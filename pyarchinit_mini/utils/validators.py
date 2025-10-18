@@ -198,12 +198,13 @@ class InventarioValidator(BaseValidator):
                 if isinstance(value, (int, float)):
                     cls.validate_numeric_range(value, field_name, min_val, max_val)
         
-        # Validate choice fields
+        # Validate choice fields (accept Italian and English yes/no values)
         yes_no_fields = ['lavato', 'repertato', 'diagnostico']
         for field in yes_no_fields:
-            if field in data and data[field] is not None:
+            if field in data and data[field] is not None and data[field] != '':
                 value = data[field].upper() if isinstance(data[field], str) else str(data[field])
-                if value not in ['SI', 'NO', 'S', 'N', 'YES', 'NO', '1', '0', 'TRUE', 'FALSE']:
+                # Accept both Italian (Sì/No with accents) and English (Yes/No) values
+                if value not in ['SI', 'SÌ', 'NO', 'S', 'N', 'YES', '1', '0', 'TRUE', 'FALSE']:
                     raise ValidationError(f"Field '{field}' must be a yes/no value", field, data[field])
 
 def validate_data(model_type: str, data: Dict[str, Any]):
