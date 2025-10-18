@@ -53,7 +53,7 @@ class USForm(FlaskForm):
     ])
 
     # Dati di Scavo
-    anno_scavo = IntegerField('Anno Scavo')
+    anno_scavo = IntegerField('Anno Scavo', validators=[Optional()])
     scavato = SelectField('Scavato', choices=[
         ('', '-- Seleziona --'),
         ('Sì', 'Sì'),
@@ -211,10 +211,10 @@ class InventarioForm(FlaskForm):
     # TAB 1: Identificazione
     sito = SelectField('Sito', validators=[DataRequired()], coerce=str)
     numero_inventario = IntegerField('Numero Inventario', validators=[DataRequired()])
-    n_reperto = IntegerField('N. Reperto')
+    n_reperto = IntegerField('N. Reperto', validators=[Optional()])
     schedatore = StringField('Schedatore')
     date_scheda = StringField('Data Scheda', description='Formato: AAAA-MM-GG')
-    years = IntegerField('Anno')
+    years = IntegerField('Anno', validators=[Optional()])
 
     # TAB 2: Classificazione
     tipo_reperto = SelectField('Tipo Reperto', choices=[])  # Populated from thesaurus
@@ -261,9 +261,9 @@ class InventarioForm(FlaskForm):
 
     # TAB 7: Misurazioni
     peso = StringField('Peso (g)')
-    forme_minime = IntegerField('Forme Minime')
-    forme_massime = IntegerField('Forme Massime')
-    totale_frammenti = IntegerField('Totale Frammenti')
+    forme_minime = IntegerField('Forme Minime', validators=[Optional()])
+    forme_massime = IntegerField('Forme Massime', validators=[Optional()])
+    totale_frammenti = IntegerField('Totale Frammenti', validators=[Optional()])
     misurazioni = TextAreaField('Misurazioni')
 
     # TAB 8: Documentazione
