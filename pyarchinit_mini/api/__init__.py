@@ -58,4 +58,30 @@ def create_app(database_url: str = None) -> FastAPI:
     
     return app
 
-__all__ = ["create_app"]
+
+def run_server():
+    """
+    Entry point for running the API server via console script.
+    """
+    import uvicorn
+    import os
+
+    # Get configuration from environment or use defaults
+    host = os.getenv("PYARCHINIT_API_HOST", "0.0.0.0")
+    port = int(os.getenv("PYARCHINIT_API_PORT", "8000"))
+    reload = os.getenv("PYARCHINIT_API_RELOAD", "false").lower() == "true"
+
+    print(f"Starting PyArchInit-Mini API server on {host}:{port}")
+    print(f"API Documentation: http://{host if host != '0.0.0.0' else 'localhost'}:{port}/docs")
+
+    # Run the server
+    uvicorn.run(
+        "pyarchinit_mini.api:create_app",
+        host=host,
+        port=port,
+        reload=reload,
+        factory=True
+    )
+
+
+__all__ = ["create_app", "run_server"]

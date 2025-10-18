@@ -1,19 +1,25 @@
 """
 PyArchInit-Mini: Standalone Archaeological Data Management System
 
-A lightweight, modular version of PyArchInit focused on core archaeological 
+A lightweight, modular version of PyArchInit focused on core archaeological
 data management functionality without GIS dependencies.
 
 Features:
-- Site management
-- Stratigraphic Unit (US) management  
-- Material inventory management
-- Multi-database support (PostgreSQL/SQLite)
-- REST API interface
+- Site management with complete CRUD operations
+- Stratigraphic Unit (US) management (49 fields, 6 tabs)
+- Material inventory management (37 fields, 8 tabs, ICCD thesaurus)
+- Harris Matrix generation (Matplotlib + Graphviz with 4 grouping modes)
+- Stratigraphic validation (paradoxes, cycles, auto-fix)
+- Multi-database support (PostgreSQL/SQLite upload/connect)
+- PDF export (Sites, US, Inventario, Harris Matrix)
+- REST API interface (FastAPI)
+- Web UI interface (Flask) - 100% Desktop GUI parity
+- Desktop GUI interface (Tkinter)
+- CLI interface
 - Scalable and modular architecture
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __author__ = "PyArchInit Team"
 __email__ = "enzo.ccc@gmail.com"
 
