@@ -977,14 +977,15 @@ def create_app():
 
             # Generate PDF
             site_name_clean = site_name if site_name else 'Tutti_i_siti'
-            pdf_bytes = pdf_generator.generate_us_pdf(site_name_clean, us_list)
 
-            # Create temporary file
+            # Create temporary file for PDF output
             with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
-                tmp.write(pdf_bytes)
-                tmp_path = tmp.name
+                output_path = tmp.name
 
-            return send_file(tmp_path, as_attachment=True,
+            # Generate PDF to file
+            pdf_generator.generate_us_pdf(site_name_clean, us_list, output_path)
+
+            return send_file(output_path, as_attachment=True,
                            download_name=f"us_{site_name_clean}.pdf",
                            mimetype='application/pdf')
 
@@ -1011,15 +1012,14 @@ def create_app():
 
                 us_dict = us.to_dict()
 
-            # Generate PDF with single US
-            pdf_bytes = pdf_generator.generate_us_pdf(sito, [us_dict])
-
-            # Create temporary file
+            # Create temporary file for PDF output
             with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
-                tmp.write(pdf_bytes)
-                tmp_path = tmp.name
+                output_path = tmp.name
 
-            return send_file(tmp_path, as_attachment=True,
+            # Generate PDF with single US
+            pdf_generator.generate_us_pdf(sito, [us_dict], output_path)
+
+            return send_file(output_path, as_attachment=True,
                            download_name=f"us_{sito}_{us_number}.pdf",
                            mimetype='application/pdf')
 
@@ -1050,14 +1050,15 @@ def create_app():
 
             # Generate PDF
             site_name_clean = site_name if site_name else 'Tutti_i_siti'
-            pdf_bytes = pdf_generator.generate_inventario_pdf(site_name_clean, inventory_list)
 
-            # Create temporary file
+            # Create temporary file for PDF output
             with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
-                tmp.write(pdf_bytes)
-                tmp_path = tmp.name
+                output_path = tmp.name
 
-            return send_file(tmp_path, as_attachment=True,
+            # Generate PDF to file
+            pdf_generator.generate_inventario_pdf(site_name_clean, inventory_list, output_path)
+
+            return send_file(output_path, as_attachment=True,
                            download_name=f"inventario_{site_name_clean}.pdf",
                            mimetype='application/pdf')
 
@@ -1082,15 +1083,14 @@ def create_app():
                 inv_dict = inv.to_dict()
                 site_name = inv_dict.get('sito', 'Unknown')
 
-            # Generate PDF with single item
-            pdf_bytes = pdf_generator.generate_inventario_pdf(site_name, [inv_dict])
-
-            # Create temporary file
+            # Create temporary file for PDF output
             with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
-                tmp.write(pdf_bytes)
-                tmp_path = tmp.name
+                output_path = tmp.name
 
-            return send_file(tmp_path, as_attachment=True,
+            # Generate PDF with single item
+            pdf_generator.generate_inventario_pdf(site_name, [inv_dict], output_path)
+
+            return send_file(output_path, as_attachment=True,
                            download_name=f"inventario_{inv_id}.pdf",
                            mimetype='application/pdf')
 
