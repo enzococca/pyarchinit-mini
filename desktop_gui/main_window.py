@@ -123,6 +123,8 @@ class PyArchInitGUI:
         # File menu
         file_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="File", menu=file_menu)
+        file_menu.add_command(label="Nuovo Database SQLite", command=self.create_new_database)
+        file_menu.add_separator()
         file_menu.add_command(label="Nuovo Sito", command=self.new_site_dialog)
         file_menu.add_command(label="Nuova US", command=self.new_us_dialog)
         file_menu.add_command(label="Nuovo Reperto", command=self.new_inventario_dialog)
@@ -1264,6 +1266,61 @@ class PyArchInitGUI:
         except Exception as e:
             messagebox.showerror("Errore", f"Errore nella connessione al database: {str(e)}")
     
+    def create_new_database(self):
+        """Create a new empty SQLite database"""
+        try:
+            # Ask user where to save the new database
+            new_db_path = filedialog.asksaveasfilename(
+                title="Crea Nuovo Database SQLite",
+                defaultextension=".db",
+                filetypes=[("SQLite files", "*.db"), ("All files", "*.*")],
+                initialvalue="nuovo_database.db"
+            )
+
+            if not new_db_path:
+                return
+
+            # Check if file already exists
+            if os.path.exists(new_db_path):
+                if not messagebox.askyesno("File Esistente",
+                                          f"Il file {new_db_path} esiste già.\n"
+                                          f"Vuoi sovrascriverlo?"):
+                    return
+                os.remove(new_db_path)
+
+            # Create new database connection
+            from pyarchinit_mini.database.connection import DatabaseConnection
+            new_conn = DatabaseConnection.sqlite(new_db_path)
+
+            # Create all tables
+            new_conn.create_tables()
+
+            # Initialize database manager and run migrations
+            new_manager = DatabaseManager(new_conn)
+            new_manager.run_migrations()
+
+            # Close the new connection
+            new_conn.close()
+
+            # Ask if user wants to switch to the new database
+            if messagebox.askyesno("Database Creato",
+                                  f"Nuovo database creato con successo:\n{new_db_path}\n\n"
+                                  f"Vuoi passare al nuovo database ora?"):
+                # Reconnect to the new database
+                self.db_conn.close()
+                self.db_conn = DatabaseConnection.sqlite(new_db_path)
+                self.setup_database()
+                self.refresh_data()
+
+                messagebox.showinfo("Successo", f"Ora stai usando il nuovo database:\n{new_db_path}")
+            else:
+                messagebox.showinfo("Completato", f"Database creato in:\n{new_db_path}")
+
+        except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            messagebox.showerror("Errore", f"Errore durante la creazione del database:\n{str(e)}\n\nDettagli:\n{error_details}")
+
     def show_about_dialog(self):
         """Show about dialog"""
         about_text = """

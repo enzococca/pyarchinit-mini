@@ -160,12 +160,28 @@ class USService:
     def update_us_dto(self, us_id: int, update_data: Dict[str, Any]) -> Optional[USDTO]:
         """Update existing US and return DTO"""
         try:
-            # Update using existing method
-            self.update_us(us_id, update_data)
-            
-            # Return updated DTO
-            return self.get_us_dto_by_id(us_id)
-            
+            # Perform update in a single session to avoid detached instance errors
+            with self.db_manager.connection.get_session() as session:
+                us_record = session.query(US).filter(US.id_us == us_id).first()
+                if not us_record:
+                    from ..utils.exceptions import RecordNotFoundError
+                    raise RecordNotFoundError(f"US with ID {us_id} not found")
+
+                # Update fields
+                for key, value in update_data.items():
+                    if hasattr(us_record, key):
+                        setattr(us_record, key, value)
+
+                # Flush to persist changes and refresh
+                session.flush()
+                session.refresh(us_record)
+
+                # Convert to DTO while still in session
+                dto = USDTO.from_model(us_record)
+
+            # Return DTO (session is now closed, but DTO is safe)
+            return dto
+
         except Exception as e:
             from ..utils.exceptions import DatabaseError
             raise DatabaseError(f"Failed to update US: {e}")

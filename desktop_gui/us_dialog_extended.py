@@ -28,7 +28,11 @@ class ExtendedUSDialog:
         self.db_manager = db_manager
         self.us = us
         self.callback = callback
-        
+
+        # Store US ID and number separately to avoid session issues
+        self.us_id = us.id_us if us else None
+        self.us_number = us.us if us else None
+
         # Data storage
         self.fields = {}
         self.relationships_data = []
@@ -36,7 +40,7 @@ class ExtendedUSDialog:
         
         # Create main window
         self.window = tk.Toplevel(parent)
-        self.window.title("Nuova US" if us is None else f"Modifica US {us.us if us else ''}")
+        self.window.title("Nuova US" if us is None else f"Modifica US {self.us_number}")
         self.window.geometry("900x700")
         self.window.resizable(True, True)
         
@@ -601,53 +605,53 @@ class ExtendedUSDialog:
     
     def load_relationships(self):
         """Load stratigraphic relationships for current US"""
-        if not self.us or not hasattr(self.us, 'sito') or not hasattr(self.us, 'us'):
+        if not self.us:
             return
-            
+
+        # Clear existing relationships
+        for item in self.relationships_tree.get_children():
+            self.relationships_tree.delete(item)
+
         try:
-            # Get relationships from matrix generator
-            relationships = self.matrix_generator._get_relationships(self.us.sito)
-            
-            # Filter relationships for this US
-            us_relationships = []
-            for rel in relationships:
-                if rel['us_from'] == self.us.us or rel['us_to'] == self.us.us:
-                    us_relationships.append(rel)
-            
-            # Populate tree
-            for item in self.relationships_tree.get_children():
-                self.relationships_tree.delete(item)
-            
-            for rel in us_relationships:
-                if rel['us_from'] == self.us.us:
-                    # This US is the source
-                    relation_text = f"{rel['type']} US {rel['us_to']}"
-                    target_us = rel['us_to']
-                else:
-                    # This US is the target
-                    relation_text = f"è {rel['type']} di US {rel['us_from']}"
-                    target_us = rel['us_from']
-                
-                self.relationships_tree.insert("", "end", values=(
-                    relation_text,
-                    target_us,
-                    rel.get('certainty', 'certain'),
-                    rel.get('description', '')
-                ))
-                
+            # Load from US rapporti field (format: "copre 1002, taglia 1005")
+            if hasattr(self.us, 'rapporti') and self.us.rapporti:
+                rapporti_str = self.us.rapporti
+
+                # Parse relationships
+                if rapporti_str.strip():
+                    parts = rapporti_str.split(',')
+                    for part in parts:
+                        part = part.strip()
+                        if not part:
+                            continue
+
+                        # Split "copre 1002" into ["copre", "1002"]
+                        tokens = part.split()
+                        if len(tokens) >= 2:
+                            rel_type = ' '.join(tokens[:-1])  # Everything except last token
+                            target_us = tokens[-1]  # Last token is US number
+
+                            # Add to TreeView: (Type, Target_US, Certainty, Description)
+                            self.relationships_tree.insert("", "end", values=(
+                                rel_type,      # Type: "copre", "taglia", etc
+                                target_us,     # Target US number
+                                "certa",       # Certainty (default)
+                                ""             # Description (empty)
+                            ))
+
         except Exception as e:
-            # Handle error silently for now
-            pass
+            print(f"Error loading relationships: {e}")
+            # Don't show error to user, just log it
     
     def add_relationship(self):
         """Add new stratigraphic relationship"""
         if not self.us:
             messagebox.showwarning("Avviso", "Salva prima la US")
             return
-            
+
         # Create simple relationship dialog
-        RelationshipDialog(self.window, self.us, self.matrix_generator, 
-                         callback=self.load_relationships)
+        RelationshipDialog(self.window, self.us, self.matrix_generator,
+                         callback=self.load_relationships, parent_dialog=self)
     
     def edit_relationship(self):
         """Edit selected relationship"""
@@ -659,11 +663,12 @@ class ExtendedUSDialog:
         # Get selected relationship data
         item = selection[0]
         values = self.relationships_tree.item(item, 'values')
-        if not values or len(values) < 3:
+        if not values or len(values) < 2:
             messagebox.showerror("Errore", "Dati relazione non validi")
             return
-        
-        old_us_correlata, old_rel_type = values[0], values[1]
+
+        # TreeView columns: ("Type", "Target_US", "Certainty", "Description")
+        old_rel_type, old_us_correlata = values[0], values[1]
         
         # Create edit dialog
         edit_window = tk.Toplevel(self.window)
@@ -747,9 +752,9 @@ class ExtendedUSDialog:
                 
                 # Update US
                 self.us.rapporti = updated_rapporti
-                
-                # Update tree
-                self.relationships_tree.item(item, values=(new_us_correlata, new_rel_type, "diretta", ""))
+
+                # Update tree - columns: ("Type", "Target_US", "Certainty", "Description")
+                self.relationships_tree.item(item, values=(new_rel_type, new_us_correlata, "certa", ""))
                 
                 edit_window.destroy()
                 messagebox.showinfo("Successo", "Relazione modificata con successo")
@@ -770,11 +775,12 @@ class ExtendedUSDialog:
         # Get selected relationship data
         item = selection[0]
         values = self.relationships_tree.item(item, 'values')
-        if not values or len(values) < 3:
+        if not values or len(values) < 2:
             messagebox.showerror("Errore", "Dati relazione non validi")
             return
-        
-        us_correlata, rel_type = values[0], values[1]
+
+        # TreeView columns: ("Type", "Target_US", "Certainty", "Description")
+        rel_type, us_correlata = values[0], values[1]
         
         if messagebox.askyesno("Conferma", f"Eliminare la relazione:\n{self.us.us} {rel_type} {us_correlata}?"):
             try:
@@ -1284,11 +1290,28 @@ class ExtendedUSDialog:
                     value = self.fields[field].get("1.0", tk.END).strip()
                     if value:
                         us_data[field] = value
-            
+
+            # Collect stratigraphic relationships from TreeView
+            relationships_list = []
+            for item in self.relationships_tree.get_children():
+                values = self.relationships_tree.item(item, 'values')
+                if values and len(values) >= 2:
+                    rel_type = values[0]  # Type of relationship
+                    target_us = values[1]  # Target US number
+                    # Format as "Type TargetUS"
+                    relationships_list.append(f"{rel_type} {target_us}")
+
+            # Save relationships to rapporti field
+            if relationships_list:
+                us_data['rapporti'] = ", ".join(relationships_list)
+            elif 'rapporti' in us_data:
+                # Clear rapporti if no relationships
+                us_data['rapporti'] = ""
+
             # Save US
-            if self.us:
+            if self.us_id:
                 # Update existing - use DTO method to avoid session issues
-                updated_us = self.us_service.update_us_dto(self.us.id_us, us_data)
+                updated_us = self.us_service.update_us_dto(self.us_id, us_data)
                 messagebox.showinfo("Successo", "US aggiornata con successo")
             else:
                 # Create new
@@ -1307,12 +1330,12 @@ class ExtendedUSDialog:
     
     def delete_us(self):
         """Delete current US"""
-        if not self.us:
+        if not self.us_id:
             return
-        
-        if messagebox.askyesno("Conferma", f"Eliminare la US {self.us.us}?"):
+
+        if messagebox.askyesno("Conferma", f"Eliminare la US {self.us_number}?"):
             try:
-                self.us_service.delete_us(self.us.id_us)
+                self.us_service.delete_us(self.us_id)
                 messagebox.showinfo("Successo", "US eliminata con successo")
                 
                 if self.callback:
@@ -1322,25 +1345,72 @@ class ExtendedUSDialog:
                 
             except Exception as e:
                 messagebox.showerror("Errore", f"Errore durante l'eliminazione: {str(e)}")
-    
+
+    def export_pdf(self):
+        """Export current US record as PDF"""
+        try:
+            if not self.us:
+                messagebox.showwarning("Avviso", "Nessuna US da esportare")
+                return
+
+            from pyarchinit_mini.pdf_export.pdf_generator import PDFGenerator
+
+            # Convert DTO to dict manually
+            us_data = {}
+            for attr in dir(self.us):
+                if not attr.startswith('_') and not callable(getattr(self.us, attr)):
+                    value = getattr(self.us, attr)
+                    # Convert datetime to string
+                    if hasattr(value, 'isoformat'):
+                        us_data[attr] = str(value)
+                    else:
+                        us_data[attr] = value
+
+            # Get save location
+            export_path = filedialog.asksaveasfilename(
+                title="Esporta US come PDF",
+                defaultextension=".pdf",
+                filetypes=[("File PDF", "*.pdf"), ("Tutti i file", "*.*")],
+                initialfile=f"US_{self.us.us}_{self.us.sito.replace(' ', '_')}.pdf"
+            )
+
+            if export_path:
+                # Generate PDF
+                generator = PDFGenerator()
+                pdf_path = generator.generate_us_pdf(
+                    site_name=self.us.sito,
+                    us_list=[us_data],
+                    output_path=export_path,
+                    logo_path=None
+                )
+                messagebox.showinfo("Successo", f"PDF esportato in:\n{pdf_path}")
+
+        except Exception as e:
+            messagebox.showerror("Errore", f"Errore nell'esportazione PDF: {str(e)}")
+            print(f"Export PDF error: {e}")
+            import traceback
+            traceback.print_exc()
+
     def cancel(self):
         """Cancel and close dialog"""
         self.window.destroy()
 
 class RelationshipDialog:
     """Simple dialog for adding stratigraphic relationships"""
-    
-    def __init__(self, parent, us, matrix_generator, callback=None):
+
+    def __init__(self, parent, us, matrix_generator, callback=None, parent_dialog=None):
         self.parent = parent
         self.us = us
         self.matrix_generator = matrix_generator
         self.callback = callback
+        self.parent_dialog = parent_dialog  # Reference to ExtendedUSDialog for TreeView access
         
         # Create dialog
         self.window = tk.Toplevel(parent)
         self.window.title("Nuova Relazione Stratigrafica")
-        self.window.geometry("400x300")
-        self.window.resizable(False, False)
+        self.window.geometry("500x450")
+        self.window.resizable(True, True)
+        self.window.minsize(450, 400)
         self.window.transient(parent)
         self.window.grab_set()
         
@@ -1397,27 +1467,29 @@ class RelationshipDialog:
             if not target_us_str:
                 messagebox.showerror("Errore", "Inserisci il numero della US correlata")
                 return
-            
+
             try:
                 target_us_num = int(target_us_str)
             except ValueError:
                 messagebox.showerror("Errore", "Il numero US deve essere un numero")
                 return
-            
+
             rel_type = self.rel_type.get()
             certainty = self.certainty.get()
             description = self.description.get("1.0", tk.END).strip()
-            
-            # Add relationship
-            success = self.matrix_generator.add_relationship(
-                self.us.sito, self.us.us, target_us_num, 
-                rel_type, certainty, description
-            )
-            
-            if success:
-                messagebox.showinfo("Successo", "Relazione aggiunta con successo")
-                if self.callback:
-                    self.callback()
+
+            # Add relationship directly to parent dialog's TreeView
+            if self.parent_dialog and hasattr(self.parent_dialog, 'relationships_tree'):
+                # Format: Type, Target_US, Certainty, Description
+                self.parent_dialog.relationships_tree.insert("", "end", values=(
+                    rel_type,           # Type
+                    target_us_num,      # Target US
+                    certainty,          # Certainty
+                    description         # Description
+                ))
+                messagebox.showinfo("Successo", "Relazione aggiunta alla lista.\nRicorda di salvare la US per confermare.")
+                # DON'T call callback - it would reload from DB and clear the new relationship!
+                # The relationship will be saved when the US is saved
                 self.window.destroy()
             else:
                 messagebox.showerror("Errore", "Errore nell'aggiunta della relazione")
@@ -1898,52 +1970,6 @@ class ChronologicalSequenceDialog:
                         f.write(f"{values[0]}: {values[1]} - {values[2]} ({values[3]})\n")
                 
                 messagebox.showinfo("Successo", f"Sequenza esportata in:\n{export_path}")
-                
+
         except Exception as e:
             messagebox.showerror("Errore", f"Errore nell'esportazione: {str(e)}")
-    
-    def export_pdf(self):
-        """Export current US record as PDF"""
-        try:
-            from pyarchinit_mini.pdf_export.pdf_generator import PDFGenerator
-            
-            # Get site name from service
-            site_data = self.site_service.get_site_by_name(self.us.sito)
-            
-            # Prepare US data dict
-            us_data = self.us.to_dict()
-            
-            # Convert datetime fields to strings
-            if us_data.get('data_schedatura'):
-                us_data['data_schedatura'] = str(us_data['data_schedatura'])
-            if us_data.get('data'):
-                us_data['data'] = str(us_data['data'])
-                
-            # Get save location
-            export_path = filedialog.asksaveasfilename(
-                title="Esporta US come PDF",
-                defaultextension=".pdf",
-                filetypes=[("File PDF", "*.pdf"), ("Tutti i file", "*.*")],
-                initialfile=f"US_{self.us.us}_{self.us.sito}.pdf"
-            )
-            
-            if export_path:
-                # Generate PDF
-                generator = PDFGenerator()
-                pdf_path = generator.generate_us_pdf(
-                    site_name=self.us.sito,
-                    us_list=[us_data],
-                    output_path=export_path,
-                    logo_path=None
-                )
-                messagebox.showinfo("Successo", f"PDF esportato in:\n{pdf_path}")
-                
-        except Exception as e:
-            messagebox.showerror("Errore", f"Errore nell'esportazione PDF: {str(e)}")
-            print(f"Export PDF error: {e}")
-            import traceback
-            traceback.print_exc()
-    
-    def close(self):
-        """Close dialog"""
-        self.window.destroy()
