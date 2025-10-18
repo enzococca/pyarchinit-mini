@@ -164,11 +164,21 @@ class InventarioValidator(BaseValidator):
         if 'area' in data and data['area']:
             cls.validate_string_length(data['area'], 'area', 20)
         
-        # US validation  
-        if 'us' in data and data['us'] is not None:
-            us_num = data['us']
-            if not isinstance(us_num, int) or us_num <= 0:
-                raise ValidationError("US number must be a positive integer", 'us', us_num)
+        # US validation - field is a string in the model (can be "1001", "1001a", etc.)
+        if 'us' in data and data['us'] is not None and data['us'] != '':
+            us_value = data['us']
+            # Convert to string if it's an integer
+            if isinstance(us_value, int):
+                us_value = str(us_value)
+            elif not isinstance(us_value, str):
+                raise ValidationError("US must be a string or integer", 'us', us_value)
+
+            # Validate it's not empty
+            if not us_value.strip():
+                raise ValidationError("US cannot be empty", 'us', us_value)
+
+            # Validate length (max 20 chars as per model)
+            cls.validate_string_length(us_value, 'us', 20)
         
         # Numeric field validations
         numeric_fields = [
