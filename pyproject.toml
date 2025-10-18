@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "0.1.0"
-description = "Lightweight archaeological data management system"
+version = "1.0.0"
+description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, and CLI - 100% Desktop GUI parity"
 readme = "README.md"
 license = {text = "GPL-2.0"}
 authors = [
@@ -13,29 +13,32 @@ authors = [
 ]
 keywords = [
     "archaeology",
-    "archaeological data", 
+    "archaeological data",
     "heritage",
     "cultural heritage",
     "database",
     "api",
     "stratigraphy",
-    "excavation"
+    "excavation",
+    "harris matrix",
+    "finds inventory"
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: GIS",
     "Topic :: Database :: Database Engines/Servers",
     "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9", 
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent",
     "Framework :: FastAPI",
 ]
 requires-python = ">=3.8"
+# Core dependencies - API only
 dependencies = [
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
@@ -45,12 +48,62 @@ dependencies = [
     "pydantic-settings>=2.0.0",
     "python-multipart>=0.0.6",
     "alembic>=1.12.0",
+    "networkx>=3.0.0",
+    "reportlab>=4.0.0",
+    "pillow>=10.0.0",
 ]
 
 [project.optional-dependencies]
+# CLI interface dependencies
+cli = [
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "inquirer>=3.0.0",
+]
+# Web interface dependencies
+web = [
+    "flask>=3.0.0",
+    "flask-wtf>=1.2.0",
+    "wtforms>=3.1.0",
+    "jinja2>=3.1.0",
+]
+# Desktop GUI dependencies (tkinter is stdlib, no external deps needed)
+gui = [
+    "pillow>=10.0.0",
+]
+# Full Harris Matrix visualization
+harris = [
+    "matplotlib>=3.7.0",
+    "graphviz>=0.20.0",
+]
+# PDF export with advanced features
+pdf = [
+    "weasyprint>=60.0.0",
+]
+# Media processing
+media = [
+    "python-magic>=0.4.0",
+    "moviepy>=1.0.0",
+]
+# All interfaces
+all = [
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "inquirer>=3.0.0",
+    "flask>=3.0.0",
+    "flask-wtf>=1.2.0",
+    "wtforms>=3.1.0",
+    "jinja2>=3.1.0",
+    "matplotlib>=3.7.0",
+    "graphviz>=0.20.0",
+    "weasyprint>=60.0.0",
+    "python-magic>=0.4.0",
+    "moviepy>=1.0.0",
+]
+# Development dependencies
 dev = [
     "pytest>=7.0.0",
-    "pytest-asyncio>=0.21.0", 
+    "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.0.0",
     "httpx>=0.25.0",
     "black>=23.0.0",
@@ -58,6 +111,7 @@ dev = [
     "isort>=5.12.0",
     "mypy>=1.0.0",
 ]
+# Documentation
 docs = [
     "sphinx>=6.0.0",
     "sphinx-rtd-theme>=1.2.0",
@@ -65,21 +119,28 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/pyarchinit/pyarchinit-mini"
-Documentation = "https://pyarchinit-mini.readthedocs.io/"
-Repository = "https://github.com/pyarchinit/pyarchinit-mini"
-"Bug Tracker" = "https://github.com/pyarchinit/pyarchinit-mini/issues"
+Homepage = "https://github.com/enzococa/pyarchinit-mini-desk"
+Documentation = "https://github.com/enzococa/pyarchinit-mini-desk/blob/main/README.md"
+Repository = "https://github.com/enzococa/pyarchinit-mini-desk"
+"Bug Tracker" = "https://github.com/enzococa/pyarchinit-mini-desk/issues"
 
 [project.scripts]
-pyarchinit-mini = "pyarchinit_mini.cli:main"
+pyarchinit-mini = "pyarchinit_mini.cli_interface.cli_app:main"
+pyarchinit-mini-api = "pyarchinit_mini.api:run_server"
+pyarchinit-mini-web = "pyarchinit_mini.web_interface.app:main"
+pyarchinit-mini-gui = "pyarchinit_mini.desktop_gui.gui_app:main"
+pyarchinit-mini-setup = "pyarchinit_mini.scripts.setup_user_env:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pyarchinit_mini*"]
-exclude = ["tests*"]
+include = ["pyarchinit_mini*", "cli_interface*", "web_interface*", "desktop_gui*"]
+exclude = ["tests*", "docs*", "examples*"]
 
 [tool.setuptools.package-data]
-pyarchinit_mini = ["*.yaml", "*.yml", "*.json"]
+pyarchinit_mini = ["*.yaml", "*.yml", "*.json", "data/*.db", "data/*.sql"]
+web_interface = ["templates/*.html", "templates/**/*.html", "static/**/*"]
+cli_interface = ["*.json", "*.yaml"]
+desktop_gui = ["*.png", "*.ico", "*.gif"]
 
 [tool.black]
 line-length = 88
