@@ -1,0 +1,21 @@
+site_name: pyarchinit-mini
+site_description: Documentation for pyarchinit-mini
+repo_url: https://github.com/yourusername/pyarchinit-mini
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.highlight
+    - search.share
+
+plugins:
+  - search
+  - mkdocstrings
+
+nav:
+  - Home: index.md
+  - API Reference: api.md
+  - Examples: examples.md
