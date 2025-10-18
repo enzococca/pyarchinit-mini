@@ -105,12 +105,31 @@ class HarrisMatrixGenerator:
                 continue
             
             try:
-                # Parse rapporti field (should be a list of relationships)
+                # Parse rapporti field (supports both formats)
+                rapporti_list = []
                 if isinstance(rapporti, str):
-                    rapporti_list = eval(rapporti)  # Safe eval for stored lists
+                    # Try to parse as Python list first (legacy format)
+                    if rapporti.strip().startswith('[') or rapporti.strip().startswith('('):
+                        try:
+                            rapporti_list = eval(rapporti)
+                        except:
+                            pass
+                    else:
+                        # Parse as text format: "Copre 1002, Taglia 1003"
+                        parts = rapporti.split(',')
+                        for part in parts:
+                            part = part.strip()
+                            if not part:
+                                continue
+                            # Split "Copre 1002" into ["Copre", "1002"]
+                            tokens = part.split()
+                            if len(tokens) >= 2:
+                                rel_type = ' '.join(tokens[:-1])  # Everything except last token
+                                rel_us = tokens[-1]  # Last token is US number
+                                rapporti_list.append([rel_type, rel_us])
                 else:
                     rapporti_list = rapporti
-                
+
                 for rel in rapporti_list:
                     # Handle both PyArchInit format and our format
                     rel_type = None
@@ -225,10 +244,10 @@ class HarrisMatrixGenerator:
     def _map_relationship_type(self, pyarchinit_rel: str) -> Optional[str]:
         """Map PyArchInit relationship types to our standardized types"""
         mapping = {
-            # Italian
+            # Italian (uppercase)
             'Copre': 'copre',
             'Coperto da': 'coperto da',
-            'Taglia': 'taglia', 
+            'Taglia': 'taglia',
             'Tagliato da': 'tagliato da',
             'Riempie': 'riempie',
             'Riempito da': 'riempito da',
@@ -236,6 +255,18 @@ class HarrisMatrixGenerator:
             'Gli si appoggia': 'gli si appoggia',
             'Si lega a': 'si lega a',
             'Uguale a': 'uguale a',
+            # Italian (lowercase)
+            'copre': 'copre',
+            'coperto da': 'coperto da',
+            'taglia': 'taglia',
+            'tagliato da': 'tagliato da',
+            'riempie': 'riempie',
+            'riempito da': 'riempito da',
+            'si appoggia': 'si appoggia',
+            'si appoggia a': 'si appoggia',
+            'gli si appoggia': 'gli si appoggia',
+            'si lega a': 'si lega a',
+            'uguale a': 'uguale a',
             # English
             'Covers': 'copre',
             'Covered by': 'coperto da',
