@@ -29,8 +29,8 @@ class GraphMLExportDialog:
         # Create dialog window
         self.dialog = tk.Toplevel(parent)
         self.dialog.title("Export Harris Matrix to GraphML (yEd)")
-        self.dialog.geometry("650x550")
-        self.dialog.resizable(False, False)
+        self.dialog.geometry("700x650")
+        self.dialog.resizable(True, True)
 
         # Center dialog
         self.dialog.transient(parent)
@@ -187,47 +187,71 @@ class GraphMLExportDialog:
 
             # Create nodes based on grouping
             if grouping != 'none':
-                # Group by period/area
-                groups = {}
-                for node in us_rilevanti:
-                    if node not in graph.nodes:
-                        continue
-                    node_data = graph.nodes[node]
-
-                    periodo = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
-                    area = node_data.get('area', 'A')
-
-                    # Create group key
-                    if grouping == 'period_area':
-                        group_key = f"{periodo}_{area}"
-                    elif grouping == 'period':
-                        group_key = periodo
-                    else:  # area
-                        group_key = area
-
-                    if group_key not in groups:
-                        groups[group_key] = []
-                    groups[group_key].append(node)
-
-                # Create subgraphs (periods as table rows in yEd)
-                for group_key, nodes in groups.items():
-                    # Add period/area label nodes
-                    G.node(f"Periodo : {group_key}", shape='plaintext')
-
-                    # Add US nodes with proper format for GraphML converter
-                    for node in nodes:
+                if grouping == 'period_area':
+                    # Nested structure: {periodo: {area: [nodes]}}
+                    period_groups = {}
+                    for node in us_rilevanti:
+                        if node not in graph.nodes:
+                            continue
                         node_data = graph.nodes[node]
-                        descrizione = node_data.get('d_stratigrafica', '')
+                        periodo = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
+                        area = node_data.get('area', 'A')
 
-                        # Format: US_number_description_epoch
-                        node_label = f"US_{node}_{descrizione}_{group_key}"
-                        display_label = f"US {node}\\n{descrizione}"
+                        if periodo not in period_groups:
+                            period_groups[periodo] = {}
+                        if area not in period_groups[periodo]:
+                            period_groups[periodo][area] = []
+                        period_groups[periodo][area].append(node)
 
-                        G.node(node_label,
-                              label=display_label,
-                              shape='box',
-                              style='filled',
-                              fillcolor='#CCCCFF')
+                    # Create period labels and nodes grouped by area
+                    for periodo, areas in sorted(period_groups.items()):
+                        G.node(f"Periodo : {periodo}", shape='plaintext')
+
+                        # Add nodes grouped by area within this period
+                        for area, nodes in sorted(areas.items()):
+                            for node in sorted(nodes):
+                                node_data = graph.nodes[node]
+                                descrizione = node_data.get('d_stratigrafica', '')
+                                node_id = f"US_{node}_{descrizione}_{periodo}"
+                                display_label = f"US {node}\\n{descrizione}"
+
+                                G.node(node_id,
+                                      label=display_label,
+                                      shape='box',
+                                      style='filled',
+                                      fillcolor='#CCCCFF')
+                else:
+                    # Flat grouping for 'period' or 'area' modes
+                    groups = {}
+                    for node in us_rilevanti:
+                        if node not in graph.nodes:
+                            continue
+                        node_data = graph.nodes[node]
+
+                        if grouping == 'period':
+                            group_key = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
+                        else:  # area
+                            group_key = node_data.get('area', 'A')
+
+                        if group_key not in groups:
+                            groups[group_key] = []
+                        groups[group_key].append(node)
+
+                    # Create labeled groups
+                    for group_key, nodes in sorted(groups.items()):
+                        G.node(f"Periodo : {group_key}", shape='plaintext')
+
+                        for node in sorted(nodes):
+                            node_data = graph.nodes[node]
+                            descrizione = node_data.get('d_stratigrafica', '')
+                            node_id = f"US_{node}_{descrizione}_{group_key}"
+                            display_label = f"US {node}\\n{descrizione}"
+
+                            G.node(node_id,
+                                  label=display_label,
+                                  shape='box',
+                                  style='filled',
+                                  fillcolor='#CCCCFF')
             else:
                 # Simple nodes without grouping
                 for node in us_rilevanti:
@@ -253,27 +277,25 @@ class GraphMLExportDialog:
                     source_data = graph.nodes.get(source, {})
                     target_data = graph.nodes.get(target, {})
 
-                    source_periodo = source_data.get('period_initial', source_data.get('periodo_iniziale', 'Sconosciuto'))
-                    target_periodo = target_data.get('period_initial', target_data.get('periodo_iniziale', 'Sconosciuto'))
-                    source_area = source_data.get('area', 'A')
-                    target_area = target_data.get('area', 'A')
                     source_desc = source_data.get('d_stratigrafica', '')
                     target_desc = target_data.get('d_stratigrafica', '')
 
-                    if grouping == 'period_area':
-                        source_label = f"US_{source}_{source_desc}_{source_periodo}_{source_area}"
-                        target_label = f"US_{target}_{target_desc}_{target_periodo}_{target_area}"
-                    elif grouping == 'period':
-                        source_label = f"US_{source}_{source_desc}_{source_periodo}"
-                        target_label = f"US_{target}_{target_desc}_{target_periodo}"
+                    if grouping == 'period_area' or grouping == 'period':
+                        # Use periodo for node ID (area is just visual grouping)
+                        source_periodo = source_data.get('period_initial', source_data.get('periodo_iniziale', 'Sconosciuto'))
+                        target_periodo = target_data.get('period_initial', target_data.get('periodo_iniziale', 'Sconosciuto'))
+                        source_id = f"US_{source}_{source_desc}_{source_periodo}"
+                        target_id = f"US_{target}_{target_desc}_{target_periodo}"
                     else:  # area
-                        source_label = f"US_{source}_{source_desc}_{source_area}"
-                        target_label = f"US_{target}_{target_desc}_{target_area}"
+                        source_area = source_data.get('area', 'A')
+                        target_area = target_data.get('area', 'A')
+                        source_id = f"US_{source}_{source_desc}_{source_area}"
+                        target_id = f"US_{target}_{target_desc}_{target_area}"
                 else:
-                    source_label = f"US {source}"
-                    target_label = f"US {target}"
+                    source_id = f"US {source}"
+                    target_id = f"US {target}"
 
-                G.edge(source_label, target_label, label=rel_type)
+                G.edge(source_id, target_id, label=rel_type)
 
             # Get DOT source
             dot_content = G.source

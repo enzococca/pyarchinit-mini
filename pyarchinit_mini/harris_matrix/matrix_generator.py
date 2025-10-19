@@ -77,7 +77,34 @@ class HarrisMatrixGenerator:
         
         # Validate and fix matrix
         graph = self._validate_matrix(graph)
-        
+
+        # Apply transitive reduction to eliminate redundant edges
+        # This removes edges that can be inferred through transitivity
+        # e.g., if US1→US2→US3 and US1→US3, removes US1→US3
+        if len(graph.edges()) > 0:
+            try:
+                # Preserve node and edge attributes during reduction
+                node_attrs = {n: graph.nodes[n] for n in graph.nodes()}
+                edge_attrs = {(u, v): graph.edges[u, v] for u, v in graph.edges()}
+
+                # Apply transitive reduction
+                reduced_graph = nx.transitive_reduction(graph)
+
+                # Restore node attributes
+                for node, attrs in node_attrs.items():
+                    for key, value in attrs.items():
+                        reduced_graph.nodes[node][key] = value
+
+                # Restore edge attributes (only for edges that remain)
+                for (u, v), attrs in edge_attrs.items():
+                    if reduced_graph.has_edge(u, v):
+                        for key, value in attrs.items():
+                            reduced_graph.edges[u, v][key] = value
+
+                graph = reduced_graph
+            except Exception as e:
+                print(f"Warning: Could not apply transitive reduction: {e}")
+
         return graph
     
     def _get_relationships(self, site_name: str, area: Optional[str] = None) -> List[Dict[str, Any]]:
