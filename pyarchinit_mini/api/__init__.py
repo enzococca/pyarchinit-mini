@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .site import router as site_router
 from .us import router as us_router
 from .inventario import router as inventario_router
+from .auth import router as auth_router
 
 def create_app(database_url: str = None) -> FastAPI:
     """
@@ -36,6 +37,7 @@ def create_app(database_url: str = None) -> FastAPI:
     )
     
     # Include routers
+    app.include_router(auth_router)  # Auth routes already have /api/auth prefix
     app.include_router(site_router, prefix="/api/v1/sites", tags=["sites"])
     app.include_router(us_router, prefix="/api/v1/us", tags=["stratigraphic-units"])
     app.include_router(inventario_router, prefix="/api/v1/inventario", tags=["inventory"])
