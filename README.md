@@ -69,7 +69,7 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **Real-Time Data**: Charts update automatically with current database state
 
 ### 🚀 Technical Features
-- **Production Ready**: v1.1.1 with Full Edit Functionality + Analytics Dashboard + Real-Time Collaboration
+- **Production Ready**: v1.1.2 with Mobile/Tablet Optimization + Full Edit Functionality + Analytics Dashboard
 - **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14
 - **Data Validation**: Comprehensive Pydantic schemas
 - **Session Management**: Proper database connection pooling
@@ -564,7 +564,15 @@ pyarchinit-api
 
 ## 🗺️ Roadmap
 
-### Recently Completed (v1.1.1)
+### Recently Completed (v1.1.2)
+- [x] **Mobile & Tablet Optimization** - Complete responsive design for phones and tablets
+- [x] **Touch-Friendly Interface** - 44px minimum button height (iOS/Android guidelines)
+- [x] **Mobile Card View** - Tables converted to cards on mobile (< 768px)
+- [x] **Responsive Breakpoints** - Mobile (<768px), Tablet (768-991px), Desktop (≥992px)
+- [x] **iOS/Android Optimized** - 16px font prevents auto-zoom, optimized touch targets
+- [x] **Print Styles** - Clean print layout for reports
+
+### Completed in v1.1.1
 - [x] **Full Edit Functionality** - Complete edit support for Sites, US, and Inventario in Web interface
 - [x] **37 Inventario Fields Editable** - All 37 fields across 8 tabs fully editable
 - [x] **49 US Fields Editable** - All 49 fields across 6 tabs fully editable
@@ -600,10 +608,10 @@ pyarchinit-api
 - [x] **Multi-interface export/import** - Web UI, Desktop GUI, and CLI
 
 ### Upcoming Features
-- [ ] Mobile-responsive improvements
 - [ ] Docker containerization
 - [ ] Cloud deployment guides
 - [ ] Advanced search and filtering
+- [ ] Offline mode support
 
 ---
 
@@ -652,7 +660,7 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 📊 Project Status
 
-**Version**: 1.1.1
+**Version**: 1.1.2
 **Status**: Production/Stable
 **Python**: 3.8 - 3.14
 **Last Updated**: 2025-10-19
@@ -660,7 +668,8 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 ✅ **100% Desktop GUI Feature Parity Achieved**
 ✅ **Full Python 3.14 Support**
 ✅ **Tests Included in Distribution**
-✅ **Full Edit Functionality** (NEW in v1.1.1 - Web interface CRUD complete)
+✅ **Mobile & Tablet Optimized** (NEW in v1.1.2 - Responsive design complete)
+✅ **Full Edit Functionality** (v1.1.1 - Web interface CRUD complete)
 ✅ **Analytics Dashboard** (v1.1.0)
 ✅ **Real-Time Collaboration** (v1.0.9)
 ✅ **Multi-User Authentication** (v1.0.8)
