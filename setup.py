@@ -16,17 +16,17 @@ if (this_directory / "requirements.txt").exists():
 
 setup(
     name="pyarchinit-mini",
-    version="0.1.2",
+    version="1.0.3",
     author="PyArchInit Team",
     author_email="enzo.ccc@gmail.com",
     description="Lightweight archaeological data management system",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/enzococa/pyarchinit-mini-desk",
+    url="https://github.com/enzococca/pyarchinit-mini",
     project_urls={
-        "Bug Tracker": "https://github.com/enzococa/pyarchinit-mini-desk/issues",
-        "Documentation": "https://github.com/enzococa/pyarchinit-mini-desk/blob/main/README.md",
-        "Source Code": "https://github.com/enzococa/pyarchinit-mini-desk",
+        "Bug Tracker": "https://github.com/enzococca/pyarchinit-mini/issues",
+        "Documentation": "https://github.com/enzococca/pyarchinit-mini/blob/main/README.md",
+        "Source Code": "https://github.com/enzococca/pyarchinit-mini",
     },
     packages=find_packages(exclude=["tests*", "docs*"]),
     classifiers=[
