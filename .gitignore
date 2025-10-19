@@ -162,3 +162,4 @@ docs/.doctrees/
 test_*.db
 *.test.db
 /ttl
+.claude/
