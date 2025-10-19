@@ -376,6 +376,7 @@ def create_app():
     
     # Routes
     @app.route('/')
+    @login_required
     def index():
         """Dashboard with statistics"""
         try:
@@ -399,6 +400,7 @@ def create_app():
     
     # Sites routes
     @app.route('/sites')
+    @login_required
     def sites_list():
         page = request.args.get('page', 1, type=int)
         search = request.args.get('search', '')
@@ -414,6 +416,8 @@ def create_app():
                              page=page, search=search)
     
     @app.route('/sites/create', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
     def create_site():
         form = SiteForm()
         
@@ -439,6 +443,7 @@ def create_app():
         return render_template('sites/form.html', form=form, title='Nuovo Sito')
     
     @app.route('/sites/<int:site_id>')
+    @login_required
     def view_site(site_id):
         # Get site and related data within session scope
         with db_manager.connection.get_session() as session:
@@ -469,6 +474,7 @@ def create_app():
     
     # US routes
     @app.route('/us')
+    @login_required
     def us_list():
         page = request.args.get('page', 1, type=int)
         sito_filter = request.args.get('sito', '')
@@ -487,6 +493,8 @@ def create_app():
                              total=total, page=page, sito_filter=sito_filter)
     
     @app.route('/us/create', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
     def create_us():
         form = USForm()
         
@@ -587,6 +595,7 @@ def create_app():
     
     # Inventory routes
     @app.route('/inventario')
+    @login_required
     def inventario_list():
         page = request.args.get('page', 1, type=int)
         sito_filter = request.args.get('sito', '')
@@ -609,6 +618,8 @@ def create_app():
                              sito_filter=sito_filter, tipo_filter=tipo_filter)
     
     @app.route('/inventario/create', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
     def create_inventario():
         form = InventarioForm()
 
@@ -1119,6 +1130,8 @@ def create_app():
 
     # Media routes
     @app.route('/media/upload', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
     def upload_media():
         form = MediaUploadForm()
         
@@ -1154,6 +1167,7 @@ def create_app():
 
     # Database Administration Routes
     @app.route('/admin/database')
+    @login_required
     def admin_database():
         """Database administration page"""
         # Get current database info
@@ -1338,12 +1352,14 @@ def create_app():
     export_import_service = ExportImportService(db_manager)
 
     @app.route('/export')
+    @login_required
     def export_page():
         """Export/Import management page"""
         return render_template('export/export_import.html')
 
     # Excel Export Routes
     @app.route('/export/sites/excel')
+    @login_required
     def export_sites_excel():
         """Export sites to Excel"""
         try:

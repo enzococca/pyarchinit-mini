@@ -115,7 +115,10 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        remember = request.form.get('remember', False)
+        remember = request.form.get('remember', 'off') == 'on'
+
+        # Debug logging
+        print(f"[LOGIN] Username: {username}, Remember: {remember}")
 
         # Get user service from app context
         from flask import current_app
@@ -123,16 +126,19 @@ def login():
 
         # Authenticate
         user_dict = user_service.authenticate_user(username, password)
+        print(f"[LOGIN] Authentication result: {user_dict is not None}")
 
         if user_dict:
             user = User(user_dict)
             login_user(user, remember=remember)
+            print(f"[LOGIN] User logged in: {user.username}")
             flash(f'Benvenuto, {user.username}!', 'success')
 
             # Redirect to next page or index
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
+            print(f"[LOGIN] Authentication failed for username: {username}")
             flash('Username o password non corretti.', 'error')
 
     return render_template('auth/login.html')
