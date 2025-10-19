@@ -8,6 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from flask_login import login_required, current_user
+from flask_socketio import SocketIO
 from wtforms import StringField, TextAreaField, IntegerField, SelectField, FileField, BooleanField
 from wtforms.validators import DataRequired, Optional
 from werkzeug.utils import secure_filename
@@ -33,6 +34,20 @@ from pyarchinit_mini.media_manager.media_handler import MediaHandler
 
 # Import authentication routes
 from auth_routes import auth_bp, init_login_manager, write_permission_required
+
+# Import WebSocket events
+from socketio_events import (
+    init_socketio_events,
+    broadcast_site_created,
+    broadcast_site_updated,
+    broadcast_site_deleted,
+    broadcast_us_created,
+    broadcast_us_updated,
+    broadcast_us_deleted,
+    broadcast_inventario_created,
+    broadcast_inventario_updated,
+    broadcast_inventario_deleted
+)
 
 # Forms
 class SiteForm(FlaskForm):
@@ -377,6 +392,15 @@ def create_app():
     # Register authentication blueprint
     app.register_blueprint(auth_bp)
 
+    # Initialize Flask-SocketIO
+    socketio = SocketIO(app, cors_allowed_origins="*")
+
+    # Initialize WebSocket event handlers
+    init_socketio_events(socketio)
+
+    # Store socketio in app for access in routes
+    app.socketio = socketio
+
     # Helper function to get thesaurus values
     def get_thesaurus_choices(field_name, table_name='inventario_materiali_table'):
         """Get thesaurus choices for a field"""
@@ -447,6 +471,16 @@ def create_app():
                 }
                 
                 site = site_service.create_site(site_data)
+
+                # Try to get site ID, use None if instance is detached
+                try:
+                    site_id = site.id_sito
+                except Exception:
+                    site_id = None
+
+                # Broadcast site creation
+                broadcast_site_created(socketio, site_data['sito'], site_id)
+
                 flash(f'Sito "{site_data["sito"]}" creato con successo!', 'success')
                 return redirect(url_for('sites_list'))
                 
@@ -594,6 +628,10 @@ def create_app():
                 }
 
                 us = us_service.create_us(us_data)
+
+                # Broadcast US creation (use data from form, not from detached instance)
+                broadcast_us_created(socketio, us_data['sito'], us_data['us'])
+
                 flash(f'US {us_data["us"]} creata con successo!', 'success')
                 return redirect(url_for('us_list'))
 
@@ -721,6 +759,10 @@ def create_app():
                 }
 
                 item = inventario_service.create_inventario(inv_data)
+
+                # Broadcast inventario creation (use data from form, not from detached instance)
+                broadcast_inventario_created(socketio, inv_data['numero_inventario'], inv_data['sito'])
+
                 flash(f'Reperto {inv_data["numero_inventario"]} creato con successo!', 'success')
                 return redirect(url_for('inventario_list'))
 
@@ -831,27 +873,37 @@ def create_app():
                         for rel_type, target_us in relationships:
                             validator.add_relationship(us_num, target_us, rel_type)
 
-            # Run validation
-            errors = validator.validate_all()
-            cycles = validator.detect_cycles()
-            missing_reciprocals = validator.check_missing_reciprocals()
+            # Convert US list to dict format for validation
+            us_list_dicts = []
+            for us in us_list:
+                us_dict = {
+                    'sito': getattr(us, 'sito', ''),
+                    'area': getattr(us, 'area', ''),
+                    'us': getattr(us, 'us', None),
+                    'rapporti': getattr(us, 'rapporti', '')
+                }
+                us_list_dicts.append(us_dict)
+
+            # Get validation report
+            report = validator.get_validation_report(us_list_dicts)
 
             # Get statistics
             stats = {
                 'total_us': len(us_list),
-                'total_relationships': sum(len(rels) for rels in validator.relationships.values()),
-                'total_errors': len(errors),
-                'total_cycles': len(cycles),
-                'missing_reciprocals': len(missing_reciprocals),
-                'is_valid': len(errors) == 0 and len(cycles) == 0
+                'total_relationships': report.get('relationships_found', 0),
+                'total_errors': report.get('error_count', 0),
+                'total_cycles': 0,  # Feature not implemented in validator
+                'missing_reciprocals': 0,  # Feature not implemented in validator
+                'is_valid': report.get('valid', False)
             }
 
+            # Return simplified report (cycles and missing_reciprocals not available)
             return render_template('validation/report.html',
                                  site_name=site_name,
                                  stats=stats,
-                                 errors=errors,
-                                 cycles=cycles,
-                                 missing_reciprocals=missing_reciprocals)
+                                 errors=report.get('errors', []),
+                                 cycles=[],  # Feature not implemented
+                                 missing_reciprocals=[])  # Feature not implemented
 
         except Exception as e:
             import traceback
@@ -1586,14 +1638,14 @@ def create_app():
             flash(f'Errore import CSV: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
-    return app
+    return app, socketio
 
 # Run app
 def main():
     """
     Entry point for running the web interface via console script.
     """
-    app = create_app()
+    app, socketio = create_app()
 
     # Get configuration from environment or use defaults
     host = os.getenv("PYARCHINIT_WEB_HOST", "0.0.0.0")
@@ -1602,8 +1654,11 @@ def main():
 
     print(f"Starting PyArchInit-Mini Web Interface on {host}:{port}")
     print(f"Web Interface: http://{host if host != '0.0.0.0' else 'localhost'}:{port}/")
+    print(f"WebSocket support enabled for real-time collaboration")
 
-    app.run(debug=debug, host=host, port=port)
+    # Note: For production use, deploy with gunicorn + eventlet/gevent
+    # Example: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:5001 app:app
+    socketio.run(app, debug=debug, host=host, port=port, allow_unsafe_werkzeug=True)
 
 
 if __name__ == '__main__':
