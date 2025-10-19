@@ -48,8 +48,17 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **Permissions**: Granular permissions (create, read, update, delete, manage_users)
 - **Protected Routes**: All web routes require authentication
 
+### 🌐 Real-Time Collaboration (NEW in v1.0.9)
+- **WebSocket Support**: Flask-SocketIO for bidirectional real-time communication
+- **Live Notifications**: Toast notifications for all CRUD operations (Sites, US, Inventario)
+- **Online User Presence**: See who's currently connected to the system
+- **Activity Tracking**: Real-time updates when users create, edit, or delete data
+- **User Join/Leave Events**: Notifications when team members connect or disconnect
+- **Instant Data Sync**: All team members see changes immediately without refreshing
+- **Multi-Tab Support**: Works across multiple browser tabs and windows
+
 ### 🚀 Technical Features
-- **Production Ready**: v1.0.8 with 100% Desktop GUI feature parity
+- **Production Ready**: v1.0.9 with 100% Desktop GUI feature parity + Real-Time Collaboration
 - **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14
 - **Data Validation**: Comprehensive Pydantic schemas
 - **Session Management**: Proper database connection pooling
@@ -183,7 +192,7 @@ pyarchinit-cli
 | Extra | Components | Installation |
 |-------|-----------|--------------|
 | `cli` | Click, Rich, Inquirer | `pip install 'pyarchinit-mini[cli]'` |
-| `web` | Flask, WTForms, Jinja2 | `pip install 'pyarchinit-mini[web]'` |
+| `web` | Flask, WTForms, Jinja2, Flask-SocketIO | `pip install 'pyarchinit-mini[web]'` |
 | `gui` | (Tkinter is in stdlib) | `pip install 'pyarchinit-mini[gui]'` |
 | `harris` | Matplotlib, Graphviz | `pip install 'pyarchinit-mini[harris]'` |
 | `pdf` | WeasyPrint | `pip install 'pyarchinit-mini[pdf]'` |
@@ -518,7 +527,14 @@ pyarchinit-api
 
 ## 🗺️ Roadmap
 
-### Recently Completed (v1.0.8)
+### Recently Completed (v1.0.9)
+- [x] **Real-time collaboration** - WebSocket support with Flask-SocketIO
+- [x] **Live notifications** - Toast notifications for all CRUD operations
+- [x] **Online user presence** - See who's currently connected
+- [x] **Activity tracking** - Real-time updates when users create/edit/delete data
+- [x] **User join/leave events** - Team collaboration awareness
+
+### Completed in v1.0.8
 - [x] **Multi-user authentication** - Role-based access control (Admin, Operator, Viewer)
 - [x] **JWT authentication** - Secure API access with JSON Web Tokens
 - [x] **User management** - Admin interface for creating/editing/deleting users
@@ -531,7 +547,6 @@ pyarchinit-api
 - [x] **Multi-interface export/import** - Web UI, Desktop GUI, and CLI
 
 ### Upcoming Features
-- [ ] Real-time collaboration (WebSocket)
 - [ ] Chart analytics dashboard
 - [ ] Mobile-responsive improvements
 - [ ] Docker containerization
@@ -584,7 +599,7 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 📊 Project Status
 
-**Version**: 1.0.8
+**Version**: 1.0.9
 **Status**: Production/Stable
 **Python**: 3.8 - 3.14
 **Last Updated**: 2025-01-19
@@ -592,7 +607,8 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 ✅ **100% Desktop GUI Feature Parity Achieved**
 ✅ **Full Python 3.14 Support**
 ✅ **Tests Included in Distribution**
-✅ **Multi-User Authentication** (NEW in v1.0.8)
+✅ **Real-Time Collaboration** (NEW in v1.0.9)
+✅ **Multi-User Authentication** (v1.0.8)
 ✅ **Excel/CSV Export/Import**
 
 ---

@@ -48,6 +48,45 @@
             font-size: 2.5rem;
             font-weight: bold;
         }
+
+        /* Real-time notification styles */
+        .notification-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+
+        .notification-toast {
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .online-users-badge {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+
+        .online-users-badge i {
+            margin-right: 5px;
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -116,6 +155,14 @@
                 </ul>
 
                 <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="online-users-badge" id="online-users-badge">
+                            <i class="fas fa-users"></i>
+                            <span id="online-users-count">0</span> online
+                        </span>
+                    </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('admin_database') }}">
                             <i class="fas fa-database"></i> Database
@@ -230,8 +277,139 @@
         </div>
     </div>
 
+    <!-- Notification Container -->
+    {% if current_user.is_authenticated %}
+    <div class="notification-container" id="notification-container"></div>
+    {% endif %}
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Socket.IO Client -->
+    {% if current_user.is_authenticated %}
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+
+        // Track online users count
+        let onlineUsersCount = 0;
+
+        // Connection event handlers
+        socket.on('connect', function() {
+            console.log('[WebSocket] Connected to server');
+        });
+
+        socket.on('disconnect', function() {
+            console.log('[WebSocket] Disconnected from server');
+        });
+
+        // Online users events
+        socket.on('online_users', function(data) {
+            onlineUsersCount = data.users.length;
+            document.getElementById('online-users-count').textContent = onlineUsersCount;
+            console.log(`[WebSocket] Online users: ${onlineUsersCount}`);
+        });
+
+        socket.on('user_joined', function(data) {
+            showNotification('info', `${data.username} si è collegato`, 'far fa-user');
+            onlineUsersCount++;
+            document.getElementById('online-users-count').textContent = onlineUsersCount;
+        });
+
+        socket.on('user_left', function(data) {
+            showNotification('info', `${data.username} si è disconnesso`, 'far fa-user');
+            onlineUsersCount--;
+            document.getElementById('online-users-count').textContent = onlineUsersCount;
+        });
+
+        // Site events
+        socket.on('site_created', function(data) {
+            showNotification('success',
+                `${data.user} ha creato il sito "${data.site_name}"`,
+                'fas fa-map-marked-alt');
+        });
+
+        socket.on('site_updated', function(data) {
+            showNotification('info',
+                `${data.user} ha modificato il sito "${data.site_name}"`,
+                'fas fa-map-marked-alt');
+        });
+
+        socket.on('site_deleted', function(data) {
+            showNotification('warning',
+                `${data.user} ha eliminato il sito "${data.site_name}"`,
+                'fas fa-map-marked-alt');
+        });
+
+        // US events
+        socket.on('us_created', function(data) {
+            showNotification('success',
+                `${data.user} ha creato US ${data.us_number} (${data.site})`,
+                'fas fa-layer-group');
+        });
+
+        socket.on('us_updated', function(data) {
+            showNotification('info',
+                `${data.user} ha modificato US ${data.us_number} (${data.site})`,
+                'fas fa-layer-group');
+        });
+
+        socket.on('us_deleted', function(data) {
+            showNotification('warning',
+                `${data.user} ha eliminato US ${data.us_number} (${data.site})`,
+                'fas fa-layer-group');
+        });
+
+        // Inventario events
+        socket.on('inventario_created', function(data) {
+            showNotification('success',
+                `${data.user} ha creato reperto ${data.numero_inventario} (${data.site})`,
+                'fas fa-archive');
+        });
+
+        socket.on('inventario_updated', function(data) {
+            showNotification('info',
+                `${data.user} ha modificato reperto ${data.numero_inventario} (${data.site})`,
+                'fas fa-archive');
+        });
+
+        socket.on('inventario_deleted', function(data) {
+            showNotification('warning',
+                `${data.user} ha eliminato reperto ${data.numero_inventario} (${data.site})`,
+                'fas fa-archive');
+        });
+
+        // Notification display function
+        function showNotification(type, message, icon) {
+            const container = document.getElementById('notification-container');
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast notification-toast show bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} text-white`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="toast-header bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} text-white">
+                    <i class="${icon} me-2"></i>
+                    <strong class="me-auto">Notifica</strong>
+                    <small>Ora</small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+    </script>
+    {% endif %}
     
     {% block extra_js %}{% endblock %}
 </body>

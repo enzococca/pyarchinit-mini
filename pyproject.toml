@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.0.8"
-description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, and multi-user authentication"
+version = "1.0.9"
+description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, and real-time collaboration"
 readme = "README.md"
 license = {text = "GPL-2.0"}
 authors = [
@@ -69,6 +69,8 @@ web = [
     "flask-wtf>=1.2.0",
     "wtforms>=3.1.0",
     "jinja2>=3.1.0",
+    "flask-socketio>=5.3.0",
+    "python-socketio>=5.10.0",
 ]
 # Desktop GUI dependencies (tkinter is stdlib, no external deps needed)
 gui = [
@@ -109,6 +111,8 @@ all = [
     "flask-wtf>=1.2.0",
     "wtforms>=3.1.0",
     "jinja2>=3.1.0",
+    "flask-socketio>=5.3.0",
+    "python-socketio>=5.10.0",
     "matplotlib>=3.7.0",
     "graphviz>=0.20.0",
     "weasyprint>=60.0.0",

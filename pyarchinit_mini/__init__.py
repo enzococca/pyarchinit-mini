@@ -14,6 +14,7 @@ Features:
 - PDF export (Sites, US, Inventario, Harris Matrix)
 - Excel/CSV export and batch import
 - Multi-user authentication with role-based permissions (Admin, Operator, Viewer)
+- Real-time collaboration with WebSocket notifications (Flask-SocketIO)
 - REST API interface (FastAPI with JWT authentication)
 - Web UI interface (Flask with session-based auth) - 100% Desktop GUI parity
 - Desktop GUI interface (Tkinter)
@@ -21,7 +22,7 @@ Features:
 - Scalable and modular architecture
 """
 
-__version__ = "1.0.8"
+__version__ = "1.0.9"
 __author__ = "PyArchInit Team"
 __email__ = "enzo.ccc@gmail.com"
 
