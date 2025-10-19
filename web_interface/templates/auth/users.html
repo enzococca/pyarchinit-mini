@@ -85,7 +85,8 @@
                 <h5 class="modal-title">Crea Nuovo Utente</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{{ url_for('create_user') }}">
+            <form method="POST" action="{{ url_for('auth.create_user') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username *</label>
@@ -134,6 +135,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" id="editUserForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="modal-body">
                     <input type="hidden" id="edit_user_id" name="user_id">
 
@@ -199,6 +201,14 @@ function deleteUser(id, username) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/auth/users/${id}/delete`;
+
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = '{{ csrf_token() }}';
+        form.appendChild(csrfInput);
+
         document.body.appendChild(form);
         form.submit();
     }
