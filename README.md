@@ -57,8 +57,19 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **Instant Data Sync**: All team members see changes immediately without refreshing
 - **Multi-Tab Support**: Works across multiple browser tabs and windows
 
+### 📊 Analytics Dashboard (NEW in v1.1.0)
+- **Interactive Charts**: 8 different chart types for comprehensive data visualization
+- **Overview Statistics**: Total counts for sites, US, inventory items, regions, and provinces
+- **Geographic Analysis**: Sites distribution by region and province (pie and bar charts)
+- **Chronological Analysis**: US distribution by chronological period
+- **Typological Analysis**: US and inventory items grouped by type (doughnut and bar charts)
+- **Conservation Analysis**: Inventory items by conservation state with color-coded pie chart
+- **Site-Level Aggregations**: Top 10 sites by US count and inventory count
+- **Multi-Interface Support**: Available in both Web UI (Chart.js) and Desktop GUI (matplotlib)
+- **Real-Time Data**: Charts update automatically with current database state
+
 ### 🚀 Technical Features
-- **Production Ready**: v1.0.9 with 100% Desktop GUI feature parity + Real-Time Collaboration
+- **Production Ready**: v1.1.0 with Analytics Dashboard + Real-Time Collaboration
 - **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14
 - **Data Validation**: Comprehensive Pydantic schemas
 - **Session Management**: Proper database connection pooling
@@ -173,6 +184,32 @@ pyarchinit-api
 ```bash
 pyarchinit-cli
 ```
+
+### 3. Accessing the Analytics Dashboard
+
+The Analytics Dashboard provides comprehensive data visualization with 8 different chart types.
+
+#### Web Interface
+1. Start the web interface: `pyarchinit-web`
+2. Navigate to **Analytics** in the top menu
+3. View interactive Chart.js charts with:
+   - Sites by region (pie chart)
+   - Sites by province (bar chart - top 10)
+   - US by chronological period (horizontal bar chart)
+   - US by type (doughnut chart)
+   - Inventory by type (bar chart - top 10)
+   - Inventory by conservation state (pie chart)
+   - US by site (bar chart - top 10)
+   - Inventory by site (bar chart - top 10)
+
+#### Desktop GUI
+1. Start the desktop application: `pyarchinit-gui`
+2. Go to **Tools → Analytics Dashboard**
+3. View matplotlib charts with the same 8 visualizations
+4. Use the zoom/pan toolbar for detailed analysis
+5. Scroll through all charts in a single window
+
+**Charts Update Automatically**: All charts reflect the current state of your database in real-time.
 
 ---
 
@@ -527,7 +564,16 @@ pyarchinit-api
 
 ## 🗺️ Roadmap
 
-### Recently Completed (v1.0.9)
+### Recently Completed (v1.1.0)
+- [x] **Analytics Dashboard** - Interactive charts and data visualization
+- [x] **8 Chart Types** - Pie, bar, horizontal bar, and doughnut charts
+- [x] **Geographic Analysis** - Sites distribution by region and province
+- [x] **Chronological Analysis** - US distribution by period
+- [x] **Typological Analysis** - US and inventory items by type
+- [x] **Conservation Analysis** - Inventory items by conservation state
+- [x] **Multi-Interface Charts** - Web UI (Chart.js) and Desktop GUI (matplotlib)
+
+### Completed in v1.0.9
 - [x] **Real-time collaboration** - WebSocket support with Flask-SocketIO
 - [x] **Live notifications** - Toast notifications for all CRUD operations
 - [x] **Online user presence** - See who's currently connected
@@ -547,10 +593,10 @@ pyarchinit-api
 - [x] **Multi-interface export/import** - Web UI, Desktop GUI, and CLI
 
 ### Upcoming Features
-- [ ] Chart analytics dashboard
 - [ ] Mobile-responsive improvements
 - [ ] Docker containerization
 - [ ] Cloud deployment guides
+- [ ] Advanced search and filtering
 
 ---
 
@@ -599,7 +645,7 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 📊 Project Status
 
-**Version**: 1.0.9
+**Version**: 1.1.0
 **Status**: Production/Stable
 **Python**: 3.8 - 3.14
 **Last Updated**: 2025-01-19
@@ -607,9 +653,10 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 ✅ **100% Desktop GUI Feature Parity Achieved**
 ✅ **Full Python 3.14 Support**
 ✅ **Tests Included in Distribution**
-✅ **Real-Time Collaboration** (NEW in v1.0.9)
+✅ **Analytics Dashboard** (NEW in v1.1.0)
+✅ **Real-Time Collaboration** (v1.0.9)
 ✅ **Multi-User Authentication** (v1.0.8)
-✅ **Excel/CSV Export/Import**
+✅ **Excel/CSV Export/Import** (v1.0.7)
 
 ---
 

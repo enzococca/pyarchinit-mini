@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.0.9"
-description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, and real-time collaboration"
+version = "1.1.0"
+description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, and analytics dashboard"
 readme = "README.md"
 license = {text = "GPL-2.0"}
 authors = [
