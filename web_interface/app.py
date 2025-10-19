@@ -1254,7 +1254,7 @@ def create_app():
                 }
 
                 # Get DOT source from visualizer (uses transitive-reduced graph)
-                dot_content = matrix_visualizer.get_dot_source(graph, grouping, settings)
+                dot_content = graphviz_visualizer.get_dot_source(graph, grouping, settings)
 
                 # Convert to GraphML
                 graphml_content = convert_dot_content_to_graphml(
