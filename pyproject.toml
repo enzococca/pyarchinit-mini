@@ -93,6 +93,12 @@ export = [
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",
 ]
+# Authentication and authorization
+auth = [
+    "passlib[bcrypt]>=1.7.4",
+    "python-jose[cryptography]>=3.3.0",
+    "flask-login>=0.6.3",
+]
 # All interfaces
 all = [
     "click>=8.1.0",
@@ -109,6 +115,9 @@ all = [
     "moviepy>=1.0.0",
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-jose[cryptography]>=3.3.0",
+    "flask-login>=0.6.3",
 ]
 # Development dependencies
 dev = [

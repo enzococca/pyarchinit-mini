@@ -9,20 +9,23 @@ from .inventario_materiali import InventarioMateriali
 from .harris_matrix import HarrisMatrix, USRelationships, Period, Periodizzazione
 from .media import Media, MediaThumb, Documentation
 from .thesaurus import ThesaurusSigle, ThesaurusField, ThesaurusCategory
+from .user import User, UserRole
 
 __all__ = [
     "BaseModel",
-    "Site", 
+    "Site",
     "US",
     "InventarioMateriali",
     "HarrisMatrix",
-    "USRelationships", 
+    "USRelationships",
     "Period",
     "Periodizzazione",
     "Media",
     "MediaThumb",
     "Documentation",
     "ThesaurusSigle",
-    "ThesaurusField", 
-    "ThesaurusCategory"
+    "ThesaurusField",
+    "ThesaurusCategory",
+    "User",
+    "UserRole"
 ]
