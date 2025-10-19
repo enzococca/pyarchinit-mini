@@ -164,141 +164,18 @@ class GraphMLExportDialog:
             if not filepath:
                 return
 
-            # Generate Harris Matrix graph
+            # Generate Harris Matrix graph (with transitive reduction applied)
             graph = self.matrix_generator.generate_matrix(site_name)
 
-            # Create Graphviz DOT structure
-            from graphviz import Digraph
+            # Use PyArchInitMatrixVisualizer to generate DOT source
+            settings = {
+                'show_legend': False,  # Skip legend for cleaner GraphML
+                'show_periods': grouping != 'none',
+                'rankdir': 'BT'  # Bottom to top for archaeological stratigraphy
+            }
 
-            G = Digraph(engine='dot', strict=False)
-            G.attr(
-                rankdir='BT',
-                compound='true',
-                pad='0.5',
-                nodesep='0.5',
-                ranksep='1.0'
-            )
-
-            # Categorize relationships
-            us_rilevanti = set()
-            for source, target in graph.edges():
-                us_rilevanti.add(source)
-                us_rilevanti.add(target)
-
-            # Create nodes based on grouping
-            if grouping != 'none':
-                if grouping == 'period_area':
-                    # Nested structure: {periodo: {area: [nodes]}}
-                    period_groups = {}
-                    for node in us_rilevanti:
-                        if node not in graph.nodes:
-                            continue
-                        node_data = graph.nodes[node]
-                        periodo = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
-                        area = node_data.get('area', 'A')
-
-                        if periodo not in period_groups:
-                            period_groups[periodo] = {}
-                        if area not in period_groups[periodo]:
-                            period_groups[periodo][area] = []
-                        period_groups[periodo][area].append(node)
-
-                    # Create period labels and nodes grouped by area
-                    for periodo, areas in sorted(period_groups.items()):
-                        G.node(f"Periodo : {periodo}", shape='plaintext')
-
-                        # Add nodes grouped by area within this period
-                        for area, nodes in sorted(areas.items()):
-                            for node in sorted(nodes):
-                                node_data = graph.nodes[node]
-                                descrizione = node_data.get('d_stratigrafica', '')
-                                node_id = f"US_{node}_{descrizione}_{periodo}"
-                                display_label = f"US {node}\\n{descrizione}"
-
-                                G.node(node_id,
-                                      label=display_label,
-                                      shape='box',
-                                      style='filled',
-                                      fillcolor='#CCCCFF')
-                else:
-                    # Flat grouping for 'period' or 'area' modes
-                    groups = {}
-                    for node in us_rilevanti:
-                        if node not in graph.nodes:
-                            continue
-                        node_data = graph.nodes[node]
-
-                        if grouping == 'period':
-                            group_key = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
-                        else:  # area
-                            group_key = node_data.get('area', 'A')
-
-                        if group_key not in groups:
-                            groups[group_key] = []
-                        groups[group_key].append(node)
-
-                    # Create labeled groups
-                    for group_key, nodes in sorted(groups.items()):
-                        G.node(f"Periodo : {group_key}", shape='plaintext')
-
-                        for node in sorted(nodes):
-                            node_data = graph.nodes[node]
-                            descrizione = node_data.get('d_stratigrafica', '')
-                            node_id = f"US_{node}_{descrizione}_{group_key}"
-                            display_label = f"US {node}\\n{descrizione}"
-
-                            G.node(node_id,
-                                  label=display_label,
-                                  shape='box',
-                                  style='filled',
-                                  fillcolor='#CCCCFF')
-            else:
-                # Simple nodes without grouping
-                for node in us_rilevanti:
-                    if node not in graph.nodes:
-                        continue
-                    node_data = graph.nodes[node]
-                    descrizione = node_data.get('d_stratigrafica', '')
-                    display_label = f"US {node}\\n{descrizione}"
-
-                    G.node(f"US {node}",
-                          label=display_label,
-                          shape='box',
-                          style='filled',
-                          fillcolor='#CCCCFF')
-
-            # Add edges
-            for source, target in graph.edges():
-                edge_data = graph.get_edge_data(source, target)
-                rel_type = edge_data.get('relationship', edge_data.get('type', 'sopra'))
-
-                # Format node names to match those created above
-                if grouping != 'none':
-                    source_data = graph.nodes.get(source, {})
-                    target_data = graph.nodes.get(target, {})
-
-                    source_desc = source_data.get('d_stratigrafica', '')
-                    target_desc = target_data.get('d_stratigrafica', '')
-
-                    if grouping == 'period_area' or grouping == 'period':
-                        # Use periodo for node ID (area is just visual grouping)
-                        source_periodo = source_data.get('period_initial', source_data.get('periodo_iniziale', 'Sconosciuto'))
-                        target_periodo = target_data.get('period_initial', target_data.get('periodo_iniziale', 'Sconosciuto'))
-                        source_id = f"US_{source}_{source_desc}_{source_periodo}"
-                        target_id = f"US_{target}_{target_desc}_{target_periodo}"
-                    else:  # area
-                        source_area = source_data.get('area', 'A')
-                        target_area = target_data.get('area', 'A')
-                        source_id = f"US_{source}_{source_desc}_{source_area}"
-                        target_id = f"US_{target}_{target_desc}_{target_area}"
-                else:
-                    source_id = f"US {source}"
-                    target_id = f"US {target}"
-
-                G.edge(source_id, target_id, label=rel_type)
-
-            # Get DOT source
-            dot_content = G.source
+            # Get DOT source from visualizer (uses transitive-reduced graph)
+            dot_content = self.matrix_visualizer.get_dot_source(graph, grouping, settings)
 
             # Convert to GraphML
             from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
