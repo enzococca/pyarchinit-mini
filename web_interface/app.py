@@ -32,6 +32,7 @@ from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrix
 from pyarchinit_mini.utils.stratigraphic_validator import StratigraphicValidator
 from pyarchinit_mini.pdf_export.pdf_generator import PDFGenerator
 from pyarchinit_mini.media_manager.media_handler import MediaHandler
+from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
 
 # Import authentication routes
 from auth_routes import auth_bp, init_login_manager, write_permission_required
@@ -334,6 +335,18 @@ class DatabaseConnectionForm(FlaskForm):
 
     connection_name = StringField('Nome Connessione', validators=[DataRequired()],
                                  description='Nome identificativo per questa connessione')
+
+class GraphMLExportForm(FlaskForm):
+    """Form for GraphML export of Harris Matrix"""
+    site = SelectField('Sito', validators=[DataRequired()], coerce=str)
+    title = StringField('Titolo Diagramma', description='Intestazione opzionale per il diagramma')
+    grouping = SelectField('Raggruppamento', choices=[
+        ('period_area', 'Periodo + Area'),
+        ('period', 'Solo Periodo'),
+        ('area', 'Solo Area'),
+        ('none', 'Nessun Raggruppamento')
+    ], default='period_area')
+    reverse_epochs = BooleanField('Inverti ordine periodi', default=False)
 
 # Flask App Setup
 def create_app():
@@ -1211,6 +1224,195 @@ def create_app():
             traceback.print_exc()
             flash(f'Errore generazione Harris Matrix Graphviz: {str(e)}', 'error')
             return redirect(url_for('sites_list'))
+
+    # GraphML Export routes
+    @app.route('/harris_matrix/graphml_export', methods=['GET', 'POST'])
+    @login_required
+    def export_harris_graphml():
+        """Export Harris Matrix to GraphML format (yEd compatible)"""
+        form = GraphMLExportForm()
+
+        # Populate site choices
+        sites = site_service.get_all_sites()
+        form.site.choices = [(s.sito, s.sito) for s in sites]
+
+        if form.validate_on_submit():
+            try:
+                site_name = form.site.data
+                title = form.title.data or site_name
+                grouping = form.grouping.data
+                reverse_epochs = form.reverse_epochs.data
+
+                # Generate Harris Matrix graph
+                graph = matrix_generator.generate_matrix(site_name)
+
+                # Create Graphviz visualizer to generate DOT source
+                from graphviz import Digraph
+                import networkx as nx
+
+                # Use PyArchInitMatrixVisualizer to create the DOT structure
+                # We need to extract the DOT source without rendering
+                graphviz_settings = {
+                    'show_legend': False,  # Skip legend for cleaner GraphML
+                    'show_periods': grouping != 'none'
+                }
+
+                # Create temporary visualizer instance
+                temp_visualizer = PyArchInitMatrixVisualizer()
+
+                # Build the Graphviz Digraph
+                G = Digraph(engine='dot', strict=False)
+                G.attr(
+                    rankdir='BT',
+                    compound='true',
+                    pad='0.5',
+                    nodesep='0.5',
+                    ranksep='1.0'
+                )
+
+                # Categorize relationships
+                us_rilevanti = set()
+                for source, target in graph.edges():
+                    us_rilevanti.add(source)
+                    us_rilevanti.add(target)
+
+                # Create nodes based on grouping
+                if grouping != 'none':
+                    # Group by period/area
+                    groups = {}
+                    for node in us_rilevanti:
+                        if node not in graph.nodes:
+                            continue
+                        node_data = graph.nodes[node]
+
+                        periodo = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
+                        area = node_data.get('area', 'A')
+                        sito = node_data.get('sito', site_name)
+
+                        # Create group key
+                        if grouping == 'period_area':
+                            group_key = f"{periodo}_{area}"
+                        elif grouping == 'period':
+                            group_key = periodo
+                        else:  # area
+                            group_key = area
+
+                        if group_key not in groups:
+                            groups[group_key] = []
+                        groups[group_key].append(node)
+
+                    # Create subgraphs (periods as table rows in yEd)
+                    for group_key, nodes in groups.items():
+                        # Add period/area label nodes
+                        G.node(f"Periodo : {group_key}", shape='plaintext')
+
+                        # Add US nodes with proper format for GraphML converter
+                        for node in nodes:
+                            node_data = graph.nodes[node]
+                            descrizione = node_data.get('d_stratigrafica', '')
+
+                            # Format: US_number_description_epoch
+                            node_label = f"US_{node}_{descrizione}_{group_key}"
+                            display_label = f"US {node}\\n{descrizione}"
+
+                            G.node(node_label,
+                                  label=display_label,
+                                  shape='box',
+                                  style='filled',
+                                  fillcolor='#CCCCFF')
+                else:
+                    # Simple nodes without grouping
+                    for node in us_rilevanti:
+                        if node not in graph.nodes:
+                            continue
+                        node_data = graph.nodes[node]
+                        descrizione = node_data.get('d_stratigrafica', '')
+                        display_label = f"US {node}\\n{descrizione}"
+
+                        G.node(f"US {node}",
+                              label=display_label,
+                              shape='box',
+                              style='filled',
+                              fillcolor='#CCCCFF')
+
+                # Add edges
+                for source, target in graph.edges():
+                    edge_data = graph.get_edge_data(source, target)
+                    rel_type = edge_data.get('relationship', edge_data.get('type', 'sopra'))
+
+                    # Format node names to match those created above
+                    if grouping != 'none':
+                        source_data = graph.nodes.get(source, {})
+                        target_data = graph.nodes.get(target, {})
+
+                        source_periodo = source_data.get('period_initial', source_data.get('periodo_iniziale', 'Sconosciuto'))
+                        target_periodo = target_data.get('period_initial', target_data.get('periodo_iniziale', 'Sconosciuto'))
+                        source_area = source_data.get('area', 'A')
+                        target_area = target_data.get('area', 'A')
+                        source_desc = source_data.get('d_stratigrafica', '')
+                        target_desc = target_data.get('d_stratigrafica', '')
+
+                        if grouping == 'period_area':
+                            source_label = f"US_{source}_{source_desc}_{source_periodo}_{source_area}"
+                            target_label = f"US_{target}_{target_desc}_{target_periodo}_{target_area}"
+                        elif grouping == 'period':
+                            source_label = f"US_{source}_{source_desc}_{source_periodo}"
+                            target_label = f"US_{target}_{target_desc}_{target_periodo}"
+                        else:  # area
+                            source_label = f"US_{source}_{source_desc}_{source_area}"
+                            target_label = f"US_{target}_{target_desc}_{target_area}"
+                    else:
+                        source_label = f"US {source}"
+                        target_label = f"US {target}"
+
+                    G.edge(source_label, target_label, label=rel_type)
+
+                # Get DOT source
+                dot_content = G.source
+
+                # Convert to GraphML
+                graphml_content = convert_dot_content_to_graphml(
+                    dot_content,
+                    title=title,
+                    reverse_epochs=reverse_epochs
+                )
+
+                if graphml_content is None:
+                    flash('Errore durante la conversione a GraphML', 'error')
+                    return render_template('harris_matrix/graphml_export.html', form=form)
+
+                # Create temporary file for download
+                import tempfile
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.graphml', delete=False) as f:
+                    f.write(graphml_content)
+                    temp_path = f.name
+
+                # Send file
+                filename = f"{site_name}_harris_matrix.graphml"
+                response = send_file(
+                    temp_path,
+                    mimetype='application/xml',
+                    as_attachment=True,
+                    download_name=filename
+                )
+
+                # Clean up temp file after sending
+                @response.call_on_close
+                def cleanup():
+                    try:
+                        os.remove(temp_path)
+                    except:
+                        pass
+
+                return response
+
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                flash(f'Errore durante l\'export GraphML: {str(e)}', 'error')
+                return render_template('harris_matrix/graphml_export.html', form=form)
+
+        return render_template('harris_matrix/graphml_export.html', form=form)
 
     # Stratigraphic Validation routes
     @app.route('/validate/<site_name>')
