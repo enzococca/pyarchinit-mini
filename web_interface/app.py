@@ -1314,6 +1314,230 @@ def create_app():
         sites = site_service.get_all_sites(size=100)
         return jsonify([{'id': s.id_sito, 'name': s.sito} for s in sites])
 
+    # ===== Export/Import Routes =====
+    from pyarchinit_mini.services.export_import_service import ExportImportService
+    export_import_service = ExportImportService(db_manager)
+
+    @app.route('/export')
+    def export_page():
+        """Export/Import management page"""
+        return render_template('export/export_import.html')
+
+    # Excel Export Routes
+    @app.route('/export/sites/excel')
+    def export_sites_excel():
+        """Export sites to Excel"""
+        try:
+            output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx').name
+            export_import_service.export_sites_to_excel(output_path)
+            return send_file(output_path, as_attachment=True,
+                           download_name='sites_export.xlsx',
+                           mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        except Exception as e:
+            flash(f'Errore export Excel: {str(e)}', 'error')
+            return redirect(url_for('export_page'))
+
+    @app.route('/export/us/excel')
+    def export_us_excel():
+        """Export US to Excel"""
+        try:
+            site_name = request.args.get('sito')
+            output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx').name
+            export_import_service.export_us_to_excel(output_path, site_name)
+            filename = f'us_{site_name}.xlsx' if site_name else 'us_export.xlsx'
+            return send_file(output_path, as_attachment=True,
+                           download_name=filename,
+                           mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        except Exception as e:
+            flash(f'Errore export Excel: {str(e)}', 'error')
+            return redirect(url_for('export_page'))
+
+    @app.route('/export/inventario/excel')
+    def export_inventario_excel():
+        """Export Inventario to Excel"""
+        try:
+            site_name = request.args.get('sito')
+            output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx').name
+            export_import_service.export_inventario_to_excel(output_path, site_name)
+            filename = f'inventario_{site_name}.xlsx' if site_name else 'inventario_export.xlsx'
+            return send_file(output_path, as_attachment=True,
+                           download_name=filename,
+                           mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        except Exception as e:
+            flash(f'Errore export Excel: {str(e)}', 'error')
+            return redirect(url_for('export_page'))
+
+    # CSV Export Routes
+    @app.route('/export/sites/csv')
+    def export_sites_csv():
+        """Export sites to CSV"""
+        try:
+            output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.csv').name
+            export_import_service.export_sites_to_csv(output_path)
+            return send_file(output_path, as_attachment=True,
+                           download_name='sites_export.csv',
+                           mimetype='text/csv')
+        except Exception as e:
+            flash(f'Errore export CSV: {str(e)}', 'error')
+            return redirect(url_for('export_page'))
+
+    @app.route('/export/us/csv')
+    def export_us_csv():
+        """Export US to CSV"""
+        try:
+            site_name = request.args.get('sito')
+            output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.csv').name
+            export_import_service.export_us_to_csv(output_path, site_name)
+            filename = f'us_{site_name}.csv' if site_name else 'us_export.csv'
+            return send_file(output_path, as_attachment=True,
+                           download_name=filename,
+                           mimetype='text/csv')
+        except Exception as e:
+            flash(f'Errore export CSV: {str(e)}', 'error')
+            return redirect(url_for('export_page'))
+
+    @app.route('/export/inventario/csv')
+    def export_inventario_csv():
+        """Export Inventario to CSV"""
+        try:
+            site_name = request.args.get('sito')
+            output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.csv').name
+            export_import_service.export_inventario_to_csv(output_path, site_name)
+            filename = f'inventario_{site_name}.csv' if site_name else 'inventario_export.csv'
+            return send_file(output_path, as_attachment=True,
+                           download_name=filename,
+                           mimetype='text/csv')
+        except Exception as e:
+            flash(f'Errore export CSV: {str(e)}', 'error')
+            return redirect(url_for('export_page'))
+
+    # CSV Import Routes
+    @app.route('/import/sites/csv', methods=['POST'])
+    def import_sites_csv():
+        """Import sites from CSV"""
+        try:
+            if 'file' not in request.files:
+                flash('Nessun file selezionato', 'error')
+                return redirect(url_for('export_page'))
+
+            file = request.files['file']
+            if file.filename == '':
+                flash('Nessun file selezionato', 'error')
+                return redirect(url_for('export_page'))
+
+            if not file.filename.endswith('.csv'):
+                flash('Il file deve essere in formato CSV', 'error')
+                return redirect(url_for('export_page'))
+
+            # Save uploaded file temporarily
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp:
+                file.save(tmp.name)
+                tmp_path = tmp.name
+
+            # Import data
+            skip_duplicates = request.form.get('skip_duplicates', 'true').lower() == 'true'
+            result = export_import_service.batch_import_sites_from_csv(tmp_path, skip_duplicates)
+
+            # Clean up
+            os.unlink(tmp_path)
+
+            flash(f'Import completato: {result["imported"]} importati, '
+                  f'{result["skipped"]} saltati, {len(result["errors"])} errori', 'success')
+
+            if result['errors']:
+                for err in result['errors'][:5]:  # Show first 5 errors
+                    flash(f'Errore: {err["error"]}', 'warning')
+
+            return redirect(url_for('export_page'))
+
+        except Exception as e:
+            flash(f'Errore import CSV: {str(e)}', 'error')
+            return redirect(url_for('export_page'))
+
+    @app.route('/import/us/csv', methods=['POST'])
+    def import_us_csv():
+        """Import US from CSV"""
+        try:
+            if 'file' not in request.files:
+                flash('Nessun file selezionato', 'error')
+                return redirect(url_for('export_page'))
+
+            file = request.files['file']
+            if file.filename == '':
+                flash('Nessun file selezionato', 'error')
+                return redirect(url_for('export_page'))
+
+            if not file.filename.endswith('.csv'):
+                flash('Il file deve essere in formato CSV', 'error')
+                return redirect(url_for('export_page'))
+
+            # Save uploaded file temporarily
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp:
+                file.save(tmp.name)
+                tmp_path = tmp.name
+
+            # Import data
+            skip_duplicates = request.form.get('skip_duplicates', 'true').lower() == 'true'
+            result = export_import_service.batch_import_us_from_csv(tmp_path, skip_duplicates)
+
+            # Clean up
+            os.unlink(tmp_path)
+
+            flash(f'Import completato: {result["imported"]} importati, '
+                  f'{result["skipped"]} saltati, {len(result["errors"])} errori', 'success')
+
+            if result['errors']:
+                for err in result['errors'][:5]:
+                    flash(f'Errore: {err["error"]}', 'warning')
+
+            return redirect(url_for('export_page'))
+
+        except Exception as e:
+            flash(f'Errore import CSV: {str(e)}', 'error')
+            return redirect(url_for('export_page'))
+
+    @app.route('/import/inventario/csv', methods=['POST'])
+    def import_inventario_csv():
+        """Import Inventario from CSV"""
+        try:
+            if 'file' not in request.files:
+                flash('Nessun file selezionato', 'error')
+                return redirect(url_for('export_page'))
+
+            file = request.files['file']
+            if file.filename == '':
+                flash('Nessun file selezionato', 'error')
+                return redirect(url_for('export_page'))
+
+            if not file.filename.endswith('.csv'):
+                flash('Il file deve essere in formato CSV', 'error')
+                return redirect(url_for('export_page'))
+
+            # Save uploaded file temporarily
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp:
+                file.save(tmp.name)
+                tmp_path = tmp.name
+
+            # Import data
+            skip_duplicates = request.form.get('skip_duplicates', 'true').lower() == 'true'
+            result = export_import_service.batch_import_inventario_from_csv(tmp_path, skip_duplicates)
+
+            # Clean up
+            os.unlink(tmp_path)
+
+            flash(f'Import completato: {result["imported"]} importati, '
+                  f'{result["skipped"]} saltati, {len(result["errors"])} errori', 'success')
+
+            if result['errors']:
+                for err in result['errors'][:5]:
+                    flash(f'Errore: {err["error"]}', 'warning')
+
+            return redirect(url_for('export_page'))
+
+        except Exception as e:
+            flash(f'Errore import CSV: {str(e)}', 'error')
+            return redirect(url_for('export_page'))
+
     return app
 
 # Run app
