@@ -167,133 +167,60 @@ class GraphMLExportDialog:
             # Generate Harris Matrix graph (with transitive reduction already applied)
             graph = self.matrix_generator.generate_matrix(site_name)
 
-            # Generate DOT content manually (not using Graphviz library)
-            # This ensures commas between ALL attributes for proper GraphML parsing
-            dot_lines = []
-            dot_lines.append('digraph {')
-            dot_lines.append('\trankdir=BT')
-            dot_lines.append('\tcompound=true')
+            # Use PyArchInitMatrixVisualizer to get DOT with proper subgraph cluster structure
+            # Then post-process to add commas between attributes for GraphML parser compatibility
+            dot_content = self.matrix_visualizer.get_dot_source(graph, grouping=grouping)
 
-            # Get all relevant US
-            us_rilevanti = set()
-            for source, target in graph.edges():
-                us_rilevanti.add(source)
-                us_rilevanti.add(target)
+            # Post-process DOT for GraphML compatibility:
+            # 1. Clean labels: "US1001\nDescription..." → "US 1001" (with space)
+            # 2. Add commas between attributes: [label="..." color=blue] → [label="...", color=blue]
+            def fix_dot_for_graphml(dot):
+                """Post-process DOT to make it GraphML-compatible"""
+                import re
 
-            # Helper function to escape DOT strings
-            def escape_dot(s):
-                """Escape string for DOT format"""
-                if not s:
-                    return '""'
-                s = str(s).replace('\\', '\\\\').replace('"', '\\"')
-                return f'"{s}"'
+                # Step 1: Clean node labels - extract only US number
+                def clean_label(match):
+                    label_content = match.group(1)
+                    # Extract US number from label like "US1001\nDescription..."
+                    # Pattern: US{number}... → US {number}
+                    us_match = re.match(r'US(\d+)', label_content)
+                    if us_match:
+                        us_number = us_match.group(1)
+                        return f'label="US {us_number}"'
+                    return match.group(0)  # Keep original if no match
 
-            # Create nodes with GraphML-compatible format
-            if grouping != 'none':
-                if grouping == 'period_area':
-                    # Nested: {periodo: {area: [nodes]}}
-                    period_groups = {}
-                    for node in us_rilevanti:
-                        if node not in graph.nodes:
-                            continue
-                        node_data = graph.nodes[node]
-                        periodo = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
-                        area = node_data.get('area', 'A')
+                # First pass: clean labels
+                dot = re.sub(r'label="([^"]*)"', clean_label, dot)
 
-                        if periodo not in period_groups:
-                            period_groups[periodo] = {}
-                        if area not in period_groups[periodo]:
-                            period_groups[periodo][area] = []
-                        period_groups[periodo][area].append(node)
+                # Step 2: Add commas between attributes
+                def add_commas_to_attrs(match):
+                    attrs_block = match.group(1)
+                    parts = []
+                    current = ""
+                    in_quotes = False
 
-                    # Create period labels and nodes
-                    for periodo, areas in sorted(period_groups.items()):
-                        period_label = escape_dot(f"Periodo : {periodo}")
-                        dot_lines.append(f'\t{period_label} [shape=plaintext]')
+                    for char in attrs_block:
+                        if char == '"' and (len(current) == 0 or current[-1] != '\\'):
+                            in_quotes = not in_quotes
+                            current += char
+                        elif char == ' ' and not in_quotes:
+                            if current.strip():
+                                parts.append(current.strip())
+                            current = ""
+                        else:
+                            current += char
 
-                        for area, nodes in sorted(areas.items()):
-                            for node in sorted(nodes):
-                                node_data = graph.nodes[node]
-                                d_stratigrafica = node_data.get('d_stratigrafica', node_data.get('description', ''))
+                    if current.strip():
+                        parts.append(current.strip())
 
-                                # Node ID: US_number_d_stratigrafica_periodo
-                                node_id = escape_dot(f"US_{node}_{d_stratigrafica}_{periodo}")
-                                # Label: US number only
-                                label = escape_dot(f"US {node}")
+                    return f'[{", ".join(parts)}]'
 
-                                # IMPORTANT: Commas between ALL attributes
-                                dot_lines.append(f'\t{node_id} [label={label}, fillcolor="#CCCCFF", shape=box, style=filled]')
-                else:
-                    # Flat grouping
-                    groups = {}
-                    for node in us_rilevanti:
-                        if node not in graph.nodes:
-                            continue
-                        node_data = graph.nodes[node]
+                # Second pass: add commas
+                dot = re.sub(r'\[([^\[\]]+)\]', add_commas_to_attrs, dot)
 
-                        if grouping == 'period':
-                            group_key = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
-                        else:  # area
-                            group_key = node_data.get('area', 'A')
+                return dot
 
-                        if group_key not in groups:
-                            groups[group_key] = []
-                        groups[group_key].append(node)
-
-                    for group_key, nodes in sorted(groups.items()):
-                        group_label = escape_dot(f"Periodo : {group_key}")
-                        dot_lines.append(f'\t{group_label} [shape=plaintext]')
-
-                        for node in sorted(nodes):
-                            node_data = graph.nodes[node]
-                            d_stratigrafica = node_data.get('d_stratigrafica', node_data.get('description', ''))
-
-                            node_id = escape_dot(f"US_{node}_{d_stratigrafica}_{group_key}")
-                            label = escape_dot(f"US {node}")
-
-                            # IMPORTANT: Commas between ALL attributes
-                            dot_lines.append(f'\t{node_id} [label={label}, fillcolor="#CCCCFF", shape=box, style=filled]')
-            else:
-                # No grouping
-                for node in sorted(us_rilevanti):
-                    if node not in graph.nodes:
-                        continue
-                    node_id = escape_dot(f"US {node}")
-                    label = escape_dot(f"US {node}")
-
-                    # IMPORTANT: Commas between ALL attributes
-                    dot_lines.append(f'\t{node_id} [label={label}, fillcolor="#CCCCFF", shape=box, style=filled]')
-
-            # Add edges
-            for source, target in graph.edges():
-                edge_data = graph.get_edge_data(source, target)
-                rel_type = edge_data.get('relationship', edge_data.get('type', 'sopra'))
-
-                if grouping != 'none':
-                    source_data = graph.nodes.get(source, {})
-                    target_data = graph.nodes.get(target, {})
-                    source_desc = source_data.get('d_stratigrafica', source_data.get('description', ''))
-                    target_desc = target_data.get('d_stratigrafica', target_data.get('description', ''))
-
-                    if grouping == 'period_area' or grouping == 'period':
-                        source_periodo = source_data.get('period_initial', source_data.get('periodo_iniziale', 'Sconosciuto'))
-                        target_periodo = target_data.get('period_initial', target_data.get('periodo_iniziale', 'Sconosciuto'))
-                        source_id = escape_dot(f"US_{source}_{source_desc}_{source_periodo}")
-                        target_id = escape_dot(f"US_{target}_{target_desc}_{target_periodo}")
-                    else:  # area
-                        source_area = source_data.get('area', 'A')
-                        target_area = target_data.get('area', 'A')
-                        source_id = escape_dot(f"US_{source}_{source_desc}_{source_area}")
-                        target_id = escape_dot(f"US_{target}_{target_desc}_{target_area}")
-                else:
-                    source_id = escape_dot(f"US {source}")
-                    target_id = escape_dot(f"US {target}")
-
-                edge_label = escape_dot(rel_type)
-                dot_lines.append(f'\t{source_id} -> {target_id} [label={edge_label}]')
-
-            dot_lines.append('}')
-            dot_content = '\n'.join(dot_lines)
+            dot_content = fix_dot_for_graphml(dot_content)
 
             # Convert to GraphML
             from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
