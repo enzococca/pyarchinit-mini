@@ -6,10 +6,14 @@ Run web interface in debug mode with verbose logging
 import os
 import sys
 
+# Get absolute path to project root
+project_root = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(project_root, 'pyarchinit_mini.db')
+
 # Set environment variables
 os.environ['PYARCHINIT_WEB_DEBUG'] = 'true'
 os.environ['FLASK_ENV'] = 'development'
-os.environ['DATABASE_URL'] = 'sqlite:///./pyarchinit_mini.db'
+os.environ['DATABASE_URL'] = f'sqlite:///{db_path}'
 
 # Add web_interface to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'web_interface'))
@@ -22,7 +26,8 @@ print("Server Configuration:")
 print(f"  Host: 0.0.0.0")
 print(f"  Port: 5001")
 print(f"  Debug: ON")
-print(f"  Database: {os.environ['DATABASE_URL']}")
+print(f"  Database: {db_path}")
+print(f"  Database exists: {os.path.exists(db_path)}")
 print()
 print("Login Credentials:")
 print(f"  Username: admin")
