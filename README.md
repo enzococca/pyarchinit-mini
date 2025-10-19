@@ -32,8 +32,15 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **CLI Interface**: Rich-based interactive command-line
 - **REST API (FastAPI)**: Scalable API with automatic OpenAPI docs
 
+### 📊 Data Export/Import (NEW in v1.0.7)
+- **Excel Export**: Export Sites, US, Inventario to .xlsx format
+- **CSV Export**: Export to CSV with optional site filtering
+- **Batch Import**: Import data from CSV with validation and statistics
+- **Multi-Interface**: Available in Web UI, Desktop GUI, and CLI
+- **Duplicate Handling**: Skip duplicates option to preserve existing data
+
 ### 🚀 Technical Features
-- **Production Ready**: v1.0.6 with 100% Desktop GUI feature parity
+- **Production Ready**: v1.0.7 with 100% Desktop GUI feature parity
 - **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14
 - **Data Validation**: Comprehensive Pydantic schemas
 - **Session Management**: Proper database connection pooling
@@ -73,6 +80,11 @@ pip install 'pyarchinit-mini[harris]'
 ### With Advanced PDF Export
 ```bash
 pip install 'pyarchinit-mini[pdf]'
+```
+
+### With Excel/CSV Export and Import
+```bash
+pip install 'pyarchinit-mini[export]'
 ```
 
 ### Complete Installation (Recommended)
@@ -162,6 +174,7 @@ pyarchinit-cli
 | `harris` | Matplotlib, Graphviz | `pip install 'pyarchinit-mini[harris]'` |
 | `pdf` | WeasyPrint | `pip install 'pyarchinit-mini[pdf]'` |
 | `media` | python-magic, moviepy | `pip install 'pyarchinit-mini[media]'` |
+| `export` | pandas, openpyxl | `pip install 'pyarchinit-mini[export]'` |
 | `all` | All of the above | `pip install 'pyarchinit-mini[all]'` |
 | `dev` | pytest, black, mypy, flake8 | `pip install 'pyarchinit-mini[dev]'` |
 
@@ -254,6 +267,27 @@ export PYARCHINIT_API_PORT=8000
 - **Cycle Detection**: Identify circular dependencies
 - **Reciprocal Check**: Verify bidirectional relationships
 - **Auto-Fix**: One-click correction for missing reciprocals
+
+### Export/Import (v1.0.7)
+- **Web Interface**: Navigate to Export/Import page for visual interface
+- **Desktop GUI**: Menu → Strumenti → Export/Import Dati
+- **CLI Commands**:
+  ```bash
+  # Export to Excel/CSV
+  pyarchinit-export-import export-sites -f excel -o sites.xlsx
+  pyarchinit-export-import export-us -f csv -s "SiteName" -o us.csv
+  pyarchinit-export-import export-inventario -f excel -o inventario.xlsx
+
+  # Import from CSV
+  pyarchinit-export-import import-sites sites.csv
+  pyarchinit-export-import import-us --skip-duplicates us.csv
+  pyarchinit-export-import import-inventario --no-skip-duplicates inv.csv
+  ```
+- **Features**:
+  - Optional site filtering for US and Inventario exports
+  - Skip duplicates option (default: enabled)
+  - Import statistics (imported, skipped, errors)
+  - Comprehensive error reporting
 
 ---
 
@@ -386,11 +420,14 @@ pyarchinit-api
 
 ## 🗺️ Roadmap
 
+### Recently Completed (v1.0.7)
+- [x] **Export to Excel/CSV** - Sites, US, Inventario export
+- [x] **Batch import from CSV** - With validation and duplicate handling
+- [x] **Multi-interface export/import** - Web UI, Desktop GUI, and CLI
+
 ### Upcoming Features
 - [ ] Multi-user authentication and permissions
 - [ ] Real-time collaboration (WebSocket)
-- [ ] Export to Excel/CSV
-- [ ] Batch import from CSV
 - [ ] Chart analytics dashboard
 - [ ] Mobile-responsive improvements
 - [ ] Docker containerization
@@ -443,7 +480,7 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 📊 Project Status
 
-**Version**: 1.0.6
+**Version**: 1.0.7
 **Status**: Production/Stable
 **Python**: 3.8 - 3.14
 **Last Updated**: 2025-01-19
@@ -451,6 +488,7 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 ✅ **100% Desktop GUI Feature Parity Achieved**
 ✅ **Full Python 3.14 Support**
 ✅ **Tests Included in Distribution**
+✅ **Excel/CSV Export/Import** (NEW in v1.0.7)
 
 ---
 
