@@ -46,6 +46,7 @@
                     <th>Definizione</th>
                     <th>US</th>
                     <th>Peso (g)</th>
+                    <th>Azioni</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,6 +58,11 @@
                     <td>{{ item.definizione or '-' }}</td>
                     <td>{{ item.us or '-' }}</td>
                     <td>{{ item.peso or '-' }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_inventario', inv_id=item.id_invmat) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i> Modifica
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
