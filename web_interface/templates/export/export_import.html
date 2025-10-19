@@ -222,10 +222,10 @@ function clearFilter(type) {
 function exportUS(format) {
     const siteFilter = document.getElementById('us-site-filter').value;
     const url = siteFilter
-        ? `{{ url_for('export_us_${format}') }}?sito=${encodeURIComponent(siteFilter)}`
-        : `{{ url_for('export_us_${format}') }}`;
+        ? `/export/us/${format}?sito=${encodeURIComponent(siteFilter)}`
+        : `/export/us/${format}`;
 
-    window.location.href = url.replace('${format}', format);
+    window.location.href = url;
 }
 
 function exportInventario(format) {
