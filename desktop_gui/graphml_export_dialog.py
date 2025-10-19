@@ -167,60 +167,172 @@ class GraphMLExportDialog:
             # Generate Harris Matrix graph (with transitive reduction already applied)
             graph = self.matrix_generator.generate_matrix(site_name)
 
-            # Use PyArchInitMatrixVisualizer to get DOT with proper subgraph cluster structure
-            # Then post-process to add commas between attributes for GraphML parser compatibility
-            dot_content = self.matrix_visualizer.get_dot_source(graph, grouping=grouping)
+            # Generate DOT manually with GraphML-compatible node ID format
+            # GraphML converter requires: US_number_description_epoch
+            # This allows it to extract epoch and create y:Row elements for period grouping
 
-            # Post-process DOT for GraphML compatibility:
-            # 1. Clean labels: "US1001\nDescription..." → "US 1001" (with space)
-            # 2. Add commas between attributes: [label="..." color=blue] → [label="...", color=blue]
-            def fix_dot_for_graphml(dot):
-                """Post-process DOT to make it GraphML-compatible"""
-                import re
+            # Get all relevant US
+            us_rilevanti = set()
+            for source, target in graph.edges():
+                us_rilevanti.add(source)
+                us_rilevanti.add(target)
 
-                # Step 1: Clean node labels - extract only US number
-                def clean_label(match):
-                    label_content = match.group(1)
-                    # Extract US number from label like "US1001\nDescription..."
-                    # Pattern: US{number}... → US {number}
-                    us_match = re.match(r'US(\d+)', label_content)
-                    if us_match:
-                        us_number = us_match.group(1)
-                        return f'label="US {us_number}"'
-                    return match.group(0)  # Keep original if no match
+            # Start DOT
+            dot_lines = []
+            dot_lines.append('digraph {')
+            dot_lines.append('\trankdir=BT')
 
-                # First pass: clean labels
-                dot = re.sub(r'label="([^"]*)"', clean_label, dot)
+            # Extract unique periods for y:Row generation
+            periodi_unici = set()
+            for node in us_rilevanti:
+                if node in graph.nodes:
+                    periodo = graph.nodes[node].get('period_initial', graph.nodes[node].get('periodo_iniziale', 'Sconosciuto'))
+                    periodi_unici.add(periodo.replace(' ', '-'))  # Use dash
 
-                # Step 2: Add commas between attributes
-                def add_commas_to_attrs(match):
-                    attrs_block = match.group(1)
-                    parts = []
-                    current = ""
-                    in_quotes = False
+            # EM_palette node styles mapping based on unita_tipo
+            US_STYLES = {
+                'US': {  # Stratigraphic Unit (strato, riempimento, etc.)
+                    'shape': 'box',
+                    'fillcolor': '#FFFFFF',
+                    'color': '#9B3333',  # red border
+                    'penwidth': '4.0',
+                    'style': 'filled'
+                },
+                'USM': {  # Unità Stratigrafica Muraria (masonry)
+                    'shape': 'box',
+                    'fillcolor': '#FFFFFF',
+                    'color': '#9B3333',  # red border
+                    'penwidth': '4.0',
+                    'style': 'filled'
+                },
+                'USD': {  # Documentary US
+                    'shape': 'box',
+                    'fillcolor': '#FFFFFF',
+                    'color': '#D86400',  # orange border
+                    'penwidth': '4.0',
+                    'style': 'rounded,filled'
+                },
+                'USV': {  # Virtual US negative
+                    'shape': 'hexagon',
+                    'fillcolor': '#000000',
+                    'color': '#31792D',  # green border
+                    'penwidth': '4.0',
+                    'style': 'filled'
+                },
+                'USV/s': {  # Virtual US structural
+                    'shape': 'trapezium',  # closest to parallelogram
+                    'fillcolor': '#000000',
+                    'color': '#248FE7',  # blue border
+                    'penwidth': '4.0',
+                    'style': 'filled'
+                },
+                'default': {  # Fallback for unknown types
+                    'shape': 'box',
+                    'fillcolor': '#CCCCFF',
+                    'color': '#000000',
+                    'penwidth': '2.0',
+                    'style': 'filled'
+                }
+            }
 
-                    for char in attrs_block:
-                        if char == '"' and (len(current) == 0 or current[-1] != '\\'):
-                            in_quotes = not in_quotes
-                            current += char
-                        elif char == ' ' and not in_quotes:
-                            if current.strip():
-                                parts.append(current.strip())
-                            current = ""
-                        else:
-                            current += char
+            # Add period label nodes (required by GraphML converter to create y:Row elements)
+            for periodo in sorted(periodi_unici):
+                dot_lines.append(f'\t"Periodo : {periodo}" [shape=plaintext]')
 
-                    if current.strip():
-                        parts.append(current.strip())
+            # Create nodes with GraphML-compatible format + EM_palette styles
+            # Node ID: US_1001_Description_Period
+            # Node label: US1001_Period (period included for get_y() to work)
+            for node in sorted(us_rilevanti):
+                if node not in graph.nodes:
+                    continue
 
-                    return f'[{", ".join(parts)}]'
+                node_data = graph.nodes[node]
+                periodo = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
+                d_stratigrafica = node_data.get('d_stratigrafica', node_data.get('description', ''))
+                unita_tipo = node_data.get('unita_tipo', 'US')  # Extract unit type
 
-                # Second pass: add commas
-                dot = re.sub(r'\[([^\[\]]+)\]', add_commas_to_attrs, dot)
+                # Clean description and period (remove spaces and special chars)
+                desc_clean = d_stratigrafica.replace(' ', '_').replace(',', '').replace('"', '')
+                if len(desc_clean) > 30:
+                    desc_clean = desc_clean[:30]
 
-                return dot
+                # Clean period: replace spaces with dash (not underscore)
+                # This allows rsplit('_', 1) to extract the full period name
+                periodo_clean = periodo.replace(' ', '-')  # Romano Imperiale → Romano-Imperiale
 
-            dot_content = fix_dot_for_graphml(dot_content)
+                # Node ID format: US_numero_descrizione_periodo
+                # rsplit('_', 1) will extract "Romano-Imperiale" correctly
+                node_id = f"US_{node}_{desc_clean}_{periodo_clean}"
+
+                # Label: Include period for get_y() to work
+                # Format: US1001_Romano-Imperiale (so get_y can find the period in LabelText)
+                label = f"US{node}_{periodo_clean}"
+
+                # Get style for this node based on unita_tipo
+                style_dict = US_STYLES.get(unita_tipo, US_STYLES['default'])
+
+                # Build node attributes
+                attrs = [
+                    f'label="{label}"',
+                    f'fillcolor="{style_dict["fillcolor"]}"',
+                    f'color="{style_dict["color"]}"',
+                    f'shape={style_dict["shape"]}',
+                    f'penwidth={style_dict["penwidth"]}',
+                    f'style={style_dict["style"]}'
+                ]
+
+                # Add node with EM_palette styling
+                dot_lines.append(f'\t"{node_id}" [{", ".join(attrs)}]')
+
+            # Add edges with EM_palette styling based on relationship type
+            for source, target in graph.edges():
+                if source not in graph.nodes or target not in graph.nodes:
+                    continue
+
+                edge_data = graph.get_edge_data(source, target)
+                rel_type = edge_data.get('relationship', edge_data.get('type', 'sopra'))
+
+                source_data = graph.nodes[source]
+                target_data = graph.nodes[target]
+
+                source_periodo = source_data.get('period_initial', source_data.get('periodo_iniziale', 'Sconosciuto'))
+                target_periodo = target_data.get('period_initial', target_data.get('periodo_iniziale', 'Sconosciuto'))
+
+                source_desc = source_data.get('d_stratigrafica', source_data.get('description', ''))
+                target_desc = target_data.get('d_stratigrafica', target_data.get('description', ''))
+
+                desc_source_clean = source_desc.replace(' ', '_').replace(',', '').replace('"', '')[:30]
+                desc_target_clean = target_desc.replace(' ', '_').replace(',', '').replace('"', '')[:30]
+
+                # Clean periods (use dash, not underscore)
+                source_periodo_clean = source_periodo.replace(' ', '-')
+                target_periodo_clean = target_periodo.replace(' ', '-')
+
+                source_id = f"US_{source}_{desc_source_clean}_{source_periodo_clean}"
+                target_id = f"US_{target}_{desc_target_clean}_{target_periodo_clean}"
+
+                # Determine edge type and style based on relationship (EM_palette compatible)
+                rel_lower = rel_type.lower()
+
+                # Contemporary relationships: undirected edge (no arrow), solid line
+                if 'uguale' in rel_lower or 'lega' in rel_lower or 'same' in rel_lower or 'connected' in rel_lower:
+                    edge_op = '--'
+                    edge_attrs = []  # solid line by default, no extra attrs
+                # Virtual or uncertain relationships: directed edge with dashed line
+                elif 'virtuale' in rel_lower or 'dubbio' in rel_lower or 'virtual' in rel_lower or 'uncertain' in rel_lower:
+                    edge_op = '->'
+                    edge_attrs = ['style=dashed']
+                # Normal stratigraphic relationships: directed edge with solid line
+                else:
+                    edge_op = '->'
+                    edge_attrs = []  # solid line by default
+
+                # Build edge with label and optional styling
+                edge_attr_str = f', {", ".join(edge_attrs)}' if edge_attrs else ''
+                dot_lines.append(f'\t"{source_id}" {edge_op} "{target_id}" [label="{rel_type}"{edge_attr_str}]')
+
+            dot_lines.append('}')
+            dot_content = '\n'.join(dot_lines)
 
             # Convert to GraphML
             from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
@@ -230,6 +342,68 @@ class GraphMLExportDialog:
                 title=title,
                 reverse_epochs=reverse_epochs
             )
+
+            # Post-process GraphML to clean node labels (remove period from label)
+            # Change "US1001_Medievale" to "US1001"
+            if graphml_content:
+                import re
+                # Pattern: <y:NodeLabel...>US1234_Period-Name</y:NodeLabel>
+                # Replace with: <y:NodeLabel...>US1234</y:NodeLabel>
+                graphml_content = re.sub(
+                    r'(>US\d+)_[^<]+(<\/y:NodeLabel>)',
+                    r'\1\2',
+                    graphml_content
+                )
+
+                # Apply EM_palette colors to nodes based on unita_tipo
+                try:
+                    import xml.dom.minidom as minidom
+
+                    # Build unita_tipo map from graph
+                    unita_tipo_map = {}
+                    for node in us_rilevanti:
+                        if node in graph.nodes:
+                            unita_tipo_map[node] = graph.nodes[node].get('unita_tipo', 'US')
+
+                    # Parse and modify GraphML
+                    dom = minidom.parseString(graphml_content)
+                    nodes_modified = 0
+
+                    # Find all ShapeNode elements (US nodes)
+                    for shape_node in dom.getElementsByTagName('y:ShapeNode'):
+                        # Find the label
+                        labels = shape_node.getElementsByTagName('y:NodeLabel')
+                        if not labels or not labels[0].firstChild:
+                            continue
+
+                        label_text = labels[0].firstChild.nodeValue
+                        match = re.match(r'US(\d+)', label_text)
+                        if not match:
+                            continue
+
+                        us_number = int(match.group(1))
+                        unita_tipo = unita_tipo_map.get(us_number, 'US')
+
+                        # Get colors from US_STYLES
+                        style = US_STYLES.get(unita_tipo, US_STYLES['default'])
+
+                        # Update Fill color
+                        fill_nodes = shape_node.getElementsByTagName('y:Fill')
+                        if fill_nodes:
+                            fill_nodes[0].setAttribute('color', style['fillcolor'])
+                            nodes_modified += 1
+
+                        # Update BorderStyle color and width
+                        border_nodes = shape_node.getElementsByTagName('y:BorderStyle')
+                        if border_nodes:
+                            border_nodes[0].setAttribute('color', style['color'])
+                            border_nodes[0].setAttribute('width', style['penwidth'])
+
+                    graphml_content = dom.toxml()
+                    print(f'✓ Stili EM_palette applicati a {nodes_modified} nodi')
+                except Exception as style_error:
+                    # Non-fatal: continue even if styling fails
+                    print(f'⚠ Avviso: impossibile applicare stili EM_palette: {str(style_error)}')
 
             if graphml_content is None:
                 messagebox.showerror("Errore", "Conversione a GraphML fallita")
