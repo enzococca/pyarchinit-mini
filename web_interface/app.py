@@ -334,7 +334,10 @@ def create_app():
     os.makedirs(app.config['DATABASE_FOLDER'], exist_ok=True)
 
     # Initialize database
-    database_url = os.getenv("DATABASE_URL", "sqlite:///./pyarchinit_mini.db")
+    # Default to project root database, not current directory
+    default_db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'pyarchinit_mini.db')
+    default_db_url = f"sqlite:///{default_db_path}"
+    database_url = os.getenv("DATABASE_URL", default_db_url)
     print(f"[FLASK] Current working directory: {os.getcwd()}")
     print(f"[FLASK] Using database: {database_url}")
     # If SQLite, show absolute path
