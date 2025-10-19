@@ -16,7 +16,7 @@ if (this_directory / "requirements.txt").exists():
 
 setup(
     name="pyarchinit-mini",
-    version="1.0.4",
+    version="1.0.5",
     author="PyArchInit Team",
     author_email="enzo.ccc@gmail.com",
     description="Lightweight archaeological data management system",
@@ -28,9 +28,9 @@ setup(
         "Documentation": "https://github.com/enzococca/pyarchinit-mini/blob/main/README.md",
         "Source Code": "https://github.com/enzococca/pyarchinit-mini",
     },
-    packages=find_packages(exclude=["tests*", "docs*"]),
+    packages=find_packages(exclude=["docs*", "examples*"]),
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: GIS",
         "Topic :: Database :: Database Engines/Servers",
@@ -40,10 +40,13 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Operating System :: OS Independent",
         "Framework :: FastAPI",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.8,<3.15",
     install_requires=requirements,
     extras_require={
         "dev": [
