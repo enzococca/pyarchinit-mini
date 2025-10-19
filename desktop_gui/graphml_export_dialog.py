@@ -221,8 +221,7 @@ class GraphMLExportDialog:
                                       label=label,
                                       shape='box',
                                       style='filled',
-                                      fillcolor='#CCCCFF',
-                                      tooltip=d_interpretativa)
+                                      fillcolor='#CCCCFF')
                 else:
                     # Flat grouping
                     groups = {}
@@ -255,8 +254,7 @@ class GraphMLExportDialog:
                                   label=label,
                                   shape='box',
                                   style='filled',
-                                  fillcolor='#CCCCFF',
-                                  tooltip=d_interpretativa)
+                                  fillcolor='#CCCCFF')
             else:
                 # No grouping
                 for node in sorted(us_rilevanti):
@@ -270,8 +268,7 @@ class GraphMLExportDialog:
                           label=label,
                           shape='box',
                           style='filled',
-                          fillcolor='#CCCCFF',
-                          tooltip=d_interpretativa)
+                          fillcolor='#CCCCFF')
 
             # Add edges
             for source, target in graph.edges():

@@ -1300,8 +1300,7 @@ def create_app():
                                           label=label,
                                           shape='box',
                                           style='filled',
-                                          fillcolor='#CCCCFF',
-                                          tooltip=d_interpretativa)  # d_interpretativa as tooltip
+                                          fillcolor='#CCCCFF')
                     else:
                         # Flat grouping
                         groups = {}
@@ -1334,8 +1333,7 @@ def create_app():
                                       label=label,
                                       shape='box',
                                       style='filled',
-                                      fillcolor='#CCCCFF',
-                                      tooltip=d_interpretativa)
+                                      fillcolor='#CCCCFF')
                 else:
                     # No grouping
                     for node in sorted(us_rilevanti):
@@ -1349,8 +1347,7 @@ def create_app():
                               label=label,
                               shape='box',
                               style='filled',
-                              fillcolor='#CCCCFF',
-                              tooltip=d_interpretativa)
+                              fillcolor='#CCCCFF')
 
                 # Add edges
                 for source, target in graph.edges():
