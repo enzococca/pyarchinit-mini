@@ -335,9 +335,19 @@ def create_app():
 
     # Initialize database
     database_url = os.getenv("DATABASE_URL", "sqlite:///./pyarchinit_mini.db")
+    print(f"[FLASK] Current working directory: {os.getcwd()}")
+    print(f"[FLASK] Using database: {database_url}")
+    # If SQLite, show absolute path
+    if database_url.startswith('sqlite:///'):
+        db_path = database_url.replace('sqlite:///', '')
+        if not db_path.startswith('/'):
+            abs_path = os.path.abspath(db_path)
+            print(f"[FLASK] SQLite absolute path: {abs_path}")
+            print(f"[FLASK] Database exists: {os.path.exists(abs_path)}")
     db_conn = DatabaseConnection.from_url(database_url)
     db_conn.create_tables()
     db_manager = DatabaseManager(db_conn)
+    print(f"[FLASK] Database connection initialized")
 
     # Store current database info in app config
     app.config['CURRENT_DATABASE_URL'] = database_url
