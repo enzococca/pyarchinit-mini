@@ -68,8 +68,39 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **Multi-Interface Support**: Available in both Web UI (Chart.js) and Desktop GUI (matplotlib)
 - **Real-Time Data**: Charts update automatically with current database state
 
+### 🔄 GraphML Converter - Harris Matrix Export (NEW in v1.1.3)
+- **yEd Compatibility**: Export Harris Matrix to yEd Graph Editor compatible GraphML format
+- **Period Preservation**: Automatic preservation of archaeological periods with color coding
+- **Flexible Grouping**: Support for period+area, period-only, area-only, or no grouping
+- **US Label Format**: Proper formatting (US_number_description_epoch) for yEd tables
+- **Multi-Interface Support**: Available via Python API, CLI, REST API, Web UI, and Desktop GUI
+- **Template-Based**: Uses custom yEd template (EM_palette.graphml) for consistent styling
+- **Epoch Ordering**: Option to reverse period ordering (chronological vs reverse)
+- **Standalone Library**: Can be used in other projects via `pip install pyarchinit-mini`
+
+**Usage Examples**:
+```python
+# Python API
+from pyarchinit_mini.graphml_converter import convert_dot_to_graphml
+convert_dot_to_graphml('harris.dot', 'harris.graphml', title='Pompei')
+
+# CLI
+pyarchinit-graphml convert harris.dot harris.graphml -t "Pompei - Regio VI"
+
+# REST API
+curl -X POST http://localhost:8000/api/graphml/convert \
+     -F "file=@harris.dot" -F "title=Pompei"
+```
+
+**Interfaces**:
+- **Python Library**: Import and use in any Python project
+- **CLI Tool**: `pyarchinit-graphml` command with convert, template, batch operations
+- **REST API**: 4 endpoints (convert, convert-content, template, health)
+- **Web Interface**: Form-based export with site selection and download
+- **Desktop GUI**: Tkinter dialog in Tools menu
+
 ### 🚀 Technical Features
-- **Production Ready**: v1.1.2 with Mobile/Tablet Optimization + Full Edit Functionality + Analytics Dashboard
+- **Production Ready**: v1.1.3 with GraphML Export + Mobile/Tablet Optimization + Full Edit + Analytics
 - **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14
 - **Data Validation**: Comprehensive Pydantic schemas
 - **Session Management**: Proper database connection pooling
@@ -564,7 +595,15 @@ pyarchinit-api
 
 ## 🗺️ Roadmap
 
-### Recently Completed (v1.1.2)
+### Recently Completed (v1.1.3)
+- [x] **GraphML Converter** - Export Harris Matrix to yEd Graph Editor compatible format
+- [x] **Multi-Interface Export** - Python API, CLI, REST API, Web UI, Desktop GUI support
+- [x] **Period Preservation** - Automatic archaeological periods with color coding
+- [x] **Flexible Grouping** - Period+area, period, area, or no grouping modes
+- [x] **yEd Template** - Custom template (EM_palette.graphml) for consistent styling
+- [x] **Standalone Library** - Reusable in other projects via pip install
+
+### Completed in v1.1.2
 - [x] **Mobile & Tablet Optimization** - Complete responsive design for phones and tablets
 - [x] **Touch-Friendly Interface** - 44px minimum button height (iOS/Android guidelines)
 - [x] **Mobile Card View** - Tables converted to cards on mobile (< 768px)
@@ -660,7 +699,7 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 📊 Project Status
 
-**Version**: 1.1.2
+**Version**: 1.1.3
 **Status**: Production/Stable
 **Python**: 3.8 - 3.14
 **Last Updated**: 2025-10-19
@@ -668,7 +707,8 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 ✅ **100% Desktop GUI Feature Parity Achieved**
 ✅ **Full Python 3.14 Support**
 ✅ **Tests Included in Distribution**
-✅ **Mobile & Tablet Optimized** (NEW in v1.1.2 - Responsive design complete)
+✅ **GraphML Export for yEd** (NEW in v1.1.3 - Harris Matrix export to yEd Graph Editor)
+✅ **Mobile & Tablet Optimized** (v1.1.2 - Responsive design complete)
 ✅ **Full Edit Functionality** (v1.1.1 - Web interface CRUD complete)
 ✅ **Analytics Dashboard** (v1.1.0)
 ✅ **Real-Time Collaboration** (v1.0.9)
