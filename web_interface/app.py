@@ -503,7 +503,52 @@ def create_app():
                 flash(f'Errore nella creazione del sito: {str(e)}', 'error')
         
         return render_template('sites/form.html', form=form, title='Nuovo Sito')
-    
+
+    @app.route('/sites/<int:site_id>/edit', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
+    def edit_site(site_id):
+        """Edit existing site"""
+        form = SiteForm()
+
+        # Get existing site
+        site = site_service.get_site_dto_by_id(site_id)
+        if not site:
+            flash('Sito non trovato', 'error')
+            return redirect(url_for('sites_list'))
+
+        if form.validate_on_submit():
+            try:
+                update_data = {
+                    'sito': form.sito.data,
+                    'nazione': form.nazione.data,
+                    'regione': form.regione.data,
+                    'comune': form.comune.data,
+                    'provincia': form.provincia.data,
+                    'definizione_sito': form.definizione_sito.data,
+                    'descrizione': form.descrizione.data
+                }
+
+                updated_site = site_service.update_site(site_id, update_data)
+
+                flash(f'Sito "{update_data["sito"]}" aggiornato con successo!', 'success')
+                return redirect(url_for('sites_list'))
+
+            except Exception as e:
+                flash(f'Errore nell\'aggiornamento del sito: {str(e)}', 'error')
+
+        # Pre-populate form with existing data
+        elif request.method == 'GET':
+            form.sito.data = site.sito
+            form.nazione.data = site.nazione
+            form.regione.data = site.regione
+            form.comune.data = site.comune
+            form.provincia.data = site.provincia
+            form.definizione_sito.data = site.definizione_sito
+            form.descrizione.data = site.descrizione
+
+        return render_template('sites/form.html', form=form, title='Modifica Sito', edit_mode=True)
+
     @app.route('/sites/<int:site_id>')
     @login_required
     def view_site(site_id):
@@ -658,7 +703,166 @@ def create_app():
             print(f"Form validation errors: {form.errors}")
         
         return render_template('us/form.html', form=form, title='Nuova US')
-    
+
+    @app.route('/us/<int:us_id>/edit', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
+    def edit_us(us_id):
+        """Edit existing US"""
+        form = USForm()
+
+        # Populate site choices
+        sites = site_service.get_all_sites(size=100)
+        form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
+
+        # Get existing US
+        us = us_service.get_us_dto_by_id(us_id)
+        if not us:
+            flash('US non trovata', 'error')
+            return redirect(url_for('us_list'))
+
+        if form.validate_on_submit():
+            try:
+                # Helper function to convert numeric fields
+                def to_float(value):
+                    if value and str(value).strip():
+                        try:
+                            return float(value)
+                        except (ValueError, TypeError):
+                            return None
+                    return None
+
+                update_data = {
+                    # TAB 1: Informazioni Base
+                    'sito': form.sito.data,
+                    'area': form.area.data,
+                    'us': form.us.data,
+                    'unita_tipo': form.unita_tipo.data,
+                    'anno_scavo': form.anno_scavo.data,
+                    'scavato': form.scavato.data,
+                    'schedatore': form.schedatore.data,
+                    'metodo_di_scavo': form.metodo_di_scavo.data,
+                    'data_schedatura': form.data_schedatura.data,
+                    'attivita': form.attivita.data,
+                    'direttore_us': form.direttore_us.data,
+                    'responsabile_us': form.responsabile_us.data,
+                    'settore': form.settore.data,
+                    'quad_par': form.quad_par.data,
+                    'ambient': form.ambient.data,
+                    'saggio': form.saggio.data,
+                    'n_catalogo_generale': form.n_catalogo_generale.data,
+                    'n_catalogo_interno': form.n_catalogo_interno.data,
+                    'n_catalogo_internazionale': form.n_catalogo_internazionale.data,
+                    'soprintendenza': form.soprintendenza.data,
+
+                    # TAB 2: Descrizioni
+                    'd_stratigrafica': form.d_stratigrafica.data,
+                    'd_interpretativa': form.d_interpretativa.data,
+                    'descrizione': form.descrizione.data,
+                    'interpretazione': form.interpretazione.data,
+                    'osservazioni': form.osservazioni.data,
+
+                    # TAB 3: Caratteristiche Fisiche
+                    'formazione': form.formazione.data,
+                    'stato_di_conservazione': form.stato_di_conservazione.data,
+                    'colore': form.colore.data,
+                    'consistenza': form.consistenza.data,
+                    'struttura': form.struttura.data,
+                    'quota_relativa': to_float(form.quota_relativa.data),
+                    'quota_abs': to_float(form.quota_abs.data),
+                    'lunghezza_max': to_float(form.lunghezza_max.data),
+                    'larghezza_media': to_float(form.larghezza_media.data),
+                    'altezza_max': to_float(form.altezza_max.data),
+                    'altezza_min': to_float(form.altezza_min.data),
+                    'profondita_max': to_float(form.profondita_max.data),
+                    'profondita_min': to_float(form.profondita_min.data),
+
+                    # TAB 4: Cronologia
+                    'periodo_iniziale': form.periodo_iniziale.data,
+                    'fase_iniziale': form.fase_iniziale.data,
+                    'periodo_finale': form.periodo_finale.data,
+                    'fase_finale': form.fase_finale.data,
+                    'datazione': form.datazione.data,
+                    'affidabilita': form.affidabilita.data,
+
+                    # TAB 5: Relazioni Stratigrafiche
+                    'rapporti': form.rapporti.data,
+
+                    # TAB 6: Documentazione
+                    'inclusi': form.inclusi.data,
+                    'campioni': form.campioni.data,
+                    'documentazione': form.documentazione.data,
+                    'cont_per': form.cont_per.data,
+
+                    # Altri campi
+                    'flottazione': form.flottazione.data,
+                    'setacciatura': form.setacciatura.data,
+                }
+
+                us_service.update_us(us_id, update_data)
+
+                flash(f'US {update_data["us"]} aggiornata con successo!', 'success')
+                return redirect(url_for('us_list'))
+
+            except Exception as e:
+                flash(f'Errore nell\'aggiornamento US: {str(e)}', 'error')
+
+        # Pre-populate form with existing data
+        elif request.method == 'GET':
+            form.sito.data = us.sito
+            form.area.data = us.area
+            form.us.data = us.us
+            form.unita_tipo.data = us.unita_tipo
+            form.anno_scavo.data = us.anno_scavo
+            form.scavato.data = us.scavato
+            form.schedatore.data = us.schedatore
+            form.metodo_di_scavo.data = us.metodo_di_scavo
+            form.data_schedatura.data = us.data_schedatura
+            form.attivita.data = us.attivita
+            form.direttore_us.data = us.direttore_us
+            form.responsabile_us.data = us.responsabile_us
+            form.settore.data = us.settore
+            form.quad_par.data = us.quad_par
+            form.ambient.data = us.ambient
+            form.saggio.data = us.saggio
+            form.n_catalogo_generale.data = us.n_catalogo_generale
+            form.n_catalogo_interno.data = us.n_catalogo_interno
+            form.n_catalogo_internazionale.data = us.n_catalogo_internazionale
+            form.soprintendenza.data = us.soprintendenza
+            form.d_stratigrafica.data = us.d_stratigrafica
+            form.d_interpretativa.data = us.d_interpretativa
+            form.descrizione.data = us.descrizione
+            form.interpretazione.data = us.interpretazione
+            form.osservazioni.data = us.osservazioni
+            form.formazione.data = us.formazione
+            form.stato_di_conservazione.data = us.stato_di_conservazione
+            form.colore.data = us.colore
+            form.consistenza.data = us.consistenza
+            form.struttura.data = us.struttura
+            form.quota_relativa.data = us.quota_relativa
+            form.quota_abs.data = us.quota_abs
+            form.lunghezza_max.data = us.lunghezza_max
+            form.larghezza_media.data = us.larghezza_media
+            form.altezza_max.data = us.altezza_max
+            form.altezza_min.data = us.altezza_min
+            form.profondita_max.data = us.profondita_max
+            form.profondita_min.data = us.profondita_min
+            form.periodo_iniziale.data = us.periodo_iniziale
+            form.fase_iniziale.data = us.fase_iniziale
+            form.periodo_finale.data = us.periodo_finale
+            form.fase_finale.data = us.fase_finale
+            form.datazione.data = us.datazione
+            form.affidabilita.data = us.affidabilita
+            form.rapporti.data = us.rapporti
+            form.inclusi.data = us.inclusi
+            form.campioni.data = us.campioni
+            form.documentazione.data = us.documentazione
+            form.cont_per.data = us.cont_per
+            form.flottazione.data = us.flottazione
+            form.setacciatura.data = us.setacciatura
+
+        return render_template('us/form.html', form=form, title='Modifica US', edit_mode=True)
+
     # Inventory routes
     @app.route('/inventario')
     @login_required
@@ -789,7 +993,157 @@ def create_app():
             print(f"Form validation errors: {form.errors}")
 
         return render_template('inventario/form.html', form=form, title='Nuovo Reperto')
-    
+
+    @app.route('/inventario/<int:inv_id>/edit', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
+    def edit_inventario(inv_id):
+        """Edit existing inventario"""
+        form = InventarioForm()
+
+        # Populate site choices
+        sites = site_service.get_all_sites(size=100)
+        form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
+
+        # Populate thesaurus choices
+        form.tipo_reperto.choices = get_thesaurus_choices('tipo_reperto')
+        form.stato_conservazione.choices = get_thesaurus_choices('stato_conservazione')
+        form.corpo_ceramico.choices = get_thesaurus_choices('corpo_ceramico')
+        form.rivestimento.choices = get_thesaurus_choices('rivestimento')
+
+        # Get existing inventario using session to access all fields
+        with db_manager.connection.get_session() as session:
+            from pyarchinit_mini.models.inventario_materiali import InventarioMateriali as InvModel
+            inv = session.query(InvModel).filter(InvModel.id_invmat == inv_id).first()
+
+            if not inv:
+                flash('Reperto non trovato', 'error')
+                return redirect(url_for('inventario_list'))
+
+            # Pre-populate form with existing data (inside session to avoid detached instance)
+            if request.method == 'GET':
+                form.sito.data = inv.sito
+                form.numero_inventario.data = inv.numero_inventario
+                form.n_reperto.data = inv.n_reperto
+                form.schedatore.data = inv.schedatore
+                form.date_scheda.data = inv.date_scheda
+                form.years.data = inv.years
+                form.tipo_reperto.data = inv.tipo_reperto
+                form.criterio_schedatura.data = inv.criterio_schedatura
+                form.definizione.data = inv.definizione
+                form.tipo.data = inv.tipo
+                form.tipo_contenitore.data = inv.tipo_contenitore
+                form.struttura.data = inv.struttura
+                form.descrizione.data = inv.descrizione
+                form.area.data = inv.area
+                form.us.data = inv.us
+                form.punto_rinv.data = inv.punto_rinv
+                form.elementi_reperto.data = inv.elementi_reperto
+                form.stato_conservazione.data = inv.stato_conservazione
+                form.lavato.data = inv.lavato
+                form.nr_cassa.data = inv.nr_cassa
+                form.luogo_conservazione.data = inv.luogo_conservazione
+                form.repertato.data = inv.repertato
+                form.diagnostico.data = inv.diagnostico
+                form.corpo_ceramico.data = inv.corpo_ceramico
+                form.rivestimento.data = inv.rivestimento
+                form.diametro_orlo.data = inv.diametro_orlo
+                form.eve_orlo.data = inv.eve_orlo
+                form.peso.data = inv.peso
+                form.forme_minime.data = inv.forme_minime
+                form.forme_massime.data = inv.forme_massime
+                form.totale_frammenti.data = inv.totale_frammenti
+                form.misurazioni.data = inv.misurazioni
+                form.datazione_reperto.data = inv.datazione_reperto
+                form.rif_biblio.data = inv.rif_biblio
+                form.tecnologie.data = inv.tecnologie
+                form.negativo_photo.data = inv.negativo_photo
+                form.diapositiva.data = inv.diapositiva
+
+        if form.validate_on_submit():
+            try:
+                # Helper function to convert numeric fields
+                def to_float(value):
+                    if value and str(value).strip():
+                        try:
+                            return float(value)
+                        except (ValueError, TypeError):
+                            return None
+                    return None
+
+                def to_int(value):
+                    if value and str(value).strip():
+                        try:
+                            return int(value)
+                        except (ValueError, TypeError):
+                            return None
+                    return None
+
+                update_data = {
+                    # TAB 1: Identificazione
+                    'sito': form.sito.data,
+                    'numero_inventario': form.numero_inventario.data,
+                    'n_reperto': form.n_reperto.data,
+                    'schedatore': form.schedatore.data,
+                    'date_scheda': form.date_scheda.data,
+                    'years': form.years.data,
+
+                    # TAB 2: Classificazione
+                    'tipo_reperto': form.tipo_reperto.data,
+                    'criterio_schedatura': form.criterio_schedatura.data,
+                    'definizione': form.definizione.data,
+                    'tipo': form.tipo.data,
+                    'tipo_contenitore': form.tipo_contenitore.data,
+                    'struttura': form.struttura.data,
+                    'descrizione': form.descrizione.data,
+
+                    # TAB 3: Contesto
+                    'area': form.area.data,
+                    'us': form.us.data,
+                    'punto_rinv': form.punto_rinv.data,
+                    'elementi_reperto': form.elementi_reperto.data,
+
+                    # TAB 4: Caratteristiche Fisiche
+                    'stato_conservazione': form.stato_conservazione.data,
+                    'lavato': form.lavato.data,
+                    'nr_cassa': form.nr_cassa.data,
+                    'luogo_conservazione': form.luogo_conservazione.data,
+
+                    # TAB 5: Conservazione e Gestione
+                    'repertato': form.repertato.data,
+                    'diagnostico': form.diagnostico.data,
+
+                    # TAB 6: Caratteristiche Ceramiche
+                    'corpo_ceramico': form.corpo_ceramico.data,
+                    'rivestimento': form.rivestimento.data,
+                    'diametro_orlo': to_float(form.diametro_orlo.data),
+                    'eve_orlo': to_float(form.eve_orlo.data),
+
+                    # TAB 7: Misurazioni
+                    'peso': to_float(form.peso.data),
+                    'forme_minime': form.forme_minime.data,
+                    'forme_massime': form.forme_massime.data,
+                    'totale_frammenti': form.totale_frammenti.data,
+                    'misurazioni': form.misurazioni.data,
+
+                    # TAB 8: Documentazione
+                    'datazione_reperto': form.datazione_reperto.data,
+                    'rif_biblio': form.rif_biblio.data,
+                    'tecnologie': form.tecnologie.data,
+                    'negativo_photo': form.negativo_photo.data,
+                    'diapositiva': form.diapositiva.data,
+                }
+
+                inventario_service.update_inventario(inv_id, update_data)
+
+                flash(f'Reperto {update_data["numero_inventario"]} aggiornato con successo!', 'success')
+                return redirect(url_for('inventario_list'))
+
+            except Exception as e:
+                flash(f'Errore nell\'aggiornamento reperto: {str(e)}', 'error')
+
+        return render_template('inventario/form.html', form=form, title='Modifica Reperto', edit_mode=True)
+
     # Harris Matrix routes
     @app.route('/harris_matrix/<site_name>')
     def harris_matrix(site_name):
