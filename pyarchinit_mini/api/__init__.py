@@ -8,6 +8,7 @@ from .site import router as site_router
 from .us import router as us_router
 from .inventario import router as inventario_router
 from .auth import router as auth_router
+from .graphml import router as graphml_router
 
 def create_app(database_url: str = None) -> FastAPI:
     """
@@ -41,6 +42,7 @@ def create_app(database_url: str = None) -> FastAPI:
     app.include_router(site_router, prefix="/api/v1/sites", tags=["sites"])
     app.include_router(us_router, prefix="/api/v1/us", tags=["stratigraphic-units"])
     app.include_router(inventario_router, prefix="/api/v1/inventario", tags=["inventory"])
+    app.include_router(graphml_router, prefix="/api/graphml", tags=["graphml-converter"])
     
     # Store database URL in app state
     if database_url:

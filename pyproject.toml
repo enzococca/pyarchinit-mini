@@ -156,6 +156,7 @@ pyarchinit-mini-web = "pyarchinit_mini.web_interface.app:main"
 pyarchinit-mini-gui = "pyarchinit_mini.desktop_gui.gui_app:main"
 pyarchinit-mini-setup = "pyarchinit_mini.scripts.setup_user_env:main"
 pyarchinit-export-import = "pyarchinit_mini.cli.export_import_cli:export_import"
+pyarchinit-graphml = "pyarchinit_mini.cli.graphml_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -163,7 +164,7 @@ include = ["pyarchinit_mini*", "cli_interface*", "web_interface*", "desktop_gui*
 exclude = ["docs*", "examples*"]
 
 [tool.setuptools.package-data]
-pyarchinit_mini = ["*.yaml", "*.yml", "*.json", "data/*.db", "data/*.sql"]
+pyarchinit_mini = ["*.yaml", "*.yml", "*.json", "data/*.db", "data/*.sql", "graphml_converter/templates/*.graphml"]
 web_interface = ["templates/*.html", "templates/**/*.html", "static/**/*"]
 cli_interface = ["*.json", "*.yaml"]
 desktop_gui = ["*.png", "*.ico", "*.gif"]
