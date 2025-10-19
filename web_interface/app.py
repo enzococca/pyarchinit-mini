@@ -6,6 +6,7 @@ Flask Web Interface for PyArchInit-Mini
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_wtf import FlaskForm
+from flask_login import login_required, current_user
 from wtforms import StringField, TextAreaField, IntegerField, SelectField, FileField, BooleanField
 from wtforms.validators import DataRequired, Optional
 from werkzeug.utils import secure_filename
@@ -21,12 +22,16 @@ from pyarchinit_mini.services.site_service import SiteService
 from pyarchinit_mini.services.us_service import USService
 from pyarchinit_mini.services.inventario_service import InventarioService
 from pyarchinit_mini.services.thesaurus_service import ThesaurusService
+from pyarchinit_mini.services.user_service import UserService
 from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
 from pyarchinit_mini.harris_matrix.matrix_visualizer import MatrixVisualizer
 from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
 from pyarchinit_mini.utils.stratigraphic_validator import StratigraphicValidator
 from pyarchinit_mini.pdf_export.pdf_generator import PDFGenerator
 from pyarchinit_mini.media_manager.media_handler import MediaHandler
+
+# Import authentication routes
+from auth_routes import auth_bp, init_login_manager, write_permission_required
 
 # Forms
 class SiteForm(FlaskForm):
@@ -339,11 +344,21 @@ def create_app():
     us_service = USService(db_manager)
     inventario_service = InventarioService(db_manager)
     thesaurus_service = ThesaurusService(db_manager)
+    user_service = UserService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
     matrix_visualizer = MatrixVisualizer()
     graphviz_visualizer = PyArchInitMatrixVisualizer()  # Graphviz visualizer (desktop GUI style)
     pdf_generator = PDFGenerator()
     media_handler = MediaHandler()
+
+    # Store user service in app for authentication
+    app.user_service = user_service
+
+    # Initialize Flask-Login
+    init_login_manager(app, user_service)
+
+    # Register authentication blueprint
+    app.register_blueprint(auth_bp)
 
     # Helper function to get thesaurus values
     def get_thesaurus_choices(field_name, table_name='inventario_materiali_table'):
