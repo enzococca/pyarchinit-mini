@@ -57,83 +57,52 @@ class PyArchInitMatrixVisualizer:
             'show_periods': True
         }
     
-    def create_matrix(self, graph: nx.DiGraph, grouping: str = 'period_area', 
+    def get_dot_source(self, graph: nx.DiGraph, grouping: str = 'period_area',
+                      settings: Optional[Dict] = None) -> str:
+        """
+        Get DOT source for GraphML conversion
+
+        Args:
+            graph: NetworkX directed graph with US nodes and relationships
+            grouping: 'period_area', 'period', 'area', 'none'
+            settings: Optional style settings override
+
+        Returns:
+            DOT source code as string
+        """
+        # Merge settings
+        current_settings = {**self.default_settings}
+        if settings:
+            current_settings.update(settings)
+
+        # Create Graphviz Digraph
+        G = self._create_digraph(graph, grouping, current_settings)
+
+        # Return DOT source
+        return G.source
+
+    def create_matrix(self, graph: nx.DiGraph, grouping: str = 'period_area',
                      settings: Optional[Dict] = None, output_path: Optional[str] = None) -> str:
         """
         Create Harris Matrix using PyArchInit approach
-        
+
         Args:
             graph: NetworkX directed graph with US nodes and relationships
             grouping: 'period_area', 'period', 'area', 'none'
             settings: Optional style settings override
             output_path: Optional output file path
-            
+
         Returns:
             Path to generated file
         """
-        
+
         # Merge settings
         current_settings = {**self.default_settings}
         if settings:
             current_settings.update(settings)
-        
+
         # Create Graphviz Digraph
-        G = Digraph(engine='dot', strict=False)
-        
-        # Set graph attributes - PyArchInit style with size limits
-        G.attr(
-            rankdir=current_settings['rankdir'],
-            viewport="",
-            ratio=current_settings.get('ratio', 'auto'),
-            compound='true',
-            pad=current_settings['pad'],
-            nodesep=current_settings['nodesep'],
-            ranksep=current_settings['ranksep'],
-            splines=current_settings['splines'],
-            dpi=current_settings['dpi'],
-            size=current_settings.get('size', '20,30'),  # Limit max size
-            bgcolor='white'
-        )
-        
-        # Categorize relationships like PyArchInit
-        sequence_relations = []  # Normal stratigraphic relationships
-        negative_relations = []  # Cuts relationships
-        contemporary_relations = []  # Same/contemporary relationships
-        
-        us_rilevanti = set()  # Relevant US (those in relationships)
-        
-        # Extract and categorize relationships
-        for source, target in graph.edges():
-            edge_data = graph.get_edge_data(source, target)
-            rel_type = edge_data.get('relationship', edge_data.get('type', 'sopra'))
-            
-            us_rilevanti.add(source)
-            us_rilevanti.add(target)
-            
-            if rel_type in ['taglia', 'cuts', 'tagliato da', 'cut by']:
-                negative_relations.append((source, target, rel_type))
-            elif rel_type in ['uguale a', 'si lega a', 'same as', 'connected to']:
-                contemporary_relations.append((source, target, rel_type))
-            else:
-                sequence_relations.append((source, target, rel_type))
-        
-        # Group nodes if requested
-        if current_settings['show_periods'] and grouping != 'none':
-            self._create_period_subgraphs(G, graph, grouping, us_rilevanti, current_settings)
-        else:
-            self._create_simple_nodes(G, graph, us_rilevanti, current_settings)
-        
-        # Add edges with proper styling
-        self._add_sequence_edges(G, sequence_relations, current_settings)
-        self._add_negative_edges(G, negative_relations, current_settings)
-        self._add_contemporary_edges(G, contemporary_relations, current_settings)
-        
-        # Add temporal ordering constraints (most recent above, oldest below)
-        self._add_temporal_ordering(G, graph, us_rilevanti)
-        
-        # Add legend if requested
-        if current_settings['show_legend']:
-            self._add_legend(G, current_settings)
+        G = self._create_digraph(graph, grouping, current_settings)
         
         # Generate output
         if output_path is None:
@@ -157,7 +126,79 @@ class PyArchInitMatrixVisualizer:
                 with open(dot_path, 'w') as f:
                     f.write(G.source)
                 return dot_path
-    
+
+    def _create_digraph(self, graph: nx.DiGraph, grouping: str, settings: Dict) -> Digraph:
+        """
+        Create Graphviz Digraph from NetworkX graph
+
+        Args:
+            graph: NetworkX directed graph with US nodes and relationships
+            grouping: 'period_area', 'period', 'area', 'none'
+            settings: Style settings
+
+        Returns:
+            Graphviz Digraph object
+        """
+        # Create Graphviz Digraph
+        G = Digraph(engine='dot', strict=False)
+
+        # Set graph attributes - PyArchInit style with size limits
+        G.attr(
+            rankdir=settings['rankdir'],
+            viewport="",
+            ratio=settings.get('ratio', 'auto'),
+            compound='true',
+            pad=settings['pad'],
+            nodesep=settings['nodesep'],
+            ranksep=settings['ranksep'],
+            splines=settings['splines'],
+            dpi=settings['dpi'],
+            size=settings.get('size', '20,30'),  # Limit max size
+            bgcolor='white'
+        )
+
+        # Categorize relationships like PyArchInit
+        sequence_relations = []  # Normal stratigraphic relationships
+        negative_relations = []  # Cuts relationships
+        contemporary_relations = []  # Same/contemporary relationships
+
+        us_rilevanti = set()  # Relevant US (those in relationships)
+
+        # Extract and categorize relationships
+        for source, target in graph.edges():
+            edge_data = graph.get_edge_data(source, target)
+            rel_type = edge_data.get('relationship', edge_data.get('type', 'sopra'))
+
+            us_rilevanti.add(source)
+            us_rilevanti.add(target)
+
+            if rel_type in ['taglia', 'cuts', 'tagliato da', 'cut by']:
+                negative_relations.append((source, target, rel_type))
+            elif rel_type in ['uguale a', 'si lega a', 'same as', 'connected to']:
+                contemporary_relations.append((source, target, rel_type))
+            else:
+                sequence_relations.append((source, target, rel_type))
+
+        # Group nodes if requested
+        if settings['show_periods'] and grouping != 'none':
+            self._create_period_subgraphs(G, graph, grouping, us_rilevanti, settings)
+        else:
+            self._create_simple_nodes(G, graph, us_rilevanti, settings)
+
+        # Add edges with proper styling
+        self._add_sequence_edges(G, sequence_relations, settings)
+        self._add_negative_edges(G, negative_relations, settings)
+        self._add_contemporary_edges(G, contemporary_relations, settings)
+
+        # Add temporal ordering constraints (most recent above, oldest below)
+        self._add_temporal_ordering(G, graph, us_rilevanti)
+
+        # Add legend if requested
+        if settings['show_legend']:
+            self._add_legend(G, settings)
+
+        return G
+
     def _create_period_subgraphs(self, G: Digraph, graph: nx.DiGraph, grouping: str, 
                                us_rilevanti: set, settings: Dict):
         """Create subgraphs grouped by periods and areas (PyArchInit style)"""
