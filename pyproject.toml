@@ -119,10 +119,10 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/enzococa/pyarchinit-mini-desk"
-Documentation = "https://github.com/enzococa/pyarchinit-mini-desk/blob/main/README.md"
-Repository = "https://github.com/enzococa/pyarchinit-mini-desk"
-"Bug Tracker" = "https://github.com/enzococa/pyarchinit-mini-desk/issues"
+Homepage = "https://github.com/enzococca/pyarchinit-mini"
+Documentation = "https://github.com/enzococca/pyarchinit-mini/blob/main/README.md"
+Repository = "https://github.com/enzococca/pyarchinit-mini"
+"Bug Tracker" = "https://github.com/enzococca/pyarchinit-mini/issues"
 
 [project.scripts]
 pyarchinit-mini = "pyarchinit_mini.cli_interface.cli_app:main"
