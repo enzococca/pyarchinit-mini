@@ -124,6 +124,14 @@ def login():
         from flask import current_app
         user_service = current_app.user_service
 
+        # Debug: Check if user exists first
+        print(f"[DEBUG] Looking up user: {username}")
+        user_check = user_service.get_user_by_username(username)
+        print(f"[DEBUG] User found: {user_check is not None}")
+        if user_check:
+            print(f"[DEBUG] User data: username={user_check.get('username')}, role={user_check.get('role')}, active={user_check.get('is_active')}")
+            print(f"[DEBUG] Has hashed_password: {'hashed_password' in user_check}")
+
         # Authenticate
         user_dict = user_service.authenticate_user(username, password)
         print(f"[LOGIN] Authentication result: {user_dict is not None}")

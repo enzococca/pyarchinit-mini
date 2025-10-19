@@ -90,16 +90,24 @@ class UserService:
         Returns:
             User or None: User if authentication successful, None otherwise
         """
+        print(f"[AUTH] Authenticating user: {username}")
         user = self.get_user_by_username(username)
 
         if not user:
+            print(f"[AUTH] User not found: {username}")
             return None
 
+        print(f"[AUTH] User found: {user.get('username')}, checking password...")
         if not verify_password(password, user["hashed_password"]):
+            print(f"[AUTH] Password verification FAILED")
             return None
 
+        print(f"[AUTH] Password verified, checking if active...")
         if not user["is_active"]:
+            print(f"[AUTH] User is INACTIVE")
             return None
+
+        print(f"[AUTH] Authentication SUCCESSFUL for {username}")
 
         # Update last login
         self.update_last_login(user["id"])
