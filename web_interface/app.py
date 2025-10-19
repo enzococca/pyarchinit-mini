@@ -6,6 +6,7 @@ Flask Web Interface for PyArchInit-Mini
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_wtf import FlaskForm
+from flask_wtf.csrf import CSRFProtect
 from flask_login import login_required, current_user
 from wtforms import StringField, TextAreaField, IntegerField, SelectField, FileField, BooleanField
 from wtforms.validators import DataRequired, Optional
@@ -324,6 +325,9 @@ def create_app():
     app.config['SECRET_KEY'] = 'your-secret-key-here'
     app.config['UPLOAD_FOLDER'] = 'uploads'
     app.config['DATABASE_FOLDER'] = 'databases'  # Folder for uploaded databases
+
+    # Initialize CSRF protection
+    csrf = CSRFProtect(app)
 
     # Create necessary folders
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
