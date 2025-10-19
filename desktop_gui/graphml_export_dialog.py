@@ -167,22 +167,26 @@ class GraphMLExportDialog:
             # Generate Harris Matrix graph (with transitive reduction already applied)
             graph = self.matrix_generator.generate_matrix(site_name)
 
-            # Create DOT manually with GraphML-compatible format
-            from graphviz import Digraph
-            G = Digraph(engine='dot', strict=False)
-            G.attr(
-                rankdir='BT',
-                compound='true',
-                pad='0.5',
-                nodesep='0.5',
-                ranksep='1.0'
-            )
+            # Generate DOT content manually (not using Graphviz library)
+            # This ensures commas between ALL attributes for proper GraphML parsing
+            dot_lines = []
+            dot_lines.append('digraph {')
+            dot_lines.append('\trankdir=BT')
+            dot_lines.append('\tcompound=true')
 
             # Get all relevant US
             us_rilevanti = set()
             for source, target in graph.edges():
                 us_rilevanti.add(source)
                 us_rilevanti.add(target)
+
+            # Helper function to escape DOT strings
+            def escape_dot(s):
+                """Escape string for DOT format"""
+                if not s:
+                    return '""'
+                s = str(s).replace('\\', '\\\\').replace('"', '\\"')
+                return f'"{s}"'
 
             # Create nodes with GraphML-compatible format
             if grouping != 'none':
@@ -204,24 +208,21 @@ class GraphMLExportDialog:
 
                     # Create period labels and nodes
                     for periodo, areas in sorted(period_groups.items()):
-                        G.node(f"Periodo : {periodo}", shape='plaintext')
+                        period_label = escape_dot(f"Periodo : {periodo}")
+                        dot_lines.append(f'\t{period_label} [shape=plaintext]')
 
                         for area, nodes in sorted(areas.items()):
                             for node in sorted(nodes):
                                 node_data = graph.nodes[node]
                                 d_stratigrafica = node_data.get('d_stratigrafica', node_data.get('description', ''))
-                                d_interpretativa = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
 
                                 # Node ID: US_number_d_stratigrafica_periodo
-                                node_id = f"US_{node}_{d_stratigrafica}_{periodo}"
+                                node_id = escape_dot(f"US_{node}_{d_stratigrafica}_{periodo}")
                                 # Label: US number only
-                                label = f"US {node}"
+                                label = escape_dot(f"US {node}")
 
-                                G.node(node_id,
-                                      label=label,
-                                      shape='box',
-                                      style='filled',
-                                      fillcolor='#CCCCFF')
+                                # IMPORTANT: Commas between ALL attributes
+                                dot_lines.append(f'\t{node_id} [label={label}, fillcolor="#CCCCFF", shape=box, style=filled]')
                 else:
                     # Flat grouping
                     groups = {}
@@ -240,35 +241,28 @@ class GraphMLExportDialog:
                         groups[group_key].append(node)
 
                     for group_key, nodes in sorted(groups.items()):
-                        G.node(f"Periodo : {group_key}", shape='plaintext')
+                        group_label = escape_dot(f"Periodo : {group_key}")
+                        dot_lines.append(f'\t{group_label} [shape=plaintext]')
 
                         for node in sorted(nodes):
                             node_data = graph.nodes[node]
                             d_stratigrafica = node_data.get('d_stratigrafica', node_data.get('description', ''))
-                            d_interpretativa = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
 
-                            node_id = f"US_{node}_{d_stratigrafica}_{group_key}"
-                            label = f"US {node}"
+                            node_id = escape_dot(f"US_{node}_{d_stratigrafica}_{group_key}")
+                            label = escape_dot(f"US {node}")
 
-                            G.node(node_id,
-                                  label=label,
-                                  shape='box',
-                                  style='filled',
-                                  fillcolor='#CCCCFF')
+                            # IMPORTANT: Commas between ALL attributes
+                            dot_lines.append(f'\t{node_id} [label={label}, fillcolor="#CCCCFF", shape=box, style=filled]')
             else:
                 # No grouping
                 for node in sorted(us_rilevanti):
                     if node not in graph.nodes:
                         continue
-                    node_data = graph.nodes[node]
-                    d_interpretativa = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
-                    label = f"US {node}"
+                    node_id = escape_dot(f"US {node}")
+                    label = escape_dot(f"US {node}")
 
-                    G.node(f"US {node}",
-                          label=label,
-                          shape='box',
-                          style='filled',
-                          fillcolor='#CCCCFF')
+                    # IMPORTANT: Commas between ALL attributes
+                    dot_lines.append(f'\t{node_id} [label={label}, fillcolor="#CCCCFF", shape=box, style=filled]')
 
             # Add edges
             for source, target in graph.edges():
@@ -284,20 +278,22 @@ class GraphMLExportDialog:
                     if grouping == 'period_area' or grouping == 'period':
                         source_periodo = source_data.get('period_initial', source_data.get('periodo_iniziale', 'Sconosciuto'))
                         target_periodo = target_data.get('period_initial', target_data.get('periodo_iniziale', 'Sconosciuto'))
-                        source_id = f"US_{source}_{source_desc}_{source_periodo}"
-                        target_id = f"US_{target}_{target_desc}_{target_periodo}"
+                        source_id = escape_dot(f"US_{source}_{source_desc}_{source_periodo}")
+                        target_id = escape_dot(f"US_{target}_{target_desc}_{target_periodo}")
                     else:  # area
                         source_area = source_data.get('area', 'A')
                         target_area = target_data.get('area', 'A')
-                        source_id = f"US_{source}_{source_desc}_{source_area}"
-                        target_id = f"US_{target}_{target_desc}_{target_area}"
+                        source_id = escape_dot(f"US_{source}_{source_desc}_{source_area}")
+                        target_id = escape_dot(f"US_{target}_{target_desc}_{target_area}")
                 else:
-                    source_id = f"US {source}"
-                    target_id = f"US {target}"
+                    source_id = escape_dot(f"US {source}")
+                    target_id = escape_dot(f"US {target}")
 
-                G.edge(source_id, target_id, label=rel_type)
+                edge_label = escape_dot(rel_type)
+                dot_lines.append(f'\t{source_id} -> {target_id} [label={edge_label}]')
 
-            dot_content = G.source
+            dot_lines.append('}')
+            dot_content = '\n'.join(dot_lines)
 
             # Convert to GraphML
             from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
