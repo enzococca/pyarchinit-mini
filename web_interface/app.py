@@ -25,6 +25,7 @@ from pyarchinit_mini.services.us_service import USService
 from pyarchinit_mini.services.inventario_service import InventarioService
 from pyarchinit_mini.services.thesaurus_service import ThesaurusService
 from pyarchinit_mini.services.user_service import UserService
+from pyarchinit_mini.services.analytics_service import AnalyticsService
 from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
 from pyarchinit_mini.harris_matrix.matrix_visualizer import MatrixVisualizer
 from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
@@ -377,6 +378,7 @@ def create_app():
     inventario_service = InventarioService(db_manager)
     thesaurus_service = ThesaurusService(db_manager)
     user_service = UserService(db_manager)
+    analytics_service = AnalyticsService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
     matrix_visualizer = MatrixVisualizer()
     graphviz_visualizer = PyArchInitMatrixVisualizer()  # Graphviz visualizer (desktop GUI style)
@@ -434,7 +436,20 @@ def create_app():
         except Exception as e:
             flash(f'Errore caricamento dashboard: {str(e)}', 'error')
             return render_template('dashboard.html', stats={})
-    
+
+    @app.route('/analytics')
+    @login_required
+    def analytics():
+        """Analytics dashboard with charts"""
+        try:
+            # Get all analytics data
+            analytics_data = analytics_service.get_complete_dashboard_data()
+
+            return render_template('analytics/dashboard.html', data=analytics_data)
+        except Exception as e:
+            flash(f'Errore caricamento analytics: {str(e)}', 'error')
+            return redirect(url_for('index'))
+
     # Sites routes
     @app.route('/sites')
     @login_required
