@@ -32,15 +32,24 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **CLI Interface**: Rich-based interactive command-line
 - **REST API (FastAPI)**: Scalable API with automatic OpenAPI docs
 
-### 📊 Data Export/Import (NEW in v1.0.7)
+### 📊 Data Export/Import
 - **Excel Export**: Export Sites, US, Inventario to .xlsx format
 - **CSV Export**: Export to CSV with optional site filtering
 - **Batch Import**: Import data from CSV with validation and statistics
 - **Multi-Interface**: Available in Web UI, Desktop GUI, and CLI
 - **Duplicate Handling**: Skip duplicates option to preserve existing data
 
+### 🔐 Multi-User Authentication (NEW in v1.0.8)
+- **Role-Based Access Control**: 3 user roles (Admin, Operator, Viewer)
+- **JWT Authentication**: Secure API access with JSON Web Tokens
+- **Session Management**: Flask-Login for Web interface
+- **Password Security**: Bcrypt hashing for secure password storage
+- **User Management**: Admin interface for creating/editing/deleting users
+- **Permissions**: Granular permissions (create, read, update, delete, manage_users)
+- **Protected Routes**: All web routes require authentication
+
 ### 🚀 Technical Features
-- **Production Ready**: v1.0.7 with 100% Desktop GUI feature parity
+- **Production Ready**: v1.0.8 with 100% Desktop GUI feature parity
 - **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14
 - **Data Validation**: Comprehensive Pydantic schemas
 - **Session Management**: Proper database connection pooling
@@ -85,6 +94,11 @@ pip install 'pyarchinit-mini[pdf]'
 ### With Excel/CSV Export and Import
 ```bash
 pip install 'pyarchinit-mini[export]'
+```
+
+### With Authentication (Multi-User)
+```bash
+pip install 'pyarchinit-mini[auth]'
 ```
 
 ### Complete Installation (Recommended)
@@ -175,6 +189,7 @@ pyarchinit-cli
 | `pdf` | WeasyPrint | `pip install 'pyarchinit-mini[pdf]'` |
 | `media` | python-magic, moviepy | `pip install 'pyarchinit-mini[media]'` |
 | `export` | pandas, openpyxl | `pip install 'pyarchinit-mini[export]'` |
+| `auth` | passlib, bcrypt, python-jose, flask-login | `pip install 'pyarchinit-mini[auth]'` |
 | `all` | All of the above | `pip install 'pyarchinit-mini[all]'` |
 | `dev` | pytest, black, mypy, flake8 | `pip install 'pyarchinit-mini[dev]'` |
 
@@ -268,7 +283,7 @@ export PYARCHINIT_API_PORT=8000
 - **Reciprocal Check**: Verify bidirectional relationships
 - **Auto-Fix**: One-click correction for missing reciprocals
 
-### Export/Import (v1.0.7)
+### Export/Import
 - **Web Interface**: Navigate to Export/Import page for visual interface
 - **Desktop GUI**: Menu → Strumenti → Export/Import Dati
 - **CLI Commands**:
@@ -288,6 +303,89 @@ export PYARCHINIT_API_PORT=8000
   - Skip duplicates option (default: enabled)
   - Import statistics (imported, skipped, errors)
   - Comprehensive error reporting
+
+### Multi-User Authentication (v1.0.8)
+
+Complete authentication system with role-based access control for Web and API interfaces.
+
+#### User Roles
+
+| Role | Permissions | Description |
+|------|-------------|-------------|
+| **Admin** | Full access + user management | Can create/edit/delete data and manage users |
+| **Operator** | Create, Read, Update, Delete data | Can modify archaeological data but not users |
+| **Viewer** | Read-only access | Can view data but cannot modify |
+
+#### Setup Authentication
+
+1. **Install with authentication support**:
+   ```bash
+   pip install 'pyarchinit-mini[auth]'
+   # or
+   pip install 'pyarchinit-mini[all]'
+   ```
+
+2. **Create users table and default admin**:
+   ```bash
+   python -m pyarchinit_mini.scripts.setup_auth
+   ```
+
+   This creates:
+   - Users table in database
+   - Default admin user (username: `admin`, password: `admin`)
+
+3. **Change default password** (IMPORTANT):
+   ```bash
+   # Login to web interface at http://localhost:5001/auth/login
+   # Navigate to Users → Edit admin user → Change password
+   ```
+
+#### Web Interface Authentication
+
+- **Login page**: `http://localhost:5001/auth/login`
+- **Default credentials**: username=`admin`, password=`admin`
+- **User management**: Admin users can create/edit/delete users via the Users menu
+- **Protected routes**: All web pages require authentication
+- **Session management**: Uses Flask-Login with secure session cookies
+
+#### API Authentication
+
+- **JWT tokens**: Use `POST /api/auth/login` to get access token
+- **Token usage**: Include in `Authorization: Bearer <token>` header
+- **Token expiration**: 30 minutes (configurable)
+
+Example:
+```bash
+# Get token
+curl -X POST http://localhost:8000/api/auth/login \
+  -d "username=admin&password=admin"
+
+# Use token
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:8000/api/sites
+```
+
+#### User Management
+
+Admins can manage users via:
+- **Web Interface**: Users menu (admin only)
+- **API Endpoints**:
+  - `POST /api/auth/register` - Create user (admin only)
+  - `GET /api/auth/users` - List all users (admin only)
+  - `PUT /api/auth/users/{id}` - Update user (admin only)
+  - `DELETE /api/auth/users/{id}` - Delete user (admin only)
+
+#### Permissions
+
+| Permission | Admin | Operator | Viewer |
+|------------|-------|----------|--------|
+| View data | ✓ | ✓ | ✓ |
+| Create data | ✓ | ✓ | ✗ |
+| Edit data | ✓ | ✓ | ✗ |
+| Delete data | ✓ | ✓ | ✗ |
+| Manage users | ✓ | ✗ | ✗ |
+| Export data | ✓ | ✓ | ✓ |
+| Import data | ✓ | ✓ | ✗ |
 
 ---
 
@@ -420,13 +518,19 @@ pyarchinit-api
 
 ## 🗺️ Roadmap
 
-### Recently Completed (v1.0.7)
+### Recently Completed (v1.0.8)
+- [x] **Multi-user authentication** - Role-based access control (Admin, Operator, Viewer)
+- [x] **JWT authentication** - Secure API access with JSON Web Tokens
+- [x] **User management** - Admin interface for creating/editing/deleting users
+- [x] **Protected routes** - All web routes require authentication
+- [x] **Password security** - Bcrypt hashing for secure password storage
+
+### Completed in v1.0.7
 - [x] **Export to Excel/CSV** - Sites, US, Inventario export
 - [x] **Batch import from CSV** - With validation and duplicate handling
 - [x] **Multi-interface export/import** - Web UI, Desktop GUI, and CLI
 
 ### Upcoming Features
-- [ ] Multi-user authentication and permissions
 - [ ] Real-time collaboration (WebSocket)
 - [ ] Chart analytics dashboard
 - [ ] Mobile-responsive improvements
@@ -480,7 +584,7 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 📊 Project Status
 
-**Version**: 1.0.7
+**Version**: 1.0.8
 **Status**: Production/Stable
 **Python**: 3.8 - 3.14
 **Last Updated**: 2025-01-19
@@ -488,7 +592,8 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 ✅ **100% Desktop GUI Feature Parity Achieved**
 ✅ **Full Python 3.14 Support**
 ✅ **Tests Included in Distribution**
-✅ **Excel/CSV Export/Import** (NEW in v1.0.7)
+✅ **Multi-User Authentication** (NEW in v1.0.8)
+✅ **Excel/CSV Export/Import**
 
 ---
 
