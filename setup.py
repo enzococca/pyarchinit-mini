@@ -67,11 +67,12 @@ setup(
     entry_points={
         "console_scripts": [
             "pyarchinit-mini=pyarchinit_mini.cli:main",
+            "pyarchinit-graphml=pyarchinit_mini.cli.graphml_cli:main",
         ],
     },
     include_package_data=True,
     package_data={
-        "pyarchinit_mini": ["*.yaml", "*.yml", "*.json"],
+        "pyarchinit_mini": ["*.yaml", "*.yml", "*.json", "graphml_converter/templates/*.graphml"],
     },
     keywords=[
         "archaeology",
