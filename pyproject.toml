@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.0.4"
+version = "1.0.5"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, and CLI - 100% Desktop GUI parity"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -34,10 +34,13 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
     "Framework :: FastAPI",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.15"
 # Core dependencies - API only
 dependencies = [
     "fastapi>=0.104.0",
@@ -133,8 +136,8 @@ pyarchinit-mini-setup = "pyarchinit_mini.scripts.setup_user_env:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pyarchinit_mini*", "cli_interface*", "web_interface*", "desktop_gui*"]
-exclude = ["tests*", "docs*", "examples*"]
+include = ["pyarchinit_mini*", "cli_interface*", "web_interface*", "desktop_gui*", "tests*"]
+exclude = ["docs*", "examples*"]
 
 [tool.setuptools.package-data]
 pyarchinit_mini = ["*.yaml", "*.yml", "*.json", "data/*.db", "data/*.sql"]
