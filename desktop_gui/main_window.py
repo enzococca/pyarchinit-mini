@@ -43,6 +43,7 @@ from .us_dialog_extended import ExtendedUSDialog
 from .inventario_dialog_extended import ExtendedInventarioDialog
 from .thesaurus_dialog import ThesaurusDialog
 from .postgres_installer_dialog import PostgreSQLInstallerDialog
+from .export_import_dialog import show_export_import_dialog
 
 class PyArchInitGUI:
     """Main GUI application for PyArchInit-Mini"""
@@ -155,6 +156,7 @@ class PyArchInitGUI:
         tools_menu.add_separator()
         tools_menu.add_command(label="Media Manager", command=self.show_media_manager)
         tools_menu.add_command(label="Export PDF", command=self.show_pdf_export_dialog)
+        tools_menu.add_command(label="Export/Import Dati", command=self.show_export_import_dialog)
         tools_menu.add_command(label="Statistiche", command=self.show_statistics_dialog)
         
         # Help menu
@@ -1677,7 +1679,18 @@ SCORCIATOIE:
             StatisticsDialog(self.root, self.site_service, self.us_service, self.inventario_service)
         except Exception as e:
             messagebox.showerror("Errore", f"Errore apertura statistiche: {str(e)}")
-    
+
+    def show_export_import_dialog(self):
+        """Show export/import dialog"""
+        try:
+            show_export_import_dialog(self.root, self.db_manager)
+        except Exception as e:
+            messagebox.showerror("Errore", f"Errore apertura export/import: {str(e)}")
+
+    def refresh_current_tab(self):
+        """Refresh the current tab (called by export/import dialog after import)"""
+        self.refresh_data()
+
     def run(self):
         """Start the application"""
         self.root.mainloop()
