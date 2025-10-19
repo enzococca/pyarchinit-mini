@@ -1243,18 +1243,143 @@ def create_app():
                 grouping = form.grouping.data
                 reverse_epochs = form.reverse_epochs.data
 
-                # Generate Harris Matrix graph (with transitive reduction applied)
+                # Generate Harris Matrix graph (with transitive reduction already applied)
                 graph = matrix_generator.generate_matrix(site_name)
 
-                # Use PyArchInitMatrixVisualizer to generate DOT source
-                settings = {
-                    'show_legend': False,  # Skip legend for cleaner GraphML
-                    'show_periods': grouping != 'none',
-                    'rankdir': 'BT'  # Bottom to top for archaeological stratigraphy
-                }
+                # Create DOT manually with GraphML-compatible format
+                from graphviz import Digraph
+                G = Digraph(engine='dot', strict=False)
+                G.attr(
+                    rankdir='BT',
+                    compound='true',
+                    pad='0.5',
+                    nodesep='0.5',
+                    ranksep='1.0'
+                )
 
-                # Get DOT source from visualizer (uses transitive-reduced graph)
-                dot_content = graphviz_visualizer.get_dot_source(graph, grouping, settings)
+                # Get all relevant US
+                us_rilevanti = set()
+                for source, target in graph.edges():
+                    us_rilevanti.add(source)
+                    us_rilevanti.add(target)
+
+                # Create nodes with GraphML-compatible format
+                if grouping != 'none':
+                    if grouping == 'period_area':
+                        # Nested: {periodo: {area: [nodes]}}
+                        period_groups = {}
+                        for node in us_rilevanti:
+                            if node not in graph.nodes:
+                                continue
+                            node_data = graph.nodes[node]
+                            periodo = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
+                            area = node_data.get('area', 'A')
+
+                            if periodo not in period_groups:
+                                period_groups[periodo] = {}
+                            if area not in period_groups[periodo]:
+                                period_groups[periodo][area] = []
+                            period_groups[periodo][area].append(node)
+
+                        # Create period labels and nodes
+                        for periodo, areas in sorted(period_groups.items()):
+                            G.node(f"Periodo : {periodo}", shape='plaintext')
+
+                            for area, nodes in sorted(areas.items()):
+                                for node in sorted(nodes):
+                                    node_data = graph.nodes[node]
+                                    d_stratigrafica = node_data.get('d_stratigrafica', node_data.get('description', ''))
+                                    d_interpretativa = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
+
+                                    # Node ID: US_number_d_stratigrafica_periodo
+                                    node_id = f"US_{node}_{d_stratigrafica}_{periodo}"
+                                    # Label: US number only
+                                    label = f"US {node}"
+
+                                    G.node(node_id,
+                                          label=label,
+                                          shape='box',
+                                          style='filled',
+                                          fillcolor='#CCCCFF',
+                                          tooltip=d_interpretativa)  # d_interpretativa as tooltip
+                    else:
+                        # Flat grouping
+                        groups = {}
+                        for node in us_rilevanti:
+                            if node not in graph.nodes:
+                                continue
+                            node_data = graph.nodes[node]
+
+                            if grouping == 'period':
+                                group_key = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
+                            else:  # area
+                                group_key = node_data.get('area', 'A')
+
+                            if group_key not in groups:
+                                groups[group_key] = []
+                            groups[group_key].append(node)
+
+                        for group_key, nodes in sorted(groups.items()):
+                            G.node(f"Periodo : {group_key}", shape='plaintext')
+
+                            for node in sorted(nodes):
+                                node_data = graph.nodes[node]
+                                d_stratigrafica = node_data.get('d_stratigrafica', node_data.get('description', ''))
+                                d_interpretativa = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
+
+                                node_id = f"US_{node}_{d_stratigrafica}_{group_key}"
+                                label = f"US {node}"
+
+                                G.node(node_id,
+                                      label=label,
+                                      shape='box',
+                                      style='filled',
+                                      fillcolor='#CCCCFF',
+                                      tooltip=d_interpretativa)
+                else:
+                    # No grouping
+                    for node in sorted(us_rilevanti):
+                        if node not in graph.nodes:
+                            continue
+                        node_data = graph.nodes[node]
+                        d_interpretativa = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
+                        label = f"US {node}"
+
+                        G.node(f"US {node}",
+                              label=label,
+                              shape='box',
+                              style='filled',
+                              fillcolor='#CCCCFF',
+                              tooltip=d_interpretativa)
+
+                # Add edges
+                for source, target in graph.edges():
+                    edge_data = graph.get_edge_data(source, target)
+                    rel_type = edge_data.get('relationship', edge_data.get('type', 'sopra'))
+
+                    if grouping != 'none':
+                        source_data = graph.nodes.get(source, {})
+                        target_data = graph.nodes.get(target, {})
+                        source_desc = source_data.get('d_stratigrafica', source_data.get('description', ''))
+                        target_desc = target_data.get('d_stratigrafica', target_data.get('description', ''))
+
+                        if grouping == 'period_area' or grouping == 'period':
+                            source_periodo = source_data.get('period_initial', source_data.get('periodo_iniziale', 'Sconosciuto'))
+                            target_periodo = target_data.get('period_initial', target_data.get('periodo_iniziale', 'Sconosciuto'))
+                            source_id = f"US_{source}_{source_desc}_{source_periodo}"
+                            target_id = f"US_{target}_{target_desc}_{target_periodo}"
+                        else:  # area
+                            source_area = source_data.get('area', 'A')
+                            target_area = target_data.get('area', 'A')
+                            source_id = f"US_{source}_{source_desc}_{source_area}"
+                            target_id = f"US_{target}_{target_desc}_{target_area}"
+                    else:
+                        source_id = f"US {source}"
+                        target_id = f"US {target}"
+
+                    G.edge(source_id, target_id, label=rel_type)
+
+                dot_content = G.source
 
                 # Convert to GraphML
                 graphml_content = convert_dot_content_to_graphml(
