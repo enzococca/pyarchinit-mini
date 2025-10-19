@@ -1,7 +1,7 @@
 # PyArchInit-Mini
 
 [![PyPI version](https://badge.fury.io/py/pyarchinit-mini.svg)](https://badge.fury.io/py/pyarchinit-mini)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.8-3.14](https://img.shields.io/badge/python-3.8--3.14-blue.svg)](https://www.python.org/downloads/)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 [![Status](https://img.shields.io/badge/status-stable-green.svg)](https://pypi.org/project/pyarchinit-mini/)
 
@@ -33,11 +33,13 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **REST API (FastAPI)**: Scalable API with automatic OpenAPI docs
 
 ### 🚀 Technical Features
-- **Production Ready**: v1.0.0 with 100% Desktop GUI feature parity
+- **Production Ready**: v1.0.6 with 100% Desktop GUI feature parity
+- **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14
 - **Data Validation**: Comprehensive Pydantic schemas
 - **Session Management**: Proper database connection pooling
 - **Auto Documentation**: Interactive Swagger/OpenAPI docs
 - **Cross-Platform**: Windows, Linux, macOS support
+- **Tests Included**: Full test suite included in distribution
 
 ---
 
@@ -441,11 +443,14 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 📊 Project Status
 
-**Version**: 1.0.0
+**Version**: 1.0.6
 **Status**: Production/Stable
-**Last Updated**: 2025-01-18
+**Python**: 3.8 - 3.14
+**Last Updated**: 2025-01-19
 
 ✅ **100% Desktop GUI Feature Parity Achieved**
+✅ **Full Python 3.14 Support**
+✅ **Tests Included in Distribution**
 
 ---
 
