@@ -45,6 +45,7 @@ from .thesaurus_dialog import ThesaurusDialog
 from .postgres_installer_dialog import PostgreSQLInstallerDialog
 from .export_import_dialog import show_export_import_dialog
 from .analytics_dialog import show_analytics_dialog
+from .graphml_export_dialog import show_graphml_export_dialog
 
 class PyArchInitGUI:
     """Main GUI application for PyArchInit-Mini"""
@@ -152,6 +153,7 @@ class PyArchInitGUI:
         tools_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Strumenti", menu=tools_menu)
         tools_menu.add_command(label="Harris Matrix", command=self.show_harris_matrix_dialog)
+        tools_menu.add_command(label="Export GraphML (yEd)", command=self.show_graphml_export_dialog)
         tools_menu.add_separator()
         tools_menu.add_command(label="Gestione Thesaurus", command=self.show_thesaurus_dialog)
         tools_menu.add_separator()
@@ -838,10 +840,14 @@ class PyArchInitGUI:
         if not sites:
             messagebox.showwarning("Avviso", "Nessun sito disponibile per generare la Harris Matrix")
             return
-        
+
         HarrisMatrixDialog(self.root, self.matrix_generator, self.matrix_visualizer, sites,
                           self.site_service, self.us_service, self.db_manager)
-    
+
+    def show_graphml_export_dialog(self):
+        """Show GraphML export dialog"""
+        show_graphml_export_dialog(self.root, self.matrix_generator, self.matrix_visualizer, self.site_service)
+
     def export_pdf_dialog(self):
         """Show PDF export dialog"""
         sites = self.site_service.get_all_sites(size=100)
