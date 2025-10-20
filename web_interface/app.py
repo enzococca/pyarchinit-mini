@@ -32,7 +32,7 @@ from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrix
 from pyarchinit_mini.utils.stratigraphic_validator import StratigraphicValidator
 from pyarchinit_mini.pdf_export.pdf_generator import PDFGenerator
 from pyarchinit_mini.media_manager.media_handler import MediaHandler
-from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml, apply_swimlanes_to_graphml
+from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
 
 # Import authentication routes
 from auth_routes import auth_bp, init_login_manager, write_permission_required
@@ -347,8 +347,6 @@ class GraphMLExportForm(FlaskForm):
         ('none', 'Nessun Raggruppamento')
     ], default='period_area')
     reverse_epochs = BooleanField('Inverti ordine periodi', default=False)
-    use_swimlanes = BooleanField('Organizza in swimlanes (righe per periodo)', default=False,
-                                  description='Crea una tabella con righe swimlane per ogni periodo archeologico')
 
 # Flask App Setup
 def create_app():
@@ -1244,7 +1242,6 @@ def create_app():
                 title = form.title.data or site_name
                 grouping = form.grouping.data
                 reverse_epochs = form.reverse_epochs.data
-                use_swimlanes = form.use_swimlanes.data
 
                 # Generate Harris Matrix graph (with transitive reduction already applied)
                 graph = matrix_generator.generate_matrix(site_name)
@@ -1599,28 +1596,6 @@ def create_app():
                     except Exception as style_error:
                         # Non-fatal: continue even if styling fails
                         flash(f'Avviso: impossibile applicare stili EM_palette: {str(style_error)}', 'warning')
-
-                # Apply swimlanes if requested
-                if use_swimlanes and graphml_content:
-                    try:
-                        # Extract period mapping from graph
-                        period_mapping = {}
-                        for node in graph.nodes():
-                            node_data = graph.nodes[node]
-                            period = node_data.get('period_initial', node_data.get('periodo_iniziale', ''))
-                            if period:
-                                period_mapping[node] = period
-
-                        # Apply swimlanes with period mapping
-                        graphml_content = apply_swimlanes_to_graphml(
-                            graphml_content,
-                            title=title,
-                            period_mapping=period_mapping
-                        )
-                        flash(f'Swimlanes applicate con {len(set(period_mapping.values()))} periodi', 'success')
-                    except Exception as swimlane_error:
-                        # Non-fatal: continue even if swimlane organization fails
-                        flash(f'Avviso: impossibile applicare swimlanes: {str(swimlane_error)}', 'warning')
 
                 if graphml_content is None:
                     flash('Errore durante la conversione a GraphML', 'error')

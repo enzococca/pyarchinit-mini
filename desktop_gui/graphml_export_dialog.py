@@ -41,7 +41,6 @@ class GraphMLExportDialog:
         self.title_var = tk.StringVar()
         self.grouping_var = tk.StringVar(value='period_area')
         self.reverse_epochs_var = tk.BooleanVar(value=False)
-        self.use_swimlanes_var = tk.BooleanVar(value=False)
 
         self.create_widgets()
         self.load_sites()
@@ -104,12 +103,6 @@ class GraphMLExportDialog:
         ttk.Checkbutton(reverse_frame, text="Inverti ordine periodi (Periodo 1 = ultima epoca scavata)",
                        variable=self.reverse_epochs_var).pack(anchor=tk.W)
 
-        # Swimlane organization
-        ttk.Checkbutton(reverse_frame, text="Organizza in swimlanes (righe per periodo)",
-                       variable=self.use_swimlanes_var).pack(anchor=tk.W, pady=(5, 0))
-        ttk.Label(reverse_frame, text="Crea una tabella con righe swimlane per ogni periodo archeologico",
-                 font=('Arial', 9, 'italic'), foreground='gray').pack(anchor=tk.W, padx=20)
-
         # Buttons
         button_frame = ttk.Frame(self.dialog)
         button_frame.pack(pady=10)
@@ -154,7 +147,6 @@ class GraphMLExportDialog:
             title = self.title_var.get() or site_name
             grouping = self.grouping_var.get()
             reverse_epochs = self.reverse_epochs_var.get()
-            use_swimlanes = self.use_swimlanes_var.get()
 
             # Ask for output file
             default_filename = f"{site_name}_harris_matrix.graphml"
@@ -405,7 +397,7 @@ class GraphMLExportDialog:
             dot_content = '\n'.join(dot_lines)
 
             # Convert to GraphML
-            from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml, apply_swimlanes_to_graphml
+            from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
 
             graphml_content = convert_dot_content_to_graphml(
                 dot_content,
@@ -527,28 +519,6 @@ class GraphMLExportDialog:
                 except Exception as style_error:
                     # Non-fatal: continue even if styling fails
                     print(f'⚠ Avviso: impossibile applicare stili EM_palette: {str(style_error)}')
-
-            # Apply swimlanes if requested
-            if use_swimlanes and graphml_content:
-                try:
-                    # Extract period mapping from graph
-                    period_mapping = {}
-                    for node in graph.nodes():
-                        node_data = graph.nodes[node]
-                        period = node_data.get('period_initial', node_data.get('periodo_iniziale', ''))
-                        if period:
-                            period_mapping[node] = period
-
-                    # Apply swimlanes with period mapping
-                    graphml_content = apply_swimlanes_to_graphml(
-                        graphml_content,
-                        title=title,
-                        period_mapping=period_mapping
-                    )
-                    print(f'✓ Swimlanes applicate con {len(set(period_mapping.values()))} periodi')
-                except Exception as swimlane_error:
-                    # Non-fatal: continue even if swimlane organization fails
-                    print(f'⚠ Avviso: impossibile applicare swimlanes: {str(swimlane_error)}')
 
             if graphml_content is None:
                 messagebox.showerror("Errore", "Conversione a GraphML fallita")
