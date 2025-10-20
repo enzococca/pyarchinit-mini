@@ -60,7 +60,8 @@ class HarrisMatrixGenerator:
                 interpretation=getattr(us, 'd_interpretativa', None) or "",
                 period_initial=getattr(us, 'periodo_iniziale', None) or "",
                 period_final=getattr(us, 'periodo_finale', None) or "",
-                formation=getattr(us, 'formazione', None) or ""
+                formation=getattr(us, 'formazione', None) or "",
+                unita_tipo=getattr(us, 'unita_tipo', None) or "US"
             )
         
         # Add relationship edges - include all stratigraphic relationships
