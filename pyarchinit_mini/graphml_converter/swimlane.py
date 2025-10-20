@@ -377,46 +377,115 @@ class SwimlaneOrganizer:
 
         return table_node_id
 
-    def position_nodes_by_period(self):
+    def move_nodes_to_table_and_position(self, table_node_id: str):
         """
-        Set Y-coordinates of nodes based on their period assignment.
+        Move all nodes from main graph to TableNode's nested graph and set Y-coordinates.
 
-        Nodes are positioned at:
-        - Period 0: y = 0.0
-        - Period 1: y = 1000.0
-        - Period 2: y = 2000.0
-        - etc.
+        This is the key operation:
+        1. Find all US nodes in main graph
+        2. Move them to nested graph of TableNode
+        3. Set Y-coordinate based on period
 
-        This creates the swimlane effect without moving nodes in the DOM.
+        Y-coordinates by period (based on yEd swimlane output):
+        - Period 0 (Medievale): y range 3500-4500
+        - Period 1 (Romano Imperiale): y range 1000-2500
+        - Period 2 (Romano Repubblicano): y range 3500-4500
         """
         if not self.node_to_period:
             self.extract_periods_from_labels()
 
-        # Find all ShapeNode elements (US nodes) and update their Y-coordinates
-        for shape_node in self.dom.getElementsByTagName('y:ShapeNode'):
-            # Find parent node element to get node ID
-            data_element = shape_node.parentNode
-            node_element = data_element.parentNode
+        # Find TableNode in DOM
+        table_node = None
+        for node in self.dom.getElementsByTagName('node'):
+            if node.getAttribute('id') == table_node_id:
+                table_node = node
+                break
+
+        if not table_node:
+            raise ValueError(f"TableNode with id '{table_node_id}' not found")
+
+        # Find nested graph within TableNode
+        nested_graph = None
+        for child in table_node.childNodes:
+            if child.nodeType == child.ELEMENT_NODE and child.tagName == 'graph':
+                nested_graph = child
+                break
+
+        if not nested_graph:
+            raise ValueError(f"Nested graph not found in TableNode {table_node_id}")
+
+        # Find main graph
+        main_graphs = [g for g in self.dom.getElementsByTagName('graph')
+                      if g.getAttribute('id') == 'G']
+        if not main_graphs:
+            raise ValueError("Main graph with id='G' not found")
+        main_graph = main_graphs[0]
+
+        # Find all US nodes - they may be in main graph OR in existing TableNode groups
+        nodes_to_move = []
+
+        # First, check for nodes directly in main graph
+        for child in main_graph.childNodes:
+            if child.nodeType == child.ELEMENT_NODE and child.tagName == 'node':
+                node_id = child.getAttribute('id')
+                folder_type = child.getAttribute('yfiles.foldertype')
+
+                # If it's a TableNode group (but not our swimlane table)
+                if folder_type == 'group' and node_id != table_node_id:
+                    # Extract nodes from its nested graph
+                    for subgraph in child.getElementsByTagName('graph'):
+                        for subnode in subgraph.childNodes:
+                            if subnode.nodeType == subnode.ELEMENT_NODE and subnode.tagName == 'node':
+                                nodes_to_move.append(subnode)
+                # Regular node (not a group)
+                elif folder_type != 'group' and node_id != table_node_id:
+                    nodes_to_move.append(child)
+
+        # Base Y offset for each period's swimlane
+        # Based on yEd output analysis
+        y_offsets = {
+            0: 3500.0,  # Medievale (row 0)
+            1: 1000.0,  # Romano Imperiale (row 1)
+            2: 3500.0   # Romano Repubblicano (row 2)
+        }
+
+        # Track how many nodes we've placed in each period for spacing
+        period_node_counts = {i: 0 for i in range(len(self.periods))}
+
+        # Move nodes and set Y-coordinates
+        for node_element in nodes_to_move:
             node_id = node_element.getAttribute('id')
 
-            # Skip if this node doesn't have a period assigned
-            if node_id not in self.node_to_period:
-                continue
+            # Get period for this node
+            if node_id in self.node_to_period:
+                period = self.node_to_period[node_id]
+                try:
+                    period_index = self.periods.index(period)
+                except ValueError:
+                    period_index = 0  # Default to first period
 
-            # Get period and calculate Y-coordinate
-            period = self.node_to_period[node_id]
-            try:
-                period_index = self.periods.index(period)
-            except ValueError:
-                continue
+                # Calculate Y coordinate with spacing between nodes
+                base_y = y_offsets.get(period_index, 1000.0)
+                node_offset = period_node_counts[period_index] * 70.0  # 70px spacing
+                y_coord = base_y + node_offset
+                period_node_counts[period_index] += 1
 
-            # Y-coordinate for this period's swimlane
-            y_coord = period_index * 1000.0
+                # Update Y-coordinate in the node's ShapeNode geometry
+                data_elements = node_element.getElementsByTagName('data')
+                for data_elem in data_elements:
+                    if data_elem.getAttribute('key') == 'd6':
+                        shape_nodes = data_elem.getElementsByTagName('y:ShapeNode')
+                        if shape_nodes:
+                            geometries = shape_nodes[0].getElementsByTagName('y:Geometry')
+                            if geometries:
+                                geometries[0].setAttribute('y', str(y_coord))
+                                break
 
-            # Update geometry Y-coordinate
-            geometries = shape_node.getElementsByTagName('y:Geometry')
-            if geometries:
-                geometries[0].setAttribute('y', str(y_coord))
+            # Move node to swimlane nested graph
+            # Node might be in main graph or in another nested graph
+            parent_node = node_element.parentNode
+            parent_node.removeChild(node_element)
+            nested_graph.appendChild(node_element)
 
     def apply_swimlanes(
         self,
@@ -429,7 +498,7 @@ class SwimlaneOrganizer:
         This is the main entry point that:
         1. Extracts periods from node labels
         2. Creates TableNode group for visual swimlanes
-        3. Positions nodes by Y-coordinate based on period
+        3. Moves nodes to TableNode's nested graph and positions by Y-coordinate
 
         Args:
             title: Header title for the swimlane table
@@ -442,10 +511,10 @@ class SwimlaneOrganizer:
         self.extract_periods_from_labels()
 
         # Create table structure (visual grouping)
-        self.create_table_node_group(title, row_colors)
+        table_node_id = self.create_table_node_group(title, row_colors)
 
-        # Position nodes by Y-coordinate
-        self.position_nodes_by_period()
+        # Move nodes to TableNode and position by Y-coordinate
+        self.move_nodes_to_table_and_position(table_node_id)
 
         # Return modified GraphML
         return self.dom.toxml()
