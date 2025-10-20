@@ -1273,6 +1273,7 @@ def create_app():
                     dot_lines.append(f'\t"Periodo : {periodo}" [shape=plaintext]')
 
                 # EM_palette node styles mapping based on unita_tipo
+                # From Extended Matrix palette v.1.4
                 US_STYLES = {
                     'US': {  # Stratigraphic Unit (strato, riempimento, etc.)
                         'shape': 'box',
@@ -1287,6 +1288,13 @@ def create_app():
                         'color': '#9B3333',  # red border
                         'penwidth': '4.0',
                         'style': 'filled'
+                    },
+                    'TSU': {  # Test Stratigraphic Unit
+                        'shape': 'box',
+                        'fillcolor': '#FFFFFF',
+                        'color': '#9B3333',  # red border
+                        'penwidth': '4.0',
+                        'style': 'rounded,filled,dashed'  # DASHED border
                     },
                     'USD': {  # Documentary US
                         'shape': 'box',
@@ -1306,6 +1314,34 @@ def create_app():
                         'shape': 'trapezium',  # closest to parallelogram
                         'fillcolor': '#000000',
                         'color': '#248FE7',  # blue border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'Series US': {  # Series of Stratigraphic Units
+                        'shape': 'ellipse',
+                        'fillcolor': '#FFFFFF',
+                        'color': '#9B3333',  # red border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'Series USV': {  # Series of Virtual US
+                        'shape': 'ellipse',
+                        'fillcolor': '#000000',
+                        'color': '#31792D',  # green border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'SF': {  # Special Find
+                        'shape': 'octagon',
+                        'fillcolor': '#FFFFFF',
+                        'color': '#D8BD30',  # yellow border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'VSF': {  # Virtual Special Find
+                        'shape': 'octagon',
+                        'fillcolor': '#000000',
+                        'color': '#B19F61',  # brown border
                         'penwidth': '4.0',
                         'style': 'filled'
                     },

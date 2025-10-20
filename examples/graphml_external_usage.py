@@ -127,12 +127,18 @@ def generate_dot_from_graph(graph, grouping='period'):
         str: DOT file content
     """
     # EM_palette node styles based on unita_tipo
+    # From Extended Matrix palette v.1.4
     US_STYLES = {
         'US': {'shape': 'box', 'fillcolor': '#FFFFFF', 'color': '#9B3333', 'penwidth': '4.0'},
         'USM': {'shape': 'box', 'fillcolor': '#FFFFFF', 'color': '#9B3333', 'penwidth': '4.0'},
+        'TSU': {'shape': 'box', 'fillcolor': '#FFFFFF', 'color': '#9B3333', 'penwidth': '4.0'},  # dashed border
         'USD': {'shape': 'box', 'fillcolor': '#FFFFFF', 'color': '#D86400', 'penwidth': '4.0'},
         'USV': {'shape': 'hexagon', 'fillcolor': '#000000', 'color': '#31792D', 'penwidth': '4.0'},
         'USV/s': {'shape': 'trapezium', 'fillcolor': '#000000', 'color': '#248FE7', 'penwidth': '4.0'},
+        'Series US': {'shape': 'ellipse', 'fillcolor': '#FFFFFF', 'color': '#9B3333', 'penwidth': '4.0'},
+        'Series USV': {'shape': 'ellipse', 'fillcolor': '#000000', 'color': '#31792D', 'penwidth': '4.0'},
+        'SF': {'shape': 'octagon', 'fillcolor': '#FFFFFF', 'color': '#D8BD30', 'penwidth': '4.0'},
+        'VSF': {'shape': 'octagon', 'fillcolor': '#000000', 'color': '#B19F61', 'penwidth': '4.0'},
     }
 
     dot_lines = ['digraph {', '\trankdir=BT']  # Bottom-to-top layout
