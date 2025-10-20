@@ -1459,18 +1459,33 @@ def create_app():
                     )
 
                     # Apply EM_palette colors to nodes based on unita_tipo
+                    # AND add node descriptions (d_stratigrafica + d_interpretativa)
                     try:
                         import xml.dom.minidom as minidom
 
-                        # Build unita_tipo map from graph
+                        # Build unita_tipo map and description map from graph
                         unita_tipo_map = {}
+                        description_map = {}
                         for node in us_rilevanti:
                             if node in graph.nodes:
-                                unita_tipo_map[node] = graph.nodes[node].get('unita_tipo', 'US')
+                                node_data = graph.nodes[node]
+                                unita_tipo_map[node] = node_data.get('unita_tipo', 'US')
+
+                                # Build description: d_stratigrafica + d_interpretativa
+                                d_strat = node_data.get('d_stratigrafica', node_data.get('description', ''))
+                                d_interp = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
+                                desc_parts = []
+                                if d_strat:
+                                    desc_parts.append(d_strat)
+                                if d_interp:
+                                    desc_parts.append(d_interp)
+                                if desc_parts:
+                                    description_map[node] = ' - '.join(desc_parts)
 
                         # Parse and modify GraphML
                         dom = minidom.parseString(graphml_content)
                         nodes_modified = 0
+                        descriptions_added = 0
 
                         # Find all ShapeNode elements (US nodes)
                         for shape_node in dom.getElementsByTagName('y:ShapeNode'):
@@ -1502,8 +1517,39 @@ def create_app():
                                 border_nodes[0].setAttribute('color', style['color'])
                                 border_nodes[0].setAttribute('width', style['penwidth'])
 
+                            # Add description (d_stratigrafica + d_interpretativa) to node
+                            if us_number in description_map:
+                                # Navigate to parent <node> element
+                                # Structure: <node> -> <data key="d7"> -> <y:ShapeNode>
+                                data_element = shape_node.parentNode
+                                node_element = data_element.parentNode
+
+                                # Check if <data key="d6"> already exists
+                                existing_desc = None
+                                for child in node_element.childNodes:
+                                    if child.nodeType == child.ELEMENT_NODE and child.tagName == 'data':
+                                        if child.getAttribute('key') == 'd6':
+                                            existing_desc = child
+                                            break
+
+                                # Create or update description element
+                                description_text = description_map[us_number]
+                                if existing_desc:
+                                    # Update existing
+                                    existing_desc.firstChild.nodeValue = description_text
+                                else:
+                                    # Create new <data key="d6"> element
+                                    desc_element = dom.createElement('data')
+                                    desc_element.setAttribute('key', 'd6')
+                                    desc_element.setAttribute('xml:space', 'preserve')
+                                    desc_text_node = dom.createTextNode(description_text)
+                                    desc_element.appendChild(desc_text_node)
+                                    # Insert before <data key="d7"> (graphics data)
+                                    node_element.insertBefore(desc_element, data_element)
+                                    descriptions_added += 1
+
                         graphml_content = dom.toxml()
-                        flash(f'Stili EM_palette applicati a {nodes_modified} nodi', 'success')
+                        flash(f'Stili EM_palette applicati a {nodes_modified} nodi, {descriptions_added} descrizioni aggiunte', 'success')
                     except Exception as style_error:
                         # Non-fatal: continue even if styling fails
                         flash(f'Avviso: impossibile applicare stili EM_palette: {str(style_error)}', 'warning')
