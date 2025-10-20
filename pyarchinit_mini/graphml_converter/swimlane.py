@@ -22,51 +22,122 @@ class SwimlaneOrganizer:
     (e.g., archaeological periods), with each group in its own row (swimlane).
     """
 
-    def __init__(self, graphml_content: str):
+    def __init__(self, graphml_content: str, period_mapping: Optional[Dict[int, str]] = None):
         """
         Initialize swimlane organizer with GraphML content.
 
         Args:
             graphml_content: XML string containing GraphML data
+            period_mapping: Optional dict mapping US numbers to period names
+                           Example: {1001: 'Romano Imperiale', 1002: 'Medievale'}
         """
         self.graphml_content = graphml_content
         self.dom = minidom.parseString(graphml_content)
         self.periods: Set[str] = set()
         self.node_to_period: Dict[str, str] = {}
+        self.us_to_period: Optional[Dict[int, str]] = period_mapping
+
+        # Extract periods from mapping if provided
+        if period_mapping:
+            self.periods = set(period_mapping.values())
 
     def extract_periods_from_labels(self) -> Dict[str, str]:
         """
         Extract period information from node labels.
 
-        Assumes node labels follow format: US{number}_{period}
-        Example: US1001_Romano-Imperiale → period = "Romano-Imperiale"
+        Supports three formats:
+        1. Provided period_mapping (US number -> period name)
+        2. Node labels: US{number}_{period} (e.g., US1001_Romano-Imperiale)
+        3. Period label nodes: "Periodo : {period}" (plaintext nodes)
 
         Returns:
             Dictionary mapping node IDs to their periods
         """
         node_to_period = {}
 
-        # Find all ShapeNode elements (stratigraphic units)
+        # Method 1: Use provided period mapping if available
+        if self.us_to_period:
+            # Map GraphML node IDs to periods using US numbers from labels
+            for shape_node in self.dom.getElementsByTagName('y:ShapeNode'):
+                labels = shape_node.getElementsByTagName('y:NodeLabel')
+                if not labels or not labels[0].firstChild:
+                    continue
+
+                label_text = labels[0].firstChild.nodeValue.strip()
+
+                # Extract US number from label (format: US{number} or USM{number})
+                us_match = re.match(r'USM?\s*(\d+)', label_text, re.MULTILINE)
+                if us_match:
+                    us_number = int(us_match.group(1))
+
+                    # Find parent node element to get node ID
+                    data_element = shape_node.parentNode
+                    node_element = data_element.parentNode
+                    node_id = node_element.getAttribute('id')
+
+                    # Look up period from mapping
+                    if us_number in self.us_to_period:
+                        period = self.us_to_period[us_number]
+                        node_to_period[node_id] = period
+                        self.periods.add(period)
+
+            self.node_to_period = node_to_period
+            return node_to_period
+
+        # Method 2: Extract periods from "Periodo : X" plaintext nodes
         for shape_node in self.dom.getElementsByTagName('y:ShapeNode'):
-            # Get node label
             labels = shape_node.getElementsByTagName('y:NodeLabel')
             if not labels or not labels[0].firstChild:
                 continue
 
-            label_text = labels[0].firstChild.nodeValue
+            label_text = labels[0].firstChild.nodeValue.strip()
 
-            # Extract period from label (format: US{number}_{period})
-            match = re.match(r'US\d+_(.+)', label_text)
-            if match:
-                period = match.group(1).replace('-', ' ')  # Romano-Imperiale → Romano Imperiale
+            # Check if this is a period label node
+            if label_text.startswith('Periodo : '):
+                period = label_text.replace('Periodo : ', '').strip()
+                self.periods.add(period)
+
+        # Method 3: Extract periods from US node labels
+        for shape_node in self.dom.getElementsByTagName('y:ShapeNode'):
+            labels = shape_node.getElementsByTagName('y:NodeLabel')
+            if not labels or not labels[0].firstChild:
+                continue
+
+            label_text = labels[0].firstChild.nodeValue.strip()
+
+            # Skip period label nodes
+            if label_text.startswith('Periodo : '):
+                continue
+
+            # Extract US number and optional period
+            us_match = re.match(r'USM?\s*(\d+)(?:_(.+))?', label_text, re.MULTILINE)
+            if us_match:
+                us_number = us_match.group(1)
+                period_from_label = us_match.group(2)
 
                 # Find parent node element to get node ID
                 data_element = shape_node.parentNode
                 node_element = data_element.parentNode
                 node_id = node_element.getAttribute('id')
 
-                node_to_period[node_id] = period
-                self.periods.add(period)
+                # If period is in label, use it
+                if period_from_label:
+                    period = period_from_label.replace('-', ' ')
+                    node_to_period[node_id] = period
+                    self.periods.add(period)
+                # Otherwise, if we found periods from "Periodo : X" nodes and only one period,
+                # assign all US nodes to that period
+                elif len(self.periods) == 1:
+                    period = list(self.periods)[0]
+                    node_to_period[node_id] = period
+                # If multiple periods, try to infer
+                else:
+                    # Assign to first period or "Unknown"
+                    if self.periods:
+                        period = sorted(self.periods)[0]
+                    else:
+                        period = "Unknown"
+                    node_to_period[node_id] = period
 
         self.node_to_period = node_to_period
         return node_to_period
@@ -317,8 +388,13 @@ class SwimlaneOrganizer:
         if not self.node_to_period:
             self.extract_periods_from_labels()
 
-        # Find the TableNode's nested graph
-        table_node = self.dom.getElementById(table_node_id)
+        # Find the TableNode's nested graph (manual traversal since getElementById doesn't work with minidom)
+        table_node = None
+        for node in self.dom.getElementsByTagName('node'):
+            if node.getAttribute('id') == table_node_id:
+                table_node = node
+                break
+
         if not table_node:
             raise ValueError(f"TableNode with id '{table_node_id}' not found")
 
@@ -336,12 +412,12 @@ class SwimlaneOrganizer:
 
         main_graph = main_graphs[0]
 
-        # Move nodes to nested graph
+        # Move nodes to nested graph (only direct children that are 'node' elements)
         nodes_to_move = []
-        for node in main_graph.getElementsByTagName('node'):
-            if node.getAttribute('id') == table_node_id:
-                continue  # Skip the table node itself
-            nodes_to_move.append(node)
+        for child in main_graph.childNodes:
+            if child.nodeType == child.ELEMENT_NODE and child.tagName == 'node':
+                if child.getAttribute('id') != table_node_id:
+                    nodes_to_move.append(child)
 
         for node in nodes_to_move:
             main_graph.removeChild(node)
@@ -383,7 +459,8 @@ class SwimlaneOrganizer:
 def apply_swimlanes_to_graphml(
     graphml_content: str,
     title: str = "Archaeological Context",
-    row_colors: Optional[Dict[str, str]] = None
+    row_colors: Optional[Dict[str, str]] = None,
+    period_mapping: Optional[Dict[int, str]] = None
 ) -> str:
     """
     Convenience function to apply swimlanes to GraphML content.
@@ -392,6 +469,8 @@ def apply_swimlanes_to_graphml(
         graphml_content: XML string containing GraphML data
         title: Header title for the swimlane table
         row_colors: Optional dict mapping period names to background colors
+        period_mapping: Optional dict mapping US numbers to period names
+                       Example: {1001: 'Romano Imperiale', 1002: 'Medievale'}
 
     Returns:
         Modified GraphML content with swimlane structure
@@ -406,5 +485,5 @@ def apply_swimlanes_to_graphml(
         >>> with open('harris_matrix_swimlanes.graphml', 'w') as f:
         ...     f.write(swimlane_graphml)
     """
-    organizer = SwimlaneOrganizer(graphml_content)
+    organizer = SwimlaneOrganizer(graphml_content, period_mapping=period_mapping)
     return organizer.apply_swimlanes(title, row_colors)
