@@ -443,31 +443,38 @@ class GraphMLExportDialog:
                         # Add description (d_stratigrafica + d_interpretativa) to node
                         if us_number in description_map:
                             # Navigate to parent <node> element
-                            # Structure: <node> -> <data key="d7"> -> <y:ShapeNode>
+                            # Structure: <node> -> <data key="d6"> -> <y:ShapeNode>
+                            # Note: In the GraphML generated, d5 = description, d6 = nodegraphics
                             data_element = shape_node.parentNode
                             node_element = data_element.parentNode
 
-                            # Check if <data key="d6"> already exists
+                            # Check if <data key="d5"> already exists (description field)
                             existing_desc = None
                             for child in node_element.childNodes:
                                 if child.nodeType == child.ELEMENT_NODE and child.tagName == 'data':
-                                    if child.getAttribute('key') == 'd6':
+                                    if child.getAttribute('key') == 'd5':
                                         existing_desc = child
                                         break
 
                             # Create or update description element
                             description_text = description_map[us_number]
                             if existing_desc:
-                                # Update existing
-                                existing_desc.firstChild.nodeValue = description_text
+                                # Update existing (usually empty)
+                                if existing_desc.firstChild:
+                                    existing_desc.firstChild.nodeValue = description_text
+                                else:
+                                    # Create text node if missing
+                                    text_node = dom.createTextNode(description_text)
+                                    existing_desc.appendChild(text_node)
+                                descriptions_added += 1
                             else:
-                                # Create new <data key="d6"> element
+                                # Create new <data key="d5"> element
                                 desc_element = dom.createElement('data')
-                                desc_element.setAttribute('key', 'd6')
+                                desc_element.setAttribute('key', 'd5')
                                 desc_element.setAttribute('xml:space', 'preserve')
                                 desc_text_node = dom.createTextNode(description_text)
                                 desc_element.appendChild(desc_text_node)
-                                # Insert before <data key="d7"> (graphics data)
+                                # Insert before <data key="d6"> (graphics data)
                                 node_element.insertBefore(desc_element, data_element)
                                 descriptions_added += 1
 
