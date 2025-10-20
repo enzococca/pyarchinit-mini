@@ -311,25 +311,29 @@ class GraphMLExportDialog:
                 source_id = f"US_{source}_{desc_source_clean}_{source_periodo_clean}"
                 target_id = f"US_{target}_{desc_target_clean}_{target_periodo_clean}"
 
-                # Determine edge type and style based on relationship (EM_palette compatible)
+                # Determine edge attributes based on relationship type
+                # Following PyArchInit convention for EM_palette
                 rel_lower = rel_type.lower()
+                edge_attrs = []
 
-                # Contemporary relationships: undirected edge (no arrow), solid line
+                # Contemporary relationships (uguale a, si lega a): NO arrow (arrowhead=none)
                 if 'uguale' in rel_lower or 'lega' in rel_lower or 'same' in rel_lower or 'connected' in rel_lower:
-                    edge_op = '--'
-                    edge_attrs = []  # solid line by default, no extra attrs
-                # Virtual or uncertain relationships: directed edge with dashed line
+                    edge_attrs.append('dir=none')  # No arrowhead in either direction
+                # Negative relationships (taglia): dashed line with arrow
+                elif 'taglia' in rel_lower or 'tagli' in rel_lower or 'cut' in rel_lower:
+                    edge_attrs.append('style=dashed')
+                    edge_attrs.append('arrowhead=normal')
+                # Virtual or uncertain relationships: dashed line
                 elif 'virtuale' in rel_lower or 'dubbio' in rel_lower or 'virtual' in rel_lower or 'uncertain' in rel_lower:
-                    edge_op = '->'
-                    edge_attrs = ['style=dashed']
-                # Normal stratigraphic relationships: directed edge with solid line
+                    edge_attrs.append('style=dashed')
+                    edge_attrs.append('arrowhead=normal')
+                # Normal stratigraphic relationships (copre, sotto, etc.): solid line with arrow
                 else:
-                    edge_op = '->'
-                    edge_attrs = []  # solid line by default
+                    edge_attrs.append('arrowhead=normal')
 
-                # Build edge with label and optional styling
-                edge_attr_str = f', {", ".join(edge_attrs)}' if edge_attrs else ''
-                dot_lines.append(f'\t"{source_id}" {edge_op} "{target_id}" [label="{rel_type}"{edge_attr_str}]')
+                # Build edge with label and styling (always use -> for digraph)
+                edge_attr_str = ', ' + ', '.join(edge_attrs) if edge_attrs else ''
+                dot_lines.append(f'\t"{source_id}" -> "{target_id}" [label="{rel_type}"{edge_attr_str}]')
 
             dot_lines.append('}')
             dot_content = '\n'.join(dot_lines)
