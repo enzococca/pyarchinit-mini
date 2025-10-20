@@ -68,39 +68,97 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **Multi-Interface Support**: Available in both Web UI (Chart.js) and Desktop GUI (matplotlib)
 - **Real-Time Data**: Charts update automatically with current database state
 
-### 🔄 GraphML Converter - Harris Matrix Export (NEW in v1.1.3)
-- **yEd Compatibility**: Export Harris Matrix to yEd Graph Editor compatible GraphML format
-- **Period Preservation**: Automatic preservation of archaeological periods with color coding
-- **Flexible Grouping**: Support for period+area, period-only, area-only, or no grouping
-- **US Label Format**: Proper formatting (US_number_description_epoch) for yEd tables
+### 🔄 GraphML Converter - Harris Matrix Export (NEW in v1.1.5)
+Export Harris Matrix diagrams to yEd Graph Editor with full EM_palette styling and archaeological metadata.
+
+**Core Features**:
+- **yEd Compatibility**: Export to yEd Graph Editor compatible GraphML format
+- **EM_palette Styling**: Automatic node colors and shapes based on `unita_tipo` (US, USM, USD, USV, USV/s)
+- **Archaeological Metadata**: Node descriptions with `d_stratigrafica` + `d_interpretativa` visible in yEd
+- **Clean Edge Display**: Edges without text labels (relationship types in tooltips)
+- **Period Preservation**: Automatic grouping by archaeological periods with color coding
+- **Flexible Grouping**: Support for period+area, period-only, area-only, or no grouping modes
+- **Transitive Reduction**: Automatic removal of redundant stratigraphic relationships
 - **Multi-Interface Support**: Available via Python API, CLI, REST API, Web UI, and Desktop GUI
-- **Template-Based**: Uses custom yEd template (EM_palette.graphml) for consistent styling
-- **Epoch Ordering**: Option to reverse period ordering (chronological vs reverse)
-- **Standalone Library**: Can be used in other projects via `pip install pyarchinit-mini`
+
+**EM_palette Node Styles** (based on `unita_tipo`):
+- **US/USM** (Stratigraphic Unit): Red border (#9B3333), white fill, rectangle
+- **USD** (Documentary US): Orange border (#D86400), white fill, rounded rectangle
+- **USV** (Virtual US negative): Green border (#31792D), black fill, hexagon
+- **USV/s** (Virtual US structural): Blue border (#248FE7), black fill, trapezium
+
+**Edge Styles** (PyArchInit convention):
+- **Contemporary** (uguale a, si lega a): No arrow, solid line
+- **Stratigraphic** (copre, sotto): Arrow, solid line
+- **Negative** (taglia): Arrow, dashed line
+- **Virtual/Uncertain**: Arrow, dashed line
+
+**Data Requirements** (for external API use):
+```python
+# Graph node structure
+graph.nodes[us_number] = {
+    'd_stratigrafica': str,        # Stratigraphic description
+    'd_interpretativa': str,       # Archaeological interpretation
+    'unita_tipo': str,             # Unit type: US, USM, USD, USV, USV/s
+    'period_initial': str,         # Initial chronological period
+    'area': str,                   # Archaeological area/sector
+}
+
+# Graph edge structure
+graph.edges[(source, target)] = {
+    'relationship': str,           # Type: copre, taglia, uguale a, si lega a
+    'certainty': str              # certain, uncertain
+}
+```
 
 **Usage Examples**:
 ```python
-# Python API
+# Python API - From NetworkX graph
 from pyarchinit_mini.graphml_converter import convert_dot_to_graphml
-convert_dot_to_graphml('harris.dot', 'harris.graphml', title='Pompei')
+import networkx as nx
 
-# CLI
+graph = nx.DiGraph()
+graph.add_node(1001,
+    d_stratigrafica='Strato di riempimento',
+    d_interpretativa='Deposito medievale',
+    unita_tipo='US',
+    period_initial='Medievale')
+graph.add_edge(1001, 1002, relationship='copre')
+
+# Generate DOT and convert
+# ... (see documentation for full example)
+
+# CLI - From DOT file
 pyarchinit-graphml convert harris.dot harris.graphml -t "Pompei - Regio VI"
 
-# REST API
+# REST API - Upload DOT file
 curl -X POST http://localhost:8000/api/graphml/convert \
      -F "file=@harris.dot" -F "title=Pompei"
+
+# Web Interface - Export from database
+# Navigate to: Harris Matrix → Export GraphML (yEd)
+# Select site, configure options, download .graphml file
+
+# Desktop GUI - Tools menu
+# Tools → Export GraphML (yEd)
 ```
 
-**Interfaces**:
-- **Python Library**: Import and use in any Python project
-- **CLI Tool**: `pyarchinit-graphml` command with convert, template, batch operations
-- **REST API**: 4 endpoints (convert, convert-content, template, health)
-- **Web Interface**: Form-based export with site selection and download
-- **Desktop GUI**: Tkinter dialog in Tools menu
+**Available Interfaces**:
+- **Python Library**: `from pyarchinit_mini.graphml_converter import convert_dot_to_graphml`
+- **CLI Tool**: `pyarchinit-graphml convert|template|batch`
+- **REST API**: 4 endpoints at `/api/graphml/*` (convert, convert-content, template, health)
+- **Web Interface**: Form-based export with site selection and real-time download
+- **Desktop GUI**: Tkinter dialog in Tools menu with file save dialog
+
+**Output**:
+- GraphML file compatible with yEd Graph Editor
+- Node descriptions visible in yEd "Description" field
+- EM_palette colors and shapes applied automatically
+- Edge relationships available as tooltips
+- Period-based table structure for hierarchical visualization
 
 ### 🚀 Technical Features
-- **Production Ready**: v1.1.3 with GraphML Export + Mobile/Tablet Optimization + Full Edit + Analytics
+- **Production Ready**: v1.1.5 with EM_palette GraphML Export + Archaeological Metadata + Clean Edges
 - **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14
 - **Data Validation**: Comprehensive Pydantic schemas
 - **Session Management**: Proper database connection pooling
@@ -595,7 +653,15 @@ pyarchinit-api
 
 ## 🗺️ Roadmap
 
-### Recently Completed (v1.1.3)
+### Recently Completed (v1.1.5)
+- [x] **EM_palette Node Styling** - Automatic colors and shapes based on `unita_tipo` (US, USM, USD, USV, USV/s)
+- [x] **Archaeological Metadata** - Node descriptions with `d_stratigrafica` + `d_interpretativa` visible in yEd
+- [x] **Clean Edge Display** - Edges without text labels, relationship types in tooltips
+- [x] **PyArchInit Edge Convention** - Contemporary (no arrow), stratigraphic (arrow), negative (dashed)
+- [x] **GraphML Description Field** - Proper injection into yEd `<data key="d5">` element
+- [x] **Transitive Reduction** - Automatic removal of redundant stratigraphic relationships
+
+### Completed in v1.1.3
 - [x] **GraphML Converter** - Export Harris Matrix to yEd Graph Editor compatible format
 - [x] **Multi-Interface Export** - Python API, CLI, REST API, Web UI, Desktop GUI support
 - [x] **Period Preservation** - Automatic archaeological periods with color coding
@@ -699,15 +765,16 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 📊 Project Status
 
-**Version**: 1.1.3
+**Version**: 1.1.5
 **Status**: Production/Stable
 **Python**: 3.8 - 3.14
-**Last Updated**: 2025-10-19
+**Last Updated**: 2025-10-20
 
 ✅ **100% Desktop GUI Feature Parity Achieved**
 ✅ **Full Python 3.14 Support**
 ✅ **Tests Included in Distribution**
-✅ **GraphML Export for yEd** (NEW in v1.1.3 - Harris Matrix export to yEd Graph Editor)
+✅ **EM_palette GraphML Export** (NEW in v1.1.5 - Full archaeological metadata with PyArchInit styling)
+✅ **GraphML Export for yEd** (v1.1.3 - Harris Matrix export to yEd Graph Editor)
 ✅ **Mobile & Tablet Optimized** (v1.1.2 - Responsive design complete)
 ✅ **Full Edit Functionality** (v1.1.1 - Web interface CRUD complete)
 ✅ **Analytics Dashboard** (v1.1.0)

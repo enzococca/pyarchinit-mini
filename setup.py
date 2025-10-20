@@ -16,7 +16,7 @@ if (this_directory / "requirements.txt").exists():
 
 setup(
     name="pyarchinit-mini",
-    version="1.1.4",
+    version="1.1.5",
     author="PyArchInit Team",
     author_email="enzo.ccc@gmail.com",
     description="Lightweight archaeological data management system with multi-user authentication, real-time collaboration, and analytics dashboard",
