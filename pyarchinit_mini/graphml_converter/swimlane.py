@@ -5,8 +5,8 @@ This module provides functionality to organize GraphML nodes into swimlanes
 (horizontal rows) based on grouping criteria like archaeological periods or areas,
 similar to yEd's swimlane tool.
 
-Swimlanes are implemented using yEd's TableNode structure with rows representing
-different groups (e.g., periods) and nodes positioned within their respective rows.
+Swimlanes are implemented by organizing nodes by Y-coordinate position, with each
+period occupying a horizontal "lane" or row in the visualization.
 """
 
 import xml.dom.minidom as minidom
@@ -16,10 +16,13 @@ import re
 
 class SwimlaneOrganizer:
     """
-    Organizes GraphML nodes into swimlanes using yEd TableNode structure.
+    Organizes GraphML nodes into swimlanes by setting Y-coordinates based on periods.
 
-    This creates a visual layout where nodes are grouped horizontally by category
-    (e.g., archaeological periods), with each group in its own row (swimlane).
+    yEd's swimlane system works by:
+    1. Creating a TableNode group with rows for each period
+    2. Positioning nodes at different Y-coordinates based on their period
+    3. Nodes at y=0 go in first row, y=1000 in second row, etc.
+    4. Nodes remain in the main graph (not moved to nested graph)
     """
 
     def __init__(self, graphml_content: str, period_mapping: Optional[Dict[int, str]] = None):
@@ -33,29 +36,25 @@ class SwimlaneOrganizer:
         """
         self.graphml_content = graphml_content
         self.dom = minidom.parseString(graphml_content)
-        self.periods: Set[str] = set()
+        self.periods: List[str] = []  # Ordered list of periods
         self.node_to_period: Dict[str, str] = {}
         self.us_to_period: Optional[Dict[int, str]] = period_mapping
 
         # Extract periods from mapping if provided
         if period_mapping:
-            self.periods = set(period_mapping.values())
+            unique_periods = sorted(set(period_mapping.values()), reverse=True)
+            self.periods = unique_periods
 
     def extract_periods_from_labels(self) -> Dict[str, str]:
         """
         Extract period information from node labels.
-
-        Supports three formats:
-        1. Provided period_mapping (US number -> period name)
-        2. Node labels: US{number}_{period} (e.g., US1001_Romano-Imperiale)
-        3. Period label nodes: "Periodo : {period}" (plaintext nodes)
 
         Returns:
             Dictionary mapping node IDs to their periods
         """
         node_to_period = {}
 
-        # Method 1: Use provided period mapping if available
+        # Use provided period mapping if available
         if self.us_to_period:
             # Map GraphML node IDs to periods using US numbers from labels
             for shape_node in self.dom.getElementsByTagName('y:ShapeNode'):
@@ -79,76 +78,20 @@ class SwimlaneOrganizer:
                     if us_number in self.us_to_period:
                         period = self.us_to_period[us_number]
                         node_to_period[node_id] = period
-                        self.periods.add(period)
-
-            self.node_to_period = node_to_period
-            return node_to_period
-
-        # Method 2: Extract periods from "Periodo : X" plaintext nodes
-        for shape_node in self.dom.getElementsByTagName('y:ShapeNode'):
-            labels = shape_node.getElementsByTagName('y:NodeLabel')
-            if not labels or not labels[0].firstChild:
-                continue
-
-            label_text = labels[0].firstChild.nodeValue.strip()
-
-            # Check if this is a period label node
-            if label_text.startswith('Periodo : '):
-                period = label_text.replace('Periodo : ', '').strip()
-                self.periods.add(period)
-
-        # Method 3: Extract periods from US node labels
-        for shape_node in self.dom.getElementsByTagName('y:ShapeNode'):
-            labels = shape_node.getElementsByTagName('y:NodeLabel')
-            if not labels or not labels[0].firstChild:
-                continue
-
-            label_text = labels[0].firstChild.nodeValue.strip()
-
-            # Skip period label nodes
-            if label_text.startswith('Periodo : '):
-                continue
-
-            # Extract US number and optional period
-            us_match = re.match(r'USM?\s*(\d+)(?:_(.+))?', label_text, re.MULTILINE)
-            if us_match:
-                us_number = us_match.group(1)
-                period_from_label = us_match.group(2)
-
-                # Find parent node element to get node ID
-                data_element = shape_node.parentNode
-                node_element = data_element.parentNode
-                node_id = node_element.getAttribute('id')
-
-                # If period is in label, use it
-                if period_from_label:
-                    period = period_from_label.replace('-', ' ')
-                    node_to_period[node_id] = period
-                    self.periods.add(period)
-                # Otherwise, if we found periods from "Periodo : X" nodes and only one period,
-                # assign all US nodes to that period
-                elif len(self.periods) == 1:
-                    period = list(self.periods)[0]
-                    node_to_period[node_id] = period
-                # If multiple periods, try to infer
-                else:
-                    # Assign to first period or "Unknown"
-                    if self.periods:
-                        period = sorted(self.periods)[0]
-                    else:
-                        period = "Unknown"
-                    node_to_period[node_id] = period
 
         self.node_to_period = node_to_period
         return node_to_period
 
-    def create_table_node_structure(
+    def create_table_node_group(
         self,
         title: str = "Archaeological Context",
         row_colors: Optional[Dict[str, str]] = None
     ) -> str:
         """
-        Create yEd TableNode swimlane structure.
+        Create yEd TableNode group element for swimlane organization.
+
+        This creates a visual grouping/container but DOES NOT move nodes into it.
+        Nodes stay in main graph and are positioned by Y-coordinate.
 
         Args:
             title: Header title for the table
@@ -163,11 +106,12 @@ class SwimlaneOrganizer:
         if not self.periods:
             raise ValueError("No periods found in GraphML. Cannot create swimlanes.")
 
-        # Default colors for rows (alternating)
+        # Default colors for rows
         if row_colors is None:
+            colors = ['#5AE9EA', '#992694', '#5EE692', '#FFD700', '#FF6347', '#4169E1']
             row_colors = {
-                period: '#CCFFCC' if i % 2 == 0 else '#FFCC7F'
-                for i, period in enumerate(sorted(self.periods))
+                period: colors[i % len(colors)]
+                for i, period in enumerate(self.periods)
             }
 
         # Get graph element
@@ -175,7 +119,7 @@ class SwimlaneOrganizer:
         if not graph_elements:
             raise ValueError("No graph element found in GraphML")
 
-        graph = graph_elements[0]
+        main_graph = graph_elements[0]
 
         # Create TableNode group element
         table_node_id = "swimlane_table"
@@ -185,24 +129,26 @@ class SwimlaneOrganizer:
 
         # Add description
         desc_data = self.dom.createElement('data')
-        desc_data.setAttribute('key', 'd6')
-        desc_text = self.dom.createTextNode('Stratigrafia')
+        desc_data.setAttribute('key', 'd5')
+        desc_data.setAttribute('xml:space', 'preserve')
+        desc_text = self.dom.createCDATASection('Stratigrafia')
         desc_data.appendChild(desc_text)
         table_node.appendChild(desc_data)
 
         # Create TableNode graphics
         graphics_data = self.dom.createElement('data')
-        graphics_data.setAttribute('key', 'd7')
+        graphics_data.setAttribute('key', 'd6')
 
         y_table_node = self.dom.createElement('y:TableNode')
         y_table_node.setAttribute('configuration', 'YED_TABLE_NODE')
 
-        # Geometry (will be auto-resized)
+        # Geometry (height = num_periods * 1000 + some padding)
+        total_height = len(self.periods) * 1000 + 200
         geometry = self.dom.createElement('y:Geometry')
-        geometry.setAttribute('height', '2000.0')
+        geometry.setAttribute('height', str(total_height))
         geometry.setAttribute('width', '1500.0')
         geometry.setAttribute('x', '100.0')
-        geometry.setAttribute('y', '100.0')
+        geometry.setAttribute('y', '0.0')
         y_table_node.appendChild(geometry)
 
         # Fill
@@ -214,51 +160,65 @@ class SwimlaneOrganizer:
 
         # Border
         border = self.dom.createElement('y:BorderStyle')
-        border.setAttribute('hasColor', 'false')
+        border.setAttribute('color', '#000000')
         border.setAttribute('type', 'line')
         border.setAttribute('width', '1.0')
         y_table_node.appendChild(border)
 
-        # Header label
+        # Header label (title)
         header_label = self.dom.createElement('y:NodeLabel')
         header_label.setAttribute('alignment', 'center')
         header_label.setAttribute('autoSizePolicy', 'content')
-        header_label.setAttribute('fontFamily', 'Dialog')
-        header_label.setAttribute('fontSize', '15')
+        header_label.setAttribute('fontFamily', 'DialogInputInput')
+        header_label.setAttribute('fontSize', '24')
+        header_label.setAttribute('fontStyle', 'bold')
+        header_label.setAttribute('hasBackgroundColor', 'false')
+        header_label.setAttribute('hasLineColor', 'false')
+        header_label.setAttribute('height', '32.265625')
+        header_label.setAttribute('horizontalTextPosition', 'center')
+        header_label.setAttribute('iconTextGap', '4')
         header_label.setAttribute('modelName', 'internal')
         header_label.setAttribute('modelPosition', 't')
+        header_label.setAttribute('textColor', '#000000')
+        header_label.setAttribute('verticalTextPosition', 'bottom')
         header_label.setAttribute('visible', 'true')
+        header_label.setAttribute('xml:space', 'preserve')
         header_text = self.dom.createTextNode(title)
         header_label.appendChild(header_text)
         y_table_node.appendChild(header_label)
 
-        # Create row labels for each period
-        sorted_periods = sorted(self.periods)
-        for i, period in enumerate(sorted_periods):
+        # Create row labels for each period (swimlane labels)
+        for i, period in enumerate(self.periods):
             row_label = self.dom.createElement('y:NodeLabel')
             row_label.setAttribute('alignment', 'center')
             row_label.setAttribute('autoSizePolicy', 'content')
             row_label.setAttribute('backgroundColor', row_colors.get(period, '#CCCCCC'))
-            row_label.setAttribute('fontFamily', 'Dialog')
-            row_label.setAttribute('fontSize', '12')
-            row_label.setAttribute('fontStyle', 'plain')
+            row_label.setAttribute('fontFamily', 'DialogInput')
+            row_label.setAttribute('fontSize', '24')
+            row_label.setAttribute('fontStyle', 'bold')
             row_label.setAttribute('hasLineColor', 'false')
+            row_label.setAttribute('height', '32.265625')
+            row_label.setAttribute('horizontalTextPosition', 'center')
+            row_label.setAttribute('iconTextGap', '4')
             row_label.setAttribute('modelName', 'custom')
             row_label.setAttribute('rotationAngle', '270.0')  # Vertical text
             row_label.setAttribute('textColor', '#000000')
+            row_label.setAttribute('verticalTextPosition', 'bottom')
             row_label.setAttribute('visible', 'true')
+            row_label.setAttribute('xml:space', 'preserve')
 
             # Label text
             period_text = self.dom.createTextNode(period)
             row_label.appendChild(period_text)
 
-            # Model for row positioning
+            # Label model for row positioning
             label_model = self.dom.createElement('y:LabelModel')
             row_model = self.dom.createElement('y:RowNodeLabelModel')
             row_model.setAttribute('offset', '3.0')
             label_model.appendChild(row_model)
             row_label.appendChild(label_model)
 
+            # Model parameter
             model_param = self.dom.createElement('y:ModelParameter')
             row_param = self.dom.createElement('y:RowNodeLabelModelParameter')
             row_param.setAttribute('horizontalPosition', '0.0')
@@ -272,37 +232,27 @@ class SwimlaneOrganizer:
         # Style properties
         style_props = self.dom.createElement('y:StyleProperties')
 
-        # Add various table styling properties
-        props = [
-            ('y.view.tabular.TableNodePainter.ALTERNATE_ROW_STYLE',
-             '#474A4340', '#000000', 'line', '1.0'),
-            ('y.view.tabular.TableNodePainter.ALTERNATE_COLUMN_STYLE',
-             '#474A4340', '#000000', 'line', '1.0'),
-        ]
-
-        for prop_name, fill_color, line_color, line_type, line_width in props:
-            prop = self.dom.createElement('y:Property')
-            prop.setAttribute('name', prop_name)
-            simple_style = self.dom.createElement('y:SimpleStyle')
-            simple_style.setAttribute('fillColor', fill_color)
-            simple_style.setAttribute('lineColor', line_color)
-            simple_style.setAttribute('lineType', line_type)
-            simple_style.setAttribute('lineWidth', line_width)
-            prop.appendChild(simple_style)
-            style_props.appendChild(prop)
+        # Alternate row style
+        prop1 = self.dom.createElement('y:Property')
+        prop1.setAttribute('name', 'y.view.tabular.TableNodePainter.ALTERNATE_ROW_STYLE')
+        simple_style1 = self.dom.createElement('y:SimpleStyle')
+        simple_style1.setAttribute('fillColor', '#474A4340')
+        simple_style1.setAttribute('lineColor', '#000000')
+        simple_style1.setAttribute('lineType', 'line')
+        simple_style1.setAttribute('lineWidth', '1.0')
+        prop1.appendChild(simple_style1)
+        style_props.appendChild(prop1)
 
         # Color properties
         color_props = [
-            ('yed.table.section.color', '#7192b2'),
-            ('yed.table.lane.color.main', '#c4d7ed'),
-            ('yed.table.lane.color.alternating', '#abc8e2'),
-            ('yed.table.header.color.main', '#c4d7ed'),
-            ('yed.table.header.color.alternating', '#abc8e2'),
+            ('yed.table.section.color', 'java.awt.Color', '#7192b2'),
+            ('yed.table.lane.color.main', 'java.awt.Color', '#c4d7ed'),
+            ('yed.table.header.color.alternating', 'java.awt.Color', '#abc8e2'),
         ]
 
-        for prop_name, color in color_props:
+        for prop_name, prop_class, color in color_props:
             prop = self.dom.createElement('y:Property')
-            prop.setAttribute('class', 'java.awt.Color')
+            prop.setAttribute('class', prop_class)
             prop.setAttribute('name', prop_name)
             prop.setAttribute('value', color)
             style_props.appendChild(prop)
@@ -325,41 +275,90 @@ class SwimlaneOrganizer:
         # Insets
         insets = self.dom.createElement('y:Insets')
         insets.setAttribute('bottom', '0')
+        insets.setAttribute('bottomF', '0.0')
         insets.setAttribute('left', '0')
+        insets.setAttribute('leftF', '0.0')
         insets.setAttribute('right', '0')
+        insets.setAttribute('rightF', '0.0')
         insets.setAttribute('top', '0')
+        insets.setAttribute('topF', '0.0')
         y_table_node.appendChild(insets)
 
         # Border insets
         border_insets = self.dom.createElement('y:BorderInsets')
-        border_insets.setAttribute('bottom', '10')
-        border_insets.setAttribute('left', '14')
-        border_insets.setAttribute('right', '20')
-        border_insets.setAttribute('top', '5')
+        border_insets.setAttribute('bottom', '62')
+        border_insets.setAttribute('bottomF', '61.8')
+        border_insets.setAttribute('left', '40')
+        border_insets.setAttribute('leftF', '40.0')
+        border_insets.setAttribute('right', '40')
+        border_insets.setAttribute('rightF', '40.0')
+        border_insets.setAttribute('top', '71')
+        border_insets.setAttribute('topF', '71.0')
         y_table_node.appendChild(border_insets)
 
         # Table structure
         table = self.dom.createElement('y:Table')
         table.setAttribute('autoResizeTable', 'true')
         table.setAttribute('defaultColumnWidth', '120.0')
-        table.setAttribute('defaultRowHeight', '200.0')
+        table.setAttribute('defaultMinimumColumnWidth', '80.0')
+        table.setAttribute('defaultMinimumRowHeight', '50.0')
+        table.setAttribute('defaultRowHeight', '80.0')
+
+        # Default column insets
+        default_col_insets = self.dom.createElement('y:DefaultColumnInsets')
+        default_col_insets.setAttribute('bottom', '0.0')
+        default_col_insets.setAttribute('left', '0.0')
+        default_col_insets.setAttribute('right', '0.0')
+        default_col_insets.setAttribute('top', '0.0')
+        table.appendChild(default_col_insets)
+
+        # Default row insets (left margin for period labels)
+        default_row_insets = self.dom.createElement('y:DefaultRowInsets')
+        default_row_insets.setAttribute('bottom', '0.0')
+        default_row_insets.setAttribute('left', '54.0')  # Space for period label
+        default_row_insets.setAttribute('right', '0.0')
+        default_row_insets.setAttribute('top', '0.0')
+        table.appendChild(default_row_insets)
+
+        # Table insets
+        table_insets = self.dom.createElement('y:Insets')
+        table_insets.setAttribute('bottom', '0.0')
+        table_insets.setAttribute('left', '0.0')
+        table_insets.setAttribute('right', '0.0')
+        table_insets.setAttribute('top', '30.0')
+        table.appendChild(table_insets)
 
         # Columns
         columns = self.dom.createElement('y:Columns')
         column = self.dom.createElement('y:Column')
         column.setAttribute('id', 'column_0')
         column.setAttribute('minimumWidth', '80.0')
-        column.setAttribute('width', '1500.0')
+        column.setAttribute('width', '1020.0')
+        col_insets = self.dom.createElement('y:Insets')
+        col_insets.setAttribute('bottom', '0.0')
+        col_insets.setAttribute('left', '0.0')
+        col_insets.setAttribute('right', '0.0')
+        col_insets.setAttribute('top', '0.0')
+        column.appendChild(col_insets)
         columns.appendChild(column)
         table.appendChild(columns)
 
         # Rows - one for each period
         rows = self.dom.createElement('y:Rows')
-        for i, period in enumerate(sorted_periods):
+        for i, period in enumerate(self.periods):
             row = self.dom.createElement('y:Row')
-            row.setAttribute('height', '300.0')  # Will auto-resize
+            row.setAttribute('height', '940.0')  # Height of each swimlane
             row.setAttribute('id', f'row_{i}')
             row.setAttribute('minimumHeight', '50.0')
+
+            # Row insets (left margin for period label)
+            row_insets = self.dom.createElement('y:Insets')
+            row_insets.setAttribute('bottom', '0.0')
+            row_insets.setAttribute('left', '54.0')
+            row_insets.setAttribute('right', '0.0')
+            row_insets.setAttribute('top', '0.0')
+            row.appendChild(row_insets)
+
             rows.appendChild(row)
         table.appendChild(rows)
 
@@ -367,61 +366,57 @@ class SwimlaneOrganizer:
         graphics_data.appendChild(y_table_node)
         table_node.appendChild(graphics_data)
 
-        # Add nested graph for child nodes
+        # Add empty nested graph (required by yEd format, but nodes stay in main graph)
         nested_graph = self.dom.createElement('graph')
         nested_graph.setAttribute('edgedefault', 'directed')
         nested_graph.setAttribute('id', f'{table_node_id}:')
         table_node.appendChild(nested_graph)
 
-        # Insert table node into main graph
-        graph.insertBefore(table_node, graph.firstChild)
+        # Insert table node as first child of main graph
+        main_graph.insertBefore(table_node, main_graph.firstChild)
 
         return table_node_id
 
-    def move_nodes_to_swimlanes(self, table_node_id: str) -> None:
+    def position_nodes_by_period(self):
         """
-        Move existing nodes into the TableNode swimlane structure.
+        Set Y-coordinates of nodes based on their period assignment.
 
-        Args:
-            table_node_id: ID of the TableNode group element
+        Nodes are positioned at:
+        - Period 0: y = 0.0
+        - Period 1: y = 1000.0
+        - Period 2: y = 2000.0
+        - etc.
+
+        This creates the swimlane effect without moving nodes in the DOM.
         """
         if not self.node_to_period:
             self.extract_periods_from_labels()
 
-        # Find the TableNode's nested graph (manual traversal since getElementById doesn't work with minidom)
-        table_node = None
-        for node in self.dom.getElementsByTagName('node'):
-            if node.getAttribute('id') == table_node_id:
-                table_node = node
-                break
+        # Find all ShapeNode elements (US nodes) and update their Y-coordinates
+        for shape_node in self.dom.getElementsByTagName('y:ShapeNode'):
+            # Find parent node element to get node ID
+            data_element = shape_node.parentNode
+            node_element = data_element.parentNode
+            node_id = node_element.getAttribute('id')
 
-        if not table_node:
-            raise ValueError(f"TableNode with id '{table_node_id}' not found")
+            # Skip if this node doesn't have a period assigned
+            if node_id not in self.node_to_period:
+                continue
 
-        nested_graphs = table_node.getElementsByTagName('graph')
-        if not nested_graphs:
-            raise ValueError(f"No nested graph found in TableNode '{table_node_id}'")
+            # Get period and calculate Y-coordinate
+            period = self.node_to_period[node_id]
+            try:
+                period_index = self.periods.index(period)
+            except ValueError:
+                continue
 
-        nested_graph = nested_graphs[0]
+            # Y-coordinate for this period's swimlane
+            y_coord = period_index * 1000.0
 
-        # Find main graph
-        main_graphs = [g for g in self.dom.getElementsByTagName('graph')
-                      if g.getAttribute('id') == 'G']
-        if not main_graphs:
-            raise ValueError("Main graph with id='G' not found")
-
-        main_graph = main_graphs[0]
-
-        # Move nodes to nested graph (only direct children that are 'node' elements)
-        nodes_to_move = []
-        for child in main_graph.childNodes:
-            if child.nodeType == child.ELEMENT_NODE and child.tagName == 'node':
-                if child.getAttribute('id') != table_node_id:
-                    nodes_to_move.append(child)
-
-        for node in nodes_to_move:
-            main_graph.removeChild(node)
-            nested_graph.appendChild(node)
+            # Update geometry Y-coordinate
+            geometries = shape_node.getElementsByTagName('y:Geometry')
+            if geometries:
+                geometries[0].setAttribute('y', str(y_coord))
 
     def apply_swimlanes(
         self,
@@ -433,8 +428,8 @@ class SwimlaneOrganizer:
 
         This is the main entry point that:
         1. Extracts periods from node labels
-        2. Creates TableNode structure
-        3. Moves nodes into swimlanes
+        2. Creates TableNode group for visual swimlanes
+        3. Positions nodes by Y-coordinate based on period
 
         Args:
             title: Header title for the swimlane table
@@ -446,11 +441,11 @@ class SwimlaneOrganizer:
         # Extract periods
         self.extract_periods_from_labels()
 
-        # Create table structure
-        table_node_id = self.create_table_node_structure(title, row_colors)
+        # Create table structure (visual grouping)
+        self.create_table_node_group(title, row_colors)
 
-        # Move nodes into table
-        self.move_nodes_to_swimlanes(table_node_id)
+        # Position nodes by Y-coordinate
+        self.position_nodes_by_period()
 
         # Return modified GraphML
         return self.dom.toxml()
@@ -477,10 +472,11 @@ def apply_swimlanes_to_graphml(
 
     Example:
         >>> graphml = open('harris_matrix.graphml').read()
+        >>> period_mapping = {1001: 'Medievale', 1002: 'Romano Imperiale'}
         >>> swimlane_graphml = apply_swimlanes_to_graphml(
         ...     graphml,
         ...     title="Pompei Excavation",
-        ...     row_colors={'Moderno': '#CCFFCC', 'Medievale': '#FFCC7F'}
+        ...     period_mapping=period_mapping
         ... )
         >>> with open('harris_matrix_swimlanes.graphml', 'w') as f:
         ...     f.write(swimlane_graphml)
