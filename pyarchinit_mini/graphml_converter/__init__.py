@@ -36,18 +36,11 @@ from .converter import (
     get_template_path
 )
 
-from .swimlane import (
-    SwimlaneOrganizer,
-    apply_swimlanes_to_graphml
-)
-
 __all__ = [
     'convert_dot_to_graphml',
     'convert_dot_content_to_graphml',
     'GraphMLConverterOptions',
-    'get_template_path',
-    'SwimlaneOrganizer',
-    'apply_swimlanes_to_graphml'
+    'get_template_path'
 ]
 
 __version__ = '1.0.0'
