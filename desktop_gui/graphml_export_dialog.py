@@ -249,7 +249,16 @@ class GraphMLExportDialog:
                 node_data = graph.nodes[node]
                 periodo = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
                 d_stratigrafica = node_data.get('d_stratigrafica', node_data.get('description', ''))
+                d_interpretativa = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
                 unita_tipo = node_data.get('unita_tipo', 'US')  # Extract unit type
+
+                # Build node tooltip/description: d_stratigrafica + d_interpretativa
+                node_description_parts = []
+                if d_stratigrafica:
+                    node_description_parts.append(d_stratigrafica)
+                if d_interpretativa:
+                    node_description_parts.append(d_interpretativa)
+                node_description = ' - '.join(node_description_parts) if node_description_parts else ''
 
                 # Clean description and period (remove spaces and special chars)
                 desc_clean = d_stratigrafica.replace(' ', '_').replace(',', '').replace('"', '')
@@ -280,6 +289,12 @@ class GraphMLExportDialog:
                     f'penwidth={style_dict["penwidth"]}',
                     f'style={style_dict["style"]}'
                 ]
+
+                # Add tooltip with node description (d_stratigrafica + d_interpretativa)
+                if node_description:
+                    # Clean description for DOT format (escape quotes)
+                    desc_escaped = node_description.replace('"', '\\"').replace('\n', '\\n')
+                    attrs.append(f'tooltip="{desc_escaped}"')
 
                 # Add node with EM_palette styling
                 dot_lines.append(f'\t"{node_id}" [{", ".join(attrs)}]')
@@ -331,9 +346,16 @@ class GraphMLExportDialog:
                 else:
                     edge_attrs.append('arrowhead=normal')
 
-                # Build edge with label and styling (always use -> for digraph)
-                edge_attr_str = ', ' + ', '.join(edge_attrs) if edge_attrs else ''
-                dot_lines.append(f'\t"{source_id}" -> "{target_id}" [label="{rel_type}"{edge_attr_str}]')
+                # Build edge with styling (NO label - as per user request)
+                # Optionally add relationship type as tooltip
+                if rel_type:
+                    edge_attrs.append(f'tooltip="{rel_type}"')
+
+                edge_attr_str = ', '.join(edge_attrs) if edge_attrs else ''
+                if edge_attr_str:
+                    dot_lines.append(f'\t"{source_id}" -> "{target_id}" [{edge_attr_str}]')
+                else:
+                    dot_lines.append(f'\t"{source_id}" -> "{target_id}"')
 
             dot_lines.append('}')
             dot_content = '\n'.join(dot_lines)
