@@ -5,6 +5,59 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.12] - 2025-10-22
+
+### Fixed
+- **Web Interface Language Switching**: Fixed all navbar and menu translations
+  - Uncommented 42 missing translation strings for both Italian and English
+  - Fixed incorrect translations (Menu was "Manuale", now correctly "Menu")
+  - All interface elements now properly switch between languages
+  - Language switcher now affects entire web interface, not just analytics page
+
+### Technical
+- Updated all navigation and menu translation strings in messages.po files
+- Recompiled translation catalogs with complete string coverage
+
+## [1.2.11] - 2025-10-22
+
+### Fixed
+- **Web Interface Internationalization**: Fixed all hardcoded Italian text in web interface
+  - All error and success messages now use translation system
+  - Analytics dashboard fully translated
+  - Database info page fully translated
+  - All flash messages support language switching
+- **Language Switching**: Fixed language switcher to properly change interface language
+  - Added missing translations for Italian and English
+  - Compiled translation files with all required strings
+  - Session-based language preference storage
+
+### Added
+- Complete translation coverage for web interface
+- 80+ new translation strings for both Italian and English
+
+### Technical
+- Updated Flask-Babel integration for proper i18n support
+- All templates now use `{{ _() }}` for translatable strings
+- Flash messages in app.py use gettext for dynamic translation
+
+## [1.2.10] - 2025-10-22
+
+### Added
+- **pyarchinit-mini-init command**: New initialization command for first-time setup
+  - Creates database and configuration directories automatically
+  - Prompts for admin user creation interactively
+  - Supports --non-interactive flag for automated deployments
+  - Combines setup and admin user creation in one command
+
+### Changed
+- Updated README with clearer installation instructions
+- Improved first-time user experience with single initialization command
+- Fixed all command names in documentation to use correct prefixes
+
+### Fixed
+- Admin user creation now works with installed package paths
+- Database path detection improved for various Python environments
+
 ## [1.2.9] - 2025-10-22
 
 ### Fixed

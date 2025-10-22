@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.2.9"
+version = "1.2.12"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, and analytics dashboard"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -161,6 +161,7 @@ pyarchinit-mini-api = "pyarchinit_mini.api:run_server"
 pyarchinit-mini-web = "pyarchinit_mini.web_interface.app:main"
 pyarchinit-mini-gui = "pyarchinit_mini.desktop_gui.gui_app:main"
 pyarchinit-mini-setup = "pyarchinit_mini.scripts.setup_user_env:main"
+pyarchinit-mini-init = "pyarchinit_mini.scripts.create_admin_user:main"
 pyarchinit-export-import = "pyarchinit_mini.cli.export_import_cli:export_import"
 pyarchinit-graphml = "pyarchinit_mini.cli.graphml_cli:main"
 

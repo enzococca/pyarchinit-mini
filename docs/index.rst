@@ -1,76 +1,107 @@
-pyarchinit-mini Documentation
+PyArchInit-Mini Documentation
 =============================
 
+.. image:: https://badge.fury.io/py/pyarchinit-mini.svg
+   :target: https://badge.fury.io/py/pyarchinit-mini
+
+.. image:: https://img.shields.io/badge/python-3.8--3.14-blue.svg
+   :target: https://www.python.org/downloads/
+
+.. image:: https://img.shields.io/badge/License-GPL%20v2-blue.svg
+   :target: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
+**Lightweight Archaeological Data Management System**
+
+PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core archaeological data management functionality without GIS dependencies. It provides multiple interfaces (Web, Desktop GUI, CLI, REST API) with a clean, scalable architecture for managing archaeological sites, stratigraphic units, and material inventories.
+
+Key Features
+------------
+
+- **Multi-Interface Support**: Web, Desktop GUI, CLI, and REST API
+- **Multi-Database**: SQLite and PostgreSQL support
+- **Internationalization**: Full Italian and English language support
+- **Harris Matrix**: Graphviz visualization with GraphML export
+- **3D Visualization**: s3Dgraphy integration for stratigraphic units
+- **Multi-User Authentication**: Role-based access control
+- **Real-Time Collaboration**: WebSocket support for team updates
+- **Analytics Dashboard**: Interactive charts and data visualization
+
+Getting Started
+---------------
+
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorials:
+   :caption: Installation & Setup:
 
-   TUTORIAL
-   QUICK_START
-   EXAMPLES
-   TROUBLESHOOTING
-   tutorial_beginner
-   tutorial_intermediate
-   tutorial_advanced
-   API_REFERENCE
+   installation/quickstart
+   installation/requirements
+   installation/configuration
+   installation/first_steps
+
+User Interfaces
+---------------
 
 .. toctree::
    :maxdepth: 2
-   :caption: API Documentation:
+   :caption: Interface Documentation:
 
-   __init__
-   app
-   base
-   cli_app
-   connection
-   dependencies
-   dialogs
-   enhanced_visualizer
-   example_usage
-   exceptions
-   gui_app
-   harris_matrix
-   harris_matrix_editor
-   interface_demo
-   inventario
-   inventario_dialog_extended
-   inventario_dto
-   inventario_materiali
-   inventario_service
-   launch_with_sample_data
-   load_sample_as_main
-   main
-   main_window
-   manager
-   matrix_generator
-   matrix_visualizer
-   media
-   media_handler
-   media_service
-   migrate_database
-   migrations
-   pdf_generator
-   periodizzazione_service
-   populate_sample_data
-   populate_simple_data
-   postgres_installer
-   postgres_installer_dialog
-   pyarchinit_inventory_template
-   pyarchinit_visualizer
-   run_gui
-   schemas
-   setup
-   site
-   site_dto
-   site_service
-   thesaurus
-   thesaurus_dialog
-   thesaurus_service
-   us
-   us_dialog_extended
-   us_dto
-   us_service
-   validators
+   web/index
+   gui/index
+   cli/index
+   api/index
+
+Features
+--------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Feature Documentation:
+
+   features/harris_matrix
+   features/s3dgraphy
+   features/graphml_export
+   features/analytics
+   features/authentication
+   features/export_import
+   features/media_management
+
+Data Management
+---------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Data Documentation:
+
+   data/sites
+   data/stratigraphic_units
+   data/inventory
+   data/database_management
+   data/migrations
+
+Development
+-----------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Developer Documentation:
+
+   development/architecture
+   development/api_reference
+   development/contributing
+   development/testing
+   development/changelog
+
+Examples & Tutorials
+--------------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples:
+
+   examples/python_api
+   examples/rest_api
+   examples/cli_usage
+   examples/integration
 
 Indices and tables
 ==================

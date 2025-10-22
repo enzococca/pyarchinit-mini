@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-10-22 08:33+0200\n"
+"POT-Creation-Date: 2025-10-22 18:16+0200\n"
 "PO-Revision-Date: 2025-10-21 11:18+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: it\n"
@@ -24,8 +24,8 @@ msgstr ""
 #~ msgid "Cancel"
 #~ msgstr "Annulla"
 
-#~ msgid "New Site"
-#~ msgstr "Nuovo Sito"
+msgid "New Site"
+msgstr "Nuovo Sito"
 
 #~ msgid "Edit Site"
 #~ msgstr "Modifica Sito"
@@ -60,8 +60,8 @@ msgstr ""
 #~ msgid "Site description:"
 #~ msgstr "Descrizione del sito:"
 
-#~ msgid "Media"
-#~ msgstr "Media"
+msgid "Media"
+msgstr "Media"
 
 #~ msgid "Add Media"
 #~ msgstr "Aggiungi Media"
@@ -98,8 +98,8 @@ msgstr ""
 #~ msgid "Error saving: {}"
 #~ msgstr "Errore durante il salvataggio: {}"
 
-#~ msgid "New US"
-#~ msgstr "Nuova US"
+msgid "New US"
+msgstr "Nuova US"
 
 #~ msgid "Edit US"
 #~ msgstr "Modifica US"
@@ -152,8 +152,8 @@ msgstr ""
 #~ msgid "US created successfully"
 #~ msgstr "US creata con successo"
 
-#~ msgid "New Artifact"
-#~ msgstr "Nuovo Reperto"
+msgid "New Artifact"
+msgstr "Nuovo Reperto"
 
 #~ msgid "Edit Artifact"
 #~ msgstr "Modifica Reperto"
@@ -245,23 +245,23 @@ msgstr ""
 #~ msgid "View"
 #~ msgstr "Visualizza"
 
-#~ msgid "Dashboard"
-#~ msgstr "Dashboard"
+msgid "Dashboard"
+msgstr "Dashboard"
 
-#~ msgid "Sites"
-#~ msgstr "Siti"
+msgid "Sites"
+msgstr "Siti"
 
 #~ msgid "US"
 #~ msgstr "US"
 
-#~ msgid "Inventory"
-#~ msgstr "Inventario"
+msgid "Inventory"
+msgstr "Inventario"
 
-#~ msgid "Tools"
-#~ msgstr "Strumenti"
+msgid "Tools"
+msgstr "Strumenti"
 
-#~ msgid "Harris Matrix"
-#~ msgstr "Harris Matrix"
+msgid "Harris Matrix"
+msgstr "Harris Matrix"
 
 #~ msgid "Export GraphML (yEd)"
 #~ msgstr "Esporta GraphML (yEd)"
@@ -302,11 +302,11 @@ msgstr ""
 #~ msgid "General Statistics"
 #~ msgstr "Statistiche Generali"
 
-#~ msgid "Archaeological Sites"
-#~ msgstr "Siti Archeologici"
+msgid "Archaeological Sites"
+msgstr "Siti Archeologici"
 
-#~ msgid "Stratigraphic Units"
-#~ msgstr "Unità Stratigrafiche"
+msgid "Stratigraphic Units"
+msgstr "Unità Stratigrafiche"
 
 #~ msgid "Catalogued Artifacts"
 #~ msgstr "Reperti Catalogati"
@@ -428,92 +428,92 @@ msgstr ""
 #~ msgid "No sites available to generate Harris Matrix"
 #~ msgstr "Nessun sito disponibile per generare la Harris Matrix"
 
-#~ msgid "Analytics"
-#~ msgstr "Analitiche"
+msgid "Analytics"
+msgstr "Analitiche"
 
-#~ msgid "Sites List"
-#~ msgstr "Lista Siti"
+msgid "Sites List"
+msgstr "Lista Siti"
 
-#~ msgid "US List"
-#~ msgstr "Lista US"
+msgid "US List"
+msgstr "Lista US"
 
-#~ msgid "Artifacts List"
-#~ msgstr "Lista Reperti"
+msgid "Artifacts List"
+msgstr "Lista Reperti"
 
-#~ msgid "Export/Import"
-#~ msgstr "Esporta/Importa"
+msgid "Export/Import"
+msgstr "Esporta/Importa"
 
-#~ msgid "online"
-#~ msgstr "online"
+msgid "online"
+msgstr "online"
 
-#~ msgid "Database"
-#~ msgstr "Database"
+msgid "Database"
+msgstr "Database"
 
-#~ msgid "Users"
-#~ msgstr "Utenti"
+msgid "Users"
+msgstr "Utenti"
 
-#~ msgid "API Docs"
-#~ msgstr "Documentazione API"
+msgid "API Docs"
+msgstr "Documentazione API"
 
-#~ msgid "Logout"
-#~ msgstr "Esci"
+msgid "Logout"
+msgstr "Esci"
 
-#~ msgid "Login"
-#~ msgstr "Accedi"
+msgid "Login"
+msgstr "Accedi"
 
-#~ msgid "Navigation"
-#~ msgstr "Navigazione"
+msgid "Navigation"
+msgstr "Navigazione"
 
-#~ msgid "Material Inventory"
-#~ msgstr "Inventario Materiali"
+msgid "Material Inventory"
+msgstr "Inventario Materiali"
 
-#~ msgid "Upload Media"
-#~ msgstr "Carica Media"
+msgid "Upload Media"
+msgstr "Carica Media"
 
-#~ msgid "Administration"
-#~ msgstr "Amministrazione"
+msgid "Administration"
+msgstr "Amministrazione"
 
-#~ msgid "Database Management"
-#~ msgstr "Gestione Database"
+msgid "Database Management"
+msgstr "Gestione Database"
 
-#~ msgid "has connected"
-#~ msgstr "si è collegato"
+msgid "has connected"
+msgstr "si è collegato"
 
-#~ msgid "has disconnected"
-#~ msgstr "si è disconnesso"
+msgid "has disconnected"
+msgstr "si è disconnesso"
 
-#~ msgid "created site"
-#~ msgstr "ha creato il sito"
+msgid "created site"
+msgstr "ha creato il sito"
 
-#~ msgid "modified site"
-#~ msgstr "ha modificato il sito"
+msgid "modified site"
+msgstr "ha modificato il sito"
 
-#~ msgid "deleted site"
-#~ msgstr "ha eliminato il sito"
+msgid "deleted site"
+msgstr "ha eliminato il sito"
 
-#~ msgid "created US"
-#~ msgstr "ha creato US"
+msgid "created US"
+msgstr "ha creato US"
 
-#~ msgid "modified US"
-#~ msgstr "ha modificato US"
+msgid "modified US"
+msgstr "ha modificato US"
 
-#~ msgid "deleted US"
-#~ msgstr "ha eliminato US"
+msgid "deleted US"
+msgstr "ha eliminato US"
 
-#~ msgid "created artifact"
-#~ msgstr "ha creato reperto"
+msgid "created artifact"
+msgstr "ha creato reperto"
 
-#~ msgid "modified artifact"
-#~ msgstr "ha modificato reperto"
+msgid "modified artifact"
+msgstr "ha modificato reperto"
 
-#~ msgid "deleted artifact"
-#~ msgstr "ha eliminato reperto"
+msgid "deleted artifact"
+msgstr "ha eliminato reperto"
 
-#~ msgid "Notification"
-#~ msgstr "Notifica"
+msgid "Notification"
+msgstr "Notifica"
 
-#~ msgid "Now"
-#~ msgstr "Ora"
+msgid "Now"
+msgstr "Ora"
 
 #~ msgid "Archaeological Dashboard"
 #~ msgstr "Dashboard Archeologica"
@@ -1249,11 +1249,11 @@ msgstr ""
 #~ msgid "USM sheet generation to be implemented"
 #~ msgstr "Generazione schede USM da implementare"
 
-#~ msgid "Menu"
-#~ msgstr "Manuale"
+msgid "Menu"
+msgstr "Menu"
 
-#~ msgid "Main Sections"
-#~ msgstr "Azioni"
+msgid "Main Sections"
+msgstr "Sezioni Principali"
 
 #~ msgid "3D Model Viewer"
 #~ msgstr "3D Model Viewer"
@@ -1312,3 +1312,250 @@ msgstr ""
 #~ msgid "Error loading 3D model"
 #~ msgstr "Errore caricamento statistiche: {}"
 
+
+# Analytics Dashboard translations
+
+msgid "Total Sites"
+msgstr "Siti Totali"
+
+msgid "Total US"
+msgstr "US Totali"
+
+msgid "Total Finds"
+msgstr "Reperti Totali"
+
+msgid "Regions"
+msgstr "Regioni"
+
+msgid "Provinces"
+msgstr "Province"
+
+msgid "Sites by Region"
+msgstr "Siti per Regione"
+
+msgid "Sites by Province"
+msgstr "Siti per Provincia"
+
+msgid "US by Chronological Period"
+msgstr "US per Periodo Cronologico"
+
+msgid "US by Type"
+msgstr "US per Tipologia"
+
+msgid "Finds by Type"
+msgstr "Reperti per Tipologia"
+
+msgid "Finds by Conservation State"
+msgstr "Reperti per Stato di Conservazione"
+
+msgid "US by Site"
+msgstr "US per Sito"
+
+msgid "Finds by Site"
+msgstr "Reperti per Sito"
+
+msgid "Number of Sites"
+msgstr "Numero Siti"
+
+msgid "Number of US"
+msgstr "Numero US"
+
+msgid "Number of Finds"
+msgstr "Numero Reperti"
+
+# Additional translations for web interface
+
+msgid "Analytics Dashboard"
+msgstr "Dashboard Analitiche"
+
+msgid "Error loading dashboard"
+msgstr "Errore caricamento dashboard"
+
+msgid "Error loading analytics"
+msgstr "Errore caricamento analytics"
+
+msgid "Site"
+msgstr "Sito"
+
+msgid "created successfully"
+msgstr "creato con successo"
+
+msgid "updated successfully"
+msgstr "aggiornato con successo"
+
+msgid "Error creating site"
+msgstr "Errore nella creazione del sito"
+
+msgid "Error updating site"
+msgstr "Errore nell'aggiornamento del sito"
+
+msgid "Error creating US"
+msgstr "Errore nella creazione US"
+
+msgid "Error updating US"
+msgstr "Errore nell'aggiornamento US"
+
+msgid "Form validation error. Check required fields."
+msgstr "Errore nella validazione del form. Controlla i campi obbligatori."
+
+msgid "Artifact"
+msgstr "Reperto"
+
+msgid "Error creating artifact"
+msgstr "Errore nella creazione reperto"
+
+msgid "Error updating artifact"
+msgstr "Errore nell'aggiornamento reperto"
+
+msgid "Error generating Harris Matrix"
+msgstr "Errore generazione Harris Matrix"
+
+msgid "Error generating Harris Matrix Graphviz"
+msgstr "Errore generazione Harris Matrix Graphviz"
+
+msgid "Error during GraphML conversion"
+msgstr "Errore durante la conversione a GraphML"
+
+msgid "Error during GraphML export"
+msgstr "Errore durante l'export GraphML"
+
+msgid "Validation error"
+msgstr "Errore validazione"
+
+msgid "Error applying fix"
+msgstr "Errore applicazione fix"
+
+msgid "Error exporting PDF"
+msgstr "Errore export PDF"
+
+msgid "Error exporting Harris Matrix PDF"
+msgstr "Errore export PDF Harris Matrix"
+
+msgid "Error exporting US PDF"
+msgstr "Errore export PDF US"
+
+msgid "Error exporting Inventory PDF"
+msgstr "Errore export PDF Inventario"
+
+msgid "Error uploading file"
+msgstr "Errore caricamento file"
+
+msgid "File uploaded successfully!"
+msgstr "File caricato con successo!"
+
+msgid "Database"
+msgstr "Database"
+
+msgid "loaded successfully"
+msgstr "caricato con successo"
+
+msgid "Error loading database"
+msgstr "Errore caricamento database"
+
+msgid "Connection"
+msgstr "Connessione"
+
+msgid "added successfully"
+msgstr "aggiunta con successo"
+
+msgid "Connection error"
+msgstr "Errore connessione"
+
+msgid "Error"
+msgstr "Errore"
+
+msgid "Error retrieving database info"
+msgstr "Errore recupero info database"
+
+msgid "Error exporting Excel"
+msgstr "Errore export Excel"
+
+msgid "Error exporting CSV"
+msgstr "Errore export CSV"
+
+msgid "Error importing CSV"
+msgstr "Errore import CSV"
+
+msgid "Database Information"
+msgstr "Informazioni Database"
+
+msgid "Back"
+msgstr "Indietro"
+
+msgid "Connection Information"
+msgstr "Informazioni Connessione"
+
+msgid "Connection URL"
+msgstr "URL Connessione"
+
+msgid "Main Tables"
+msgstr "Tabelle Principali"
+
+msgid "Table"
+msgstr "Tabella"
+
+msgid "Number of Records"
+msgstr "Numero Record"
+
+msgid "Description"
+msgstr "Descrizione"
+
+msgid "Archaeological sites"
+msgstr "Siti archeologici"
+
+msgid "Stratigraphic units"
+msgstr "Unità stratigrafiche"
+
+msgid "Material inventory"
+msgstr "Inventario materiali"
+
+msgid "All Tables"
+msgstr "Tutte le Tabelle"
+
+msgid "Database Status"
+msgstr "Stato Database"
+
+msgid "Active Connection"
+msgstr "Connessione Attiva"
+
+msgid "Database reachable and operational"
+msgstr "Database raggiungibile e operativo"
+
+msgid "Valid Structure"
+msgstr "Struttura Valida"
+
+msgid "tables found"
+msgstr "tabelle trovate"
+
+msgid "No Tables"
+msgstr "Nessuna Tabella"
+
+msgid "Empty or incompatible database"
+msgstr "Database vuoto o incompatibile"
+
+msgid "Data Present"
+msgstr "Dati Presenti"
+
+msgid "total records"
+msgstr "record totali"
+
+msgid "Empty Database"
+msgstr "Database Vuoto"
+
+msgid "No data present"
+msgstr "Nessun dato presente"
+
+msgid "Actions"
+msgstr "Azioni"
+
+msgid "Database Management"
+msgstr "Gestione Database"
+
+msgid "View Sites"
+msgstr "Visualizza Siti"
+
+msgid "View US"
+msgstr "Visualizza US"
+
+msgid "View Inventory"
+msgstr "Visualizza Inventario"

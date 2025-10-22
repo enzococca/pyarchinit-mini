@@ -9,7 +9,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from flask_login import login_required, current_user
 from flask_socketio import SocketIO
-from flask_babel import lazy_gettext as _l
+from flask_babel import lazy_gettext as _l, gettext as _
 from wtforms import StringField, TextAreaField, IntegerField, SelectField, FileField, BooleanField
 from wtforms.validators import DataRequired, Optional
 from werkzeug.utils import secure_filename
@@ -468,7 +468,7 @@ def create_app():
             
             return render_template('dashboard.html', stats=stats)
         except Exception as e:
-            flash(f'Errore caricamento dashboard: {str(e)}', 'error')
+            flash(f'{_("Error loading dashboard")}: {str(e)}', 'error')
             return render_template('dashboard.html', stats={})
 
     @app.route('/analytics')
@@ -481,7 +481,7 @@ def create_app():
 
             return render_template('analytics/dashboard.html', data=analytics_data)
         except Exception as e:
-            flash(f'Errore caricamento analytics: {str(e)}', 'error')
+            flash(f'{_("Error loading analytics")}: {str(e)}', 'error')
             return redirect(url_for('index'))
 
     # Sites routes
@@ -530,11 +530,11 @@ def create_app():
                 # Broadcast site creation
                 broadcast_site_created(socketio, site_data['sito'], site_id)
 
-                flash(f'Sito "{site_data["sito"]}" creato con successo!', 'success')
+                flash(f'{_("Site")} "{site_data["sito"]}" {_("created successfully")}!', 'success')
                 return redirect(url_for('sites_list'))
                 
             except Exception as e:
-                flash(f'Errore nella creazione del sito: {str(e)}', 'error')
+                flash(f'{_("Error creating site")}: {str(e)}', 'error')
         
         return render_template('sites/form.html', form=form, title='Nuovo Sito')
 
@@ -565,11 +565,11 @@ def create_app():
 
                 updated_site = site_service.update_site(site_id, update_data)
 
-                flash(f'Sito "{update_data["sito"]}" aggiornato con successo!', 'success')
+                flash(f'{_("Site")} "{update_data["sito"]}" {_("updated successfully")}!', 'success')
                 return redirect(url_for('sites_list'))
 
             except Exception as e:
-                flash(f'Errore nell\'aggiornamento del sito: {str(e)}', 'error')
+                flash(f'{_("Error updating site")}: {str(e)}', 'error')
 
         # Pre-populate form with existing data
         elif request.method == 'GET':
@@ -726,14 +726,14 @@ def create_app():
                 # Broadcast US creation (use data from form, not from detached instance)
                 broadcast_us_created(socketio, us_data['sito'], us_data['us'])
 
-                flash(f'US {us_data["us"]} creata con successo!', 'success')
+                flash(f'US {us_data["us"]} {_("created successfully")}!', 'success')
                 return redirect(url_for('us_list'))
 
             except Exception as e:
-                flash(f'Errore nella creazione US: {str(e)}', 'error')
+                flash(f'{_("Error creating US")}: {str(e)}', 'error')
         elif request.method == 'POST':
             # Form validation failed - show errors
-            flash('Errore nella validazione del form. Controlla i campi obbligatori.', 'error')
+            flash(_("Form validation error. Check required fields."), 'error')
             print(f"Form validation errors: {form.errors}")
         
         return render_template('us/form.html', form=form, title='Nuova US')
@@ -835,11 +835,11 @@ def create_app():
 
                 us_service.update_us(us_id, update_data)
 
-                flash(f'US {update_data["us"]} aggiornata con successo!', 'success')
+                flash(f'US {update_data["us"]} {_("updated successfully")}!', 'success')
                 return redirect(url_for('us_list'))
 
             except Exception as e:
-                flash(f'Errore nell\'aggiornamento US: {str(e)}', 'error')
+                flash(f'{_("Error updating US")}: {str(e)}', 'error')
 
         # Pre-populate form with existing data
         elif request.method == 'GET':
@@ -1016,14 +1016,14 @@ def create_app():
                 # Broadcast inventario creation (use data from form, not from detached instance)
                 broadcast_inventario_created(socketio, inv_data['numero_inventario'], inv_data['sito'])
 
-                flash(f'Reperto {inv_data["numero_inventario"]} creato con successo!', 'success')
+                flash(f'{_("Artifact")} {inv_data["numero_inventario"]} {_("created successfully")}!', 'success')
                 return redirect(url_for('inventario_list'))
 
             except Exception as e:
-                flash(f'Errore nella creazione reperto: {str(e)}', 'error')
+                flash(f'{_("Error creating artifact")}: {str(e)}', 'error')
         elif request.method == 'POST':
             # Form validation failed - show errors
-            flash('Errore nella validazione del form. Controlla i campi obbligatori.', 'error')
+            flash(_("Form validation error. Check required fields."), 'error')
             print(f"Form validation errors: {form.errors}")
 
         return render_template('inventario/form.html', form=form, title='Nuovo Reperto')
@@ -1170,11 +1170,11 @@ def create_app():
 
                 inventario_service.update_inventario(inv_id, update_data)
 
-                flash(f'Reperto {update_data["numero_inventario"]} aggiornato con successo!', 'success')
+                flash(f'{_("Artifact")} {update_data["numero_inventario"]} {_("updated successfully")}!', 'success')
                 return redirect(url_for('inventario_list'))
 
             except Exception as e:
-                flash(f'Errore nell\'aggiornamento reperto: {str(e)}', 'error')
+                flash(f'{_("Error updating artifact")}: {str(e)}', 'error')
 
         return render_template('inventario/form.html', form=form, title='Modifica Reperto', edit_mode=True)
 
@@ -1199,7 +1199,7 @@ def create_app():
                                  visualizer='matplotlib')
 
         except Exception as e:
-            flash(f'Errore generazione Harris Matrix: {str(e)}', 'error')
+            flash(f'{_("Error generating Harris Matrix")}: {str(e)}', 'error')
             return redirect(url_for('sites_list'))
 
     @app.route('/harris_matrix/<site_name>/graphviz')
@@ -1243,7 +1243,7 @@ def create_app():
         except Exception as e:
             import traceback
             traceback.print_exc()
-            flash(f'Errore generazione Harris Matrix Graphviz: {str(e)}', 'error')
+            flash(f'{_("Error generating Harris Matrix Graphviz")}: {str(e)}', 'error')
             return redirect(url_for('sites_list'))
 
     # GraphML Export routes
@@ -1619,7 +1619,7 @@ def create_app():
                         flash(f'Avviso: impossibile applicare stili EM_palette: {str(style_error)}', 'warning')
 
                 if graphml_content is None:
-                    flash('Errore durante la conversione a GraphML', 'error')
+                    flash(_("Error during GraphML conversion"), 'error')
                     return render_template('harris_matrix/graphml_export.html', form=form)
 
                 # Create temporary file for download
@@ -1650,7 +1650,7 @@ def create_app():
             except Exception as e:
                 import traceback
                 traceback.print_exc()
-                flash(f'Errore durante l\'export GraphML: {str(e)}', 'error')
+                flash(f'{_("Error during GraphML export")}: {str(e)}', 'error')
                 return render_template('harris_matrix/graphml_export.html', form=form)
 
         return render_template('harris_matrix/graphml_export.html', form=form)
@@ -1720,7 +1720,7 @@ def create_app():
         except Exception as e:
             import traceback
             traceback.print_exc()
-            flash(f'Errore validazione: {str(e)}', 'error')
+            flash(f'{_("Validation error")}: {str(e)}', 'error')
             return redirect(url_for('sites_list'))
 
     @app.route('/validate/<site_name>/fix', methods=['POST'])
@@ -1774,7 +1774,7 @@ def create_app():
         except Exception as e:
             import traceback
             traceback.print_exc()
-            flash(f'Errore applicazione fix: {str(e)}', 'error')
+            flash(f'{_("Error applying fix")}: {str(e)}', 'error')
             return redirect(url_for('validate_stratigraphic', site_name=site_name))
 
     # Export routes
@@ -1819,7 +1819,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF: {str(e)}', 'error')
+            flash(f'{_("Error exporting PDF")}: {str(e)}', 'error')
             return redirect(url_for('view_site', site_id=site_id))
 
     @app.route('/export/site_pdf_with_matrix/<site_name>')
@@ -1858,7 +1858,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF Harris Matrix: {str(e)}', 'error')
+            flash(f'{_("Error exporting Harris Matrix PDF")}: {str(e)}', 'error')
             return redirect(url_for('harris_matrix', site_name=site_name))
 
     @app.route('/export/us_pdf')
@@ -1897,7 +1897,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF US: {str(e)}', 'error')
+            flash(f'{_("Error exporting US PDF")}: {str(e)}', 'error')
             return redirect(url_for('us_list'))
 
     @app.route('/export/us_single_pdf/<sito>/<int:us_number>')
@@ -1931,7 +1931,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF US: {str(e)}', 'error')
+            flash(f'{_("Error exporting US PDF")}: {str(e)}', 'error')
             return redirect(url_for('us_list'))
 
     @app.route('/export/inventario_pdf')
@@ -1970,7 +1970,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF Inventario: {str(e)}', 'error')
+            flash(f'{_("Error exporting Inventory PDF")}: {str(e)}', 'error')
             return redirect(url_for('inventario_list'))
 
     @app.route('/export/inventario_single_pdf/<int:inv_id>')
@@ -2002,7 +2002,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF Inventario: {str(e)}', 'error')
+            flash(f'{_("Error exporting Inventory PDF")}: {str(e)}', 'error')
             return redirect(url_for('inventario_list'))
 
     # Media routes
@@ -2034,11 +2034,11 @@ def create_app():
                     # Clean up temp file
                     os.remove(temp_path)
                     
-                    flash('File caricato con successo!', 'success')
+                    flash(_("File uploaded successfully!"), 'success')
                     return redirect(url_for('upload_media'))
                     
             except Exception as e:
-                flash(f'Errore caricamento file: {str(e)}', 'error')
+                flash(f'{_("Error uploading file")}: {str(e)}', 'error')
         
         return render_template('media/upload.html', form=form)
 
@@ -2121,11 +2121,11 @@ def create_app():
                 }
                 app.config['DATABASE_CONNECTIONS'] = connections
 
-                flash(f'Database "{db_name}" caricato con successo!', 'success')
+                flash(f'{_("Database")} "{db_name}" {_("loaded successfully")}!', 'success')
                 return redirect(url_for('admin_database'))
 
             except Exception as e:
-                flash(f'Errore caricamento database: {str(e)}', 'error')
+                flash(f'{_("Error loading database")}: {str(e)}', 'error')
 
         return render_template('admin/database_upload.html', form=form)
 
@@ -2166,7 +2166,7 @@ def create_app():
                         # Try a simple query
                         session.execute('SELECT 1')
                 except Exception as e:
-                    flash(f'Errore connessione: {str(e)}', 'error')
+                    flash(f'{_("Connection error")}: {str(e)}', 'error')
                     return render_template('admin/database_connect.html', form=form)
 
                 # Store connection
@@ -2178,11 +2178,11 @@ def create_app():
                 }
                 app.config['DATABASE_CONNECTIONS'] = connections
 
-                flash(f'Connessione "{conn_name}" aggiunta con successo!', 'success')
+                flash(f'{_("Connection")} "{conn_name}" {_("added successfully")}!', 'success')
                 return redirect(url_for('admin_database'))
 
             except Exception as e:
-                flash(f'Errore: {str(e)}', 'error')
+                flash(f'{_("Error")}: {str(e)}', 'error')
 
         return render_template('admin/database_connect.html', form=form)
 
@@ -2215,7 +2215,7 @@ def create_app():
                                  current_url=app.config['CURRENT_DATABASE_URL'])
 
         except Exception as e:
-            flash(f'Errore recupero info database: {str(e)}', 'error')
+            flash(f'{_("Error retrieving database info")}: {str(e)}', 'error')
             return redirect(url_for('admin_database'))
 
     # API endpoints for AJAX
@@ -2246,7 +2246,7 @@ def create_app():
                            download_name='sites_export.xlsx',
                            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         except Exception as e:
-            flash(f'Errore export Excel: {str(e)}', 'error')
+            flash(f'{_("Error exporting Excel")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/export/us/excel')
@@ -2261,7 +2261,7 @@ def create_app():
                            download_name=filename,
                            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         except Exception as e:
-            flash(f'Errore export Excel: {str(e)}', 'error')
+            flash(f'{_("Error exporting Excel")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/export/inventario/excel')
@@ -2276,7 +2276,7 @@ def create_app():
                            download_name=filename,
                            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         except Exception as e:
-            flash(f'Errore export Excel: {str(e)}', 'error')
+            flash(f'{_("Error exporting Excel")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     # CSV Export Routes
@@ -2290,7 +2290,7 @@ def create_app():
                            download_name='sites_export.csv',
                            mimetype='text/csv')
         except Exception as e:
-            flash(f'Errore export CSV: {str(e)}', 'error')
+            flash(f'{_("Error exporting CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/export/us/csv')
@@ -2305,7 +2305,7 @@ def create_app():
                            download_name=filename,
                            mimetype='text/csv')
         except Exception as e:
-            flash(f'Errore export CSV: {str(e)}', 'error')
+            flash(f'{_("Error exporting CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/export/inventario/csv')
@@ -2320,7 +2320,7 @@ def create_app():
                            download_name=filename,
                            mimetype='text/csv')
         except Exception as e:
-            flash(f'Errore export CSV: {str(e)}', 'error')
+            flash(f'{_("Error exporting CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     # CSV Import Routes
@@ -2358,12 +2358,12 @@ def create_app():
 
             if result['errors']:
                 for err in result['errors'][:5]:  # Show first 5 errors
-                    flash(f'Errore: {err["error"]}', 'warning')
+                    flash(f'{_("Error")}: {err["error"]}', 'warning')
 
             return redirect(url_for('export_page'))
 
         except Exception as e:
-            flash(f'Errore import CSV: {str(e)}', 'error')
+            flash(f'{_("Error importing CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/import/us/csv', methods=['POST'])
@@ -2400,12 +2400,12 @@ def create_app():
 
             if result['errors']:
                 for err in result['errors'][:5]:
-                    flash(f'Errore: {err["error"]}', 'warning')
+                    flash(f'{_("Error")}: {err["error"]}', 'warning')
 
             return redirect(url_for('export_page'))
 
         except Exception as e:
-            flash(f'Errore import CSV: {str(e)}', 'error')
+            flash(f'{_("Error importing CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/import/inventario/csv', methods=['POST'])
@@ -2442,12 +2442,12 @@ def create_app():
 
             if result['errors']:
                 for err in result['errors'][:5]:
-                    flash(f'Errore: {err["error"]}', 'warning')
+                    flash(f'{_("Error")}: {err["error"]}', 'warning')
 
             return redirect(url_for('export_page'))
 
         except Exception as e:
-            flash(f'Errore import CSV: {str(e)}', 'error')
+            flash(f'{_("Error importing CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     # ===== 3D Model Viewer Routes (s3Dgraphy Integration) =====

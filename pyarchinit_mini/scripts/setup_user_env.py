@@ -278,13 +278,14 @@ def print_summary(directories: dict):
     print("\n" + "="*60)
 
 
-def main():
+def main(silent=False):
     """
     Entry point principale per lo script di setup.
     """
-    print("="*60)
-    print("PyArchInit-Mini - Setup Ambiente Utente")
-    print("="*60)
+    if not silent:
+        print("="*60)
+        print("PyArchInit-Mini - Setup Ambiente Utente")
+        print("="*60)
 
     try:
         # 1. Crea le directory

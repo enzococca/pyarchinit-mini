@@ -1,11 +1,19 @@
-# Sphinx configuration file
+# Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
 import os
 import sys
-sys.path.insert(0, os.path.abspath('/Users/enzo/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/pyarchinit/pyarchinit-mini'))
+sys.path.insert(0, os.path.abspath('..'))
 
-project = 'pyarchinit-mini'
-copyright = '2025, pyarchinit-mini'
-author = 'pyarchinit-mini Team'
+# -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+project = 'PyArchInit-Mini'
+copyright = '2025, PyArchInit Team'
+author = 'PyArchInit Team'
+release = '1.2.12'
 
 extensions = [
     'sphinx.ext.autodoc',
