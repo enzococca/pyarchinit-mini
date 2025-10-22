@@ -14,13 +14,15 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 ## ✨ Features
 
 ### 🏛️ Core Data Management
-- **Site Management**: Complete CRUD operations for archaeological sites
+- **Site Management**: Complete CRUD operations for archaeological sites with i18n support
 - **Stratigraphic Units (US)**: 49 fields organized in 6 tabs, matching desktop GUI
 - **Material Inventory**: 37 fields in 8 tabs with ICCD thesaurus support
 - **Multi-Database**: SQLite and PostgreSQL with upload/connect capabilities
+- **Internationalization**: Full support for Italian and English languages
 
 ### 🔬 Advanced Archaeological Tools
-- **Harris Matrix**: Graphviz visualizer with 4 grouping modes (period_area, period, area, none)
+- **Harris Matrix**: Graphviz visualizer with 4 grouping modes and GraphML export
+- **3D Visualization**: s3Dgraphy integration for stratigraphic unit visualization
 - **Stratigraphic Validation**: Paradox detection, cycle detection, auto-fix reciprocal relationships
 - **PDF Export**: Desktop-style reports (Sites, US, Inventario, Harris Matrix embedded)
 - **Media Management**: Images, documents, videos with metadata
@@ -39,7 +41,7 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **Multi-Interface**: Available in Web UI, Desktop GUI, and CLI
 - **Duplicate Handling**: Skip duplicates option to preserve existing data
 
-### 🔐 Multi-User Authentication (NEW in v1.0.8)
+### 🔐 Multi-User Authentication
 - **Role-Based Access Control**: 3 user roles (Admin, Operator, Viewer)
 - **JWT Authentication**: Secure API access with JSON Web Tokens
 - **Session Management**: Flask-Login for Web interface

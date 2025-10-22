@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2>{{ title }}</h2>
+
+    <form method="POST" class="mt-4">
+        {{ form.hidden_tag() }}
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>{{ _('Form errors:') }}</strong>
+            <ul>
+            {% for field_name, errors in form.errors.items() %}
+                {% for error in errors %}
+                <li>{{ field_name }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Bootstrap Tabs -->
+        <ul class="nav nav-tabs" id="usFormTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab" aria-controls="basic" aria-selected="true">
+                    <i class="fas fa-info-circle"></i> {{ _('Basic Information') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="false">
+                    <i class="fas fa-align-left"></i> {{ _('Descriptions') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="physical-tab" data-bs-toggle="tab" data-bs-target="#physical" type="button" role="tab" aria-controls="physical" aria-selected="false">
+                    <i class="fas fa-ruler"></i> {{ _('Physical Characteristics') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="chronology-tab" data-bs-toggle="tab" data-bs-target="#chronology" type="button" role="tab" aria-controls="chronology" aria-selected="false">
+                    <i class="fas fa-calendar-alt"></i> {{ _('Chronology') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="relationships-tab" data-bs-toggle="tab" data-bs-target="#relationships" type="button" role="tab" aria-controls="relationships" aria-selected="false">
+                    <i class="fas fa-project-diagram"></i> {{ _('Stratigraphic Relationships') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="documentation-tab" data-bs-toggle="tab" data-bs-target="#documentation" type="button" role="tab" aria-controls="documentation" aria-selected="false">
+                    <i class="fas fa-file-alt"></i> {{ _('Documentation') }}
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content border border-top-0 p-4" id="usFormTabContent">
+            <!-- TAB 1: Informazioni Base -->
+            <div class="tab-pane fade show active" id="basic" role="tabpanel" aria-labelledby="basic-tab">
+                <!-- Identificazione -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ _('Identification') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ _('Site') }} *</label>
+                                {{ form.sito(class="form-select", required=True) }}
+                                {% if form.sito.errors %}
+                                    <div class="text-danger">{{ form.sito.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Area') }}</label>
+                                {{ form.area(class="form-control") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">{{ _('SU Number') }} *</label>
+                                {{ form.us(class="form-control", required=True) }}
+                                {% if form.us.errors %}
+                                    <div class="text-danger">{{ form.us.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Unit Type') }}</label>
+                                {{ form.unita_tipo(class="form-select") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Sector') }}</label>
+                                {{ form.settore(class="form-control") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Room') }}</label>
+                                {{ form.ambient(class="form-control") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Trench') }}</label>
+                                {{ form.saggio(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">{{ _('Square/Partition') }}</label>
+                                {{ form.quad_par(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dati di Scavo -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ _('Excavation Data') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Excavation Year') }}</label>
+                                {{ form.anno_scavo(class="form-control", placeholder="YYYY") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Excavated') }}</label>
+                                {{ form.scavato(class="form-select") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Excavation Method') }}</label>
+                                {{ form.metodo_di_scavo(class="form-select") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Recording Date') }}</label>
+                                {{ form.data_schedatura(class="form-control", placeholder="YYYY-MM-DD") }}
+                                <small class="text-muted">{{ _('Format: YYYY-MM-DD') }}</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('Recorder') }}</label>
+                                {{ form.schedatore(class="form-control") }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('SU Director') }}</label>
+                                {{ form.direttore_us(class="form-control") }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('SU Supervisor') }}</label>
+                                {{ form.responsabile_us(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">{{ _('Activity') }}</label>
+                                {{ form.attivita(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catalogazione ICCD -->
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">{{ _('ICCD Cataloguing') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('General Catalogue No.') }}</label>
+                                {{ form.n_catalogo_generale(class="form-control") }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('Internal Catalogue No.') }}</label>
+                                {{ form.n_catalogo_interno(class="form-control") }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('International Catalogue No.') }}</label>
+                                {{ form.n_catalogo_internazionale(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">{{ _('Superintendence') }}</label>
+                                {{ form.soprintendenza(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Descrizioni -->
+            <div class="tab-pane fade" id="description" role="tabpanel" aria-labelledby="description-tab">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ _('Stratigraphic Description') }}</label>
+                    {{ form.d_stratigrafica(class="form-control", rows=4) }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ _('Interpretative Description') }}</label>
+                    {{ form.d_interpretativa(class="form-control", rows=4) }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Detailed Description') }}</label>
+                    {{ form.descrizione(class="form-control", rows=6) }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Interpretation') }}</label>
+                    {{ form.interpretazione(class="form-control", rows=6) }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Observations') }}</label>
+                    {{ form.osservazioni(class="form-control", rows=4) }}
+                </div>
+            </div>
+
+            <!-- TAB 3: Caratteristiche Fisiche -->
+            <div class="tab-pane fade" id="physical" role="tabpanel" aria-labelledby="physical-tab">
+                <!-- Caratteristiche -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ _('Characteristics') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Formation') }}</label>
+                                {{ form.formazione(class="form-select") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Conservation State') }}</label>
+                                {{ form.stato_di_conservazione(class="form-select") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Color') }}</label>
+                                {{ form.colore(class="form-control") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ _('Consistency') }}</label>
+                                {{ form.consistenza(class="form-select") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">{{ _('Structure') }}</label>
+                                {{ form.struttura(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Misure -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ _('Measurements') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Relative Elevation') }}</label>
+                                {{ form.quota_relativa(class="form-control", placeholder=_('e.g. 10.50')) }}
+                                <small class="text-muted">{{ _('Meters') }}</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Absolute Elevation') }}</label>
+                                {{ form.quota_abs(class="form-control", placeholder=_('e.g. 120.50')) }}
+                                <small class="text-muted">{{ _('Meters a.s.l.') }}</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('Max Length') }}</label>
+                                {{ form.lunghezza_max(class="form-control", placeholder=_('e.g. 250')) }}
+                                <small class="text-muted">{{ _('cm') }}</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('Average Width') }}</label>
+                                {{ form.larghezza_media(class="form-control", placeholder=_('e.g. 150')) }}
+                                <small class="text-muted">{{ _('cm') }}</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('Max Height') }}</label>
+                                {{ form.altezza_max(class="form-control", placeholder=_('e.g. 50')) }}
+                                <small class="text-muted">{{ _('cm') }}</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('Min Height') }}</label>
+                                {{ form.altezza_min(class="form-control", placeholder=_('e.g. 10')) }}
+                                <small class="text-muted">{{ _('cm') }}</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('Max Depth') }}</label>
+                                {{ form.profondita_max(class="form-control", placeholder=_('e.g. 80')) }}
+                                <small class="text-muted">{{ _('cm') }}</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ _('Min Depth') }}</label>
+                                {{ form.profondita_min(class="form-control", placeholder=_('e.g. 20')) }}
+                                <small class="text-muted">{{ _('cm') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: Cronologia -->
+            <div class="tab-pane fade" id="chronology" role="tabpanel" aria-labelledby="chronology-tab">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ _('Periodization') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ _('Initial Period') }}</label>
+                                {{ form.periodo_iniziale(class="form-select") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Initial Phase') }}</label>
+                                {{ form.fase_iniziale(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ _('Final Period') }}</label>
+                                {{ form.periodo_finale(class="form-select") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Final Phase') }}</label>
+                                {{ form.fase_finale(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Dating') }}</label>
+                                {{ form.datazione(class="form-control", placeholder=_('e.g. 1st century AD')) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Reliability') }}</label>
+                                {{ form.affidabilita(class="form-select") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>{{ _('Tip:') }}</strong> {{ _('Specifying the initial and final period helps to chronologically contextualize the stratigraphic unit in the archaeological site.') }}
+                </div>
+            </div>
+
+            <!-- TAB 5: Relazioni Stratigrafiche -->
+            <div class="tab-pane fade" id="relationships" role="tabpanel" aria-labelledby="relationships-tab">
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>{{ _('Stratigraphic relationships format:') }}</strong><br>
+                    {{ _('Enter relationships in the format:') }} <code>{{ _('covers 1002, cuts 1005, leans on 1010') }}</code><br>
+                    {{ _('Relationship types: covers, cuts, leans on, fills, equal to, bonds to') }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ _('Stratigraphic Relationships') }}</label>
+                    {{ form.rapporti(class="form-control", rows=8) }}
+                    <small class="form-text text-muted">
+                        {{ _('Example: "Covers 1002, Covers 1003, Cuts 1005, Leans on 1010"') }}
+                    </small>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">{{ _('Harris Matrix Relationships') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <i class="fas fa-lightbulb text-warning"></i>
+                            {{ _('After saving the SU, it will be possible to view the complete Harris Matrix of the site in the dedicated section.') }}
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-check-circle text-success"></i>
+                            {{ _('The system will automatically validate stratigraphic relationships to identify any paradoxes or cycles.') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: Documentazione -->
+            <div class="tab-pane fade" id="documentation" role="tabpanel" aria-labelledby="documentation-tab">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ _('Inclusions') }}</label>
+                    {{ form.inclusi(class="form-control", rows=4) }}
+                    <small class="text-muted">{{ _('Materials or elements included in the SU') }}</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ _('Samples') }}</label>
+                    {{ form.campioni(class="form-control", rows=4) }}
+                    <small class="text-muted">{{ _('Samples taken from the SU') }}</small>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Flotation') }}</label>
+                        {{ form.flottazione(class="form-select") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Sieving') }}</label>
+                        {{ form.setacciatura(class="form-select") }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Documentation') }}</label>
+                    {{ form.documentazione(class="form-control", rows=4) }}
+                    <small class="text-muted">{{ _('References to photographic, graphic documentation, etc.') }}</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Containers/Contents') }}</label>
+                    {{ form.cont_per(class="form-control", rows=4) }}
+                    <small class="text-muted">{{ _('Containment relationships (e.g. "Container: SU 1000")') }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mt-4 mb-4">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save"></i> {{ _('Save US') }}
+            </button>
+            <a href="{{ url_for('us_list') }}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-times"></i> {{ _('Cancel') }}
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

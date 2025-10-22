@@ -1,0 +1,1792 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d20" for="edge" attr.name="relation_label" attr.type="string" />
+  <key id="d19" for="edge" attr.name="stratigraphic_relation" attr.type="string" />
+  <key id="d18" for="edge" attr.name="label" attr.type="string" />
+  <key id="d17" for="edge" attr.name="edge_type" attr.type="string" />
+  <key id="d16" for="edge" attr.name="edge_id" attr.type="string" />
+  <key id="d15" for="node" attr.name="phase" attr.type="string" />
+  <key id="d14" for="node" attr.name="period" attr.type="string" />
+  <key id="d13" for="node" attr.name="excavated" attr.type="string" />
+  <key id="d12" for="node" attr.name="excavation_year" attr.type="string" />
+  <key id="d11" for="node" attr.name="description_interp" attr.type="string" />
+  <key id="d10" for="node" attr.name="description_strat" attr.type="string" />
+  <key id="d9" for="node" attr.name="unit_type" attr.type="string" />
+  <key id="d8" for="node" attr.name="area" attr.type="string" />
+  <key id="d7" for="node" attr.name="site" attr.type="string" />
+  <key id="d6" for="node" attr.name="us_number" attr.type="string" />
+  <key id="d5" for="node" attr.name="node_type" attr.type="string" />
+  <key id="d4" for="node" attr.name="description" attr.type="string" />
+  <key id="d3" for="node" attr.name="name" attr.type="string" />
+  <key id="d2" for="graph" attr.name="graph_id" attr.type="string" />
+  <key id="d1" for="graph" attr.name="description" attr.type="string" />
+  <key id="d0" for="graph" attr.name="name" attr.type="string" />
+  <graph edgedefault="directed">
+    <node id="geo_Sito Archeologico di Esempio_stratigraphy">
+      <data key="d3">geo_position</data>
+      <data key="d4" />
+      <data key="d5">geo_position</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1001">
+      <data key="d3">US 1001</data>
+      <data key="d4">Humus - Strato superficiale di humus</data>
+      <data key="d5">Node</data>
+      <data key="d6">1001</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Humus - Strato superficiale di humus</data>
+      <data key="d11">Interpretazione: superficial. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1002">
+      <data key="d3">US 1002</data>
+      <data key="d4">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d5">Node</data>
+      <data key="d6">1002</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d11">Interpretazione: topsoil. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1003">
+      <data key="d3">US 1003</data>
+      <data key="d4">Crollo - Crollo di strutture murarie</data>
+      <data key="d5">Node</data>
+      <data key="d6">1003</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Crollo - Crollo di strutture murarie</data>
+      <data key="d11">Interpretazione: collapse. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1004">
+      <data key="d3">US 1004</data>
+      <data key="d4">Pavimento - Superficie pavimentale</data>
+      <data key="d5">Node</data>
+      <data key="d6">1004</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Pavimento - Superficie pavimentale</data>
+      <data key="d11">Interpretazione: floor. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1005">
+      <data key="d3">US 1005</data>
+      <data key="d4">Riempimento - Riempimento di fossa</data>
+      <data key="d5">Node</data>
+      <data key="d6">1005</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Riempimento - Riempimento di fossa</data>
+      <data key="d11">Interpretazione: fill. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1006">
+      <data key="d3">US 1006</data>
+      <data key="d4">Muro - Struttura muraria</data>
+      <data key="d5">Node</data>
+      <data key="d6">1006</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">USM</data>
+      <data key="d10">Muro - Struttura muraria</data>
+      <data key="d11">Interpretazione: wall. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1007">
+      <data key="d3">US 1007</data>
+      <data key="d4">Taglio - Interfaccia di taglio</data>
+      <data key="d5">Node</data>
+      <data key="d6">1007</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Taglio - Interfaccia di taglio</data>
+      <data key="d11">Interpretazione: cut. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1008">
+      <data key="d3">US 1008</data>
+      <data key="d4">Deposito - Deposito archeologico</data>
+      <data key="d5">Node</data>
+      <data key="d6">1008</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Deposito - Deposito archeologico</data>
+      <data key="d11">Interpretazione: deposit. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1009">
+      <data key="d3">US 1009</data>
+      <data key="d4">Distruzione - Livello di distruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1009</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Distruzione - Livello di distruzione</data>
+      <data key="d11">Interpretazione: destruction. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1010">
+      <data key="d3">US 1010</data>
+      <data key="d4">Costruzione - Livello di costruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1010</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Costruzione - Livello di costruzione</data>
+      <data key="d11">Interpretazione: construction. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1011">
+      <data key="d3">US 1011</data>
+      <data key="d4">Humus - Strato superficiale di humus</data>
+      <data key="d5">Node</data>
+      <data key="d6">1011</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Humus - Strato superficiale di humus</data>
+      <data key="d11">Interpretazione: superficial. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1012">
+      <data key="d3">US 1012</data>
+      <data key="d4">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d5">Node</data>
+      <data key="d6">1012</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d11">Interpretazione: topsoil. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1013">
+      <data key="d3">US 1013</data>
+      <data key="d4">Crollo - Crollo di strutture murarie</data>
+      <data key="d5">Node</data>
+      <data key="d6">1013</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Crollo - Crollo di strutture murarie</data>
+      <data key="d11">Interpretazione: collapse. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1014">
+      <data key="d3">US 1014</data>
+      <data key="d4">Pavimento - Superficie pavimentale</data>
+      <data key="d5">Node</data>
+      <data key="d6">1014</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Pavimento - Superficie pavimentale</data>
+      <data key="d11">Interpretazione: floor. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1015">
+      <data key="d3">US 1015</data>
+      <data key="d4">Riempimento - Riempimento di fossa</data>
+      <data key="d5">Node</data>
+      <data key="d6">1015</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Riempimento - Riempimento di fossa</data>
+      <data key="d11">Interpretazione: fill. Contesto medievale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Medievale</data>
+      <data key="d15">Alto Medioevo</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1016">
+      <data key="d3">US 1016</data>
+      <data key="d4">Muro - Struttura muraria</data>
+      <data key="d5">Node</data>
+      <data key="d6">1016</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">USM</data>
+      <data key="d10">Muro - Struttura muraria</data>
+      <data key="d11">Interpretazione: wall. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1017">
+      <data key="d3">US 1017</data>
+      <data key="d4">Taglio - Interfaccia di taglio</data>
+      <data key="d5">Node</data>
+      <data key="d6">1017</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Taglio - Interfaccia di taglio</data>
+      <data key="d11">Interpretazione: cut. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1018">
+      <data key="d3">US 1018</data>
+      <data key="d4">Deposito - Deposito archeologico</data>
+      <data key="d5">Node</data>
+      <data key="d6">1018</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Deposito - Deposito archeologico</data>
+      <data key="d11">Interpretazione: deposit. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1019">
+      <data key="d3">US 1019</data>
+      <data key="d4">Distruzione - Livello di distruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1019</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Distruzione - Livello di distruzione</data>
+      <data key="d11">Interpretazione: destruction. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1020">
+      <data key="d3">US 1020</data>
+      <data key="d4">Costruzione - Livello di costruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1020</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Costruzione - Livello di costruzione</data>
+      <data key="d11">Interpretazione: construction. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1021">
+      <data key="d3">US 1021</data>
+      <data key="d4">Humus - Strato superficiale di humus</data>
+      <data key="d5">Node</data>
+      <data key="d6">1021</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Humus - Strato superficiale di humus</data>
+      <data key="d11">Interpretazione: superficial. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1022">
+      <data key="d3">US 1022</data>
+      <data key="d4">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d5">Node</data>
+      <data key="d6">1022</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d11">Interpretazione: topsoil. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1023">
+      <data key="d3">US 1023</data>
+      <data key="d4">Crollo - Crollo di strutture murarie</data>
+      <data key="d5">Node</data>
+      <data key="d6">1023</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Crollo - Crollo di strutture murarie</data>
+      <data key="d11">Interpretazione: collapse. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1024">
+      <data key="d3">US 1024</data>
+      <data key="d4">Pavimento - Superficie pavimentale</data>
+      <data key="d5">Node</data>
+      <data key="d6">1024</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Pavimento - Superficie pavimentale</data>
+      <data key="d11">Interpretazione: floor. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1025">
+      <data key="d3">US 1025</data>
+      <data key="d4">Riempimento - Riempimento di fossa</data>
+      <data key="d5">Node</data>
+      <data key="d6">1025</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Riempimento - Riempimento di fossa</data>
+      <data key="d11">Interpretazione: fill. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1026">
+      <data key="d3">US 1026</data>
+      <data key="d4">Muro - Struttura muraria</data>
+      <data key="d5">Node</data>
+      <data key="d6">1026</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">USM</data>
+      <data key="d10">Muro - Struttura muraria</data>
+      <data key="d11">Interpretazione: wall. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1027">
+      <data key="d3">US 1027</data>
+      <data key="d4">Taglio - Interfaccia di taglio</data>
+      <data key="d5">Node</data>
+      <data key="d6">1027</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Taglio - Interfaccia di taglio</data>
+      <data key="d11">Interpretazione: cut. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1028">
+      <data key="d3">US 1028</data>
+      <data key="d4">Deposito - Deposito archeologico</data>
+      <data key="d5">Node</data>
+      <data key="d6">1028</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Deposito - Deposito archeologico</data>
+      <data key="d11">Interpretazione: deposit. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1029">
+      <data key="d3">US 1029</data>
+      <data key="d4">Distruzione - Livello di distruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1029</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Distruzione - Livello di distruzione</data>
+      <data key="d11">Interpretazione: destruction. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1030">
+      <data key="d3">US 1030</data>
+      <data key="d4">Costruzione - Livello di costruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1030</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Costruzione - Livello di costruzione</data>
+      <data key="d11">Interpretazione: construction. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1031">
+      <data key="d3">US 1031</data>
+      <data key="d4">Humus - Strato superficiale di humus</data>
+      <data key="d5">Node</data>
+      <data key="d6">1031</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Humus - Strato superficiale di humus</data>
+      <data key="d11">Interpretazione: superficial. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1032">
+      <data key="d3">US 1032</data>
+      <data key="d4">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d5">Node</data>
+      <data key="d6">1032</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d11">Interpretazione: topsoil. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1033">
+      <data key="d3">US 1033</data>
+      <data key="d4">Crollo - Crollo di strutture murarie</data>
+      <data key="d5">Node</data>
+      <data key="d6">1033</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Crollo - Crollo di strutture murarie</data>
+      <data key="d11">Interpretazione: collapse. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1034">
+      <data key="d3">US 1034</data>
+      <data key="d4">Pavimento - Superficie pavimentale</data>
+      <data key="d5">Node</data>
+      <data key="d6">1034</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Pavimento - Superficie pavimentale</data>
+      <data key="d11">Interpretazione: floor. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1035">
+      <data key="d3">US 1035</data>
+      <data key="d4">Riempimento - Riempimento di fossa</data>
+      <data key="d5">Node</data>
+      <data key="d6">1035</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Riempimento - Riempimento di fossa</data>
+      <data key="d11">Interpretazione: fill. Contesto romano imperiale.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Imperiale</data>
+      <data key="d15">Alto Impero</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1036">
+      <data key="d3">US 1036</data>
+      <data key="d4">Muro - Struttura muraria</data>
+      <data key="d5">Node</data>
+      <data key="d6">1036</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">USM</data>
+      <data key="d10">Muro - Struttura muraria</data>
+      <data key="d11">Interpretazione: wall. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1037">
+      <data key="d3">US 1037</data>
+      <data key="d4">Taglio - Interfaccia di taglio</data>
+      <data key="d5">Node</data>
+      <data key="d6">1037</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Taglio - Interfaccia di taglio</data>
+      <data key="d11">Interpretazione: cut. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1038">
+      <data key="d3">US 1038</data>
+      <data key="d4">Deposito - Deposito archeologico</data>
+      <data key="d5">Node</data>
+      <data key="d6">1038</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Deposito - Deposito archeologico</data>
+      <data key="d11">Interpretazione: deposit. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1039">
+      <data key="d3">US 1039</data>
+      <data key="d4">Distruzione - Livello di distruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1039</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Distruzione - Livello di distruzione</data>
+      <data key="d11">Interpretazione: destruction. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1040">
+      <data key="d3">US 1040</data>
+      <data key="d4">Costruzione - Livello di costruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1040</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Costruzione - Livello di costruzione</data>
+      <data key="d11">Interpretazione: construction. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1041">
+      <data key="d3">US 1041</data>
+      <data key="d4">Humus - Strato superficiale di humus</data>
+      <data key="d5">Node</data>
+      <data key="d6">1041</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Humus - Strato superficiale di humus</data>
+      <data key="d11">Interpretazione: superficial. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1042">
+      <data key="d3">US 1042</data>
+      <data key="d4">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d5">Node</data>
+      <data key="d6">1042</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Terreno arativo - Strato di aratura moderna</data>
+      <data key="d11">Interpretazione: topsoil. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1043">
+      <data key="d3">US 1043</data>
+      <data key="d4">Crollo - Crollo di strutture murarie</data>
+      <data key="d5">Node</data>
+      <data key="d6">1043</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Crollo - Crollo di strutture murarie</data>
+      <data key="d11">Interpretazione: collapse. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1044">
+      <data key="d3">US 1044</data>
+      <data key="d4">Pavimento - Superficie pavimentale</data>
+      <data key="d5">Node</data>
+      <data key="d6">1044</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Pavimento - Superficie pavimentale</data>
+      <data key="d11">Interpretazione: floor. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1045">
+      <data key="d3">US 1045</data>
+      <data key="d4">Riempimento - Riempimento di fossa</data>
+      <data key="d5">Node</data>
+      <data key="d6">1045</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Riempimento - Riempimento di fossa</data>
+      <data key="d11">Interpretazione: fill. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1046">
+      <data key="d3">US 1046</data>
+      <data key="d4">Muro - Struttura muraria</data>
+      <data key="d5">Node</data>
+      <data key="d6">1046</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">USM</data>
+      <data key="d10">Muro - Struttura muraria</data>
+      <data key="d11">Interpretazione: wall. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1047">
+      <data key="d3">US 1047</data>
+      <data key="d4">Taglio - Interfaccia di taglio</data>
+      <data key="d5">Node</data>
+      <data key="d6">1047</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Taglio - Interfaccia di taglio</data>
+      <data key="d11">Interpretazione: cut. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1048">
+      <data key="d3">US 1048</data>
+      <data key="d4">Deposito - Deposito archeologico</data>
+      <data key="d5">Node</data>
+      <data key="d6">1048</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Deposito - Deposito archeologico</data>
+      <data key="d11">Interpretazione: deposit. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">No</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1049">
+      <data key="d3">US 1049</data>
+      <data key="d4">Distruzione - Livello di distruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1049</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Distruzione - Livello di distruzione</data>
+      <data key="d11">Interpretazione: destruction. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Parzialmente</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <node id="Sito Archeologico di Esempio_A_1050">
+      <data key="d3">US 1050</data>
+      <data key="d4">Costruzione - Livello di costruzione</data>
+      <data key="d5">Node</data>
+      <data key="d6">1050</data>
+      <data key="d7">Sito Archeologico di Esempio</data>
+      <data key="d8">A</data>
+      <data key="d9">US</data>
+      <data key="d10">Costruzione - Livello di costruzione</data>
+      <data key="d11">Interpretazione: construction. Contesto romano repubblicano.</data>
+      <data key="d12">2024</data>
+      <data key="d13">Sì</data>
+      <data key="d14">Romano Repubblicano</data>
+      <data key="d15">Tardo Repubblicano</data>
+    </node>
+    <edge source="Sito Archeologico di Esempio_A_1001" target="Sito Archeologico di Esempio_A_1002">
+      <data key="d16">edge_1_COVERS_Sito Archeologico di Esempio_A_1001_to_Sito Archeologico di Esempio_A_1002</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1001" target="Sito Archeologico di Esempio_A_1005">
+      <data key="d16">edge_2_CUTS_Sito Archeologico di Esempio_A_1001_to_Sito Archeologico di Esempio_A_1005</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1002" target="Sito Archeologico di Esempio_A_1003">
+      <data key="d16">edge_3_COVERS_Sito Archeologico di Esempio_A_1002_to_Sito Archeologico di Esempio_A_1003</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1002" target="Sito Archeologico di Esempio_A_1001">
+      <data key="d16">edge_5_COVERED_BY_Sito Archeologico di Esempio_A_1002_to_Sito Archeologico di Esempio_A_1001</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1003" target="Sito Archeologico di Esempio_A_1004">
+      <data key="d16">edge_6_COVERS_Sito Archeologico di Esempio_A_1003_to_Sito Archeologico di Esempio_A_1004</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1003" target="Sito Archeologico di Esempio_A_1002">
+      <data key="d16">edge_7_COVERED_BY_Sito Archeologico di Esempio_A_1003_to_Sito Archeologico di Esempio_A_1002</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1004" target="Sito Archeologico di Esempio_A_1005">
+      <data key="d16">edge_8_COVERS_Sito Archeologico di Esempio_A_1004_to_Sito Archeologico di Esempio_A_1005</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1004" target="Sito Archeologico di Esempio_A_1006">
+      <data key="d16">edge_9_COVERS_Sito Archeologico di Esempio_A_1004_to_Sito Archeologico di Esempio_A_1006</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1004" target="Sito Archeologico di Esempio_A_1003">
+      <data key="d16">edge_10_COVERED_BY_Sito Archeologico di Esempio_A_1004_to_Sito Archeologico di Esempio_A_1003</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1005" target="Sito Archeologico di Esempio_A_1006">
+      <data key="d16">edge_11_COVERS_Sito Archeologico di Esempio_A_1005_to_Sito Archeologico di Esempio_A_1006</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1005" target="Sito Archeologico di Esempio_A_1007">
+      <data key="d16">edge_12_COVERS_Sito Archeologico di Esempio_A_1005_to_Sito Archeologico di Esempio_A_1007</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1005" target="Sito Archeologico di Esempio_A_1008">
+      <data key="d16">edge_13_COVERS_Sito Archeologico di Esempio_A_1005_to_Sito Archeologico di Esempio_A_1008</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1005" target="Sito Archeologico di Esempio_A_1004">
+      <data key="d16">edge_14_COVERED_BY_Sito Archeologico di Esempio_A_1005_to_Sito Archeologico di Esempio_A_1004</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1006" target="Sito Archeologico di Esempio_A_1007">
+      <data key="d16">edge_15_COVERS_Sito Archeologico di Esempio_A_1006_to_Sito Archeologico di Esempio_A_1007</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1006" target="Sito Archeologico di Esempio_A_1005">
+      <data key="d16">edge_16_COVERED_BY_Sito Archeologico di Esempio_A_1006_to_Sito Archeologico di Esempio_A_1005</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1007" target="Sito Archeologico di Esempio_A_1008">
+      <data key="d16">edge_17_COVERS_Sito Archeologico di Esempio_A_1007_to_Sito Archeologico di Esempio_A_1008</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1007" target="Sito Archeologico di Esempio_A_1006">
+      <data key="d16">edge_18_COVERED_BY_Sito Archeologico di Esempio_A_1007_to_Sito Archeologico di Esempio_A_1006</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1008" target="Sito Archeologico di Esempio_A_1009">
+      <data key="d16">edge_19_COVERS_Sito Archeologico di Esempio_A_1008_to_Sito Archeologico di Esempio_A_1009</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1008" target="Sito Archeologico di Esempio_A_1010">
+      <data key="d16">edge_20_COVERS_Sito Archeologico di Esempio_A_1008_to_Sito Archeologico di Esempio_A_1010</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1008" target="Sito Archeologico di Esempio_A_1011">
+      <data key="d16">edge_21_COVERS_Sito Archeologico di Esempio_A_1008_to_Sito Archeologico di Esempio_A_1011</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1008" target="Sito Archeologico di Esempio_A_1007">
+      <data key="d16">edge_22_COVERED_BY_Sito Archeologico di Esempio_A_1008_to_Sito Archeologico di Esempio_A_1007</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1009" target="Sito Archeologico di Esempio_A_1010">
+      <data key="d16">edge_23_COVERS_Sito Archeologico di Esempio_A_1009_to_Sito Archeologico di Esempio_A_1010</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1009" target="Sito Archeologico di Esempio_A_1011">
+      <data key="d16">edge_24_COVERS_Sito Archeologico di Esempio_A_1009_to_Sito Archeologico di Esempio_A_1011</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1009" target="Sito Archeologico di Esempio_A_1008">
+      <data key="d16">edge_25_COVERED_BY_Sito Archeologico di Esempio_A_1009_to_Sito Archeologico di Esempio_A_1008</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1010" target="Sito Archeologico di Esempio_A_1011">
+      <data key="d16">edge_26_COVERS_Sito Archeologico di Esempio_A_1010_to_Sito Archeologico di Esempio_A_1011</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1010" target="Sito Archeologico di Esempio_A_1009">
+      <data key="d16">edge_28_COVERED_BY_Sito Archeologico di Esempio_A_1010_to_Sito Archeologico di Esempio_A_1009</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1011" target="Sito Archeologico di Esempio_A_1012">
+      <data key="d16">edge_29_COVERS_Sito Archeologico di Esempio_A_1011_to_Sito Archeologico di Esempio_A_1012</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1011" target="Sito Archeologico di Esempio_A_1013">
+      <data key="d16">edge_30_COVERS_Sito Archeologico di Esempio_A_1011_to_Sito Archeologico di Esempio_A_1013</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1011" target="Sito Archeologico di Esempio_A_1014">
+      <data key="d16">edge_31_COVERS_Sito Archeologico di Esempio_A_1011_to_Sito Archeologico di Esempio_A_1014</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1011" target="Sito Archeologico di Esempio_A_1010">
+      <data key="d16">edge_32_COVERED_BY_Sito Archeologico di Esempio_A_1011_to_Sito Archeologico di Esempio_A_1010</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1012" target="Sito Archeologico di Esempio_A_1013">
+      <data key="d16">edge_33_COVERS_Sito Archeologico di Esempio_A_1012_to_Sito Archeologico di Esempio_A_1013</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1012" target="Sito Archeologico di Esempio_A_1011">
+      <data key="d16">edge_34_COVERED_BY_Sito Archeologico di Esempio_A_1012_to_Sito Archeologico di Esempio_A_1011</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1013" target="Sito Archeologico di Esempio_A_1014">
+      <data key="d16">edge_35_COVERS_Sito Archeologico di Esempio_A_1013_to_Sito Archeologico di Esempio_A_1014</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1013" target="Sito Archeologico di Esempio_A_1015">
+      <data key="d16">edge_36_COVERS_Sito Archeologico di Esempio_A_1013_to_Sito Archeologico di Esempio_A_1015</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1013" target="Sito Archeologico di Esempio_A_1016">
+      <data key="d16">edge_37_COVERS_Sito Archeologico di Esempio_A_1013_to_Sito Archeologico di Esempio_A_1016</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1013" target="Sito Archeologico di Esempio_A_1012">
+      <data key="d16">edge_39_COVERED_BY_Sito Archeologico di Esempio_A_1013_to_Sito Archeologico di Esempio_A_1012</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1014" target="Sito Archeologico di Esempio_A_1015">
+      <data key="d16">edge_40_COVERS_Sito Archeologico di Esempio_A_1014_to_Sito Archeologico di Esempio_A_1015</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1014" target="Sito Archeologico di Esempio_A_1016">
+      <data key="d16">edge_41_COVERS_Sito Archeologico di Esempio_A_1014_to_Sito Archeologico di Esempio_A_1016</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1014" target="Sito Archeologico di Esempio_A_1017">
+      <data key="d16">edge_42_COVERS_Sito Archeologico di Esempio_A_1014_to_Sito Archeologico di Esempio_A_1017</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1014" target="Sito Archeologico di Esempio_A_1018">
+      <data key="d16">edge_43_CUTS_Sito Archeologico di Esempio_A_1014_to_Sito Archeologico di Esempio_A_1018</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1014" target="Sito Archeologico di Esempio_A_1013">
+      <data key="d16">edge_44_COVERED_BY_Sito Archeologico di Esempio_A_1014_to_Sito Archeologico di Esempio_A_1013</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1015" target="Sito Archeologico di Esempio_A_1016">
+      <data key="d16">edge_45_COVERS_Sito Archeologico di Esempio_A_1015_to_Sito Archeologico di Esempio_A_1016</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1015" target="Sito Archeologico di Esempio_A_1017">
+      <data key="d16">edge_46_COVERS_Sito Archeologico di Esempio_A_1015_to_Sito Archeologico di Esempio_A_1017</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1015" target="Sito Archeologico di Esempio_A_1018">
+      <data key="d16">edge_47_COVERS_Sito Archeologico di Esempio_A_1015_to_Sito Archeologico di Esempio_A_1018</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1015" target="Sito Archeologico di Esempio_A_1014">
+      <data key="d16">edge_48_COVERED_BY_Sito Archeologico di Esempio_A_1015_to_Sito Archeologico di Esempio_A_1014</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1016" target="Sito Archeologico di Esempio_A_1017">
+      <data key="d16">edge_50_CUTS_Sito Archeologico di Esempio_A_1016_to_Sito Archeologico di Esempio_A_1017</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1016" target="Sito Archeologico di Esempio_A_1015">
+      <data key="d16">edge_51_COVERED_BY_Sito Archeologico di Esempio_A_1016_to_Sito Archeologico di Esempio_A_1015</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1017" target="Sito Archeologico di Esempio_A_1018">
+      <data key="d16">edge_52_COVERS_Sito Archeologico di Esempio_A_1017_to_Sito Archeologico di Esempio_A_1018</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1017" target="Sito Archeologico di Esempio_A_1019">
+      <data key="d16">edge_53_COVERS_Sito Archeologico di Esempio_A_1017_to_Sito Archeologico di Esempio_A_1019</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1017" target="Sito Archeologico di Esempio_A_1020">
+      <data key="d16">edge_54_COVERS_Sito Archeologico di Esempio_A_1017_to_Sito Archeologico di Esempio_A_1020</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1017" target="Sito Archeologico di Esempio_A_1016">
+      <data key="d16">edge_55_COVERED_BY_Sito Archeologico di Esempio_A_1017_to_Sito Archeologico di Esempio_A_1016</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1018" target="Sito Archeologico di Esempio_A_1019">
+      <data key="d16">edge_56_COVERS_Sito Archeologico di Esempio_A_1018_to_Sito Archeologico di Esempio_A_1019</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1018" target="Sito Archeologico di Esempio_A_1017">
+      <data key="d16">edge_58_COVERED_BY_Sito Archeologico di Esempio_A_1018_to_Sito Archeologico di Esempio_A_1017</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1019" target="Sito Archeologico di Esempio_A_1020">
+      <data key="d16">edge_59_COVERS_Sito Archeologico di Esempio_A_1019_to_Sito Archeologico di Esempio_A_1020</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1019" target="Sito Archeologico di Esempio_A_1021">
+      <data key="d16">edge_60_COVERS_Sito Archeologico di Esempio_A_1019_to_Sito Archeologico di Esempio_A_1021</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1019" target="Sito Archeologico di Esempio_A_1022">
+      <data key="d16">edge_61_COVERS_Sito Archeologico di Esempio_A_1019_to_Sito Archeologico di Esempio_A_1022</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1019" target="Sito Archeologico di Esempio_A_1018">
+      <data key="d16">edge_62_COVERED_BY_Sito Archeologico di Esempio_A_1019_to_Sito Archeologico di Esempio_A_1018</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1020" target="Sito Archeologico di Esempio_A_1021">
+      <data key="d16">edge_63_COVERS_Sito Archeologico di Esempio_A_1020_to_Sito Archeologico di Esempio_A_1021</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1020" target="Sito Archeologico di Esempio_A_1023">
+      <data key="d16">edge_64_CUTS_Sito Archeologico di Esempio_A_1020_to_Sito Archeologico di Esempio_A_1023</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1020" target="Sito Archeologico di Esempio_A_1019">
+      <data key="d16">edge_65_COVERED_BY_Sito Archeologico di Esempio_A_1020_to_Sito Archeologico di Esempio_A_1019</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1021" target="Sito Archeologico di Esempio_A_1022">
+      <data key="d16">edge_66_COVERS_Sito Archeologico di Esempio_A_1021_to_Sito Archeologico di Esempio_A_1022</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1021" target="Sito Archeologico di Esempio_A_1023">
+      <data key="d16">edge_67_COVERS_Sito Archeologico di Esempio_A_1021_to_Sito Archeologico di Esempio_A_1023</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1021" target="Sito Archeologico di Esempio_A_1024">
+      <data key="d16">edge_69_CUTS_Sito Archeologico di Esempio_A_1021_to_Sito Archeologico di Esempio_A_1024</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1021" target="Sito Archeologico di Esempio_A_1020">
+      <data key="d16">edge_70_COVERED_BY_Sito Archeologico di Esempio_A_1021_to_Sito Archeologico di Esempio_A_1020</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1022" target="Sito Archeologico di Esempio_A_1023">
+      <data key="d16">edge_71_COVERS_Sito Archeologico di Esempio_A_1022_to_Sito Archeologico di Esempio_A_1023</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1022" target="Sito Archeologico di Esempio_A_1024">
+      <data key="d16">edge_72_COVERS_Sito Archeologico di Esempio_A_1022_to_Sito Archeologico di Esempio_A_1024</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1022" target="Sito Archeologico di Esempio_A_1021">
+      <data key="d16">edge_73_COVERED_BY_Sito Archeologico di Esempio_A_1022_to_Sito Archeologico di Esempio_A_1021</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1023" target="Sito Archeologico di Esempio_A_1024">
+      <data key="d16">edge_74_COVERS_Sito Archeologico di Esempio_A_1023_to_Sito Archeologico di Esempio_A_1024</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1023" target="Sito Archeologico di Esempio_A_1025">
+      <data key="d16">edge_75_COVERS_Sito Archeologico di Esempio_A_1023_to_Sito Archeologico di Esempio_A_1025</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1023" target="Sito Archeologico di Esempio_A_1026">
+      <data key="d16">edge_76_COVERS_Sito Archeologico di Esempio_A_1023_to_Sito Archeologico di Esempio_A_1026</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1023" target="Sito Archeologico di Esempio_A_1022">
+      <data key="d16">edge_77_COVERED_BY_Sito Archeologico di Esempio_A_1023_to_Sito Archeologico di Esempio_A_1022</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1024" target="Sito Archeologico di Esempio_A_1025">
+      <data key="d16">edge_78_COVERS_Sito Archeologico di Esempio_A_1024_to_Sito Archeologico di Esempio_A_1025</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1024" target="Sito Archeologico di Esempio_A_1026">
+      <data key="d16">edge_79_COVERS_Sito Archeologico di Esempio_A_1024_to_Sito Archeologico di Esempio_A_1026</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1024" target="Sito Archeologico di Esempio_A_1027">
+      <data key="d16">edge_80_COVERS_Sito Archeologico di Esempio_A_1024_to_Sito Archeologico di Esempio_A_1027</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1024" target="Sito Archeologico di Esempio_A_1023">
+      <data key="d16">edge_81_COVERED_BY_Sito Archeologico di Esempio_A_1024_to_Sito Archeologico di Esempio_A_1023</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1025" target="Sito Archeologico di Esempio_A_1026">
+      <data key="d16">edge_82_COVERS_Sito Archeologico di Esempio_A_1025_to_Sito Archeologico di Esempio_A_1026</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1025" target="Sito Archeologico di Esempio_A_1024">
+      <data key="d16">edge_83_COVERED_BY_Sito Archeologico di Esempio_A_1025_to_Sito Archeologico di Esempio_A_1024</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1026" target="Sito Archeologico di Esempio_A_1027">
+      <data key="d16">edge_87_CUTS_Sito Archeologico di Esempio_A_1026_to_Sito Archeologico di Esempio_A_1027</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1026" target="Sito Archeologico di Esempio_A_1028">
+      <data key="d16">edge_85_COVERS_Sito Archeologico di Esempio_A_1026_to_Sito Archeologico di Esempio_A_1028</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1026" target="Sito Archeologico di Esempio_A_1029">
+      <data key="d16">edge_86_COVERS_Sito Archeologico di Esempio_A_1026_to_Sito Archeologico di Esempio_A_1029</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1026" target="Sito Archeologico di Esempio_A_1025">
+      <data key="d16">edge_88_COVERED_BY_Sito Archeologico di Esempio_A_1026_to_Sito Archeologico di Esempio_A_1025</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1027" target="Sito Archeologico di Esempio_A_1028">
+      <data key="d16">edge_89_COVERS_Sito Archeologico di Esempio_A_1027_to_Sito Archeologico di Esempio_A_1028</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1027" target="Sito Archeologico di Esempio_A_1026">
+      <data key="d16">edge_90_COVERED_BY_Sito Archeologico di Esempio_A_1027_to_Sito Archeologico di Esempio_A_1026</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1028" target="Sito Archeologico di Esempio_A_1029">
+      <data key="d16">edge_91_COVERS_Sito Archeologico di Esempio_A_1028_to_Sito Archeologico di Esempio_A_1029</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1028" target="Sito Archeologico di Esempio_A_1027">
+      <data key="d16">edge_92_COVERED_BY_Sito Archeologico di Esempio_A_1028_to_Sito Archeologico di Esempio_A_1027</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1029" target="Sito Archeologico di Esempio_A_1030">
+      <data key="d16">edge_93_COVERS_Sito Archeologico di Esempio_A_1029_to_Sito Archeologico di Esempio_A_1030</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1029" target="Sito Archeologico di Esempio_A_1028">
+      <data key="d16">edge_96_COVERED_BY_Sito Archeologico di Esempio_A_1029_to_Sito Archeologico di Esempio_A_1028</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1029" target="Sito Archeologico di Esempio_A_1033">
+      <data key="d16">edge_95_CUTS_Sito Archeologico di Esempio_A_1029_to_Sito Archeologico di Esempio_A_1033</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1030" target="Sito Archeologico di Esempio_A_1031">
+      <data key="d16">edge_97_COVERS_Sito Archeologico di Esempio_A_1030_to_Sito Archeologico di Esempio_A_1031</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1030" target="Sito Archeologico di Esempio_A_1029">
+      <data key="d16">edge_98_COVERED_BY_Sito Archeologico di Esempio_A_1030_to_Sito Archeologico di Esempio_A_1029</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1031" target="Sito Archeologico di Esempio_A_1032">
+      <data key="d16">edge_99_COVERS_Sito Archeologico di Esempio_A_1031_to_Sito Archeologico di Esempio_A_1032</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1031" target="Sito Archeologico di Esempio_A_1033">
+      <data key="d16">edge_100_COVERS_Sito Archeologico di Esempio_A_1031_to_Sito Archeologico di Esempio_A_1033</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1031" target="Sito Archeologico di Esempio_A_1034">
+      <data key="d16">edge_101_COVERS_Sito Archeologico di Esempio_A_1031_to_Sito Archeologico di Esempio_A_1034</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1031" target="Sito Archeologico di Esempio_A_1030">
+      <data key="d16">edge_103_COVERED_BY_Sito Archeologico di Esempio_A_1031_to_Sito Archeologico di Esempio_A_1030</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1032" target="Sito Archeologico di Esempio_A_1033">
+      <data key="d16">edge_104_COVERS_Sito Archeologico di Esempio_A_1032_to_Sito Archeologico di Esempio_A_1033</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1032" target="Sito Archeologico di Esempio_A_1034">
+      <data key="d16">edge_105_COVERS_Sito Archeologico di Esempio_A_1032_to_Sito Archeologico di Esempio_A_1034</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1032" target="Sito Archeologico di Esempio_A_1035">
+      <data key="d16">edge_106_COVERS_Sito Archeologico di Esempio_A_1032_to_Sito Archeologico di Esempio_A_1035</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1032" target="Sito Archeologico di Esempio_A_1036">
+      <data key="d16">edge_107_CUTS_Sito Archeologico di Esempio_A_1032_to_Sito Archeologico di Esempio_A_1036</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1032" target="Sito Archeologico di Esempio_A_1031">
+      <data key="d16">edge_108_COVERED_BY_Sito Archeologico di Esempio_A_1032_to_Sito Archeologico di Esempio_A_1031</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1033" target="Sito Archeologico di Esempio_A_1034">
+      <data key="d16">edge_110_CUTS_Sito Archeologico di Esempio_A_1033_to_Sito Archeologico di Esempio_A_1034</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1033" target="Sito Archeologico di Esempio_A_1032">
+      <data key="d16">edge_111_COVERED_BY_Sito Archeologico di Esempio_A_1033_to_Sito Archeologico di Esempio_A_1032</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1034" target="Sito Archeologico di Esempio_A_1035">
+      <data key="d16">edge_112_COVERS_Sito Archeologico di Esempio_A_1034_to_Sito Archeologico di Esempio_A_1035</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1034" target="Sito Archeologico di Esempio_A_1036">
+      <data key="d16">edge_113_COVERS_Sito Archeologico di Esempio_A_1034_to_Sito Archeologico di Esempio_A_1036</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1034" target="Sito Archeologico di Esempio_A_1037">
+      <data key="d16">edge_114_COVERS_Sito Archeologico di Esempio_A_1034_to_Sito Archeologico di Esempio_A_1037</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1034" target="Sito Archeologico di Esempio_A_1033">
+      <data key="d16">edge_115_COVERED_BY_Sito Archeologico di Esempio_A_1034_to_Sito Archeologico di Esempio_A_1033</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1035" target="Sito Archeologico di Esempio_A_1036">
+      <data key="d16">edge_116_COVERS_Sito Archeologico di Esempio_A_1035_to_Sito Archeologico di Esempio_A_1036</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1035" target="Sito Archeologico di Esempio_A_1037">
+      <data key="d16">edge_117_COVERS_Sito Archeologico di Esempio_A_1035_to_Sito Archeologico di Esempio_A_1037</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1035" target="Sito Archeologico di Esempio_A_1038">
+      <data key="d16">edge_118_COVERS_Sito Archeologico di Esempio_A_1035_to_Sito Archeologico di Esempio_A_1038</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1035" target="Sito Archeologico di Esempio_A_1034">
+      <data key="d16">edge_119_COVERED_BY_Sito Archeologico di Esempio_A_1035_to_Sito Archeologico di Esempio_A_1034</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1036" target="Sito Archeologico di Esempio_A_1037">
+      <data key="d16">edge_120_COVERS_Sito Archeologico di Esempio_A_1036_to_Sito Archeologico di Esempio_A_1037</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1036" target="Sito Archeologico di Esempio_A_1038">
+      <data key="d16">edge_121_COVERS_Sito Archeologico di Esempio_A_1036_to_Sito Archeologico di Esempio_A_1038</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1036" target="Sito Archeologico di Esempio_A_1035">
+      <data key="d16">edge_124_COVERED_BY_Sito Archeologico di Esempio_A_1036_to_Sito Archeologico di Esempio_A_1035</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1036" target="Sito Archeologico di Esempio_A_1039">
+      <data key="d16">edge_123_CUTS_Sito Archeologico di Esempio_A_1036_to_Sito Archeologico di Esempio_A_1039</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1037" target="Sito Archeologico di Esempio_A_1038">
+      <data key="d16">edge_125_COVERS_Sito Archeologico di Esempio_A_1037_to_Sito Archeologico di Esempio_A_1038</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1037" target="Sito Archeologico di Esempio_A_1039">
+      <data key="d16">edge_126_COVERS_Sito Archeologico di Esempio_A_1037_to_Sito Archeologico di Esempio_A_1039</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1037" target="Sito Archeologico di Esempio_A_1040">
+      <data key="d16">edge_127_COVERS_Sito Archeologico di Esempio_A_1037_to_Sito Archeologico di Esempio_A_1040</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1037" target="Sito Archeologico di Esempio_A_1036">
+      <data key="d16">edge_128_COVERED_BY_Sito Archeologico di Esempio_A_1037_to_Sito Archeologico di Esempio_A_1036</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1038" target="Sito Archeologico di Esempio_A_1039">
+      <data key="d16">edge_129_COVERS_Sito Archeologico di Esempio_A_1038_to_Sito Archeologico di Esempio_A_1039</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1038" target="Sito Archeologico di Esempio_A_1040">
+      <data key="d16">edge_130_COVERS_Sito Archeologico di Esempio_A_1038_to_Sito Archeologico di Esempio_A_1040</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1038" target="Sito Archeologico di Esempio_A_1037">
+      <data key="d16">edge_131_COVERED_BY_Sito Archeologico di Esempio_A_1038_to_Sito Archeologico di Esempio_A_1037</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1039" target="Sito Archeologico di Esempio_A_1040">
+      <data key="d16">edge_132_COVERS_Sito Archeologico di Esempio_A_1039_to_Sito Archeologico di Esempio_A_1040</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1039" target="Sito Archeologico di Esempio_A_1038">
+      <data key="d16">edge_133_COVERED_BY_Sito Archeologico di Esempio_A_1039_to_Sito Archeologico di Esempio_A_1038</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1040" target="Sito Archeologico di Esempio_A_1041">
+      <data key="d16">edge_134_COVERS_Sito Archeologico di Esempio_A_1040_to_Sito Archeologico di Esempio_A_1041</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1040" target="Sito Archeologico di Esempio_A_1042">
+      <data key="d16">edge_135_COVERS_Sito Archeologico di Esempio_A_1040_to_Sito Archeologico di Esempio_A_1042</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1040" target="Sito Archeologico di Esempio_A_1043">
+      <data key="d16">edge_136_CUTS_Sito Archeologico di Esempio_A_1040_to_Sito Archeologico di Esempio_A_1043</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1040" target="Sito Archeologico di Esempio_A_1039">
+      <data key="d16">edge_137_COVERED_BY_Sito Archeologico di Esempio_A_1040_to_Sito Archeologico di Esempio_A_1039</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1041" target="Sito Archeologico di Esempio_A_1042">
+      <data key="d16">edge_138_COVERS_Sito Archeologico di Esempio_A_1041_to_Sito Archeologico di Esempio_A_1042</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1041" target="Sito Archeologico di Esempio_A_1043">
+      <data key="d16">edge_139_COVERS_Sito Archeologico di Esempio_A_1041_to_Sito Archeologico di Esempio_A_1043</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1041" target="Sito Archeologico di Esempio_A_1044">
+      <data key="d16">edge_140_COVERS_Sito Archeologico di Esempio_A_1041_to_Sito Archeologico di Esempio_A_1044</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1041" target="Sito Archeologico di Esempio_A_1040">
+      <data key="d16">edge_142_COVERED_BY_Sito Archeologico di Esempio_A_1041_to_Sito Archeologico di Esempio_A_1040</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1042" target="Sito Archeologico di Esempio_A_1043">
+      <data key="d16">edge_143_COVERS_Sito Archeologico di Esempio_A_1042_to_Sito Archeologico di Esempio_A_1043</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1042" target="Sito Archeologico di Esempio_A_1044">
+      <data key="d16">edge_145_CUTS_Sito Archeologico di Esempio_A_1042_to_Sito Archeologico di Esempio_A_1044</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1042" target="Sito Archeologico di Esempio_A_1041">
+      <data key="d16">edge_146_COVERED_BY_Sito Archeologico di Esempio_A_1042_to_Sito Archeologico di Esempio_A_1041</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1043" target="Sito Archeologico di Esempio_A_1044">
+      <data key="d16">edge_147_COVERS_Sito Archeologico di Esempio_A_1043_to_Sito Archeologico di Esempio_A_1044</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1043" target="Sito Archeologico di Esempio_A_1042">
+      <data key="d16">edge_148_COVERED_BY_Sito Archeologico di Esempio_A_1043_to_Sito Archeologico di Esempio_A_1042</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1044" target="Sito Archeologico di Esempio_A_1045">
+      <data key="d16">edge_149_COVERS_Sito Archeologico di Esempio_A_1044_to_Sito Archeologico di Esempio_A_1045</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1044" target="Sito Archeologico di Esempio_A_1046">
+      <data key="d16">edge_150_COVERS_Sito Archeologico di Esempio_A_1044_to_Sito Archeologico di Esempio_A_1046</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1044" target="Sito Archeologico di Esempio_A_1047">
+      <data key="d16">edge_151_COVERS_Sito Archeologico di Esempio_A_1044_to_Sito Archeologico di Esempio_A_1047</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1044" target="Sito Archeologico di Esempio_A_1043">
+      <data key="d16">edge_153_COVERED_BY_Sito Archeologico di Esempio_A_1044_to_Sito Archeologico di Esempio_A_1043</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1045" target="Sito Archeologico di Esempio_A_1046">
+      <data key="d16">edge_154_COVERS_Sito Archeologico di Esempio_A_1045_to_Sito Archeologico di Esempio_A_1046</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERS</data>
+      <data key="d20">Covers</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1045" target="Sito Archeologico di Esempio_A_1044">
+      <data key="d16">edge_155_LEANS_AGAINST_Sito Archeologico di Esempio_A_1045_to_Sito Archeologico di Esempio_A_1044</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">LEANS_AGAINST</data>
+      <data key="d20">Leans Against</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1046" target="Sito Archeologico di Esempio_A_1045">
+      <data key="d16">edge_158_COVERED_BY_Sito Archeologico di Esempio_A_1046_to_Sito Archeologico di Esempio_A_1045</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">COVERED_BY</data>
+      <data key="d20">Covered By</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1046" target="Sito Archeologico di Esempio_A_1047">
+      <data key="d16">edge_157_CUTS_Sito Archeologico di Esempio_A_1046_to_Sito Archeologico di Esempio_A_1047</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <edge source="Sito Archeologico di Esempio_A_1047" target="Sito Archeologico di Esempio_A_1046">
+      <data key="d16">edge_159_CUTS_Sito Archeologico di Esempio_A_1047_to_Sito Archeologico di Esempio_A_1046</data>
+      <data key="d17">generic_connection</data>
+      <data key="d18">Generic Connection</data>
+      <data key="d19">CUTS</data>
+      <data key="d20">Cuts</data>
+    </edge>
+    <data key="d0">Sito Archeologico di Esempio Stratigraphy</data>
+    <data key="d1">Stratigraphic graph exported from PyArchInit-Mini on 2025-10-21 18:30</data>
+    <data key="d2">Sito Archeologico di Esempio_stratigraphy</data>
+  </graph>
+</graphml>

@@ -5,6 +5,53 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.7] - 2025-10-22
+
+### Fixed
+- **Web Server**: Fixed Flask template and static file path resolution for installed package
+- **Web Server**: Added proper error handling for server startup
+- **Web Server**: Created minimal CSS structure for proper static file inclusion
+
+### Changed
+- Flask app now uses absolute paths based on module location instead of pkg_resources
+- Improved error messages and diagnostics for web server startup
+
+### Added
+- Basic CSS file (style.css) to ensure static directory is properly packaged
+
+## [1.2.6] - 2025-10-22
+
+### Fixed
+- **API**: Added missing email-validator dependency for Pydantic EmailStr validation
+- **Desktop GUI**: Fixed language switching by properly importing and initializing i18n system
+- **Web Interface**: Changed relative imports to absolute imports for proper module resolution
+
+### Added
+- email-validator>=2.0.0 to core dependencies
+
+## [1.2.5] - 2025-10-22
+
+### Fixed
+- **Desktop GUI**: Removed orphaned help_window reference in language dialog (line 1463)
+- **Database**: Added automatic i18n column migrations during initialization
+- **Database**: Missing English translation columns (definizione_sito_en, descrizione_en, etc.) now created automatically
+
+### Added
+- i18n migration method to DatabaseMigrations class
+- Automatic migration of translation columns for site_table, us_table, and inventario_materiali_table
+
+## [1.2.0] - 2025-10-22
+
+### Added
+- **s3Dgraphy Integration**: 3D visualization support for stratigraphic units
+- **i18n Support**: Full internationalization for Italian and English
+- **GraphViz Layout**: Enhanced Harris Matrix with GraphViz dot layout engine
+- **Translation System**: Complete translation infrastructure for all interfaces
+
+### Changed
+- Improved Harris Matrix visualization with multiple layout options
+- Enhanced US and Inventory forms with multilingual support
+
 ## [0.1.3] - 2025-01-18
 
 ### Added

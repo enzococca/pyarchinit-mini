@@ -4,7 +4,7 @@
 include README.md
 include LICENSE
 include CHANGELOG.md
-include CLAUDE.md
+include babel.cfg
 
 # Include configuration files
 include pyproject.toml
@@ -15,18 +15,14 @@ include requirements.txt
 recursive-include data *.db *.sql
 recursive-include pyarchinit_mini/data *.db *.sql
 
-# Include web interface templates and static files
-recursive-include web_interface/templates *.html
-recursive-include web_interface/static *.css *.js *.png *.jpg *.ico
-
-# Include desktop GUI assets
-recursive-include desktop_gui *.png *.ico *.gif
-
-# Include CLI configurations
-recursive-include cli_interface *.json *.yaml
-
-# Include package configs
-recursive-include pyarchinit_mini *.yaml *.yml *.json
+# Include all pyarchinit_mini submodules and their data
+recursive-include pyarchinit_mini *.py *.yaml *.yml *.json *.graphml
+recursive-include pyarchinit_mini/web_interface/templates *.html
+recursive-include pyarchinit_mini/web_interface/static *.css *.js *.png *.jpg *.ico *.gif
+recursive-include pyarchinit_mini/desktop_gui *.py *.png *.ico *.gif
+recursive-include pyarchinit_mini/cli_interface *.py *.json *.yaml
+recursive-include pyarchinit_mini/translations *.po *.mo *.pot
+recursive-include pyarchinit_mini/graphml_converter/templates *.graphml
 
 # Include tests
 recursive-include tests *.py
@@ -37,5 +33,10 @@ recursive-exclude * *.py[co]
 recursive-exclude * .DS_Store
 recursive-exclude docs *
 recursive-exclude examples *
+recursive-exclude scripts *
 recursive-exclude .venv *
 recursive-exclude .git *
+prune test_*
+prune databases
+prune media
+prune uploads

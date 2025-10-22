@@ -1,0 +1,92 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "PyArchInit-Mini s3Dgraphy Generator"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Stratigraphic Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "US_Collection",
+      "mesh": 0
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Stratigraphic_Units",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "COLOR_0": 1
+          },
+          "indices": 2,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 80,
+      "type": "VEC3",
+      "max": [
+        7.25,
+        0.2,
+        2.25
+      ],
+      "min": [
+        -7.25,
+        -7.2,
+        -2.25
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 80,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5123,
+      "count": 360,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 960,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 960,
+      "byteLength": 1280,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 2240,
+      "byteLength": 720,
+      "target": 34963
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 2960,
+      "uri": "stratigraphy_test.bin"
+    }
+  ]
+}
