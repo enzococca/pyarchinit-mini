@@ -19,12 +19,10 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
-    'sphinx.ext.graphviz',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'myst_parser',  # Support for Markdown files
-    'sphinxemoji.sphinxemoji',  # Emoji support in HTML and PDF
 ]
 
 # MyST parser configuration
@@ -51,44 +49,16 @@ html_theme_options = {
     'page_width': '1200px',
 }
 
-# PDF output with XeLaTeX for Unicode emoji support
-latex_engine = 'xelatex'
+# PDF output with pdflatex (more compatible)
+latex_engine = 'pdflatex'
 
 latex_elements = {
+    'papersize': 'letterpaper',
+    'pointsize': '10pt',
     'preamble': r'''
-\usepackage{fontspec}
-\setmainfont{DejaVu Sans}
-\setmonofont[Scale=0.85]{DejaVu Sans Mono}
-\usepackage{seqsplit}
-\usepackage{xurl}
-\usepackage{breakurl}
-\usepackage{ragged2e}
-\usepackage{microtype}
-\sloppy
-\emergencystretch=3em
-\tolerance=9999
-\hbadness=9999
-% Wrap long paths and code with smaller font
-\renewcommand{\path}[1]{{\small\seqsplit{#1}}}
-\renewcommand{\sphinxcode}[1]{{\small\seqsplit{#1}}}
-\renewcommand{\sphinxupquote}[1]{{\small\seqsplit{#1}}}
-% Force verbatim to use smaller font and break long lines
-\makeatletter
-\renewcommand{\sphinxVerbatim}[1][1]{%
-  \par\setbox\sphinxcodeblockbox=\hbox{%
-    \fvset{fontsize=\small,baselinestretch=1}%
-    \begin{OriginalVerbatim}[#1,commandchars=\\\{\}]%
-}
-% Allow breaking in table of contents
-\renewcommand{\@pnumwidth}{2em}
-\renewcommand{\@tocrmarg}{3em}
-\makeatother
+\usepackage{hyperref}
+\setcounter{secnumdepth}{0}
 ''',
-    'fontpkg': r'\usepackage{fontspec}',
-    'printindex': r'\footnotesize\raggedright\printindex',
-    'tableofcontents': r'\sphinxtableofcontents',
-    'maxlistdepth': '10',
-    'fncychap': '',
 }
 
 # LaTeX document settings
@@ -96,7 +66,11 @@ latex_use_parts = False
 latex_show_pagerefs = True
 latex_show_urls = 'footnote'
 
+# Single PDF output
 latex_documents = [
-    ('index', 'pyarchinit-mini.tex', 'pyarchinit-mini Documentation',
-     'pyarchinit-mini Team', 'manual', True),
+    ('index', 'pyarchinit-mini.tex', 'PyArchInit-Mini Documentation',
+     'PyArchInit Team', 'manual'),
 ]
+
+# Ensure single PDF output
+latex_additional_files = []
