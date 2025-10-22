@@ -539,13 +539,26 @@ pip install 'pyarchinit-mini[dev]'
 ## 🚀 Quick Start
 
 ### 1. Initial Setup
-After installation, run the setup command to create the configuration directory:
+After installation, run the initialization command to set up the database and create an admin user:
 
 ```bash
-pyarchinit-mini-setup
+pyarchinit-mini-init
 ```
 
-This creates the following structure in your home directory:
+This command will:
+1. Create the configuration directory and database in `~/.pyarchinit_mini/`
+2. Prompt you to create an admin user (username, email, password)
+3. Set up all necessary directories for media, exports, and backups
+
+For non-interactive setup with default credentials:
+```bash
+pyarchinit-mini-init --non-interactive
+# Creates admin user with username: admin, password: admin
+```
+
+**Note**: If using the non-interactive mode, change the default password immediately after first login!
+
+The setup creates the following structure in your home directory:
 
 ```
 ~/.pyarchinit_mini/
@@ -566,24 +579,25 @@ This creates the following structure in your home directory:
 
 #### Start the Web Interface
 ```bash
-pyarchinit-web
+pyarchinit-mini-web
 # Open http://localhost:5001 in your browser
+# Login with the admin credentials created during initialization
 ```
 
 #### Start the Desktop GUI
 ```bash
-pyarchinit-gui
+pyarchinit-mini-gui
 ```
 
 #### Start the REST API Server
 ```bash
-pyarchinit-api
+pyarchinit-mini-api
 # API docs available at http://localhost:8000/docs
 ```
 
 #### Start the CLI Interface
 ```bash
-pyarchinit-cli
+pyarchinit-mini
 ```
 
 ### 3. Accessing the Analytics Dashboard
@@ -591,9 +605,10 @@ pyarchinit-cli
 The Analytics Dashboard provides comprehensive data visualization with 8 different chart types.
 
 #### Web Interface
-1. Start the web interface: `pyarchinit-web`
-2. Navigate to **Analytics** in the top menu
-3. View interactive Chart.js charts with:
+1. Start the web interface: `pyarchinit-mini-web`
+2. Login with your admin credentials
+3. Navigate to **Analytics** in the top menu
+4. View interactive Chart.js charts with:
    - Sites by region (pie chart)
    - Sites by province (bar chart - top 10)
    - US by chronological period (horizontal bar chart)
