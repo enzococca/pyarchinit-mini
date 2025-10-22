@@ -3,6 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/pyarchinit-mini.svg)](https://badge.fury.io/py/pyarchinit-mini)
 [![Python 3.8-3.14](https://img.shields.io/badge/python-3.8--3.14-blue.svg)](https://www.python.org/downloads/)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+[![Documentation Status](https://readthedocs.org/projects/pyarchinit-mini/badge/?version=latest)](https://pyarchinit-mini.readthedocs.io/en/latest/?badge=latest)
 [![Status](https://img.shields.io/badge/status-stable-green.svg)](https://pypi.org/project/pyarchinit-mini/)
 
 **Lightweight Archaeological Data Management System - 100% Desktop GUI Parity**
