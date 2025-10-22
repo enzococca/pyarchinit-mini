@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Unità Stratigrafiche{% endblock %}
+{% block title %}{{ _('Stratigraphic Units') }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Unità Stratigrafiche</h2>
+        <h2>{{ _('Stratigraphic Units') }}</h2>
         <div>
             <a href="{{ url_for('export_us_pdf') }}{% if sito_filter %}?sito={{ sito_filter }}{% endif %}" class="btn btn-danger">
-                <i class="fas fa-file-pdf"></i> Esporta PDF
+                <i class="fas fa-file-pdf"></i> {{ _('Export PDF') }}
             </a>
-            <a href="{{ url_for('create_us') }}" class="btn btn-primary">Nuova US</a>
+            <a href="{{ url_for('create_us') }}" class="btn btn-primary">{{ _('New US') }}</a>
         </div>
     </div>
 
@@ -19,15 +19,15 @@
         <div class="row">
             <div class="col-md-6">
                 <select name="sito" class="form-select">
-                    <option value="">Tutti i siti</option>
+                    <option value="">{{ _('All sites') }}</option>
                     {% for site in sites %}
                     <option value="{{ site.sito }}" {% if sito_filter == site.sito %}selected{% endif %}>{{ site.sito }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-6">
-                <button type="submit" class="btn btn-primary">Filtra</button>
-                <a href="{{ url_for('us_list') }}" class="btn btn-secondary">Reset</a>
+                <button type="submit" class="btn btn-primary">{{ _('Filter') }}</button>
+                <a href="{{ url_for('us_list') }}" class="btn btn-secondary">{{ _('Reset') }}</a>
             </div>
         </div>
     </form>
@@ -40,11 +40,11 @@
             <thead>
                 <tr>
                     <th>US</th>
-                    <th>Sito</th>
-                    <th>Area</th>
-                    <th>Descrizione</th>
-                    <th>Anno</th>
-                    <th>Azioni</th>
+                    <th>{{ _('Site') }}</th>
+                    <th>{{ _('Area') }}</th>
+                    <th>{{ _('Description') }}</th>
+                    <th>{{ _('Year') }}</th>
+                    <th>{{ _('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,7 +57,7 @@
                     <td>{{ us.anno_scavo or '-' }}</td>
                     <td>
                         <a href="{{ url_for('edit_us', us_id=us.id_us) }}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-edit"></i> <span class="d-none d-lg-inline">Modifica</span>
+                            <i class="fas fa-edit"></i> <span class="d-none d-lg-inline">{{ _('Edit') }}</span>
                         </a>
                     </td>
                 </tr>
@@ -73,29 +73,29 @@
             </div>
             <div class="mobile-card-body">
                 {% if us.area %}
-                <div class="label">Area</div>
+                <div class="label">{{ _('Area') }}</div>
                 <div class="value">{{ us.area }}</div>
                 {% endif %}
                 {% if us.d_stratigrafica %}
-                <div class="label">Descrizione Stratigrafica</div>
+                <div class="label">{{ _('Stratigraphic Description') }}</div>
                 <div class="value">{{ us.d_stratigrafica }}</div>
                 {% endif %}
                 {% if us.anno_scavo %}
-                <div class="label">Anno Scavo</div>
+                <div class="label">{{ _('Excavation Year') }}</div>
                 <div class="value">{{ us.anno_scavo }}</div>
                 {% endif %}
             </div>
             <div class="mobile-card-actions">
                 <a href="{{ url_for('edit_us', us_id=us.id_us) }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-edit"></i> Modifica US
+                    <i class="fas fa-edit"></i> {{ _('Edit US') }}
                 </a>
             </div>
         </div>
         {% endfor %}
     </div>
-    <p class="text-muted">Totale: {{ total }} US</p>
+    <p class="text-muted">{{ _('Total') }}: {{ total }} US</p>
     {% else %}
-    <div class="alert alert-info">Nessuna US trovata.</div>
+    <div class="alert alert-info">{{ _('No US found.') }}</div>
     {% endif %}
 </div>
 {% endblock %}

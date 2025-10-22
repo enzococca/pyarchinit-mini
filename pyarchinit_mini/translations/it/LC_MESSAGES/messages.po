@@ -1,0 +1,1314 @@
+# Italian translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-10-22 08:33+0200\n"
+"PO-Revision-Date: 2025-10-21 11:18+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: it\n"
+"Language-Team: it <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#~ msgid "OK"
+#~ msgstr "OK"
+
+#~ msgid "Cancel"
+#~ msgstr "Annulla"
+
+#~ msgid "New Site"
+#~ msgstr "Nuovo Sito"
+
+#~ msgid "Edit Site"
+#~ msgstr "Modifica Sito"
+
+#~ msgid "Save"
+#~ msgstr "Salva"
+
+#~ msgid "Basic Information"
+#~ msgstr "Informazioni Base"
+
+#~ msgid "Site Name *:"
+#~ msgstr "Nome Sito *:"
+
+#~ msgid "Country:"
+#~ msgstr "Nazione:"
+
+#~ msgid "Region:"
+#~ msgstr "Regione:"
+
+#~ msgid "Municipality:"
+#~ msgstr "Municipality:"
+
+#~ msgid "Province:"
+#~ msgstr "Province:"
+
+#~ msgid "Site Definition:"
+#~ msgstr "Definizione Sito:"
+
+#~ msgid "Description"
+#~ msgstr "Descrizione"
+
+#~ msgid "Site description:"
+#~ msgstr "Descrizione del sito:"
+
+#~ msgid "Media"
+#~ msgstr "Media"
+
+#~ msgid "Add Media"
+#~ msgstr "Aggiungi Media"
+
+#~ msgid "Remove Selected"
+#~ msgstr "Rimuovi Selezionato"
+
+#~ msgid "Preview"
+#~ msgstr "Anteprima"
+
+#~ msgid "Drag media files here"
+#~ msgstr "Trascina qui i file multimediali"
+
+#~ msgid ""
+#~ "Drag media files here\n"
+#~ "(Images, PDF, Video, Audio)"
+#~ msgstr ""
+
+#~ msgid "Error"
+#~ msgstr "Errore"
+
+#~ msgid "Site name is required"
+#~ msgstr "Il nome del sito è obbligatorio"
+
+#~ msgid "Success"
+#~ msgstr "Successo"
+
+#~ msgid "Site updated successfully"
+#~ msgstr "Sito aggiornato con successo"
+
+#~ msgid "Site created successfully"
+#~ msgstr "Sito creato con successo"
+
+#~ msgid "Error saving: {}"
+#~ msgstr "Errore durante il salvataggio: {}"
+
+#~ msgid "New US"
+#~ msgstr "Nuova US"
+
+#~ msgid "Edit US"
+#~ msgstr "Modifica US"
+
+#~ msgid "Site *:"
+#~ msgstr "Sito *:"
+
+#~ msgid "Area:"
+#~ msgstr "Area:"
+
+#~ msgid "US Number *:"
+#~ msgstr "Numero US *:"
+
+#~ msgid "Stratigraphic Description:"
+#~ msgstr "Descrizione Stratigrafica:"
+
+#~ msgid "Interpretative Description:"
+#~ msgstr "Descrizione Interpretativa:"
+
+#~ msgid "Excavation Year:"
+#~ msgstr "Anno Scavo:"
+
+#~ msgid "Cataloguer:"
+#~ msgstr "Schedatore:"
+
+#~ msgid "Formation:"
+#~ msgstr "Formazione:"
+
+#~ msgid "Natural"
+#~ msgstr "Naturale"
+
+#~ msgid "Artificial"
+#~ msgstr "Artificiale"
+
+#~ msgid "Site is required"
+#~ msgstr "Il sito è obbligatorio"
+
+#~ msgid "US number is required"
+#~ msgstr "Il numero US è obbligatorio"
+
+#~ msgid "US number must be an integer"
+#~ msgstr "Il numero US deve essere un numero intero"
+
+#~ msgid "Excavation year must be a number"
+#~ msgstr "L'anno scavo deve essere un numero"
+
+#~ msgid "US updated successfully"
+#~ msgstr "US aggiornata con successo"
+
+#~ msgid "US created successfully"
+#~ msgstr "US creata con successo"
+
+#~ msgid "New Artifact"
+#~ msgstr "Nuovo Reperto"
+
+#~ msgid "Edit Artifact"
+#~ msgstr "Modifica Reperto"
+
+#~ msgid "Inventory Number *:"
+#~ msgstr "Numero Inventario *:"
+
+#~ msgid "Artifact Type:"
+#~ msgstr "Artifact Type:"
+
+#~ msgid "Ceramic"
+#~ msgstr "Ceramica"
+
+#~ msgid "Metal"
+#~ msgstr "Metallo"
+
+#~ msgid "Stone"
+#~ msgstr "Pietra"
+
+#~ msgid "Bone"
+#~ msgstr "Osso"
+
+#~ msgid "Glass"
+#~ msgstr "Vetro"
+
+#~ msgid "Definition:"
+#~ msgstr "Definition:"
+
+#~ msgid "Weight (g):"
+#~ msgstr "Weight (g):"
+
+#~ msgid "Description:"
+#~ msgstr "Descrizione:"
+
+#~ msgid "Inventory number is required"
+#~ msgstr "Il numero inventario è obbligatorio"
+
+#~ msgid "Inventory number must be an integer"
+#~ msgstr "Il numero inventario deve essere un numero intero"
+
+#~ msgid "US must be a number"
+#~ msgstr "US deve essere un numero"
+
+#~ msgid "Weight must be a number"
+#~ msgstr "Il peso deve essere un numero"
+
+#~ msgid "Artifact updated successfully"
+#~ msgstr "Reperto aggiornato con successo"
+
+#~ msgid "Artifact created successfully"
+#~ msgstr "Reperto creato con successo"
+
+#~ msgid "PyArchInit-Mini - Archaeological Data Management"
+#~ msgstr "PyArchInit-Mini - Gestione Dati Archeologici"
+
+#~ msgid "Ready"
+#~ msgstr "Pronto"
+
+#~ msgid "Database Error"
+#~ msgstr "Errore Database"
+
+#~ msgid "Failed to initialize database: {}"
+#~ msgstr "Impossibile inizializzare il database: {}"
+
+#~ msgid "File"
+#~ msgstr "File"
+
+#~ msgid "New SQLite Database"
+#~ msgstr "Nuovo Database SQLite"
+
+#~ msgid "Configure Database"
+#~ msgstr "Configura Database"
+
+#~ msgid "Install PostgreSQL"
+#~ msgstr "Installa PostgreSQL"
+
+#~ msgid "Load Sample Database"
+#~ msgstr "Carica Database di Esempio"
+
+#~ msgid "Import Database"
+#~ msgstr "Importa Database"
+
+#~ msgid "Export Database"
+#~ msgstr "Esporta Database"
+
+#~ msgid "Exit"
+#~ msgstr "Esci"
+
+#~ msgid "View"
+#~ msgstr "Visualizza"
+
+#~ msgid "Dashboard"
+#~ msgstr "Dashboard"
+
+#~ msgid "Sites"
+#~ msgstr "Siti"
+
+#~ msgid "US"
+#~ msgstr "US"
+
+#~ msgid "Inventory"
+#~ msgstr "Inventario"
+
+#~ msgid "Tools"
+#~ msgstr "Strumenti"
+
+#~ msgid "Harris Matrix"
+#~ msgstr "Harris Matrix"
+
+#~ msgid "Export GraphML (yEd)"
+#~ msgstr "Esporta GraphML (yEd)"
+
+#~ msgid "Thesaurus Management"
+#~ msgstr "Gestione Thesaurus"
+
+#~ msgid "Media Manager"
+#~ msgstr "Media Manager"
+
+#~ msgid "Export PDF"
+#~ msgstr "Export PDF"
+
+#~ msgid "Export/Import Data"
+#~ msgstr "Esporta/Importa Dati"
+
+#~ msgid "Statistics"
+#~ msgstr "Statistiche"
+
+#~ msgid "Analytics Dashboard"
+#~ msgstr "Analytics Dashboard"
+
+#~ msgid "Help"
+#~ msgstr "Aiuto"
+
+#~ msgid "About"
+#~ msgstr "Informazioni"
+
+#~ msgid "User Guide"
+#~ msgstr "Guida Utente"
+
+#~ msgid "Current Site:"
+#~ msgstr "Sito Corrente:"
+
+#~ msgid "Refresh"
+#~ msgstr "Aggiorna"
+
+#~ msgid "General Statistics"
+#~ msgstr "Statistiche Generali"
+
+#~ msgid "Archaeological Sites"
+#~ msgstr "Siti Archeologici"
+
+#~ msgid "Stratigraphic Units"
+#~ msgstr "Unità Stratigrafiche"
+
+#~ msgid "Catalogued Artifacts"
+#~ msgstr "Reperti Catalogati"
+
+#~ msgid "Media Files"
+#~ msgstr "File Multimediali"
+
+#~ msgid "Recent Activity"
+#~ msgstr "Attività Recente"
+
+#~ msgid "Type"
+#~ msgstr "Tipo"
+
+#~ msgid "Name"
+#~ msgstr "Nome"
+
+#~ msgid "Date"
+#~ msgstr "Date"
+
+#~ msgid "Edit"
+#~ msgstr "Modifica"
+
+#~ msgid "Delete"
+#~ msgstr "Elimina"
+
+#~ msgid "Search:"
+#~ msgstr "Cerca:"
+
+#~ msgid "Site Name"
+#~ msgstr "Nome Sito"
+
+#~ msgid "Municipality"
+#~ msgstr "Comune"
+
+#~ msgid "Province"
+#~ msgstr "Provincia"
+
+#~ msgid "Country"
+#~ msgstr "Nazione"
+
+#~ msgid "Validate Paradoxes"
+#~ msgstr "Valida Paradossi"
+
+#~ msgid "Fix Relationships"
+#~ msgstr "Fix Rapporti"
+
+#~ msgid "Site:"
+#~ msgstr "Site:"
+
+#~ msgid "Site"
+#~ msgstr "Sito"
+
+#~ msgid "Area"
+#~ msgstr "Area"
+
+#~ msgid "Year"
+#~ msgstr "Anno"
+
+#~ msgid "Type:"
+#~ msgstr "Type:"
+
+#~ msgid "Inv. No."
+#~ msgstr "N. Inv."
+
+#~ msgid "Definition"
+#~ msgstr "Definizione"
+
+#~ msgid "Weight (g)"
+#~ msgstr "Peso (g)"
+
+#~ msgid "Selection"
+#~ msgstr "Selezione"
+
+#~ msgid "Select a site to edit"
+#~ msgstr "Seleziona un sito da modificare"
+
+#~ msgid "Select a site to delete"
+#~ msgstr "Seleziona un sito da eliminare"
+
+#~ msgid "Confirm"
+#~ msgstr "Conferma"
+
+#~ msgid "Are you sure you want to delete the selected site?"
+#~ msgstr "Sei sicuro di voler eliminare il sito selezionato?"
+
+#~ msgid "Site deleted successfully"
+#~ msgstr "Sito eliminato con successo"
+
+#~ msgid "Error during deletion: {}"
+#~ msgstr "Errore durante l'eliminazione: {}"
+
+#~ msgid "Select a US to edit"
+#~ msgstr "Seleziona una US da modificare"
+
+#~ msgid "Select a US to delete"
+#~ msgstr "Seleziona una US da eliminare"
+
+#~ msgid "Are you sure you want to delete the selected US?"
+#~ msgstr "Sei sicuro di voler eliminare la US selezionata?"
+
+#~ msgid "US deleted successfully"
+#~ msgstr "US eliminata con successo"
+
+#~ msgid "Select an artifact to edit"
+#~ msgstr "Seleziona un reperto da modificare"
+
+#~ msgid "Select an artifact to delete"
+#~ msgstr "Seleziona un reperto da eliminare"
+
+#~ msgid "Are you sure you want to delete the selected artifact?"
+#~ msgstr "Sei sicuro di voler eliminare il reperto selezionato?"
+
+#~ msgid "Artifact deleted successfully"
+#~ msgstr "Reperto eliminato con successo"
+
+#~ msgid "Warning"
+#~ msgstr "Avviso"
+
+#~ msgid "No sites available to generate Harris Matrix"
+#~ msgstr "Nessun sito disponibile per generare la Harris Matrix"
+
+#~ msgid "Analytics"
+#~ msgstr "Analitiche"
+
+#~ msgid "Sites List"
+#~ msgstr "Lista Siti"
+
+#~ msgid "US List"
+#~ msgstr "Lista US"
+
+#~ msgid "Artifacts List"
+#~ msgstr "Lista Reperti"
+
+#~ msgid "Export/Import"
+#~ msgstr "Esporta/Importa"
+
+#~ msgid "online"
+#~ msgstr "online"
+
+#~ msgid "Database"
+#~ msgstr "Database"
+
+#~ msgid "Users"
+#~ msgstr "Utenti"
+
+#~ msgid "API Docs"
+#~ msgstr "Documentazione API"
+
+#~ msgid "Logout"
+#~ msgstr "Esci"
+
+#~ msgid "Login"
+#~ msgstr "Accedi"
+
+#~ msgid "Navigation"
+#~ msgstr "Navigazione"
+
+#~ msgid "Material Inventory"
+#~ msgstr "Inventario Materiali"
+
+#~ msgid "Upload Media"
+#~ msgstr "Carica Media"
+
+#~ msgid "Administration"
+#~ msgstr "Amministrazione"
+
+#~ msgid "Database Management"
+#~ msgstr "Gestione Database"
+
+#~ msgid "has connected"
+#~ msgstr "si è collegato"
+
+#~ msgid "has disconnected"
+#~ msgstr "si è disconnesso"
+
+#~ msgid "created site"
+#~ msgstr "ha creato il sito"
+
+#~ msgid "modified site"
+#~ msgstr "ha modificato il sito"
+
+#~ msgid "deleted site"
+#~ msgstr "ha eliminato il sito"
+
+#~ msgid "created US"
+#~ msgstr "ha creato US"
+
+#~ msgid "modified US"
+#~ msgstr "ha modificato US"
+
+#~ msgid "deleted US"
+#~ msgstr "ha eliminato US"
+
+#~ msgid "created artifact"
+#~ msgstr "ha creato reperto"
+
+#~ msgid "modified artifact"
+#~ msgstr "ha modificato reperto"
+
+#~ msgid "deleted artifact"
+#~ msgstr "ha eliminato reperto"
+
+#~ msgid "Notification"
+#~ msgstr "Notifica"
+
+#~ msgid "Now"
+#~ msgstr "Ora"
+
+#~ msgid "Archaeological Dashboard"
+#~ msgstr "Dashboard Archeologica"
+
+#~ msgid "Export"
+#~ msgstr "Esporta"
+
+#~ msgid "Recent Sites"
+#~ msgstr "Siti Recenti"
+
+#~ msgid "Actions"
+#~ msgstr "Azioni"
+
+#~ msgid "View All Sites"
+#~ msgstr "Visualizza Tutti i Siti"
+
+#~ msgid "No sites found"
+#~ msgstr "Nessun sito presente"
+
+#~ msgid "Start by creating your first archaeological site"
+#~ msgstr "Inizia creando il tuo primo sito archeologico"
+
+#~ msgid "Create First Site"
+#~ msgstr "Crea Primo Sito"
+
+#~ msgid "Quick Actions"
+#~ msgstr "Azioni Rapide"
+
+#~ msgid "System"
+#~ msgstr "Sistema"
+
+#~ msgid "Version"
+#~ msgstr "Versione"
+
+#~ msgid "Documentation"
+#~ msgstr "Documentazione"
+
+#~ msgid "Interface"
+#~ msgstr "Interfaccia"
+
+#~ msgid "Statistics by Type"
+#~ msgstr "Statistiche per Tipologia"
+
+#~ msgid "Statistics charts available in full version"
+#~ msgstr "Grafici statistiche disponibili nella versione completa"
+
+#~ msgid "Back"
+#~ msgstr "Indietro"
+
+#~ msgid "Matplotlib Visualizer (Simple)"
+#~ msgstr "Visualizzatore Matplotlib (Semplice)"
+
+#~ msgid "For advanced visualization with groupings and desktop GUI style,"
+#~ msgstr ""
+#~ "Per una visualizzazione avanzata con "
+#~ "raggruppamenti e stile desktop GUI,"
+
+#~ msgid "switch to Graphviz"
+#~ msgstr "passa a Graphviz"
+
+#~ msgid "Relationships"
+#~ msgstr "Relazioni"
+
+#~ msgid "Maximum Depth"
+#~ msgstr "Profondità Massima"
+
+#~ msgid "Levels"
+#~ msgstr "Livelli"
+
+#~ msgid "Matrix Visualization"
+#~ msgstr "Visualizzazione Matrice"
+
+#~ msgid "No matrix available for this site."
+#~ msgstr "Nessuna matrice disponibile per questo sito."
+
+#~ msgid "Stratigraphic Sequence"
+#~ msgstr "Sequenza Stratigrafica"
+
+#~ msgid "Level"
+#~ msgstr "Livello"
+
+#~ msgid "Save Artifact"
+#~ msgstr "Salva Reperto"
+
+#~ msgid "All sites"
+#~ msgstr "Tutti i siti"
+
+#~ msgid "Artifact type"
+#~ msgstr "Tipo reperto"
+
+#~ msgid "Filter"
+#~ msgstr "Filtra"
+
+#~ msgid "Inventory No."
+#~ msgstr "N. Inventario"
+
+#~ msgid "Inv."
+#~ msgstr "Inv."
+
+#~ msgid "Artifact Type"
+#~ msgstr "Tipo Reperto"
+
+#~ msgid "Weight"
+#~ msgstr "Peso"
+
+#~ msgid "Total"
+#~ msgstr "Totale"
+
+#~ msgid "artifacts"
+#~ msgstr "reperti"
+
+#~ msgid "No artifacts found."
+#~ msgstr "Nessun reperto trovato."
+
+#~ msgid "Search site..."
+#~ msgstr "Cerca sito..."
+
+#~ msgid "Search"
+#~ msgstr "Cerca"
+
+#~ msgid "Reset"
+#~ msgstr "Reset"
+
+#~ msgid "Region"
+#~ msgstr "Regione"
+
+#~ msgid "Details"
+#~ msgstr "Dettagli"
+
+#~ msgid "Validate Relationships"
+#~ msgstr "Valida Rapporti"
+
+#~ msgid "Validate"
+#~ msgstr "Valida"
+
+#~ msgid "Site Report"
+#~ msgstr "Relazione Sito"
+
+#~ msgid "Harris Matrix PDF"
+#~ msgstr "Harris Matrix PDF"
+
+#~ msgid "View Details"
+#~ msgstr "Visualizza Dettagli"
+
+#~ msgid "Total sites"
+#~ msgstr "Totale siti"
+
+#~ msgid "No sites found."
+#~ msgstr "Nessun sito trovato."
+
+#~ msgid "Create the first site"
+#~ msgstr "Crea il primo sito"
+
+#~ msgid "Form errors:"
+#~ msgstr "Errori nel form:"
+
+#~ msgid "Descriptions"
+#~ msgstr "Descrizioni"
+
+#~ msgid "Physical Characteristics"
+#~ msgstr "Caratteristiche Fisiche"
+
+#~ msgid "Chronology"
+#~ msgstr "Cronologia"
+
+#~ msgid "Stratigraphic Relationships"
+#~ msgstr "Relazioni Stratigrafiche"
+
+#~ msgid "Save US"
+#~ msgstr "Salva US"
+
+#~ msgid "Stratigraphic Description"
+#~ msgstr "Descrizione Stratigrafica"
+
+#~ msgid "Excavation Year"
+#~ msgstr "Anno Scavo"
+
+#~ msgid "No US found."
+#~ msgstr "Nessuna US trovata."
+
+#~ msgid "Harris Matrix Generator"
+#~ msgstr "Generatore Harris Matrix"
+
+#~ msgid "Close"
+#~ msgstr "Chiudi"
+
+#~ msgid "Select Site:"
+#~ msgstr "Seleziona Sito:"
+
+#~ msgid "Generate Matrix"
+#~ msgstr "Genera Matrix"
+
+#~ msgid "Advanced Editor"
+#~ msgstr "Editor Avanzato"
+
+#~ msgid "Matrix Visualization:"
+#~ msgstr "Visualizzazione Matrix:"
+
+#~ msgid "Layout:"
+#~ msgstr "Layout:"
+
+#~ msgid ""
+#~ "Select a site and generate the Harris Matrix\n"
+#~ "\n"
+#~ "Controls:\n"
+#~ "• Drag with mouse to pan\n"
+#~ "• Mouse wheel to zoom\n"
+#~ "• Zoom buttons for precise control"
+#~ msgstr ""
+
+#~ msgid "Select a site"
+#~ msgstr "Seleziona un sito"
+
+#~ msgid "Generating Harris Matrix for {}...\n"
+#~ msgstr "Generating Harris Matrix for {}...\n"
+
+#~ msgid "Completed"
+#~ msgstr "Completato"
+
+#~ msgid "Harris Matrix generated successfully!"
+#~ msgstr "Harris Matrix generata con successo!"
+
+#~ msgid "Error generating matrix: {}"
+#~ msgstr "Errore nella generazione della matrix: {}"
+
+#~ msgid ""
+#~ "HARRIS MATRIX STATISTICS - {}\n"
+#~ "\n"
+#~ "Total US: {}\n"
+#~ "Stratigraphic Relationships: {}\n"
+#~ "Stratigraphic Levels: {}\n"
+#~ "Valid Matrix: {}\n"
+#~ "Isolated US: {}\n"
+#~ "\n"
+#~ msgstr ""
+
+#~ msgid "Yes"
+#~ msgstr "Sì"
+
+#~ msgid "No"
+#~ msgstr "No"
+
+#~ msgid "⚠️ WARNING: The matrix contains cycles or logical errors\n"
+#~ msgstr "⚠️ WARNING: The matrix contains cycles or logical errors\n"
+
+#~ msgid ""
+#~ "\n"
+#~ "STRATIGRAPHIC LEVELS:\n"
+#~ "\n"
+#~ msgstr ""
+
+#~ msgid "Level {}: US {}\n"
+#~ msgstr "Level {}: US {}\n"
+
+#~ msgid ""
+#~ "No data to visualize\n"
+#~ "Generate a Harris Matrix first"
+#~ msgstr ""
+
+#~ msgid "Harris Matrix - {} (Layout: {})"
+#~ msgstr "Harris Matrix - {} (Layout: {})"
+
+#~ msgid ""
+#~ "Error generating image\n"
+#~ "Try the Advanced Editor"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Visualization error:\n"
+#~ "{}\n"
+#~ "\n"
+#~ "Use the Advanced Editor for more options"
+#~ msgstr ""
+
+#~ msgid "Generate a matrix first"
+#~ msgstr "Genera prima una matrix"
+
+#~ msgid "Select folder for export"
+#~ msgstr "Seleziona cartella per l'export"
+
+#~ msgid "Export Completed"
+#~ msgstr "Export Completato"
+
+#~ msgid ""
+#~ "Matrix exported to:\n"
+#~ "\n"
+#~ "{}"
+#~ msgstr ""
+
+#~ msgid "Error during export: {}"
+#~ msgstr "Errore durante l'export: {}"
+
+#~ msgid "Services not available for advanced editor"
+#~ msgstr "Servizi non disponibili per l'editor avanzato"
+
+#~ msgid "Database manager not available"
+#~ msgstr "Database manager non disponibile"
+
+#~ msgid "Error opening editor: {}"
+#~ msgstr "Errore apertura editor: {}"
+
+#~ msgid "Export Type:"
+#~ msgstr "Tipo Export:"
+
+#~ msgid "US Sheets"
+#~ msgstr "Schede US"
+
+#~ msgid "Inventory Sheets"
+#~ msgstr "Schede Inventario"
+
+#~ msgid "Complete Site Report"
+#~ msgstr "Report Completo Sito"
+
+#~ msgid "Custom Logo:"
+#~ msgstr "Logo Personalizzato:"
+
+#~ msgid "Browse..."
+#~ msgstr "Sfoglia..."
+
+#~ msgid "Output File:"
+#~ msgstr "File Output:"
+
+#~ msgid "Select logo"
+#~ msgstr "Seleziona logo"
+
+#~ msgid "Images"
+#~ msgstr "Immagini"
+
+#~ msgid "All files"
+#~ msgstr "Tutti i file"
+
+#~ msgid "Save PDF report"
+#~ msgstr "Salva report PDF"
+
+#~ msgid "Output File"
+#~ msgstr "Output File"
+
+#~ msgid "Specify the output file"
+#~ msgstr "Specifica il file di output"
+
+#~ msgid "Site not found"
+#~ msgstr "Sito non trovato"
+
+#~ msgid "Data"
+#~ msgstr "Dati"
+
+#~ msgid "No US found for site {}"
+#~ msgstr "Nessuna US trovata per il sito {}"
+
+#~ msgid ""
+#~ "US sheets saved to:\n"
+#~ "{}"
+#~ msgstr ""
+
+#~ msgid "No artifacts found for site {}"
+#~ msgstr "Nessun reperto trovato per il sito {}"
+
+#~ msgid ""
+#~ "Inventory sheets saved to:\n"
+#~ "{}"
+#~ msgstr ""
+
+#~ msgid "Error generating PDF"
+#~ msgstr "Errore nella generazione del PDF"
+
+#~ msgid ""
+#~ "Complete report saved to:\n"
+#~ "{}"
+#~ msgstr ""
+
+#~ msgid "Error generating PDF: {}"
+#~ msgstr "Errore durante la generazione del PDF: {}"
+
+#~ msgid "Database Configuration"
+#~ msgstr "Configurazione Database"
+
+#~ msgid "Connect"
+#~ msgstr "Connetti"
+
+#~ msgid "Database Type"
+#~ msgstr "Tipo Database"
+
+#~ msgid "SQLite (Local file)"
+#~ msgstr "SQLite (File locale)"
+
+#~ msgid "PostgreSQL (Server)"
+#~ msgstr "PostgreSQL (Server)"
+
+#~ msgid "SQLite Configuration"
+#~ msgstr "Configurazione SQLite"
+
+#~ msgid "Database File:"
+#~ msgstr "File Database:"
+
+#~ msgid "Browse"
+#~ msgstr "Sfoglia"
+
+#~ msgid "Sample Database"
+#~ msgstr "Database di Esempio"
+
+#~ msgid "New Database"
+#~ msgstr "Nuovo Database"
+
+#~ msgid "PostgreSQL Configuration"
+#~ msgstr "Configurazione PostgreSQL"
+
+#~ msgid "Host:"
+#~ msgstr "Host:"
+
+#~ msgid "Port:"
+#~ msgstr "Porta:"
+
+#~ msgid "Database:"
+#~ msgstr "Database:"
+
+#~ msgid "Username:"
+#~ msgstr "Username:"
+
+#~ msgid "Password:"
+#~ msgstr "Password:"
+
+#~ msgid "Test Connection"
+#~ msgstr "Test Connessione"
+
+#~ msgid "Information"
+#~ msgstr "Informazioni"
+
+#~ msgid ""
+#~ "DATABASE CONFIGURATION\n"
+#~ "\n"
+#~ "SQLite:\n"
+#~ "• Local database stored in a file\n"
+#~ "• Ideal for single user\n"
+#~ "• Easy to transport and share\n"
+#~ "\n"
+#~ "PostgreSQL:\n"
+#~ "• Professional database server\n"
+#~ "• Supports multi-user access\n"
+#~ "• Better performance for large datasets\n"
+#~ "• Requires PostgreSQL server installation\n"
+#~ "\n"
+#~ "NOTE: Changing database will reload the interface\n"
+#~ "and data migrations may be required."
+#~ msgstr ""
+
+#~ msgid "Select SQLite database file"
+#~ msgstr "Seleziona file database SQLite"
+
+#~ msgid ""
+#~ "Sample database loaded!\n"
+#~ "\n"
+#~ "Contents:\n"
+#~ "• 1 Archaeological site\n"
+#~ "• 100 Stratigraphic units\n"
+#~ "• 50 Artifacts\n"
+#~ "• 70+ Stratigraphic relationships"
+#~ msgstr ""
+
+#~ msgid "Missing Database"
+#~ msgstr "Database Mancante"
+
+#~ msgid ""
+#~ "The sample database does not exist.\n"
+#~ "Do you want to create it now?"
+#~ msgstr ""
+
+#~ msgid "Create new SQLite database"
+#~ msgstr "Crea nuovo database SQLite"
+
+#~ msgid "New database created: {}"
+#~ msgstr "Nuovo database creato: {}"
+
+#~ msgid "Import SQLite database"
+#~ msgstr "Importa database SQLite"
+
+#~ msgid "Database imported: {}"
+#~ msgstr "Database importato: {}"
+
+#~ msgid ""
+#~ "Sample database created successfully!\n"
+#~ "\n"
+#~ "Contents:\n"
+#~ "• 1 Archaeological site\n"
+#~ "• 100 US with relationships\n"
+#~ "• 50 Artifacts"
+#~ msgstr ""
+
+#~ msgid "Database creation error: {}"
+#~ msgstr "Errore creazione database: {}"
+
+#~ msgid "Database creation script not found"
+#~ msgstr "Script di creazione database non trovato"
+
+#~ msgid "Error during creation: {}"
+#~ msgstr "Errore durante la creazione: {}"
+
+#~ msgid "PostgreSQL connection successful!"
+#~ msgstr "Connessione PostgreSQL riuscita!"
+
+#~ msgid "PostgreSQL connection failed"
+#~ msgstr "Connessione PostgreSQL fallita"
+
+#~ msgid "Connection test error: {}"
+#~ msgstr "Errore test connessione: {}"
+
+#~ msgid "All PostgreSQL fields are required"
+#~ msgstr "Tutti i campi PostgreSQL sono obbligatori"
+
+#~ msgid "Specify the SQLite file path"
+#~ msgstr "Specifica il percorso del file SQLite"
+
+#~ msgid "Unable to connect to database"
+#~ msgstr "Impossibile connettersi al database"
+
+#~ msgid "Database configuration error: {}"
+#~ msgstr "Errore configurazione database: {}"
+
+#~ msgid "Media Management"
+#~ msgstr "Gestione Media"
+
+#~ msgid "Upload New File"
+#~ msgstr "Carica Nuovo File"
+
+#~ msgid "File:"
+#~ msgstr "File:"
+
+#~ msgid "Entity Type:"
+#~ msgstr "Tipo Entità:"
+
+#~ msgid "Entity ID:"
+#~ msgstr "ID Entità:"
+
+#~ msgid "Upload File"
+#~ msgstr "Carica File"
+
+#~ msgid "Media file list (in development)"
+#~ msgstr "Lista file multimediali (in sviluppo)"
+
+#~ msgid "Select file to upload"
+#~ msgstr "Seleziona file da caricare"
+
+#~ msgid "Documents"
+#~ msgstr "Documenti"
+
+#~ msgid "Videos"
+#~ msgstr "Video"
+
+#~ msgid "Select a file to upload"
+#~ msgstr "Seleziona un file da caricare"
+
+#~ msgid "Entity"
+#~ msgstr "Entità"
+
+#~ msgid "Select the entity type"
+#~ msgstr "Seleziona il tipo di entità"
+
+#~ msgid "ID"
+#~ msgstr "ID"
+
+#~ msgid "Enter the entity ID"
+#~ msgstr "Inserisci l'ID dell'entità"
+
+#~ msgid "ID must be a number"
+#~ msgstr "L'ID deve essere un numero"
+
+#~ msgid "File uploaded successfully!"
+#~ msgstr "File caricato con successo!"
+
+#~ msgid "Error during upload: {}"
+#~ msgstr "Errore durante il caricamento: {}"
+
+#~ msgid ""
+#~ "PYARCHINIT-MINI STATISTICS\n"
+#~ "Date: {}\n"
+#~ "\n"
+#~ "OVERALL TOTALS:\n"
+#~ "• Archaeological Sites: {}\n"
+#~ "• Stratigraphic Units: {}\n"
+#~ "• Catalogued Artifacts: {}\n"
+#~ "\n"
+#~ "DETAILS BY SITE:\n"
+#~ msgstr ""
+
+#~ msgid "  - US: {}\n"
+#~ msgstr "  - US: {}\n"
+
+#~ msgid "  - Artifacts: {}\n"
+#~ msgstr "  - Artifacts: {}\n"
+
+#~ msgid "  - Municipality: {}\n"
+#~ msgstr "  - Municipality: {}\n"
+
+#~ msgid "Error loading statistics: {}"
+#~ msgstr "Errore caricamento statistiche: {}"
+
+#~ msgid "Settings"
+#~ msgstr "Impostazioni"
+
+#~ msgid "Language"
+#~ msgstr "Lingua"
+
+#~ msgid "Language Selection"
+#~ msgstr "Selezione Lingua"
+
+#~ msgid "Select Language:"
+#~ msgstr "Seleziona Lingua:"
+
+#~ msgid "Language Changed"
+#~ msgstr "Lingua Modificata"
+
+#~ msgid ""
+#~ "Language preference saved.\n"
+#~ "Please restart the application for changes to take effect."
+#~ msgstr ""
+
+#~ msgid "Edit US {}"
+#~ msgstr "Modifica US {}"
+
+#~ msgid "Identification"
+#~ msgstr "Identificazione"
+
+#~ msgid "Unit Type:"
+#~ msgstr "Tipo Unità:"
+
+#~ msgid "Excavation Data"
+#~ msgstr "Dati di Scavo"
+
+#~ msgid "Excavated:"
+#~ msgstr "Scavato:"
+
+#~ msgid "Partially"
+#~ msgstr "Parzialmente"
+
+#~ msgid "Excavation Method:"
+#~ msgstr "Metodo Scavo:"
+
+#~ msgid "Manual"
+#~ msgstr "Manuale"
+
+#~ msgid "Mechanical"
+#~ msgstr "Meccanico"
+
+#~ msgid "Mixed"
+#~ msgstr "Misto"
+
+#~ msgid "Record Date:"
+#~ msgstr "Data Schedatura:"
+
+#~ msgid "Activity:"
+#~ msgstr "Attività:"
+
+#~ msgid "Interpretation:"
+#~ msgstr "Interpretazione:"
+
+#~ msgid "Observations:"
+#~ msgstr "Osservazioni:"
+
+#~ msgid "Generated by PyArchInit-Mini"
+#~ msgstr "Generato da PyArchInit-Mini"
+
+#~ msgid "1. SITE INFORMATION"
+#~ msgstr "Informazioni Base"
+
+#~ msgid "1.1 Location"
+#~ msgstr "1.1 Localizzazione"
+
+#~ msgid "1.2 Description"
+#~ msgstr "Descrizione"
+
+#~ msgid "1.3 Site Definition"
+#~ msgstr "Definizione Sito:"
+
+#~ msgid "2. STRATIGRAPHIC UNITS"
+#~ msgstr "Unità Stratigrafiche"
+
+#~ msgid "2.1 US List"
+#~ msgstr "Lista US"
+
+#~ msgid "Interpretation"
+#~ msgstr "Interpretazione:"
+
+#~ msgid "2.2 Detailed Descriptions"
+#~ msgstr "Descrizione del sito:"
+
+#~ msgid "3. MATERIAL INVENTORY"
+#~ msgstr "Inventario Materiali"
+
+#~ msgid "3.1 Statistics"
+#~ msgstr "Statistiche"
+
+#~ msgid "3.2 Artifacts List"
+#~ msgstr "Lista Reperti"
+
+#~ msgid "Area/US"
+#~ msgstr "Area"
+
+#~ msgid "State"
+#~ msgstr "Sito"
+
+#~ msgid "4. PHOTOGRAPHIC DOCUMENTATION"
+#~ msgstr "Documentazione"
+
+#~ msgid "4.1 Media List"
+#~ msgstr "File Multimediali"
+
+#~ msgid "File Name"
+#~ msgstr "Nome Sito"
+
+#~ msgid "Author"
+#~ msgstr "Autore"
+
+#~ msgid "Matrix Statistics"
+#~ msgstr "Statistiche"
+
+#~ msgid "Total US:"
+#~ msgstr "Totale"
+
+#~ msgid "Relationships:"
+#~ msgstr "Relazioni"
+
+#~ msgid "Levels:"
+#~ msgstr "Livelli"
+
+#~ msgid "Valid Matrix:"
+#~ msgstr "Harris Matrix"
+
+#~ msgid "Isolated US:"
+#~ msgstr "ha eliminato US"
+
+#~ msgid "Harris Matrix Diagram"
+#~ msgstr "Harris Matrix PDF"
+
+#~ msgid "USM sheet generation to be implemented"
+#~ msgstr "Generazione schede USM da implementare"
+
+#~ msgid "Menu"
+#~ msgstr "Manuale"
+
+#~ msgid "Main Sections"
+#~ msgstr "Azioni"
+
+#~ msgid "3D Model Viewer"
+#~ msgstr "3D Model Viewer"
+
+#~ msgid "Back to Site"
+#~ msgstr "Totale siti"
+
+#~ msgid "Interactive 3D visualization of archaeological context"
+#~ msgstr "Interactive 3D visualization of archaeological context"
+
+#~ msgid "3D model of"
+#~ msgstr "3D model of"
+
+#~ msgid "Click to load 3D model"
+#~ msgstr "Click to load 3D model"
+
+#~ msgid "Reset Camera"
+#~ msgstr "Reset Camera"
+
+#~ msgid "Toggle Rotation"
+#~ msgstr "Interpretazione:"
+
+#~ msgid "Toggle Wireframe"
+#~ msgstr "Toggle Wireframe"
+
+#~ msgid "Model Information"
+#~ msgstr "Informazioni"
+
+#~ msgid "Stratigraphic Unit"
+#~ msgstr "Unità Stratigrafiche"
+
+#~ msgid "Format"
+#~ msgstr "Formazione:"
+
+#~ msgid "File Size"
+#~ msgstr "Nome Sito"
+
+#~ msgid "Filename"
+#~ msgstr "Nome Sito"
+
+#~ msgid "Download Model"
+#~ msgstr "Download Model"
+
+#~ msgid "Share"
+#~ msgstr "Salva"
+
+#~ msgid "3D Model"
+#~ msgstr "3D Model"
+
+#~ msgid "View 3D archaeological model"
+#~ msgstr "Siti Archeologici"
+
+#~ msgid "Link copied to clipboard"
+#~ msgstr "Link copied to clipboard"
+
+#~ msgid "Error loading 3D model"
+#~ msgstr "Errore caricamento statistiche: {}"
+

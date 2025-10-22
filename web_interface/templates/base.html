@@ -328,60 +328,65 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+                    <!-- Hamburger Menu with all work sections -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="mainMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bars"></i> {{ _('Menu') }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="mainMenuDropdown">
+                            <li><h6 class="dropdown-header">{{ _('Main Sections') }}</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('index') }}">
+                                <i class="fas fa-tachometer-alt"></i> {{ _('Dashboard') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('analytics') }}">
+                                <i class="fas fa-chart-line"></i> {{ _('Analytics') }}
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li><h6 class="dropdown-header">{{ _('Sites') }}</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sites_list') }}">
+                                <i class="fas fa-list"></i> {{ _('Sites List') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('create_site') }}">
+                                <i class="fas fa-plus"></i> {{ _('New Site') }}
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li><h6 class="dropdown-header">{{ _('Stratigraphic Units') }}</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('us_list') }}">
+                                <i class="fas fa-list"></i> {{ _('US List') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('create_us') }}">
+                                <i class="fas fa-plus"></i> {{ _('New US') }}
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li><h6 class="dropdown-header">{{ _('Inventory') }}</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('inventario_list') }}">
+                                <i class="fas fa-list"></i> {{ _('Artifacts List') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('create_inventario') }}">
+                                <i class="fas fa-plus"></i> {{ _('New Artifact') }}
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li><h6 class="dropdown-header">{{ _('Tools') }}</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('upload_media') }}">
+                                <i class="fas fa-images"></i> {{ _('Media') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('export_harris_graphml') }}">
+                                <i class="fas fa-project-diagram"></i> {{ _('Harris Matrix') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('export_page') }}">
+                                <i class="bi bi-file-earmark-spreadsheet"></i> {{ _('Export/Import') }}
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Direct Dashboard Link -->
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('analytics') }}">
-                            <i class="fas fa-chart-line"></i> Analytics
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="sitesDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-map-marked-alt"></i> Siti
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('sites_list') }}">Elenco Siti</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('create_site') }}">Nuovo Sito</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="usDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-layer-group"></i> US
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('us_list') }}">Elenco US</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('create_us') }}">Nuova US</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="inventarioDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-archive"></i> Inventario
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('inventario_list') }}">Elenco Reperti</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('create_inventario') }}">Nuovo Reperto</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('upload_media') }}">
-                            <i class="fas fa-images"></i> Media
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="harrisDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-project-diagram"></i> Harris Matrix
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="harrisDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('sites_list') }}"><i class="fas fa-eye"></i> Visualizza</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('export_harris_graphml') }}"><i class="fas fa-file-export"></i> Export GraphML (yEd)</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('export_page') }}">
-                            <i class="bi bi-file-earmark-spreadsheet"></i> Export/Import
+                            <i class="fas fa-tachometer-alt"></i> {{ _('Dashboard') }}
                         </a>
                     </li>
                 </ul>
@@ -391,25 +396,25 @@
                     <li class="nav-item">
                         <span class="online-users-badge" id="online-users-badge">
                             <i class="fas fa-users"></i>
-                            <span id="online-users-count">0</span> online
+                            <span id="online-users-count">0</span> {{ _('online') }}
                         </span>
                     </li>
                     {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('admin_database') }}">
-                            <i class="fas fa-database"></i> Database
+                            <i class="fas fa-database"></i> {{ _('Database') }}
                         </a>
                     </li>
                     {% if current_user.is_authenticated and current_user.can_manage_users() %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('auth.users_list') }}">
-                            <i class="fas fa-users"></i> Utenti
+                            <i class="fas fa-users"></i> {{ _('Users') }}
                         </a>
                     </li>
                     {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="/docs" target="_blank">
-                            <i class="fas fa-book"></i> API Docs
+                            <i class="fas fa-book"></i> {{ _('API Docs') }}
                         </a>
                     </li>
                     {% if current_user.is_authenticated %}
@@ -419,17 +424,20 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                <i class="fas fa-sign-out-alt"></i> Logout
+                                <i class="fas fa-sign-out-alt"></i> {{ _('Logout') }}
                             </a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('auth.login') }}">
-                            <i class="fas fa-sign-in-alt"></i> Login
+                            <i class="fas fa-sign-in-alt"></i> {{ _('Login') }}
                         </a>
                     </li>
                     {% endif %}
+                    <li class="nav-item d-flex align-items-center">
+                        {% include 'components/language_switcher.html' %}
+                    </li>
                 </ul>
             </div>
         </div>
@@ -442,49 +450,49 @@
             <nav class="col-md-2 d-none d-md-block sidebar">
                 <div class="position-sticky pt-3">
                     <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Navigazione</span>
+                        <span>{{ _('Navigation') }}</span>
                     </h6>
                     <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('index') }}">
-                                <i class="fas fa-home"></i> Dashboard
+                                <i class="fas fa-home"></i> {{ _('Dashboard') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('sites_list') }}">
-                                <i class="fas fa-map-marked-alt"></i> Siti Archeologici
+                                <i class="fas fa-map-marked-alt"></i> {{ _('Archaeological Sites') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('us_list') }}">
-                                <i class="fas fa-layer-group"></i> Unità Stratigrafiche
+                                <i class="fas fa-layer-group"></i> {{ _('Stratigraphic Units') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('inventario_list') }}">
-                                <i class="fas fa-archive"></i> Inventario Materiali
-                            </a>
-                        </li>
-                    </ul>
-                    
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Strumenti</span>
-                    </h6>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('upload_media') }}">
-                                <i class="fas fa-upload"></i> Carica Media
+                                <i class="fas fa-archive"></i> {{ _('Material Inventory') }}
                             </a>
                         </li>
                     </ul>
 
                     <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Amministrazione</span>
+                        <span>{{ _('Tools') }}</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('upload_media') }}">
+                                <i class="fas fa-upload"></i> {{ _('Upload Media') }}
+                            </a>
+                        </li>
+                    </ul>
+
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>{{ _('Administration') }}</span>
                     </h6>
                     <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('admin_database') }}">
-                                <i class="fas fa-database"></i> Gestione Database
+                                <i class="fas fa-database"></i> {{ _('Database Management') }}
                             </a>
                         </li>
                     </ul>
@@ -521,6 +529,23 @@
     {% if current_user.is_authenticated %}
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
+        // Translations for JavaScript
+        const i18n = {
+            'user_connected': "{{ _('has connected') }}",
+            'user_disconnected': "{{ _('has disconnected') }}",
+            'created_site': "{{ _('created site') }}",
+            'modified_site': "{{ _('modified site') }}",
+            'deleted_site': "{{ _('deleted site') }}",
+            'created_us': "{{ _('created US') }}",
+            'modified_us': "{{ _('modified US') }}",
+            'deleted_us': "{{ _('deleted US') }}",
+            'created_artifact': "{{ _('created artifact') }}",
+            'modified_artifact': "{{ _('modified artifact') }}",
+            'deleted_artifact': "{{ _('deleted artifact') }}",
+            'notification': "{{ _('Notification') }}",
+            'now': "{{ _('Now') }}"
+        };
+
         // Initialize Socket.IO connection
         const socket = io();
 
@@ -544,13 +569,13 @@
         });
 
         socket.on('user_joined', function(data) {
-            showNotification('info', `${data.username} si è collegato`, 'far fa-user');
+            showNotification('info', `${data.username} ${i18n.user_connected}`, 'far fa-user');
             onlineUsersCount++;
             document.getElementById('online-users-count').textContent = onlineUsersCount;
         });
 
         socket.on('user_left', function(data) {
-            showNotification('info', `${data.username} si è disconnesso`, 'far fa-user');
+            showNotification('info', `${data.username} ${i18n.user_disconnected}`, 'far fa-user');
             onlineUsersCount--;
             document.getElementById('online-users-count').textContent = onlineUsersCount;
         });
@@ -558,57 +583,57 @@
         // Site events
         socket.on('site_created', function(data) {
             showNotification('success',
-                `${data.user} ha creato il sito "${data.site_name}"`,
+                `${data.user} ${i18n.created_site} "${data.site_name}"`,
                 'fas fa-map-marked-alt');
         });
 
         socket.on('site_updated', function(data) {
             showNotification('info',
-                `${data.user} ha modificato il sito "${data.site_name}"`,
+                `${data.user} ${i18n.modified_site} "${data.site_name}"`,
                 'fas fa-map-marked-alt');
         });
 
         socket.on('site_deleted', function(data) {
             showNotification('warning',
-                `${data.user} ha eliminato il sito "${data.site_name}"`,
+                `${data.user} ${i18n.deleted_site} "${data.site_name}"`,
                 'fas fa-map-marked-alt');
         });
 
         // US events
         socket.on('us_created', function(data) {
             showNotification('success',
-                `${data.user} ha creato US ${data.us_number} (${data.site})`,
+                `${data.user} ${i18n.created_us} ${data.us_number} (${data.site})`,
                 'fas fa-layer-group');
         });
 
         socket.on('us_updated', function(data) {
             showNotification('info',
-                `${data.user} ha modificato US ${data.us_number} (${data.site})`,
+                `${data.user} ${i18n.modified_us} ${data.us_number} (${data.site})`,
                 'fas fa-layer-group');
         });
 
         socket.on('us_deleted', function(data) {
             showNotification('warning',
-                `${data.user} ha eliminato US ${data.us_number} (${data.site})`,
+                `${data.user} ${i18n.deleted_us} ${data.us_number} (${data.site})`,
                 'fas fa-layer-group');
         });
 
         // Inventario events
         socket.on('inventario_created', function(data) {
             showNotification('success',
-                `${data.user} ha creato reperto ${data.numero_inventario} (${data.site})`,
+                `${data.user} ${i18n.created_artifact} ${data.numero_inventario} (${data.site})`,
                 'fas fa-archive');
         });
 
         socket.on('inventario_updated', function(data) {
             showNotification('info',
-                `${data.user} ha modificato reperto ${data.numero_inventario} (${data.site})`,
+                `${data.user} ${i18n.modified_artifact} ${data.numero_inventario} (${data.site})`,
                 'fas fa-archive');
         });
 
         socket.on('inventario_deleted', function(data) {
             showNotification('warning',
-                `${data.user} ha eliminato reperto ${data.numero_inventario} (${data.site})`,
+                `${data.user} ${i18n.deleted_artifact} ${data.numero_inventario} (${data.site})`,
                 'fas fa-archive');
         });
 
@@ -623,8 +648,8 @@
             toast.innerHTML = `
                 <div class="toast-header bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} text-white">
                     <i class="${icon} me-2"></i>
-                    <strong class="me-auto">Notifica</strong>
-                    <small>Ora</small>
+                    <strong class="me-auto">${i18n.notification}</strong>
+                    <small>${i18n.now}</small>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
                 </div>
                 <div class="toast-body">

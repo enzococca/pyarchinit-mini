@@ -1,0 +1,71 @@
+# Extended Matrix Materials
+
+newmtl Taglio
+Ka 0.545 0.271 0.075
+Kd 0.545 0.271 0.075
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0
+
+newmtl Deposito
+Ka 0.824 0.412 0.118
+Kd 0.824 0.412 0.118
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0
+
+newmtl Riempimento
+Ka 0.804 0.522 0.247
+Kd 0.804 0.522 0.247
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0
+
+newmtl Humus
+Ka 0.957 0.643 0.376
+Kd 0.957 0.643 0.376
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0
+
+newmtl Terreno_arativo
+Ka 0.957 0.643 0.376
+Kd 0.957 0.643 0.376
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0
+
+newmtl Muro
+Ka 0.502 0.502 0.502
+Kd 0.502 0.502 0.502
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0
+
+newmtl Pavimento
+Ka 0.275 0.510 0.706
+Kd 0.275 0.510 0.706
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0
+
+newmtl Distruzione
+Ka 1.000 0.843 0.000
+Kd 1.000 0.843 0.000
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0
+
+newmtl Crollo
+Ka 1.000 0.843 0.000
+Kd 1.000 0.843 0.000
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0
+
+newmtl Costruzione
+Ka 0.565 0.933 0.565
+Kd 0.565 0.933 0.565
+Ks 0.5 0.5 0.5
+Ns 32.0
+d 1.0

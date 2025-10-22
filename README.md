@@ -157,6 +157,292 @@ curl -X POST http://localhost:8000/api/graphml/convert \
 - Edge relationships available as tooltips
 - Period-based table structure for hierarchical visualization
 
+### 🎨 s3Dgraphy - 3D Stratigraphic Visualization (NEW in v1.6.0)
+
+**Interactive 3D Harris Matrix with Extended Matrix (EM) Palette Integration**
+
+s3Dgraphy provides a complete 3D visualization system for Harris Matrix diagrams, combining stratigraphic relationships with 3D models of archaeological contexts. The system uses GraphViz DOT layout for accurate positioning and supports OBJ, GLTF, and GLB 3D formats.
+
+#### Core Features
+
+- **Integrated 3D+2D Viewer**: Side-by-side Harris Matrix and 3D model visualization
+- **GraphViz DOT Layout**: Professional stratigraphic positioning following archaeological standards
+- **Extended Matrix Palette**: Automatic node coloring based on US type (10 archaeological categories)
+- **3D Model Support**: OBJ, GLTF (with vertex colors), and GLB formats
+- **Interactive Navigation**: Click nodes to focus 3D model, navigate between related US
+- **Real-Time Sync**: Bi-directional synchronization between matrix and 3D view
+- **Model Upload**: REST API for uploading 3D models per stratigraphic unit
+- **Persistent Storage**: Site-based organization of 3D models
+
+#### Extended Matrix Color Palette
+
+Automatic node coloring based on `unita_tipo`:
+
+| Type | Color | RGB | Hex |
+|------|-------|-----|-----|
+| Taglio | Brown | (139, 69, 19) | #8B4513 |
+| Deposito | Chocolate | (210, 105, 30) | #D2691E |
+| Riempimento | Peru | (205, 133, 63) | #CD853F |
+| Humus | Dark Olive Green | (85, 107, 47) | #556B2F |
+| Muro | Gray | (128, 128, 128) | #808080 |
+| Pavimento | Dark Gray | (169, 169, 169) | #A9A9A9 |
+| Crollo | Maroon | (128, 0, 0) | #800000 |
+| Costruzione | Light Gray | (211, 211, 211) | #D3D3D3 |
+| Distruzione | Dark Red | (139, 0, 0) | #8B0000 |
+| Altro | Light Steel Blue | (176, 196, 222) | #B0C4DE |
+
+#### API Endpoints
+
+**Model Management**:
+```python
+# Upload 3D model for a specific US
+POST /api/s3d/upload
+Content-Type: multipart/form-data
+Fields:
+  - site_name: str          # Archaeological site name
+  - us_id: str              # Stratigraphic unit ID
+  - file: File              # 3D model file (OBJ/GLTF/GLB)
+
+Response: {"message": str, "path": str}
+```
+
+**Viewer Access**:
+```python
+# Get integrated 3D Harris Matrix viewer
+GET /s3d/viewer/<site_name>
+
+# Get models for a site
+GET /api/s3d/models/<site_name>
+
+Response: [
+    {
+        "name": str,           # Display name
+        "path": str,          # Relative path
+        "us_id": str,         # US number or null for site-level
+        "format": str         # "obj", "gltf", or "glb"
+    }
+]
+```
+
+#### Data Format for External Use
+
+**Harris Matrix Graph Structure**:
+```python
+# Input format for Harris Matrix visualization
+{
+    "nodes": [
+        {
+            "id": str,                    # Unique node ID
+            "us_number": str,             # US number for display
+            "type": str,                  # EM palette type (see table above)
+            "area": str,                  # Archaeological area/sector
+            "period": str,                # Chronological period
+            "definition": str,            # US description
+            "d_stratigrafica": str,       # Stratigraphic description
+            "d_interpretativa": str       # Archaeological interpretation
+        }
+    ],
+    "edges": [
+        {
+            "source": str,                # Source node ID
+            "target": str,                # Target node ID
+            "stratigraphic_relation": str # COVERS, CUTS, FILLS, etc.
+        }
+    ]
+}
+```
+
+**3D Model Requirements**:
+- **OBJ Format**: Wavefront OBJ with optional MTL file
+- **GLTF/GLB Format**: GLTF 2.0 with vertex colors support
+- **File Size**: Max 100MB per model (configurable)
+- **Coordinate System**: Y-up, meters
+- **Model Organization**:
+  - Site-level: `uploads/3d_models/<site_name>/site/model.obj`
+  - US-level: `uploads/3d_models/<site_name>/US_<us_id>/model.obj`
+
+#### Usage Examples
+
+**Python API - Upload and Visualize**:
+```python
+from pyarchinit_mini.s3d_integration import Model3DManager
+import requests
+
+# Upload 3D model via API
+files = {'file': open('model.obj', 'rb')}
+data = {
+    'site_name': 'Pompei',
+    'us_id': '1001'
+}
+response = requests.post(
+    'http://localhost:5001/api/s3d/upload',
+    files=files,
+    data=data
+)
+
+# Access viewer
+viewer_url = f'http://localhost:5001/s3d/viewer/Pompei'
+```
+
+**Python API - Direct Model Management**:
+```python
+from pyarchinit_mini.s3d_integration import Model3DManager
+from pathlib import Path
+
+manager = Model3DManager(base_dir='uploads/3d_models')
+
+# Get models for a site
+models = manager.get_models_for_site('Pompei')
+for model in models:
+    print(f"US {model['us_id']}: {model['name']} ({model['format']})")
+
+# Get model path for specific US
+path = manager.get_model_path('Pompei', '1001')
+```
+
+**cURL - Upload Model**:
+```bash
+# Upload OBJ model
+curl -X POST http://localhost:5001/api/s3d/upload \
+  -F "site_name=Pompei" \
+  -F "us_id=1001" \
+  -F "file=@US1001.obj"
+
+# Upload GLTF model with vertex colors
+curl -X POST http://localhost:5001/api/s3d/upload \
+  -F "site_name=Pompei" \
+  -F "us_id=1002" \
+  -F "file=@US1002.gltf"
+
+# Upload site-level model (no US)
+curl -X POST http://localhost:5001/api/s3d/upload \
+  -F "site_name=Pompei" \
+  -F "file=@site_overview.glb"
+```
+
+**Web Interface - Upload and View**:
+1. Navigate to **Harris Matrix** → **3D Viewer** → Select site
+2. Click **Upload Model** button
+3. Select US (optional, leave blank for site-level model)
+4. Choose 3D file (OBJ/GLTF/GLB)
+5. Upload and view immediately
+
+**Viewer Features**:
+- **Dual Panel**: Harris Matrix (left) + 3D Model (right)
+- **Node Click**: Click any US node to focus 3D camera on that model
+- **Info Panel**: Right sidebar with US properties and stratigraphic relations
+- **Navigation**: Click parent/child relations to navigate through stratigraphy
+- **Scrollable Matrix**: Vertical scroll for deep stratigraphic sequences
+- **Model Selection**: Dropdown to switch between different 3D models
+- **Camera Controls**: OrbitControls for 3D navigation (rotate, pan, zoom)
+
+#### Generating Test Models
+
+For testing or creating proxy geometries:
+```python
+from pyarchinit_mini.s3d_integration.test_model_generator import (
+    generate_test_models, EM_COLORS
+)
+
+# Generate colored box for each US type
+us_data = {
+    'us': 1001,
+    'type': 'Deposito',      # Will use chocolate color
+    'area': 'A',
+    'period': 'Medievale',
+    'position': (0, 0, 0),   # X, Y, Z coordinates
+    'size': (2, 1, 2)        # Width, Height, Depth in meters
+}
+
+generate_test_models(
+    us_list=[us_data],
+    output_dir='output/3d_models',
+    formats=['obj', 'gltf']  # Generate both formats
+)
+```
+
+#### Integration with Existing Harris Matrix
+
+The 3D viewer automatically integrates with PyArchInit's Harris Matrix data:
+
+1. **Automatic Graph Generation**: Reads US and relationships from database
+2. **GraphViz Layout**: Uses DOT algorithm for hierarchical positioning
+3. **Extended Matrix Colors**: Applies EM palette based on `unita_tipo`
+4. **Model Association**: Links 3D models by US number
+5. **Bidirectional Sync**: Matrix clicks update 3D view, and vice versa
+
+#### External Integration Example
+
+Complete workflow for external applications:
+
+```python
+import requests
+import json
+
+# 1. Define stratigraphic data
+harris_data = {
+    "nodes": [
+        {
+            "id": "site_pompei_1001",
+            "us_number": "1001",
+            "type": "Deposito",
+            "area": "Regio VI",
+            "period": "Periodo Romano Imperiale",
+            "definition": "Strato di abbandono"
+        },
+        {
+            "id": "site_pompei_1002",
+            "us_number": "1002",
+            "type": "Pavimento",
+            "area": "Regio VI",
+            "period": "Periodo Romano Imperiale",
+            "definition": "Pavimento a mosaico"
+        }
+    ],
+    "edges": [
+        {
+            "source": "site_pompei_1001",
+            "target": "site_pompei_1002",
+            "stratigraphic_relation": "COVERS"
+        }
+    ]
+}
+
+# 2. Create site in PyArchInit (if not exists)
+site_data = {
+    "site_name": "Pompei",
+    "location_region": "Campania",
+    "location_comune": "Pompei"
+}
+requests.post('http://localhost:5001/api/sites', json=site_data)
+
+# 3. Upload 3D models
+for us in ["1001", "1002"]:
+    with open(f'models/US{us}.gltf', 'rb') as f:
+        files = {'file': f}
+        data = {'site_name': 'Pompei', 'us_id': us}
+        requests.post('http://localhost:5001/api/s3d/upload',
+                     files=files, data=data)
+
+# 4. Access integrated viewer
+print("Viewer: http://localhost:5001/s3d/viewer/Pompei")
+```
+
+#### Configuration
+
+Edit `~/.pyarchinit_mini/config/config.yaml`:
+
+```yaml
+s3dgraphy:
+  enabled: true
+  upload_dir: "web_interface/static/uploads/3d_models"
+  max_file_size: 104857600  # 100MB
+  allowed_formats: ["obj", "mtl", "gltf", "glb"]
+  default_camera:
+    position: [5, 5, 5]
+    target: [0, 0, 0]
+```
+
 ### 🚀 Technical Features
 - **Production Ready**: v1.1.5 with EM_palette GraphML Export + Archaeological Metadata + Clean Edges
 - **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14

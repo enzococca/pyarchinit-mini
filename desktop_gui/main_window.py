@@ -29,6 +29,9 @@ from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrix
 from pyarchinit_mini.pdf_export.pdf_generator import PDFGenerator
 from pyarchinit_mini.media_manager.media_handler import MediaHandler
 
+# Import i18n
+from .i18n import _
+
 # Import dialog classes
 from .dialogs import (
     SiteDialog,
@@ -53,16 +56,16 @@ class PyArchInitGUI:
     def __init__(self):
         # Initialize main window
         self.root = tk.Tk()
-        self.root.title("PyArchInit-Mini - Archaeological Data Management")
+        self.root.title(_("PyArchInit-Mini - Archaeological Data Management"))
         self.root.geometry("1200x800")
         self.root.minsize(1000, 600)
-        
+
         # Initialize database and services
         self.setup_database()
-        
+
         # Initialize status variables
         self.current_site = tk.StringVar()
-        self.status_text = tk.StringVar(value="Pronto")
+        self.status_text = tk.StringVar(value=_("Ready"))
         
         # Setup GUI
         self.setup_styles()
@@ -105,7 +108,7 @@ class PyArchInitGUI:
             print("Database and services initialized successfully")
             
         except Exception as e:
-            messagebox.showerror("Database Error", f"Failed to initialize database: {str(e)}")
+            messagebox.showerror(_("Database Error"), _("Failed to initialize database: {}").format(str(e)))
             sys.exit(1)
     
     def setup_styles(self):
@@ -122,52 +125,57 @@ class PyArchInitGUI:
         """Create application menu bar"""
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
-        
+
         # File menu
         file_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="File", menu=file_menu)
-        file_menu.add_command(label="Nuovo Database SQLite", command=self.create_new_database)
+        menubar.add_cascade(label=_("File"), menu=file_menu)
+        file_menu.add_command(label=_("New SQLite Database"), command=self.create_new_database)
         file_menu.add_separator()
-        file_menu.add_command(label="Nuovo Sito", command=self.new_site_dialog)
-        file_menu.add_command(label="Nuova US", command=self.new_us_dialog)
-        file_menu.add_command(label="Nuovo Reperto", command=self.new_inventario_dialog)
+        file_menu.add_command(label=_("New Site"), command=self.new_site_dialog)
+        file_menu.add_command(label=_("New US"), command=self.new_us_dialog)
+        file_menu.add_command(label=_("New Artifact"), command=self.new_inventario_dialog)
         file_menu.add_separator()
-        file_menu.add_command(label="Configura Database", command=self.show_database_config)
-        file_menu.add_command(label="Installa PostgreSQL", command=self.show_postgres_installer)
+        file_menu.add_command(label=_("Configure Database"), command=self.show_database_config)
+        file_menu.add_command(label=_("Install PostgreSQL"), command=self.show_postgres_installer)
         file_menu.add_separator()
-        file_menu.add_command(label="Carica Database di Esempio", command=self.load_sample_database)
-        file_menu.add_command(label="Import Database", command=self.import_database)
-        file_menu.add_command(label="Export Database", command=self.export_database)
+        file_menu.add_command(label=_("Load Sample Database"), command=self.load_sample_database)
+        file_menu.add_command(label=_("Import Database"), command=self.import_database)
+        file_menu.add_command(label=_("Export Database"), command=self.export_database)
         file_menu.add_separator()
-        file_menu.add_command(label="Esci", command=self.root.quit)
-        
+        file_menu.add_command(label=_("Exit"), command=self.root.quit)
+
         # View menu
         view_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Visualizza", menu=view_menu)
-        view_menu.add_command(label="Dashboard", command=lambda: self.show_tab("dashboard"))
-        view_menu.add_command(label="Siti", command=lambda: self.show_tab("sites"))
-        view_menu.add_command(label="US", command=lambda: self.show_tab("us"))
-        view_menu.add_command(label="Inventario", command=lambda: self.show_tab("inventario"))
-        
+        menubar.add_cascade(label=_("View"), menu=view_menu)
+        view_menu.add_command(label=_("Dashboard"), command=lambda: self.show_tab("dashboard"))
+        view_menu.add_command(label=_("Sites"), command=lambda: self.show_tab("sites"))
+        view_menu.add_command(label=_("US"), command=lambda: self.show_tab("us"))
+        view_menu.add_command(label=_("Inventory"), command=lambda: self.show_tab("inventario"))
+
         # Tools menu
         tools_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Strumenti", menu=tools_menu)
-        tools_menu.add_command(label="Harris Matrix", command=self.show_harris_matrix_dialog)
-        tools_menu.add_command(label="Export GraphML (yEd)", command=self.show_graphml_export_dialog)
+        menubar.add_cascade(label=_("Tools"), menu=tools_menu)
+        tools_menu.add_command(label=_("Harris Matrix"), command=self.show_harris_matrix_dialog)
+        tools_menu.add_command(label=_("Export GraphML (yEd)"), command=self.show_graphml_export_dialog)
         tools_menu.add_separator()
-        tools_menu.add_command(label="Gestione Thesaurus", command=self.show_thesaurus_dialog)
+        tools_menu.add_command(label=_("Thesaurus Management"), command=self.show_thesaurus_dialog)
         tools_menu.add_separator()
-        tools_menu.add_command(label="Media Manager", command=self.show_media_manager)
-        tools_menu.add_command(label="Export PDF", command=self.show_pdf_export_dialog)
-        tools_menu.add_command(label="Export/Import Dati", command=self.show_export_import_dialog)
-        tools_menu.add_command(label="Statistiche", command=self.show_statistics_dialog)
-        tools_menu.add_command(label="Analytics Dashboard", command=self.show_analytics_dashboard)
-        
+        tools_menu.add_command(label=_("Media Manager"), command=self.show_media_manager)
+        tools_menu.add_command(label=_("Export PDF"), command=self.show_pdf_export_dialog)
+        tools_menu.add_command(label=_("Export/Import Data"), command=self.show_export_import_dialog)
+        tools_menu.add_command(label=_("Statistics"), command=self.show_statistics_dialog)
+        tools_menu.add_command(label=_("Analytics Dashboard"), command=self.show_analytics_dashboard)
+
+        # Settings menu
+        settings_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label=_("Settings"), menu=settings_menu)
+        settings_menu.add_command(label=_("Language"), command=self.show_language_dialog)
+
         # Help menu
         help_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Aiuto", menu=help_menu)
-        help_menu.add_command(label="Informazioni", command=self.show_about_dialog)
-        help_menu.add_command(label="Guida Utente", command=self.show_help_dialog)
+        menubar.add_cascade(label=_("Help"), menu=help_menu)
+        help_menu.add_command(label=_("About"), command=self.show_about_dialog)
+        help_menu.add_command(label=_("User Guide"), command=self.show_help_dialog)
     
     def create_main_interface(self):
         """Create main application interface"""
@@ -195,22 +203,22 @@ class PyArchInitGUI:
         """Create application toolbar"""
         toolbar = ttk.Frame(parent)
         toolbar.pack(fill=tk.X, pady=(0, 10))
-        
+
         # Title
         title_label = ttk.Label(toolbar, text="PyArchInit-Mini", style="Title.TLabel")
         title_label.pack(side=tk.LEFT)
-        
+
         # Current site selection
         site_frame = ttk.Frame(toolbar)
         site_frame.pack(side=tk.RIGHT, padx=10)
-        ttk.Label(site_frame, text="Sito Corrente:").pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(site_frame, text=_("Current Site:")).pack(side=tk.LEFT, padx=(0, 5))
         self.site_combobox = ttk.Combobox(site_frame, textvariable=self.current_site, width=30)
         self.site_combobox.pack(side=tk.LEFT)
         self.site_combobox.bind('<<ComboboxSelected>>', self.on_site_changed)
-        
+
         # Quick action buttons
-        ttk.Button(toolbar, text="Nuovo Sito", command=self.new_site_dialog).pack(side=tk.RIGHT, padx=(0, 10))
-        ttk.Button(toolbar, text="Refresh", command=self.refresh_data).pack(side=tk.RIGHT, padx=(0, 5))
+        ttk.Button(toolbar, text=_("New Site"), command=self.new_site_dialog).pack(side=tk.RIGHT, padx=(0, 10))
+        ttk.Button(toolbar, text=_("Refresh"), command=self.refresh_data).pack(side=tk.RIGHT, padx=(0, 5))
     
     def create_status_bar(self, parent):
         """Create status bar"""
@@ -226,7 +234,7 @@ class PyArchInitGUI:
     def create_dashboard_tab(self):
         """Create dashboard tab"""
         dashboard_frame = ttk.Frame(self.notebook)
-        self.notebook.add(dashboard_frame, text="Dashboard")
+        self.notebook.add(dashboard_frame, text=_("Dashboard"))
         
         # Create scrollable frame
         canvas = tk.Canvas(dashboard_frame)
@@ -253,41 +261,41 @@ class PyArchInitGUI:
     def create_dashboard_content(self, parent):
         """Create dashboard content widgets"""
         # Statistics section
-        stats_frame = ttk.LabelFrame(parent, text="Statistiche Generali", padding=15)
+        stats_frame = ttk.LabelFrame(parent, text=_("General Statistics"), padding=15)
         stats_frame.pack(fill=tk.X, padx=10, pady=10)
-        
+
         # Create statistics grid
         stats_grid = ttk.Frame(stats_frame)
         stats_grid.pack(fill=tk.X)
-        
+
         # Statistics cards
         self.stats_labels = {}
         stats_info = [
-            ("total_sites", "Siti Archeologici", 0),
-            ("total_us", "Unità Stratigrafiche", 1),
-            ("total_inventory", "Reperti Catalogati", 2),
-            ("total_media", "File Multimediali", 3)
+            ("total_sites", _("Archaeological Sites"), 0),
+            ("total_us", _("Stratigraphic Units"), 1),
+            ("total_inventory", _("Catalogued Artifacts"), 2),
+            ("total_media", _("Media Files"), 3)
         ]
-        
+
         for stat_key, stat_label, col in stats_info:
             card_frame = ttk.Frame(stats_grid, relief="raised", borderwidth=1)
             card_frame.grid(row=0, column=col, padx=10, pady=5, sticky="ew")
             stats_grid.columnconfigure(col, weight=1)
-            
+
             ttk.Label(card_frame, text="0", font=("Arial", 20, "bold")).pack(pady=5)
             ttk.Label(card_frame, text=stat_label).pack()
-            
+
             self.stats_labels[stat_key] = card_frame.winfo_children()[0]
-        
+
         # Recent activity section
-        activity_frame = ttk.LabelFrame(parent, text="Attività Recente", padding=15)
+        activity_frame = ttk.LabelFrame(parent, text=_("Recent Activity"), padding=15)
         activity_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        
+
         # Activity tree
         self.activity_tree = ttk.Treeview(activity_frame, columns=("Type", "Name", "Date"), show="headings", height=10)
-        self.activity_tree.heading("Type", text="Tipo")
-        self.activity_tree.heading("Name", text="Nome")
-        self.activity_tree.heading("Date", text="Data")
+        self.activity_tree.heading("Type", text=_("Type"))
+        self.activity_tree.heading("Name", text=_("Name"))
+        self.activity_tree.heading("Date", text=_("Date"))
         
         self.activity_tree.column("Type", width=100)
         self.activity_tree.column("Name", width=300)
@@ -321,35 +329,35 @@ class PyArchInitGUI:
     def create_sites_tab(self):
         """Create sites management tab"""
         sites_frame = ttk.Frame(self.notebook)
-        self.notebook.add(sites_frame, text="Siti")
-        
+        self.notebook.add(sites_frame, text=_("Sites"))
+
         # Toolbar
         sites_toolbar = ttk.Frame(sites_frame)
         sites_toolbar.pack(fill=tk.X, padx=10, pady=10)
-        
-        ttk.Button(sites_toolbar, text="Nuovo Sito", command=self.new_site_dialog).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(sites_toolbar, text="Modifica", command=self.edit_selected_site).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(sites_toolbar, text="Elimina", command=self.delete_selected_site).pack(side=tk.LEFT, padx=(0, 10))
-        
+
+        ttk.Button(sites_toolbar, text=_("New Site"), command=self.new_site_dialog).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(sites_toolbar, text=_("Edit"), command=self.edit_selected_site).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(sites_toolbar, text=_("Delete"), command=self.delete_selected_site).pack(side=tk.LEFT, padx=(0, 10))
+
         # Search
         search_frame = ttk.Frame(sites_toolbar)
         search_frame.pack(side=tk.RIGHT)
-        ttk.Label(search_frame, text="Cerca:").pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(search_frame, text=_("Search:")).pack(side=tk.LEFT, padx=(0, 5))
         self.sites_search_var = tk.StringVar()
         self.sites_search_var.trace("w", self.on_sites_search)
         search_entry = ttk.Entry(search_frame, textvariable=self.sites_search_var, width=30)
         search_entry.pack(side=tk.LEFT)
-        
+
         # Sites list
         list_frame = ttk.Frame(sites_frame)
         list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
-        
+
         # Treeview for sites
         self.sites_tree = ttk.Treeview(list_frame, columns=("Nome", "Comune", "Provincia", "Nazione"), show="headings")
-        self.sites_tree.heading("Nome", text="Nome Sito")
-        self.sites_tree.heading("Comune", text="Comune")
-        self.sites_tree.heading("Provincia", text="Provincia")
-        self.sites_tree.heading("Nazione", text="Nazione")
+        self.sites_tree.heading("Nome", text=_("Site Name"))
+        self.sites_tree.heading("Comune", text=_("Municipality"))
+        self.sites_tree.heading("Provincia", text=_("Province"))
+        self.sites_tree.heading("Nazione", text=_("Country"))
         
         self.sites_tree.column("Nome", width=250)
         self.sites_tree.column("Comune", width=150)
@@ -368,47 +376,47 @@ class PyArchInitGUI:
     def create_us_tab(self):
         """Create US management tab"""
         us_frame = ttk.Frame(self.notebook)
-        self.notebook.add(us_frame, text="US")
-        
+        self.notebook.add(us_frame, text=_("US"))
+
         # Toolbar
         us_toolbar = ttk.Frame(us_frame)
         us_toolbar.pack(fill=tk.X, padx=10, pady=10)
-        
-        ttk.Button(us_toolbar, text="Nuova US", command=self.new_us_dialog).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(us_toolbar, text="Modifica", command=self.edit_selected_us).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(us_toolbar, text="Elimina", command=self.delete_selected_us).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(us_toolbar, text="Esporta PDF", command=self.export_us_pdf).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(us_toolbar, text="Valida Paradossi", command=self.validate_stratigraphic_paradoxes).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(us_toolbar, text="Fix Rapporti", command=self.fix_stratigraphic_relationships).pack(side=tk.LEFT, padx=(0, 10))
-        
+
+        ttk.Button(us_toolbar, text=_("New US"), command=self.new_us_dialog).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(us_toolbar, text=_("Edit"), command=self.edit_selected_us).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(us_toolbar, text=_("Delete"), command=self.delete_selected_us).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(us_toolbar, text=_("Export PDF"), command=self.export_us_pdf).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(us_toolbar, text=_("Validate Paradoxes"), command=self.validate_stratigraphic_paradoxes).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(us_toolbar, text=_("Fix Relationships"), command=self.fix_stratigraphic_relationships).pack(side=tk.LEFT, padx=(0, 10))
+
         # Search function
         search_frame = ttk.Frame(us_toolbar)
         search_frame.pack(side=tk.RIGHT, padx=(10, 0))
-        ttk.Label(search_frame, text="Cerca:").pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(search_frame, text=_("Search:")).pack(side=tk.LEFT, padx=(0, 5))
         self.us_search_var = tk.StringVar()
         self.us_search_var.trace("w", self.on_us_search)
         us_search_entry = ttk.Entry(search_frame, textvariable=self.us_search_var, width=25)
         us_search_entry.pack(side=tk.LEFT)
-        
+
         # Filter by site
         site_frame = ttk.Frame(us_toolbar)
         site_frame.pack(side=tk.RIGHT, padx=(10, 0))
-        ttk.Label(site_frame, text="Sito:").pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(site_frame, text=_("Site:")).pack(side=tk.LEFT, padx=(0, 5))
         self.us_site_filter = ttk.Combobox(site_frame, width=20)
         self.us_site_filter.pack(side=tk.LEFT)
         self.us_site_filter.bind('<<ComboboxSelected>>', self.on_us_filter_changed)
-        
+
         # US list
         list_frame = ttk.Frame(us_frame)
         list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
-        
+
         # Treeview for US
         self.us_tree = ttk.Treeview(list_frame, columns=("Sito", "Area", "US", "Descrizione", "Anno"), show="headings")
-        self.us_tree.heading("Sito", text="Sito")
-        self.us_tree.heading("Area", text="Area")
+        self.us_tree.heading("Sito", text=_("Site"))
+        self.us_tree.heading("Area", text=_("Area"))
         self.us_tree.heading("US", text="US")
-        self.us_tree.heading("Descrizione", text="Descrizione")
-        self.us_tree.heading("Anno", text="Anno")
+        self.us_tree.heading("Descrizione", text=_("Description"))
+        self.us_tree.heading("Anno", text=_("Year"))
         
         self.us_tree.column("Sito", width=150)
         self.us_tree.column("Area", width=100)
@@ -428,53 +436,53 @@ class PyArchInitGUI:
     def create_inventario_tab(self):
         """Create inventory management tab"""
         inv_frame = ttk.Frame(self.notebook)
-        self.notebook.add(inv_frame, text="Inventario")
-        
+        self.notebook.add(inv_frame, text=_("Inventory"))
+
         # Toolbar
         inv_toolbar = ttk.Frame(inv_frame)
         inv_toolbar.pack(fill=tk.X, padx=10, pady=10)
-        
-        ttk.Button(inv_toolbar, text="Nuovo Reperto", command=self.new_inventario_dialog).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(inv_toolbar, text="Modifica", command=self.edit_selected_inventario).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(inv_toolbar, text="Elimina", command=self.delete_selected_inventario).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(inv_toolbar, text="Esporta PDF", command=self.export_inventario_pdf).pack(side=tk.LEFT, padx=(0, 10))
-        
+
+        ttk.Button(inv_toolbar, text=_("New Artifact"), command=self.new_inventario_dialog).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(inv_toolbar, text=_("Edit"), command=self.edit_selected_inventario).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(inv_toolbar, text=_("Delete"), command=self.delete_selected_inventario).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(inv_toolbar, text=_("Export PDF"), command=self.export_inventario_pdf).pack(side=tk.LEFT, padx=(0, 10))
+
         # Search function
         search_frame = ttk.Frame(inv_toolbar)
         search_frame.pack(side=tk.RIGHT, padx=(10, 0))
-        ttk.Label(search_frame, text="Cerca:").pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(search_frame, text=_("Search:")).pack(side=tk.LEFT, padx=(0, 5))
         self.inv_search_var = tk.StringVar()
         self.inv_search_var.trace("w", self.on_inventario_search)
         inv_search_entry = ttk.Entry(search_frame, textvariable=self.inv_search_var, width=25)
         inv_search_entry.pack(side=tk.LEFT)
-        
+
         # Filters
         site_frame = ttk.Frame(inv_toolbar)
         site_frame.pack(side=tk.RIGHT, padx=(10, 0))
-        ttk.Label(site_frame, text="Sito:").pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(site_frame, text=_("Site:")).pack(side=tk.LEFT, padx=(0, 5))
         self.inv_site_filter = ttk.Combobox(site_frame, width=15)
         self.inv_site_filter.pack(side=tk.LEFT)
         self.inv_site_filter.bind('<<ComboboxSelected>>', self.on_inventario_filter_changed)
-        
+
         type_frame = ttk.Frame(inv_toolbar)
         type_frame.pack(side=tk.RIGHT, padx=(10, 0))
-        ttk.Label(type_frame, text="Tipo:").pack(side=tk.LEFT, padx=(0, 5))
-        self.inv_type_filter = ttk.Combobox(type_frame, values=["", "Ceramica", "Metallo", "Pietra", "Osso", "Vetro"], width=15)
+        ttk.Label(type_frame, text=_("Type:")).pack(side=tk.LEFT, padx=(0, 5))
+        self.inv_type_filter = ttk.Combobox(type_frame, values=["", _("Ceramic"), _("Metal"), _("Stone"), _("Bone"), _("Glass")], width=15)
         self.inv_type_filter.pack(side=tk.LEFT)
         self.inv_type_filter.bind('<<ComboboxSelected>>', self.on_inventario_filter_changed)
-        
+
         # Inventory list
         list_frame = ttk.Frame(inv_frame)
         list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
-        
+
         # Treeview for inventory
         self.inv_tree = ttk.Treeview(list_frame, columns=("Sito", "Numero", "Tipo", "Definizione", "US", "Peso"), show="headings")
-        self.inv_tree.heading("Sito", text="Sito")
-        self.inv_tree.heading("Numero", text="N. Inv.")
-        self.inv_tree.heading("Tipo", text="Tipo")
-        self.inv_tree.heading("Definizione", text="Definizione")
+        self.inv_tree.heading("Sito", text=_("Site"))
+        self.inv_tree.heading("Numero", text=_("Inv. No."))
+        self.inv_tree.heading("Tipo", text=_("Type"))
+        self.inv_tree.heading("Definizione", text=_("Definition"))
         self.inv_tree.heading("US", text="US")
-        self.inv_tree.heading("Peso", text="Peso (g)")
+        self.inv_tree.heading("Peso", text=_("Weight (g)"))
         
         self.inv_tree.column("Sito", width=120)
         self.inv_tree.column("Numero", width=80)
@@ -746,99 +754,99 @@ class PyArchInitGUI:
         """Edit selected site"""
         selection = self.sites_tree.selection()
         if not selection:
-            messagebox.showwarning("Selezione", "Seleziona un sito da modificare")
+            messagebox.showwarning(_("Selection"), _("Select a site to edit"))
             return
-        
+
         site_id = int(self.sites_tree.item(selection[0])['tags'][0])
         site = self.site_service.get_site_dto_by_id(site_id)
-        
+
         if site:
             SiteDialog(self.root, self.site_service, self.media_service, site=site, callback=self.refresh_data)
-    
+
     def delete_selected_site(self):
         """Delete selected site"""
         selection = self.sites_tree.selection()
         if not selection:
-            messagebox.showwarning("Selezione", "Seleziona un sito da eliminare")
+            messagebox.showwarning(_("Selection"), _("Select a site to delete"))
             return
-        
-        if messagebox.askyesno("Conferma", "Sei sicuro di voler eliminare il sito selezionato?"):
+
+        if messagebox.askyesno(_("Confirm"), _("Are you sure you want to delete the selected site?")):
             try:
                 site_id = int(self.sites_tree.item(selection[0])['tags'][0])
                 self.site_service.delete_site(site_id)
                 self.refresh_data()
-                messagebox.showinfo("Successo", "Sito eliminato con successo")
+                messagebox.showinfo(_("Success"), _("Site deleted successfully"))
             except Exception as e:
-                messagebox.showerror("Errore", f"Errore durante l'eliminazione: {str(e)}")
+                messagebox.showerror(_("Error"), _("Error during deletion: {}").format(str(e)))
     
     def edit_selected_us(self):
         """Edit selected US"""
         selection = self.us_tree.selection()
         if not selection:
-            messagebox.showwarning("Selezione", "Seleziona una US da modificare")
+            messagebox.showwarning(_("Selection"), _("Select a US to edit"))
             return
-        
+
         us_id = int(self.us_tree.item(selection[0])['tags'][0])
         us = self.us_service.get_us_dto_by_id(us_id)
-        
+
         if us:
             sites = self.site_service.get_all_sites(size=100)
             site_names = [site.sito for site in sites]
             ExtendedUSDialog(self.root, self.us_service, self.site_service, self.matrix_generator,
                            self.periodizzazione_service, site_names, self.db_manager, us=us, callback=self.refresh_data)
-    
+
     def delete_selected_us(self):
         """Delete selected US"""
         selection = self.us_tree.selection()
         if not selection:
-            messagebox.showwarning("Selezione", "Seleziona una US da eliminare")
+            messagebox.showwarning(_("Selection"), _("Select a US to delete"))
             return
-        
-        if messagebox.askyesno("Conferma", "Sei sicuro di voler eliminare la US selezionata?"):
+
+        if messagebox.askyesno(_("Confirm"), _("Are you sure you want to delete the selected US?")):
             try:
                 us_id = int(self.us_tree.item(selection[0])['tags'][0])
                 self.us_service.delete_us(us_id)
                 self.refresh_data()
-                messagebox.showinfo("Successo", "US eliminata con successo")
+                messagebox.showinfo(_("Success"), _("US deleted successfully"))
             except Exception as e:
-                messagebox.showerror("Errore", f"Errore durante l'eliminazione: {str(e)}")
+                messagebox.showerror(_("Error"), _("Error during deletion: {}").format(str(e)))
     
     def edit_selected_inventario(self):
         """Edit selected inventory item"""
         selection = self.inv_tree.selection()
         if not selection:
-            messagebox.showwarning("Selezione", "Seleziona un reperto da modificare")
+            messagebox.showwarning(_("Selection"), _("Select an artifact to edit"))
             return
-        
+
         inv_id = int(self.inv_tree.item(selection[0])['tags'][0])
         item = self.inventario_service.get_inventario_dto_by_id(inv_id)
-        
+
         if item:
-            ExtendedInventarioDialog(self.root, self.inventario_service, self.site_service, 
-                                   self.thesaurus_service, self.media_service, 
+            ExtendedInventarioDialog(self.root, self.inventario_service, self.site_service,
+                                   self.thesaurus_service, self.media_service,
                                    inventario=item, callback=self.refresh_data)
-    
+
     def delete_selected_inventario(self):
         """Delete selected inventory item"""
         selection = self.inv_tree.selection()
         if not selection:
-            messagebox.showwarning("Selezione", "Seleziona un reperto da eliminare")
+            messagebox.showwarning(_("Selection"), _("Select an artifact to delete"))
             return
-        
-        if messagebox.askyesno("Conferma", "Sei sicuro di voler eliminare il reperto selezionato?"):
+
+        if messagebox.askyesno(_("Confirm"), _("Are you sure you want to delete the selected artifact?")):
             try:
                 inv_id = int(self.inv_tree.item(selection[0])['tags'][0])
                 self.inventario_service.delete_inventario(inv_id)
                 self.refresh_data()
-                messagebox.showinfo("Successo", "Reperto eliminato con successo")
+                messagebox.showinfo(_("Success"), _("Artifact deleted successfully"))
             except Exception as e:
-                messagebox.showerror("Errore", f"Errore durante l'eliminazione: {str(e)}")
-    
+                messagebox.showerror(_("Error"), _("Error during deletion: {}").format(str(e)))
+
     def show_harris_matrix_dialog(self):
         """Show Harris Matrix dialog"""
         sites = self.site_service.get_all_sites(size=100)
         if not sites:
-            messagebox.showwarning("Avviso", "Nessun sito disponibile per generare la Harris Matrix")
+            messagebox.showwarning(_("Warning"), _("No sites available to generate Harris Matrix"))
             return
 
         HarrisMatrixDialog(self.root, self.matrix_generator, self.matrix_visualizer, sites,
@@ -1394,7 +1402,64 @@ SCORCIATOIE:
         text_widget.pack(fill=tk.BOTH, expand=True)
         text_widget.insert("1.0", help_text)
         text_widget.config(state=tk.DISABLED)
-        
+
+    def show_language_dialog(self):
+        """Show language selection dialog"""
+        import json
+
+        # Current language
+        current_lang = self.locale_manager.current_locale
+
+        # Create dialog
+        lang_dialog = tk.Toplevel(self.root)
+        lang_dialog.title(_("Language Selection"))
+        lang_dialog.geometry("300x150")
+        lang_dialog.resizable(False, False)
+        lang_dialog.transient(self.root)
+        lang_dialog.grab_set()
+
+        # Content
+        content_frame = ttk.Frame(lang_dialog, padding=20)
+        content_frame.pack(fill=tk.BOTH, expand=True)
+
+        ttk.Label(content_frame, text=_("Select Language:"), font=("Arial", 10, "bold")).pack(pady=(0, 10))
+
+        # Language variable
+        lang_var = tk.StringVar(value=current_lang)
+
+        # Radio buttons
+        ttk.Radiobutton(content_frame, text="Italiano", variable=lang_var, value="it").pack(anchor="w", pady=2)
+        ttk.Radiobutton(content_frame, text="English", variable=lang_var, value="en").pack(anchor="w", pady=2)
+
+        # Buttons
+        button_frame = ttk.Frame(content_frame)
+        button_frame.pack(pady=(20, 0))
+
+        def save_and_restart():
+            selected_lang = lang_var.get()
+            if selected_lang != current_lang:
+                # Save preference
+                config_file = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+                config = {}
+                if os.path.exists(config_file):
+                    with open(config_file, 'r') as f:
+                        config = json.load(f)
+                config['language'] = selected_lang
+                with open(config_file, 'w') as f:
+                    json.dump(config, f, indent=2)
+
+                # Show restart message
+                messagebox.showinfo(
+                    _("Language Changed"),
+                    _("Language preference saved.\nPlease restart the application for changes to take effect.")
+                )
+                lang_dialog.destroy()
+            else:
+                lang_dialog.destroy()
+
+        ttk.Button(button_frame, text=_("OK"), command=save_and_restart).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text=_("Cancel"), command=lang_dialog.destroy).pack(side=tk.LEFT, padx=5)
+
         ttk.Button(help_window, text="Chiudi", command=help_window.destroy).pack(pady=10)
     
     def import_database(self):

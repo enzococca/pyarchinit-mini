@@ -13,8 +13,12 @@ alembic>=1.12.0
 # Web Interface
 flask>=3.0.0
 flask-wtf>=1.2.0
+flask-babel>=3.1.0
+babel>=2.12.0
 wtforms>=3.1.0
 jinja2>=3.1.0
+flask-login>=0.6.0
+flask-socketio>=5.3.0
 
 # Desktop GUI
 
@@ -46,3 +50,6 @@ pathlib
 # Export/Import
 pandas>=2.0.0
 openpyxl>=3.1.5
+
+# 3D Stratigraphic Graph Management
+s3dgraphy>=0.1.0

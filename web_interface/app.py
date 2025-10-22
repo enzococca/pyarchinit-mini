@@ -9,6 +9,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from flask_login import login_required, current_user
 from flask_socketio import SocketIO
+from flask_babel import lazy_gettext as _l
 from wtforms import StringField, TextAreaField, IntegerField, SelectField, FileField, BooleanField
 from wtforms.validators import DataRequired, Optional
 from werkzeug.utils import secure_filename
@@ -53,22 +54,22 @@ from socketio_events import (
 
 # Forms
 class SiteForm(FlaskForm):
-    sito = StringField('Nome Sito', validators=[DataRequired()])
-    nazione = StringField('Nazione')
-    regione = StringField('Regione')
-    comune = StringField('Comune')
-    provincia = StringField('Provincia')
-    definizione_sito = StringField('Definizione Sito')
-    descrizione = TextAreaField('Descrizione')
+    sito = StringField(_l('Site Name'), validators=[DataRequired()])
+    nazione = StringField(_l('Country'))
+    regione = StringField(_l('Region'))
+    comune = StringField(_l('Municipality'))
+    provincia = StringField(_l('Province'))
+    definizione_sito = StringField(_l('Site Definition'))
+    descrizione = TextAreaField(_l('Description'))
 
 class USForm(FlaskForm):
     # TAB 1: Informazioni Base
     # Identificazione
-    sito = SelectField('Sito', validators=[DataRequired()], coerce=str)
-    area = StringField('Area')
-    us = IntegerField('Numero US', validators=[DataRequired()])
-    unita_tipo = SelectField('Tipo Unità', choices=[
-        ('', '-- Seleziona --'),
+    sito = SelectField(_l('Site'), validators=[DataRequired()], coerce=str)
+    area = StringField(_l('Area'))
+    us = IntegerField(_l('US Number'), validators=[DataRequired()])
+    unita_tipo = SelectField(_l('Unit Type'), choices=[
+        ('', _l('-- Select --')),
         ('US', 'US'),
         ('USM', 'USM'),
         ('USV', 'USV'),
@@ -76,61 +77,61 @@ class USForm(FlaskForm):
     ])
 
     # Dati di Scavo
-    anno_scavo = IntegerField('Anno Scavo', validators=[Optional()])
-    scavato = SelectField('Scavato', choices=[
-        ('', '-- Seleziona --'),
-        ('Sì', 'Sì'),
-        ('No', 'No'),
-        ('Parzialmente', 'Parzialmente')
+    anno_scavo = IntegerField(_l('Excavation Year'), validators=[Optional()])
+    scavato = SelectField(_l('Excavated'), choices=[
+        ('', _l('-- Select --')),
+        ('Sì', _l('Yes')),
+        ('No', _l('No')),
+        ('Parzialmente', _l('Partially'))
     ])
-    schedatore = StringField('Schedatore')
-    metodo_di_scavo = SelectField('Metodo di Scavo', choices=[
-        ('', '-- Seleziona --'),
-        ('Manuale', 'Manuale'),
-        ('Meccanico', 'Meccanico'),
-        ('Misto', 'Misto')
+    schedatore = StringField(_l('Cataloguer'))
+    metodo_di_scavo = SelectField(_l('Excavation Method'), choices=[
+        ('', _l('-- Select --')),
+        ('Manuale', _l('Manual')),
+        ('Meccanico', _l('Mechanical')),
+        ('Misto', _l('Mixed'))
     ])
-    data_schedatura = StringField('Data Schedatura', description='Formato: AAAA-MM-GG')
-    attivita = StringField('Attività')
+    data_schedatura = StringField(_l('Cataloguing Date'), description=_l('Format: YYYY-MM-DD'))
+    attivita = StringField(_l('Activity'))
 
     # Responsabili
-    direttore_us = StringField('Direttore US')
-    responsabile_us = StringField('Responsabile US')
+    direttore_us = StringField(_l('US Director'))
+    responsabile_us = StringField(_l('US Supervisor'))
 
     # Contesto
-    settore = StringField('Settore')
-    quad_par = StringField('Quadrato/Partizione')
-    ambient = StringField('Ambiente')
-    saggio = StringField('Saggio')
+    settore = StringField(_l('Sector'))
+    quad_par = StringField(_l('Square/Partition'))
+    ambient = StringField(_l('Room'))
+    saggio = StringField(_l('Trench'))
 
     # Catalogazione ICCD
-    n_catalogo_generale = StringField('N. Catalogo Generale')
-    n_catalogo_interno = StringField('N. Catalogo Interno')
-    n_catalogo_internazionale = StringField('N. Catalogo Internazionale')
-    soprintendenza = StringField('Soprintendenza')
+    n_catalogo_generale = StringField(_l('General Catalogue No.'))
+    n_catalogo_interno = StringField(_l('Internal Catalogue No.'))
+    n_catalogo_internazionale = StringField(_l('International Catalogue No.'))
+    soprintendenza = StringField(_l('Superintendency'))
 
     # TAB 2: Descrizioni
-    d_stratigrafica = TextAreaField('Descrizione Stratigrafica')
-    d_interpretativa = TextAreaField('Descrizione Interpretativa')
-    descrizione = TextAreaField('Descrizione Dettagliata')
-    interpretazione = TextAreaField('Interpretazione')
-    osservazioni = TextAreaField('Osservazioni')
+    d_stratigrafica = TextAreaField(_l('Stratigraphic Description'))
+    d_interpretativa = TextAreaField(_l('Interpretative Description'))
+    descrizione = TextAreaField(_l('Detailed Description'))
+    interpretazione = TextAreaField(_l('Interpretation'))
+    osservazioni = TextAreaField(_l('Observations'))
 
     # TAB 3: Caratteristiche Fisiche
-    formazione = SelectField('Formazione', choices=[
-        ('', '-- Seleziona --'),
-        ('Naturale', 'Naturale'),
-        ('Artificiale', 'Artificiale'),
-        ('Mista', 'Mista')
+    formazione = SelectField(_l('Formation'), choices=[
+        ('', _l('-- Select --')),
+        ('Naturale', _l('Natural')),
+        ('Artificiale', _l('Artificial')),
+        ('Mista', _l('Mixed'))
     ])
-    stato_di_conservazione = SelectField('Stato di Conservazione', choices=[
-        ('', '-- Seleziona --'),
-        ('Ottimo', 'Ottimo'),
-        ('Buono', 'Buono'),
-        ('Discreto', 'Discreto'),
-        ('Cattivo', 'Cattivo')
+    stato_di_conservazione = SelectField(_l('Conservation State'), choices=[
+        ('', _l('-- Select --')),
+        ('Ottimo', _l('Excellent')),
+        ('Buono', _l('Good')),
+        ('Discreto', _l('Fair')),
+        ('Cattivo', _l('Poor'))
     ])
-    colore = StringField('Colore')
+    colore = StringField(_l('Color'))
     consistenza = SelectField('Consistenza', choices=[
         ('', '-- Seleziona --'),
         ('Compatta', 'Compatta'),
@@ -352,11 +353,20 @@ class GraphMLExportForm(FlaskForm):
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'your-secret-key-here'
-    app.config['UPLOAD_FOLDER'] = 'uploads'
+    app.config['UPLOAD_FOLDER'] = 'web_interface/static/uploads'
     app.config['DATABASE_FOLDER'] = 'databases'  # Folder for uploaded databases
 
     # Initialize CSRF protection
     csrf = CSRFProtect(app)
+
+    # Initialize Flask-Babel for i18n
+    from pyarchinit_mini.i18n import init_babel, get_locale
+    babel = init_babel(app)
+
+    # Make get_locale available in all templates
+    @app.context_processor
+    def inject_locale():
+        return dict(get_locale=get_locale)
 
     # Create necessary folders
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -2428,6 +2438,16 @@ def create_app():
         except Exception as e:
             flash(f'Errore import CSV: {str(e)}', 'error')
             return redirect(url_for('export_page'))
+
+    # ===== 3D Model Viewer Routes (s3Dgraphy Integration) =====
+    try:
+        from s3d_routes import init_s3d_routes
+        init_s3d_routes(app, db_manager, media_handler)
+        print("[FLASK] s3Dgraphy routes initialized")
+    except ImportError as e:
+        print(f"[FLASK] Warning: s3Dgraphy routes not available: {e}")
+    except Exception as e:
+        print(f"[FLASK] Error initializing s3Dgraphy routes: {e}")
 
     return app, socketio
 

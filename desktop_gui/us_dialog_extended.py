@@ -11,6 +11,11 @@ from datetime import datetime
 import os
 from PIL import Image, ImageTk
 import shutil
+import sys
+
+# Add parent directory to path for i18n import
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from desktop_gui.i18n import _
 
 class ExtendedUSDialog:
     """
@@ -40,17 +45,17 @@ class ExtendedUSDialog:
         
         # Create main window
         self.window = tk.Toplevel(parent)
-        self.window.title("Nuova US" if us is None else f"Modifica US {self.us_number}")
+        self.window.title(_("New US") if us is None else _("Edit US {}").format(self.us_number))
         self.window.geometry("900x700")
         self.window.resizable(True, True)
-        
+
         # Make window modal
         self.window.transient(parent)
         self.window.grab_set()
-        
+
         # Create interface
         self.create_interface()
-        
+
         # Populate if editing
         if us:
             self.populate_form()
@@ -78,18 +83,18 @@ class ExtendedUSDialog:
         # Button frame
         button_frame = ttk.Frame(main_frame)
         button_frame.pack(fill=tk.X, pady=(10, 0))
-        
-        ttk.Button(button_frame, text="Salva", command=self.save_us).pack(side=tk.RIGHT, padx=5)
-        ttk.Button(button_frame, text="Annulla", command=self.cancel).pack(side=tk.RIGHT, padx=5)
-        
+
+        ttk.Button(button_frame, text=_("Save"), command=self.save_us).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(button_frame, text=_("Cancel"), command=self.cancel).pack(side=tk.RIGHT, padx=5)
+
         if self.us:
-            ttk.Button(button_frame, text="Elimina", command=self.delete_us).pack(side=tk.LEFT, padx=5)
-            ttk.Button(button_frame, text="Esporta PDF", command=self.export_pdf).pack(side=tk.LEFT, padx=5)
+            ttk.Button(button_frame, text=_("Delete"), command=self.delete_us).pack(side=tk.LEFT, padx=5)
+            ttk.Button(button_frame, text=_("Export PDF"), command=self.export_pdf).pack(side=tk.LEFT, padx=5)
     
     def create_basic_tab(self):
         """Create basic information tab"""
         basic_frame = ttk.Frame(self.notebook)
-        self.notebook.add(basic_frame, text="Informazioni Base")
+        self.notebook.add(basic_frame, text=_("Basic Information"))
         
         # Create scrollable frame
         canvas = tk.Canvas(basic_frame)
@@ -108,68 +113,68 @@ class ExtendedUSDialog:
         row = 0
         
         # Identification section
-        id_frame = ttk.LabelFrame(scrollable_frame, text="Identificazione", padding=10)
+        id_frame = ttk.LabelFrame(scrollable_frame, text=_("Identification"), padding=10)
         id_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=5)
         row += 1
-        
+
         # Sito (required)
-        ttk.Label(id_frame, text="Sito *:").grid(row=0, column=0, sticky="w", pady=5)
+        ttk.Label(id_frame, text=_("Site *:")).grid(row=0, column=0, sticky="w", pady=5)
         self.fields['sito'] = ttk.Combobox(id_frame, values=self.site_names, width=30)
         self.fields['sito'].grid(row=0, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Area
-        ttk.Label(id_frame, text="Area:").grid(row=0, column=2, sticky="w", pady=5, padx=(20, 0))
+        ttk.Label(id_frame, text=_("Area:")).grid(row=0, column=2, sticky="w", pady=5, padx=(20, 0))
         self.fields['area'] = ttk.Entry(id_frame, width=20)
         self.fields['area'].grid(row=0, column=3, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # US number (required)
-        ttk.Label(id_frame, text="Numero US *:").grid(row=1, column=0, sticky="w", pady=5)
+        ttk.Label(id_frame, text=_("US Number *:")).grid(row=1, column=0, sticky="w", pady=5)
         self.fields['us'] = ttk.Entry(id_frame, width=30)
         self.fields['us'].grid(row=1, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Unità tipo
-        ttk.Label(id_frame, text="Tipo Unità:").grid(row=1, column=2, sticky="w", pady=5, padx=(20, 0))
-        self.fields['unita_tipo'] = ttk.Combobox(id_frame, 
+        ttk.Label(id_frame, text=_("Unit Type:")).grid(row=1, column=2, sticky="w", pady=5, padx=(20, 0))
+        self.fields['unita_tipo'] = ttk.Combobox(id_frame,
                                                values=["US", "USM", "USV", "USR"], width=20)
         self.fields['unita_tipo'].grid(row=1, column=3, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Configure grid weights
         id_frame.columnconfigure(1, weight=1)
         id_frame.columnconfigure(3, weight=1)
-        
+
         # Excavation section
-        exc_frame = ttk.LabelFrame(scrollable_frame, text="Dati di Scavo", padding=10)
+        exc_frame = ttk.LabelFrame(scrollable_frame, text=_("Excavation Data"), padding=10)
         exc_frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=5)
         row += 1
-        
+
         # Anno scavo
-        ttk.Label(exc_frame, text="Anno Scavo:").grid(row=0, column=0, sticky="w", pady=5)
+        ttk.Label(exc_frame, text=_("Excavation Year:")).grid(row=0, column=0, sticky="w", pady=5)
         self.fields['anno_scavo'] = ttk.Entry(exc_frame, width=30)
         self.fields['anno_scavo'].grid(row=0, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Scavato
-        ttk.Label(exc_frame, text="Scavato:").grid(row=0, column=2, sticky="w", pady=5, padx=(20, 0))
-        self.fields['scavato'] = ttk.Combobox(exc_frame, values=["Sì", "No", "Parzialmente"], width=20)
+        ttk.Label(exc_frame, text=_("Excavated:")).grid(row=0, column=2, sticky="w", pady=5, padx=(20, 0))
+        self.fields['scavato'] = ttk.Combobox(exc_frame, values=[_("Yes"), _("No"), _("Partially")], width=20)
         self.fields['scavato'].grid(row=0, column=3, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Schedatore
-        ttk.Label(exc_frame, text="Schedatore:").grid(row=1, column=0, sticky="w", pady=5)
+        ttk.Label(exc_frame, text=_("Cataloguer:")).grid(row=1, column=0, sticky="w", pady=5)
         self.fields['schedatore'] = ttk.Entry(exc_frame, width=30)
         self.fields['schedatore'].grid(row=1, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Metodo di scavo
-        ttk.Label(exc_frame, text="Metodo Scavo:").grid(row=1, column=2, sticky="w", pady=5, padx=(20, 0))
-        self.fields['metodo_di_scavo'] = ttk.Combobox(exc_frame, 
-                                                    values=["Manuale", "Meccanico", "Misto"], width=20)
+        ttk.Label(exc_frame, text=_("Excavation Method:")).grid(row=1, column=2, sticky="w", pady=5, padx=(20, 0))
+        self.fields['metodo_di_scavo'] = ttk.Combobox(exc_frame,
+                                                    values=[_("Manual"), _("Mechanical"), _("Mixed")], width=20)
         self.fields['metodo_di_scavo'].grid(row=1, column=3, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Data schedatura
-        ttk.Label(exc_frame, text="Data Schedatura:").grid(row=2, column=0, sticky="w", pady=5)
+        ttk.Label(exc_frame, text=_("Record Date:")).grid(row=2, column=0, sticky="w", pady=5)
         self.fields['data_schedatura'] = ttk.Entry(exc_frame, width=30)
         self.fields['data_schedatura'].grid(row=2, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Attività
-        ttk.Label(exc_frame, text="Attività:").grid(row=2, column=2, sticky="w", pady=5, padx=(20, 0))
+        ttk.Label(exc_frame, text=_("Activity:")).grid(row=2, column=2, sticky="w", pady=5, padx=(20, 0))
         self.fields['attivita'] = ttk.Entry(exc_frame, width=20)
         self.fields['attivita'].grid(row=2, column=3, sticky="ew", padx=(10, 0), pady=5)
         
@@ -186,32 +191,32 @@ class ExtendedUSDialog:
     def create_description_tab(self):
         """Create descriptions tab"""
         desc_frame = ttk.Frame(self.notebook)
-        self.notebook.add(desc_frame, text="Descrizioni")
-        
+        self.notebook.add(desc_frame, text=_("Descriptions"))
+
         # Descrizione stratigrafica
-        ttk.Label(desc_frame, text="Descrizione Stratigrafica:", font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 5))
+        ttk.Label(desc_frame, text=_("Stratigraphic Description:"), font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 5))
         self.fields['d_stratigrafica'] = tk.Text(desc_frame, height=6, wrap=tk.WORD)
         self.fields['d_stratigrafica'].pack(fill=tk.X, padx=10, pady=5)
-        
+
         # Descrizione interpretativa
-        ttk.Label(desc_frame, text="Descrizione Interpretativa:", font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 5))
+        ttk.Label(desc_frame, text=_("Interpretative Description:"), font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 5))
         self.fields['d_interpretativa'] = tk.Text(desc_frame, height=6, wrap=tk.WORD)
         self.fields['d_interpretativa'].pack(fill=tk.X, padx=10, pady=5)
-        
+
         # Interpretazione
-        ttk.Label(desc_frame, text="Interpretazione:", font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 5))
+        ttk.Label(desc_frame, text=_("Interpretation:"), font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 5))
         self.fields['interpretazione'] = tk.Text(desc_frame, height=4, wrap=tk.WORD)
         self.fields['interpretazione'].pack(fill=tk.X, padx=10, pady=5)
-        
+
         # Osservazioni
-        ttk.Label(desc_frame, text="Osservazioni:", font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 5))
+        ttk.Label(desc_frame, text=_("Observations:"), font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 5))
         self.fields['osservazioni'] = tk.Text(desc_frame, height=4, wrap=tk.WORD)
         self.fields['osservazioni'].pack(fill=tk.X, padx=10, pady=5)
     
     def create_physical_tab(self):
         """Create physical characteristics tab"""
         phys_frame = ttk.Frame(self.notebook)
-        self.notebook.add(phys_frame, text="Caratteristiche Fisiche")
+        self.notebook.add(phys_frame, text=_("Physical Characteristics"))
         
         # Create scrollable frame
         canvas = tk.Canvas(phys_frame)
@@ -306,7 +311,7 @@ class ExtendedUSDialog:
     def create_chronology_tab(self):
         """Create chronology/periodization tab"""
         chron_frame = ttk.Frame(self.notebook)
-        self.notebook.add(chron_frame, text="Cronologia")
+        self.notebook.add(chron_frame, text=_("Chronology"))
         
         # Current periodization display
         current_frame = ttk.LabelFrame(chron_frame, text="Periodizzazione Attuale", padding=10)
@@ -381,7 +386,7 @@ class ExtendedUSDialog:
     def create_relationships_tab(self):
         """Create stratigraphic relationships tab"""
         rel_frame = ttk.Frame(self.notebook)
-        self.notebook.add(rel_frame, text="Relazioni Stratigrafiche")
+        self.notebook.add(rel_frame, text=_("Stratigraphic Relationships"))
         
         # Controls
         controls_frame = ttk.Frame(rel_frame)
@@ -430,7 +435,7 @@ class ExtendedUSDialog:
     def create_media_tab(self):
         """Create media management tab with thumbnails and drag & drop"""
         media_frame = ttk.Frame(self.notebook)
-        self.notebook.add(media_frame, text="Media")
+        self.notebook.add(media_frame, text=_("Media"))
         
         # Create media storage directory
         self.media_dir = self.create_media_directory()
@@ -508,7 +513,7 @@ class ExtendedUSDialog:
     def create_documentation_tab(self):
         """Create documentation tab"""
         doc_frame = ttk.Frame(self.notebook)
-        self.notebook.add(doc_frame, text="Documentazione")
+        self.notebook.add(doc_frame, text=_("Documentation"))
         
         # Documentation fields
         doc_fields_frame = ttk.LabelFrame(doc_frame, text="Documentazione", padding=10)
