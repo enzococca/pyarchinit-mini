@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo/logo_pyarchinit-mini.png" alt="PyArchInit-Mini Logo" width="300">
+  <img src="https://raw.githubusercontent.com/enzococca/pyarchinit-mini/main/logo/logo_pyarchinit-mini.png" alt="PyArchInit-Mini Logo" width="300">
 </p>
 
 <h1 align="center">PyArchInit-Mini</h1>
