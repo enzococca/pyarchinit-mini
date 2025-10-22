@@ -1,14 +1,26 @@
+.. image:: _static/images/pyarchinit-mini-logo.png
+   :align: center
+   :width: 300px
+   :alt: PyArchInit-Mini Logo
+
 PyArchInit-Mini Documentation
 =============================
 
 .. image:: https://badge.fury.io/py/pyarchinit-mini.svg
    :target: https://badge.fury.io/py/pyarchinit-mini
+   :alt: PyPI version
 
 .. image:: https://img.shields.io/badge/python-3.8--3.14-blue.svg
    :target: https://www.python.org/downloads/
+   :alt: Python versions
 
 .. image:: https://img.shields.io/badge/License-GPL%20v2-blue.svg
    :target: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+   :alt: License
+
+.. image:: https://readthedocs.org/projects/pyarchinit-mini/badge/?version=latest
+   :target: https://pyarchinit-mini.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 **Lightweight Archaeological Data Management System**
 

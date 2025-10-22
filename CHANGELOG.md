@@ -14,9 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All interface elements now properly switch between languages
   - Language switcher now affects entire web interface, not just analytics page
 
+### Added
+- **PyArchInit-Mini Logo**: Professional logo added to all interfaces
+  - Web interface: navbar and login page
+  - Desktop GUI: window icon and toolbar
+  - CLI: ASCII art logo in welcome screen
+  - Documentation: ReadTheDocs and README
+  - Favicon for web interface
+
 ### Technical
 - Updated all navigation and menu translation strings in messages.po files
 - Recompiled translation catalogs with complete string coverage
+- Created logo assets in PNG and ICO formats
 
 ## [1.2.11] - 2025-10-22
 

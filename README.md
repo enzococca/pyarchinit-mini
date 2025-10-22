@@ -1,10 +1,16 @@
-# PyArchInit-Mini
+<p align="center">
+  <img src="https://raw.githubusercontent.com/enzococca/pyarchinit-mini/main/docs/_static/images/pyarchinit-mini-logo.png" alt="PyArchInit-Mini Logo" width="300">
+</p>
 
-[![PyPI version](https://badge.fury.io/py/pyarchinit-mini.svg)](https://badge.fury.io/py/pyarchinit-mini)
-[![Python 3.8-3.14](https://img.shields.io/badge/python-3.8--3.14-blue.svg)](https://www.python.org/downloads/)
-[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
-[![Documentation Status](https://readthedocs.org/projects/pyarchinit-mini/badge/?version=latest)](https://pyarchinit-mini.readthedocs.io/en/latest/?badge=latest)
-[![Status](https://img.shields.io/badge/status-stable-green.svg)](https://pypi.org/project/pyarchinit-mini/)
+<h1 align="center">PyArchInit-Mini</h1>
+
+<p align="center">
+  <a href="https://badge.fury.io/py/pyarchinit-mini"><img src="https://badge.fury.io/py/pyarchinit-mini.svg" alt="PyPI version"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8--3.14-blue.svg" alt="Python 3.8-3.14"></a>
+  <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html"><img src="https://img.shields.io/badge/License-GPL%20v2-blue.svg" alt="License: GPL v2"></a>
+  <a href="https://pyarchinit-mini.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/pyarchinit-mini/badge/?version=latest" alt="Documentation Status"></a>
+  <a href="https://pypi.org/project/pyarchinit-mini/"><img src="https://img.shields.io/badge/status-stable-green.svg" alt="Status"></a>
+</p>
 
 **Lightweight Archaeological Data Management System - 100% Desktop GUI Parity**
 
