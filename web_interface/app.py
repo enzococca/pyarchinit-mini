@@ -361,12 +361,13 @@ def create_app():
 
     # Initialize Flask-Babel for i18n
     from pyarchinit_mini.i18n import init_babel, get_locale
+    from flask_babel import gettext as _
     babel = init_babel(app)
 
-    # Make get_locale available in all templates
+    # Make get_locale and gettext available in all templates
     @app.context_processor
     def inject_locale():
-        return dict(get_locale=get_locale)
+        return dict(get_locale=get_locale, _=_)
 
     # Create necessary folders
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

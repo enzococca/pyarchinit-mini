@@ -6,6 +6,9 @@ include LICENSE
 include CHANGELOG.md
 include babel.cfg
 
+# Include logo
+include logo/*.png
+
 # Include configuration files
 include pyproject.toml
 include setup.py
@@ -19,7 +22,9 @@ recursive-include pyarchinit_mini/data *.db *.sql
 recursive-include pyarchinit_mini *.py *.yaml *.yml *.json *.graphml
 recursive-include pyarchinit_mini/web_interface/templates *.html
 recursive-include pyarchinit_mini/web_interface/static *.css *.js *.png *.jpg *.ico *.gif
+recursive-include web_interface/static/images *.png
 recursive-include pyarchinit_mini/desktop_gui *.py *.png *.ico *.gif
+recursive-include desktop_gui/assets *.png
 recursive-include pyarchinit_mini/cli_interface *.py *.json *.yaml
 recursive-include pyarchinit_mini/translations *.po *.mo *.pot
 recursive-include pyarchinit_mini/graphml_converter/templates *.graphml

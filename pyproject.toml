@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.2.12"
+version = "1.2.13"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, and analytics dashboard"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -171,16 +171,19 @@ include = ["pyarchinit_mini*", "tests*"]
 exclude = ["docs*", "examples*", "scripts*", "test_*"]
 
 [tool.setuptools.package-data]
+"*" = ["logo/*.png"]
 pyarchinit_mini = [
-    "*.yaml", "*.yml", "*.json", 
-    "data/*.db", "data/*.sql", 
+    "*.yaml", "*.yml", "*.json",
+    "data/*.db", "data/*.sql",
     "graphml_converter/templates/*.graphml",
-    "web_interface/templates/*.html", 
-    "web_interface/templates/**/*.html", 
+    "web_interface/templates/*.html",
+    "web_interface/templates/**/*.html",
     "web_interface/static/**/*",
-    "desktop_gui/*.png", 
-    "desktop_gui/*.ico", 
+    "web_interface/static/images/*.png",
+    "desktop_gui/*.png",
+    "desktop_gui/*.ico",
     "desktop_gui/*.gif",
+    "desktop_gui/assets/*.png",
     "translations/**/*.mo",
     "translations/**/*.po",
     "translations/*.pot"
