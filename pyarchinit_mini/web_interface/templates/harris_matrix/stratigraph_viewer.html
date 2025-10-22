@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Stratigraph Viewer') }} - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    #graph-container {
+        width: 100%;
+        height: 800px;
+        border: 1px solid #ddd;
+        background: #fafafa;
+        position: relative;
+    }
+
+    .node {
+        cursor: pointer;
+        stroke: #333;
+        stroke-width: 2px;
+    }
+
+    .node-label {
+        font-size: 12px;
+        font-weight: bold;
+        text-anchor: middle;
+        pointer-events: none;
+        fill: #333;
+    }
+
+    .link {
+        fill: none;
+        stroke-width: 2px;
+        marker-end: url(#arrowhead);
+    }
+
+    .link-label {
+        font-size: 10px;
+        fill: #666;
+        text-anchor: middle;
+        pointer-events: none;
+    }
+
+    .tooltip {
+        position: absolute;
+        padding: 12px;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        max-width: 300px;
+        z-index: 1000;
+    }
+
+    .tooltip h6 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 4px;
+    }
+
+    .tooltip .detail {
+        font-size: 12px;
+        margin: 4px 0;
+    }
+
+    .controls {
+        margin-bottom: 15px;
+    }
+
+    .legend {
+        background: white;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-top: 15px;
+    }
+
+    .legend-item {
+        display: inline-block;
+        margin-right: 20px;
+        margin-bottom: 8px;
+    }
+
+    .legend-color {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+        vertical-align: middle;
+        border: 1px solid #333;
+    }
+
+    .stats {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    .stats .stat-item {
+        display: inline-block;
+        margin-right: 25px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-project-diagram"></i>
+                {{ _('Stratigraph Viewer') }}: {{ site_name }}
+            </h2>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="stats">
+                <div class="stat-item">
+                    <i class="fas fa-circle text-primary"></i>
+                    <strong>{{ _('Nodes') }}:</strong> <span id="node-count">-</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-arrow-right text-success"></i>
+                    <strong>{{ _('Edges') }}:</strong> <span id="edge-count">-</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-layer-group text-warning"></i>
+                    <strong>{{ _('Periods') }}:</strong> <span id="period-count">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="row">
+        <div class="col-12">
+            <div class="controls">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary" onclick="zoomIn()">
+                        <i class="fas fa-search-plus"></i> {{ _('Zoom In') }}
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="zoomOut()">
+                        <i class="fas fa-search-minus"></i> {{ _('Zoom Out') }}
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="resetZoom()">
+                        <i class="fas fa-compress"></i> {{ _('Reset') }}
+                    </button>
+                </div>
+
+                <div class="btn-group ms-3" role="group">
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeLayout('hierarchical')">
+                        <i class="fas fa-sitemap"></i> {{ _('Hierarchical') }}
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeLayout('force')">
+                        <i class="fas fa-project-diagram"></i> {{ _('Force') }}
+                    </button>
+                </div>
+
+                <button type="button" class="btn btn-outline-success ms-3" onclick="exportSVG()">
+                    <i class="fas fa-download"></i> {{ _('Export SVG') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graph Container -->
+    <div class="row">
+        <div class="col-12">
+            <div id="graph-container"></div>
+            <div class="tooltip" id="tooltip"></div>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="row">
+        <div class="col-12">
+            <div class="legend">
+                <h5><i class="fas fa-palette"></i> {{ _('Extended Matrix Palette') }}</h5>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #8B4513;"></span>
+                        <span>{{ _('Negative') }}</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #D2691E;"></span>
+                        <span>{{ _('Deposit') }}</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #CD853F;"></span>
+                        <span>{{ _('Fill') }}</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #F4A460;"></span>
+                        <span>{{ _('Layer') }}</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #808080;"></span>
+                        <span>{{ _('Structure/Wall') }}</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #4682B4;"></span>
+                        <span>{{ _('Floor') }}</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #FFD700;"></span>
+                        <span>{{ _('Destruction') }}</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #90EE90;"></span>
+                        <span>{{ _('Construction') }}</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #DDA0DD;"></span>
+                        <span>{{ _('Other') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{{ url_for('export_harris_graphml') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> {{ _('Back to Export') }}
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+// Graph data from server
+const graphData = {{ graph_json | safe }};
+
+// Extended Matrix color palette
+const EM_COLORS = {
+    'Taglio': '#8B4513',      // Cut/Negative - Dark brown
+    'Deposito': '#D2691E',    // Deposit - Chocolate
+    'Riempimento': '#CD853F', // Fill - Peru
+    'Humus': '#F4A460',       // Layer - Sandy brown
+    'Terreno arativo': '#F4A460',
+    'Muro': '#808080',        // Structure/Wall - Gray
+    'Pavimento': '#4682B4',   // Floor - Steel blue
+    'Distruzione': '#FFD700', // Destruction - Gold
+    'Crollo': '#FFD700',
+    'Costruzione': '#90EE90', // Construction - Light green
+    'default': '#DDA0DD'      // Other - Plum
+};
+
+function getNodeColor(node) {
+    const desc = node.description || '';
+    for (const [key, color] of Object.entries(EM_COLORS)) {
+        if (desc.includes(key)) {
+            return color;
+        }
+    }
+    return EM_COLORS.default;
+}
+
+// D3 visualization
+let svg, g, zoom, simulation;
+let width = 1200;
+let height = 800;
+
+function initGraph() {
+    // Update stats
+    document.getElementById('node-count').textContent = graphData.nodes.length;
+    document.getElementById('edge-count').textContent = graphData.edges.length;
+
+    // Count unique periods
+    const periods = new Set(graphData.nodes.map(n => n.period).filter(p => p));
+    document.getElementById('period-count').textContent = periods.size;
+
+    // Create SVG
+    const container = d3.select('#graph-container');
+    container.selectAll('*').remove();
+
+    svg = container.append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', [0, 0, width, height]);
+
+    // Define arrowhead marker
+    svg.append('defs').append('marker')
+        .attr('id', 'arrowhead')
+        .attr('viewBox', '-0 -5 10 10')
+        .attr('refX', 25)
+        .attr('refY', 0)
+        .attr('orient', 'auto')
+        .attr('markerWidth', 8)
+        .attr('markerHeight', 8)
+        .append('path')
+        .attr('d', 'M 0,-5 L 10,0 L 0,5')
+        .attr('fill', '#999');
+
+    // Zoom behavior
+    zoom = d3.zoom()
+        .scaleExtent([0.1, 4])
+        .on('zoom', (event) => {
+            g.attr('transform', event.transform);
+        });
+
+    svg.call(zoom);
+
+    g = svg.append('g');
+
+    // Create force simulation
+    simulation = d3.forceSimulation(graphData.nodes)
+        .force('link', d3.forceLink(graphData.edges).id(d => d.id).distance(150))
+        .force('charge', d3.forceManyBody().strength(-300))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(50));
+
+    renderGraph();
+}
+
+function renderGraph() {
+    g.selectAll('*').remove();
+
+    // Create links
+    const links = g.append('g')
+        .selectAll('path')
+        .data(graphData.edges)
+        .enter().append('path')
+        .attr('class', 'link')
+        .attr('stroke', d => {
+            const rel = d.stratigraphic_relation || '';
+            if (rel.includes('COVERS') || rel.includes('CUTS')) return '#e74c3c';
+            if (rel.includes('FILLS')) return '#3498db';
+            return '#95a5a6';
+        })
+        .attr('stroke-width', 2);
+
+    // Create link labels
+    const linkLabels = g.append('g')
+        .selectAll('text')
+        .data(graphData.edges)
+        .enter().append('text')
+        .attr('class', 'link-label')
+        .text(d => d.relation_label || d.edge_type);
+
+    // Create nodes
+    const nodes = g.append('g')
+        .selectAll('circle')
+        .data(graphData.nodes)
+        .enter().append('circle')
+        .attr('class', 'node')
+        .attr('r', 20)
+        .attr('fill', d => getNodeColor(d))
+        .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended))
+        .on('mouseover', showTooltip)
+        .on('mouseout', hideTooltip);
+
+    // Create node labels
+    const nodeLabels = g.append('g')
+        .selectAll('text')
+        .data(graphData.nodes)
+        .enter().append('text')
+        .attr('class', 'node-label')
+        .text(d => d.us_number || d.name)
+        .attr('dy', 35);
+
+    // Update positions on simulation tick
+    simulation.on('tick', () => {
+        links.attr('d', d => {
+            const dx = d.target.x - d.source.x;
+            const dy = d.target.y - d.source.y;
+            return `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`;
+        });
+
+        linkLabels
+            .attr('x', d => (d.source.x + d.target.x) / 2)
+            .attr('y', d => (d.source.y + d.target.y) / 2);
+
+        nodes
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y);
+
+        nodeLabels
+            .attr('x', d => d.x)
+            .attr('y', d => d.y);
+    });
+}
+
+function showTooltip(event, d) {
+    const tooltip = d3.select('#tooltip');
+    tooltip.style('opacity', 1);
+    tooltip.html(`
+        <h6>${d.name || 'US ' + d.us_number}</h6>
+        <div class="detail"><strong>US:</strong> ${d.us_number || '-'}</div>
+        <div class="detail"><strong>${'{{ _("Description") }}'}</strong>: ${d.description || '-'}</div>
+        <div class="detail"><strong>${'{{ _("Type") }}'}</strong>: ${d.unit_type || '-'}</div>
+        <div class="detail"><strong>${'{{ _("Period") }}'}</strong>: ${d.period || '-'}</div>
+        <div class="detail"><strong>${'{{ _("Phase") }}'}</strong>: ${d.phase || '-'}</div>
+        <div class="detail"><strong>${'{{ _("Excavated") }}'}</strong>: ${d.excavated || '-'}</div>
+    `);
+    tooltip.style('left', (event.pageX + 15) + 'px');
+    tooltip.style('top', (event.pageY - 30) + 'px');
+}
+
+function hideTooltip() {
+    d3.select('#tooltip').style('opacity', 0);
+}
+
+function dragstarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+}
+
+function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+}
+
+function dragended(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+}
+
+function zoomIn() {
+    svg.transition().call(zoom.scaleBy, 1.3);
+}
+
+function zoomOut() {
+    svg.transition().call(zoom.scaleBy, 0.7);
+}
+
+function resetZoom() {
+    svg.transition().call(zoom.transform, d3.zoomIdentity);
+}
+
+function changeLayout(type) {
+    if (type === 'hierarchical') {
+        simulation.force('link').distance(100);
+        simulation.force('charge').strength(-500);
+        simulation.force('y', d3.forceY().strength(0.1));
+        simulation.alpha(1).restart();
+    } else {
+        simulation.force('link').distance(150);
+        simulation.force('charge').strength(-300);
+        simulation.force('y', null);
+        simulation.alpha(1).restart();
+    }
+}
+
+function exportSVG() {
+    const svgData = document.querySelector('#graph-container svg').outerHTML;
+    const blob = new Blob([svgData], {type: 'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '{{ site_name }}_stratigraph.svg';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', initGraph);
+</script>
+{% endblock %}

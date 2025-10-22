@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2>{{ title }}</h2>
+
+    <form method="POST" class="mt-4">
+        {{ form.hidden_tag() }}
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>{{ _('Form errors:') }}</strong>
+            <ul>
+            {% for field_name, errors in form.errors.items() %}
+                {% for error in errors %}
+                <li>{{ field_name }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Bootstrap Tabs -->
+        <ul class="nav nav-tabs" id="inventarioFormTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="identification-tab" data-bs-toggle="tab" data-bs-target="#identification" type="button" role="tab">
+                    <i class="fas fa-id-card"></i> {{ _('Identification') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="classification-tab" data-bs-toggle="tab" data-bs-target="#classification" type="button" role="tab">
+                    <i class="fas fa-tags"></i> {{ _('Classification') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="context-tab" data-bs-toggle="tab" data-bs-target="#context" type="button" role="tab">
+                    <i class="fas fa-map-marker-alt"></i> {{ _('Context') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="physical-tab" data-bs-toggle="tab" data-bs-target="#physical" type="button" role="tab">
+                    <i class="fas fa-cube"></i> {{ _('Physical Characteristics') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="conservation-tab" data-bs-toggle="tab" data-bs-target="#conservation" type="button" role="tab">
+                    <i class="fas fa-shield-alt"></i> {{ _('Conservation') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="ceramic-tab" data-bs-toggle="tab" data-bs-target="#ceramic" type="button" role="tab">
+                    <i class="fas fa-vase"></i> {{ _('Ceramic') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="measurements-tab" data-bs-toggle="tab" data-bs-target="#measurements" type="button" role="tab">
+                    <i class="fas fa-ruler-combined"></i> {{ _('Measurements') }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="documentation-tab" data-bs-toggle="tab" data-bs-target="#documentation" type="button" role="tab">
+                    <i class="fas fa-book"></i> {{ _('Documentation') }}
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content border border-top-0 p-4" id="inventarioFormTabContent">
+            <!-- TAB 1: Identificazione -->
+            <div class="tab-pane fade show active" id="identification" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">{{ _('Site') }} *</label>
+                        {{ form.sito(class="form-select", required=True) }}
+                        {% if form.sito.errors %}
+                            <div class="text-danger">{{ form.sito.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">{{ _('Inventory Number') }} *</label>
+                        {{ form.numero_inventario(class="form-control", required=True) }}
+                        {% if form.numero_inventario.errors %}
+                            <div class="text-danger">{{ form.numero_inventario.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ _('Artifact No.') }}</label>
+                        {{ form.n_reperto(class="form-control") }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ _('Recorder') }}</label>
+                        {{ form.schedatore(class="form-control") }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ _('Record Date') }}</label>
+                        {{ form.date_scheda(class="form-control", placeholder="YYYY-MM-DD") }}
+                        <small class="text-muted">{{ _('Format: YYYY-MM-DD') }}</small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">{{ _('Year') }}</label>
+                        {{ form.years(class="form-control", placeholder="YYYY") }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Classificazione -->
+            <div class="tab-pane fade" id="classification" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">{{ _('Artifact Type') }}</label>
+                        {{ form.tipo_reperto(class="form-select") }}
+                        <small class="text-muted"><i class="fas fa-book"></i> {{ _('Controlled vocabulary from thesaurus') }}</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Recording Criteria') }}</label>
+                        {{ form.criterio_schedatura(class="form-control") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Definition') }}</label>
+                        {{ form.definizione(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Type') }}</label>
+                        {{ form.tipo(class="form-control") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Container Type') }}</label>
+                        {{ form.tipo_contenitore(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Structure') }}</label>
+                        {{ form.struttura(class="form-control") }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Description') }}</label>
+                    {{ form.descrizione(class="form-control", rows=6) }}
+                </div>
+            </div>
+
+            <!-- TAB 3: Contesto -->
+            <div class="tab-pane fade" id="context" role="tabpanel">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>{{ _('Archaeological Context:') }}</strong> {{ _('Information about the stratigraphic origin of the artifact') }}
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Area') }}</label>
+                        {{ form.area(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('SU') }}</label>
+                        {{ form.us(class="form-control") }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Find Spot') }}</label>
+                    {{ form.punto_rinv(class="form-control") }}
+                    <small class="text-muted">{{ _('Specify the exact location of the find') }}</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Artifact Elements') }}</label>
+                    {{ form.elementi_reperto(class="form-control", rows=4) }}
+                    <small class="text-muted">{{ _('Describe the constituent elements of the artifact') }}</small>
+                </div>
+            </div>
+
+            <!-- TAB 4: Caratteristiche Fisiche -->
+            <div class="tab-pane fade" id="physical" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">{{ _('Conservation State') }}</label>
+                        {{ form.stato_conservazione(class="form-select") }}
+                        <small class="text-muted"><i class="fas fa-book"></i> {{ _('Controlled vocabulary from thesaurus') }}</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Washed') }}</label>
+                        {{ form.lavato(class="form-select") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Box No.') }}</label>
+                        {{ form.nr_cassa(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Storage Location') }}</label>
+                        {{ form.luogo_conservazione(class="form-control") }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: Conservazione e Gestione -->
+            <div class="tab-pane fade" id="conservation" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Catalogued') }}</label>
+                        {{ form.repertato(class="form-select") }}
+                        <small class="text-muted">{{ _('Has the artifact been catalogued?') }}</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Diagnostic') }}</label>
+                        {{ form.diagnostico(class="form-select") }}
+                        <small class="text-muted">{{ _('Is the artifact diagnostic for dating?') }}</small>
+                    </div>
+                </div>
+                <div class="alert alert-secondary">
+                    <h6><i class="fas fa-lightbulb"></i> {{ _('Tips') }}</h6>
+                    <ul class="mb-0">
+                        <li><strong>{{ _('Catalogued:') }}</strong> {{ _('Indicates if the artifact has been photographically documented') }}</li>
+                        <li><strong>{{ _('Diagnostic:') }}</strong> {{ _('Indicates if the artifact is significant for dating the layer') }}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- TAB 6: Caratteristiche Ceramiche -->
+            <div class="tab-pane fade" id="ceramic" role="tabpanel">
+                <div class="alert alert-info">
+                    <i class="fas fa-vase"></i>
+                    <strong>{{ _('Note:') }}</strong> {{ _('This tab is specific for ceramic artifacts') }}
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">{{ _('Ceramic Body') }}</label>
+                        {{ form.corpo_ceramico(class="form-select") }}
+                        <small class="text-muted"><i class="fas fa-book"></i> {{ _('Controlled vocabulary from thesaurus') }}</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">{{ _('Coating') }}</label>
+                        {{ form.rivestimento(class="form-select") }}
+                        <small class="text-muted"><i class="fas fa-book"></i> {{ _('Controlled vocabulary from thesaurus') }}</small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Rim Diameter (cm)') }}</label>
+                        {{ form.diametro_orlo(class="form-control", placeholder=_('e.g. 12.5')) }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Rim EVE') }}</label>
+                        {{ form.eve_orlo(class="form-control", placeholder=_('e.g. 0.25')) }}
+                        <small class="text-muted">{{ _('Estimated Vessel Equivalent (preserved fraction 0-1)') }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 7: Misurazioni -->
+            <div class="tab-pane fade" id="measurements" role="tabpanel">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ _('Weight and Quantitative Measurements') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Weight (g)') }}</label>
+                                {{ form.peso(class="form-control", placeholder=_('e.g. 125.5')) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Total Fragments') }}</label>
+                                {{ form.totale_frammenti(class="form-control", placeholder=_('e.g. 5')) }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Minimum Forms') }}</label>
+                                {{ form.forme_minime(class="form-control", placeholder=_('e.g. 1')) }}
+                                <small class="text-muted">{{ _('Minimum number of individuals') }}</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ _('Maximum Forms') }}</label>
+                                {{ form.forme_massime(class="form-control", placeholder=_('e.g. 3')) }}
+                                <small class="text-muted">{{ _('Maximum number of individuals') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Detailed Measurements') }}</label>
+                    {{ form.misurazioni(class="form-control", rows=4) }}
+                    <small class="text-muted">{{ _('Other measurements: length, width, height, thickness, etc.') }}</small>
+                </div>
+            </div>
+
+            <!-- TAB 8: Documentazione -->
+            <div class="tab-pane fade" id="documentation" role="tabpanel">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ _('Artifact Dating') }}</label>
+                    {{ form.datazione_reperto(class="form-control") }}
+                    <small class="text-muted">{{ _('Proposed dating for the artifact') }}</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Technologies') }}</label>
+                    {{ form.tecnologie(class="form-control", rows=4) }}
+                    <small class="text-muted">{{ _('Production and processing techniques') }}</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">{{ _('Bibliographic References') }}</label>
+                    {{ form.rif_biblio(class="form-control", rows=4) }}
+                    <small class="text-muted">{{ _('Bibliographic citations related to the artifact') }}</small>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Photo Negative') }}</label>
+                        {{ form.negativo_photo(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ _('Slide') }}</label>
+                        {{ form.diapositiva(class="form-control") }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mt-4 mb-4">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save"></i> {{ _('Save Artifact') }}
+            </button>
+            <a href="{{ url_for('inventario_list') }}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-times"></i> {{ _('Cancel') }}
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

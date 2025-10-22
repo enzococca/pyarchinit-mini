@@ -13,7 +13,7 @@ from pyarchinit_mini.database.manager import DatabaseManager
 from pyarchinit_mini.services.user_service import UserService
 from pyarchinit_mini.models.user import UserRole
 from pyarchinit_mini.utils.auth import create_access_token, decode_access_token
-from pyarchinit_mini.api.dependencies import get_db_manager
+from pyarchinit_mini.api.dependencies import get_database_manager
 
 
 # OAuth2 scheme
@@ -67,7 +67,7 @@ router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db_manager: DatabaseManager = Depends(get_db_manager)
+    db_manager: DatabaseManager = Depends(get_database_manager)
 ) -> dict:
     """
     Get current authenticated user from token
@@ -140,7 +140,7 @@ async def get_current_active_admin(
 @router.post("/login", response_model=Token)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    db_manager: DatabaseManager = Depends(get_db_manager)
+    db_manager: DatabaseManager = Depends(get_database_manager)
 ):
     """
     Login endpoint - Returns JWT token
@@ -189,7 +189,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 @router.post("/register", response_model=UserResponse)
 async def register(
     user_data: UserCreate,
-    db_manager: DatabaseManager = Depends(get_db_manager),
+    db_manager: DatabaseManager = Depends(get_database_manager),
     current_user: dict = Depends(get_current_active_admin)
 ):
     """
@@ -223,7 +223,7 @@ async def register(
 
 @router.get("/users", response_model=list[UserResponse])
 async def list_users(
-    db_manager: DatabaseManager = Depends(get_db_manager),
+    db_manager: DatabaseManager = Depends(get_database_manager),
     current_user: dict = Depends(get_current_active_admin)
 ):
     """
@@ -245,7 +245,7 @@ async def list_users(
 async def update_user(
     user_id: int,
     user_data: UserUpdate,
-    db_manager: DatabaseManager = Depends(get_db_manager),
+    db_manager: DatabaseManager = Depends(get_database_manager),
     current_user: dict = Depends(get_current_active_admin)
 ):
     """
@@ -279,7 +279,7 @@ async def update_user(
 @router.delete("/users/{user_id}")
 async def delete_user(
     user_id: int,
-    db_manager: DatabaseManager = Depends(get_db_manager),
+    db_manager: DatabaseManager = Depends(get_database_manager),
     current_user: dict = Depends(get_current_active_admin)
 ):
     """

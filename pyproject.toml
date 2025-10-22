@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.2.0"
+version = "1.2.7"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, and analytics dashboard"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -49,6 +49,7 @@ dependencies = [
     "psycopg2-binary>=2.9.0",
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
+    "email-validator>=2.0.0",
     "python-multipart>=0.0.6",
     "alembic>=1.12.0",
     "networkx>=3.0.0",
@@ -165,14 +166,24 @@ pyarchinit-graphml = "pyarchinit_mini.cli.graphml_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pyarchinit_mini*", "cli_interface*", "web_interface*", "desktop_gui*", "tests*"]
-exclude = ["docs*", "examples*"]
+include = ["pyarchinit_mini*", "tests*"]
+exclude = ["docs*", "examples*", "scripts*", "test_*"]
 
 [tool.setuptools.package-data]
-pyarchinit_mini = ["*.yaml", "*.yml", "*.json", "data/*.db", "data/*.sql", "graphml_converter/templates/*.graphml"]
-web_interface = ["templates/*.html", "templates/**/*.html", "static/**/*"]
-cli_interface = ["*.json", "*.yaml"]
-desktop_gui = ["*.png", "*.ico", "*.gif"]
+pyarchinit_mini = [
+    "*.yaml", "*.yml", "*.json", 
+    "data/*.db", "data/*.sql", 
+    "graphml_converter/templates/*.graphml",
+    "web_interface/templates/*.html", 
+    "web_interface/templates/**/*.html", 
+    "web_interface/static/**/*",
+    "desktop_gui/*.png", 
+    "desktop_gui/*.ico", 
+    "desktop_gui/*.gif",
+    "translations/**/*.mo",
+    "translations/**/*.po",
+    "translations/*.pot"
+]
 
 [tool.black]
 line-length = 88
