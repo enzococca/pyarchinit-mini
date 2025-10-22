@@ -5,6 +5,22 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.8] - 2025-10-22
+
+### Added
+- **Project Status Section**: Added comprehensive project status to README
+- Clear indication that all interfaces are now fully functional
+- Summary of recent fixes and improvements
+
+### Changed
+- Updated README to reflect production-ready status
+- Emphasized that all installation issues have been resolved
+
+### Documentation
+- Added detailed status badges and checkmarks for features
+- Listed all recent fixes from versions 1.2.5-1.2.8
+- Added reference to active development status
+
 ## [1.2.7] - 2025-10-22
 
 ### Fixed
