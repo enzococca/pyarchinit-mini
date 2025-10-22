@@ -103,11 +103,28 @@ class GraphMLExportDialog:
         ttk.Checkbutton(reverse_frame, text="Inverti ordine periodi (Periodo 1 = ultima epoca scavata)",
                        variable=self.reverse_epochs_var).pack(anchor=tk.W)
 
+        # s3Dgraphy Export Section
+        s3d_frame = ttk.LabelFrame(main_frame, text="Export s3Dgraphy (Extended Matrix)", padding=10)
+        s3d_frame.pack(fill=tk.X, pady=10)
+
+        desc_s3d = ttk.Label(s3d_frame,
+                            text="Export avanzato con metadata completi, supporto 3D, Extended Matrix Framework",
+                            wraplength=550, font=('Arial', 9))
+        desc_s3d.pack(anchor=tk.W, pady=(0, 10))
+
+        s3d_button_frame = ttk.Frame(s3d_frame)
+        s3d_button_frame.pack(fill=tk.X)
+
+        ttk.Button(s3d_button_frame, text="Export GraphML s3Dgraphy",
+                  command=self.export_s3d_graphml).pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
+        ttk.Button(s3d_button_frame, text="Export JSON s3Dgraphy",
+                  command=self.export_s3d_json).pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
+
         # Buttons
         button_frame = ttk.Frame(self.dialog)
         button_frame.pack(pady=10)
 
-        ttk.Button(button_frame, text="Export GraphML", command=self.export_graphml,
+        ttk.Button(button_frame, text="Export GraphML Tradizionale", command=self.export_graphml,
                   style='Accent.TButton').pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Chiudi", command=self.dialog.destroy).pack(side=tk.LEFT, padx=5)
 
@@ -115,8 +132,9 @@ class GraphMLExportDialog:
         help_frame = ttk.LabelFrame(self.dialog, text="Info", padding=10)
         help_frame.pack(fill=tk.X, padx=20, pady=(0, 10))
 
-        help_text = ("Il file GraphML può essere aperto con yEd Graph Editor.\n"
-                    "Download gratuito: https://www.yworks.com/products/yed")
+        help_text = ("GraphML Tradizionale: Layout yEd ottimizzato con swimlanes\n"
+                    "GraphML s3Dgraphy: Metadata completi, Extended Matrix, analisi avanzate\n"
+                    "Download yEd gratuito: https://www.yworks.com/products/yed")
         ttk.Label(help_frame, text=help_text, font=('Arial', 9), foreground='gray').pack()
 
     def load_sites(self):
@@ -540,6 +558,162 @@ class GraphMLExportDialog:
             import traceback
             traceback.print_exc()
             messagebox.showerror("Errore", f"Errore durante l'export GraphML:\n\n{str(e)}")
+
+    def export_s3d_graphml(self):
+        """Export stratigraphic data to s3Dgraphy GraphML format"""
+        try:
+            site_name = self.selected_site.get()
+            if not site_name:
+                messagebox.showwarning("Avviso", "Seleziona un sito")
+                return
+
+            # Ask for output file
+            default_filename = f"{site_name}_s3d_stratigraphy.graphml"
+            filepath = filedialog.asksaveasfilename(
+                parent=self.dialog,
+                title="Salva s3Dgraphy GraphML",
+                defaultextension=".graphml",
+                initialfile=default_filename,
+                filetypes=[
+                    ("GraphML files", "*.graphml"),
+                    ("All files", "*.*")
+                ]
+            )
+
+            if not filepath:
+                return
+
+            # Import s3d integration
+            try:
+                from pyarchinit_mini.s3d_integration import S3DConverter
+            except ImportError:
+                messagebox.showerror("Errore",
+                                   "s3Dgraphy non installato.\n\n"
+                                   "Installa con: pip install s3dgraphy")
+                return
+
+            # Get all US for the site
+            from pyarchinit_mini.services.us_service import USService
+            from pyarchinit_mini.database.manager import DatabaseManager
+            from pyarchinit_mini.database.connection import DatabaseConnection
+
+            # Reuse database connection
+            db_manager = self.site_service.db_manager
+
+            # Get US data
+            us_service = USService(db_manager)
+            us_records = us_service.get_us_by_site(site_name)
+
+            if not us_records:
+                messagebox.showwarning("Avviso", f"Nessuna US trovata per il sito '{site_name}'")
+                return
+
+            # Convert to dictionaries
+            us_data = []
+            for us in us_records:
+                us_dict = {}
+                for column in us.__table__.columns:
+                    us_dict[column.name] = getattr(us, column.name)
+                us_data.append(us_dict)
+
+            # Create s3dgraphy graph
+            converter = S3DConverter()
+            graph = converter.create_graph_from_us(us_data, site_name)
+
+            # Export to GraphML
+            converter.export_to_graphml(graph, filepath)
+
+            # Get statistics
+            stats = converter.get_graph_statistics(graph)
+
+            messagebox.showinfo("Successo",
+                              f"Stratigrafia s3Dgraphy esportata!\n\n"
+                              f"File: {os.path.basename(filepath)}\n"
+                              f"Nodi (US): {stats['total_nodes']}\n"
+                              f"Archi (Relazioni): {stats['total_edges']}\n\n"
+                              f"Apri con yEd, Gephi, o NetworkX per analisi.")
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            messagebox.showerror("Errore", f"Errore export s3Dgraphy GraphML:\n\n{str(e)}")
+
+    def export_s3d_json(self):
+        """Export stratigraphic data to s3Dgraphy JSON format"""
+        try:
+            site_name = self.selected_site.get()
+            if not site_name:
+                messagebox.showwarning("Avviso", "Seleziona un sito")
+                return
+
+            # Ask for output file
+            default_filename = f"{site_name}_s3d_stratigraphy.json"
+            filepath = filedialog.asksaveasfilename(
+                parent=self.dialog,
+                title="Salva s3Dgraphy JSON",
+                defaultextension=".json",
+                initialfile=default_filename,
+                filetypes=[
+                    ("JSON files", "*.json"),
+                    ("All files", "*.*")
+                ]
+            )
+
+            if not filepath:
+                return
+
+            # Import s3d integration
+            try:
+                from pyarchinit_mini.s3d_integration import S3DConverter
+            except ImportError:
+                messagebox.showerror("Errore",
+                                   "s3Dgraphy non installato.\n\n"
+                                   "Installa con: pip install s3dgraphy")
+                return
+
+            # Get all US for the site
+            from pyarchinit_mini.services.us_service import USService
+
+            # Reuse database connection
+            db_manager = self.site_service.db_manager
+
+            # Get US data
+            us_service = USService(db_manager)
+            us_records = us_service.get_us_by_site(site_name)
+
+            if not us_records:
+                messagebox.showwarning("Avviso", f"Nessuna US trovata per il sito '{site_name}'")
+                return
+
+            # Convert to dictionaries
+            us_data = []
+            for us in us_records:
+                us_dict = {}
+                for column in us.__table__.columns:
+                    us_dict[column.name] = getattr(us, column.name)
+                us_data.append(us_dict)
+
+            # Create s3dgraphy graph
+            converter = S3DConverter()
+            graph = converter.create_graph_from_us(us_data, site_name)
+
+            # Export to JSON
+            converter.export_to_json(graph, filepath)
+
+            # Get statistics
+            stats = converter.get_graph_statistics(graph)
+
+            messagebox.showinfo("Successo",
+                              f"Stratigrafia s3Dgraphy esportata!\n\n"
+                              f"File: {os.path.basename(filepath)}\n"
+                              f"Nodi (US): {stats['total_nodes']}\n"
+                              f"Archi (Relazioni): {stats['total_edges']}\n\n"
+                              f"Formato JSON pronto per analisi programmate.")
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            messagebox.showerror("Errore", f"Errore export s3Dgraphy JSON:\n\n{str(e)}")
 
 
 def show_graphml_export_dialog(parent, matrix_generator, matrix_visualizer, site_service):

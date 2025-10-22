@@ -10,43 +10,43 @@
         {{ form.hidden_tag() }}
 
         <div class="mb-3">
-            <label for="sito" class="form-label">Nome Sito *</label>
+            <label class="form-label">{{ _('Site') }}</label>
             {{ form.sito(class="form-control", required=True) }}
         </div>
 
         <div class="mb-3">
-            <label for="nazione" class="form-label">Nazione</label>
+            <label class="form-label">{{ _('Country') }}</label>
             {{ form.nazione(class="form-control") }}
         </div>
 
         <div class="mb-3">
-            <label for="regione" class="form-label">Regione</label>
+            <label class="form-label">{{ _('Region') }}</label>
             {{ form.regione(class="form-control") }}
         </div>
 
         <div class="mb-3">
-            <label for="comune" class="form-label">Comune</label>
+            <label class="form-label">{{ _('Municipality') }}</label>
             {{ form.comune(class="form-control") }}
         </div>
 
         <div class="mb-3">
-            <label for="provincia" class="form-label">Provincia</label>
+            <label class="form-label">{{ _('Province') }}</label>
             {{ form.provincia(class="form-control") }}
         </div>
 
         <div class="mb-3">
-            <label for="definizione_sito" class="form-label">Definizione Sito</label>
+            <label class="form-label">{{ _('Site Definition') }}</label>
             {{ form.definizione_sito(class="form-control") }}
         </div>
 
         <div class="mb-3">
-            <label for="descrizione" class="form-label">Descrizione</label>
+            <label class="form-label">{{ _('Description') }}</label>
             {{ form.descrizione(class="form-control", rows=5) }}
         </div>
 
         <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Salva</button>
-            <a href="{{ url_for('sites_list') }}" class="btn btn-secondary">Annulla</a>
+            <button type="submit" class="btn btn-primary">{{ _('Save') }}</button>
+            <a href="{{ url_for('sites_list') }}" class="btn btn-secondary">{{ _('Cancel') }}</a>
         </div>
     </form>
 </div>

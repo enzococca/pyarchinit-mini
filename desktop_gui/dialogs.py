@@ -12,6 +12,10 @@ import threading
 from typing import Optional, List, Callable, Any
 from datetime import datetime
 
+# Import i18n
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from desktop_gui.i18n import _
+
 class BaseDialog:
     """Base class for dialog windows"""
     
@@ -51,8 +55,12 @@ class BaseDialog:
         y = (self.dialog.winfo_screenheight() // 2) - (height // 2)
         self.dialog.geometry(f'{width}x{height}+{x}+{y}')
     
-    def create_buttons(self, ok_text="OK", cancel_text="Annulla"):
+    def create_buttons(self, ok_text=None, cancel_text=None):
         """Create standard OK/Cancel buttons"""
+        if ok_text is None:
+            ok_text = _("OK")
+        if cancel_text is None:
+            cancel_text = _("Cancel")
         ttk.Button(self.button_frame, text=cancel_text, command=self.cancel).pack(side=tk.RIGHT, padx=(10, 0))
         ttk.Button(self.button_frame, text=ok_text, command=self.ok).pack(side=tk.RIGHT)
     
@@ -67,21 +75,22 @@ class BaseDialog:
 
 class SiteDialog(BaseDialog):
     """Dialog for creating/editing sites with media support"""
-    
+
     def __init__(self, parent, site_service, media_service=None, site=None, callback=None):
-        super().__init__(parent, "Nuovo Sito" if site is None else "Modifica Sito", 800, 600)
-        
+        title = _("New Site") if site is None else _("Edit Site")
+        super().__init__(parent, title, 800, 600)
+
         self.site_service = site_service
         self.media_service = media_service
         self.site = site
         self.callback = callback
         self.media_list = []
-        
+
         # Create media directory
         self.media_dir = self.create_media_directory()
-        
+
         self.create_form()
-        self.create_buttons("Salva", "Annulla")
+        self.create_buttons(_("Save"), _("Cancel"))
         
         if site:
             self.populate_form()
@@ -122,54 +131,54 @@ class SiteDialog(BaseDialog):
     def create_basic_tab(self):
         """Create basic information tab"""
         basic_frame = ttk.Frame(self.notebook)
-        self.notebook.add(basic_frame, text="Informazioni Base")
-        
+        self.notebook.add(basic_frame, text=_("Basic Information"))
+
         # Create scrollable frame
         canvas = tk.Canvas(basic_frame)
         scrollbar = ttk.Scrollbar(basic_frame, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
-        
+
         scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
-        
+
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
-        
+
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
-        
+
         # Create form fields
         self.fields = {}
-        
+
         # Nome sito (required)
-        ttk.Label(scrollable_frame, text="Nome Sito *:").grid(row=0, column=0, sticky="w", pady=5, padx=5)
+        ttk.Label(scrollable_frame, text=_("Site Name *:")).grid(row=0, column=0, sticky="w", pady=5, padx=5)
         self.fields['sito'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['sito'].grid(row=0, column=1, sticky="ew", padx=(10, 5), pady=5)
-        
+
         # Nazione
-        ttk.Label(scrollable_frame, text="Nazione:").grid(row=1, column=0, sticky="w", pady=5, padx=5)
+        ttk.Label(scrollable_frame, text=_("Country:")).grid(row=1, column=0, sticky="w", pady=5, padx=5)
         self.fields['nazione'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['nazione'].grid(row=1, column=1, sticky="ew", padx=(10, 5), pady=5)
-        
+
         # Regione
-        ttk.Label(scrollable_frame, text="Regione:").grid(row=2, column=0, sticky="w", pady=5, padx=5)
+        ttk.Label(scrollable_frame, text=_("Region:")).grid(row=2, column=0, sticky="w", pady=5, padx=5)
         self.fields['regione'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['regione'].grid(row=2, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Comune
-        ttk.Label(scrollable_frame, text="Comune:").grid(row=3, column=0, sticky="w", pady=5, padx=5)
+        ttk.Label(scrollable_frame, text=_("Municipality:")).grid(row=3, column=0, sticky="w", pady=5, padx=5)
         self.fields['comune'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['comune'].grid(row=3, column=1, sticky="ew", padx=(10, 5), pady=5)
-        
+
         # Provincia
-        ttk.Label(scrollable_frame, text="Provincia:").grid(row=4, column=0, sticky="w", pady=5, padx=5)
+        ttk.Label(scrollable_frame, text=_("Province:")).grid(row=4, column=0, sticky="w", pady=5, padx=5)
         self.fields['provincia'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['provincia'].grid(row=4, column=1, sticky="ew", padx=(10, 5), pady=5)
-        
+
         # Definizione sito
-        ttk.Label(scrollable_frame, text="Definizione Sito:").grid(row=5, column=0, sticky="w", pady=5, padx=5)
+        ttk.Label(scrollable_frame, text=_("Site Definition:")).grid(row=5, column=0, sticky="w", pady=5, padx=5)
         self.fields['definizione_sito'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['definizione_sito'].grid(row=5, column=1, sticky="ew", padx=(10, 5), pady=5)
         
@@ -182,32 +191,32 @@ class SiteDialog(BaseDialog):
     def create_description_tab(self):
         """Create description tab"""
         desc_frame = ttk.Frame(self.notebook)
-        self.notebook.add(desc_frame, text="Descrizione")
-        
+        self.notebook.add(desc_frame, text=_("Description"))
+
         # Descrizione
-        ttk.Label(desc_frame, text="Descrizione del sito:").pack(anchor="w", pady=(10, 5))
+        ttk.Label(desc_frame, text=_("Site description:")).pack(anchor="w", pady=(10, 5))
         self.fields['descrizione'] = tk.Text(desc_frame, width=60, height=15)
         self.fields['descrizione'].pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
-    
+
     def create_media_tab(self):
         """Create media management tab with thumbnails and drag & drop"""
         media_frame = ttk.Frame(self.notebook)
-        self.notebook.add(media_frame, text="Media")
-        
+        self.notebook.add(media_frame, text=_("Media"))
+
         # Control buttons frame
         control_frame = ttk.Frame(media_frame)
         control_frame.pack(fill=tk.X, padx=10, pady=5)
-        
-        ttk.Button(control_frame, text="Aggiungi Media", command=self.add_media_file).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(control_frame, text="Rimuovi Selezionato", command=self.remove_media_file).pack(side=tk.LEFT, padx=5)
-        ttk.Button(control_frame, text="Anteprima", command=self.preview_media).pack(side=tk.LEFT, padx=5)
-        
+
+        ttk.Button(control_frame, text=_("Add Media"), command=self.add_media_file).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(control_frame, text=_("Remove Selected"), command=self.remove_media_file).pack(side=tk.LEFT, padx=5)
+        ttk.Button(control_frame, text=_("Preview"), command=self.preview_media).pack(side=tk.LEFT, padx=5)
+
         # Drag and drop area
-        drop_frame = ttk.LabelFrame(media_frame, text="Trascina qui i file multimediali")
+        drop_frame = ttk.LabelFrame(media_frame, text=_("Drag media files here"))
         drop_frame.pack(fill=tk.X, padx=10, pady=5)
-        
-        self.drop_area = tk.Label(drop_frame, 
-                                text="Trascina qui i file multimediali\\n(Immagini, PDF, Video, Audio)",
+
+        self.drop_area = tk.Label(drop_frame,
+                                text=_("Drag media files here\n(Images, PDF, Video, Audio)"),
                                 relief="sunken", bd=2, height=3)
         self.drop_area.pack(fill=tk.X, padx=5, pady=5)
         
@@ -471,9 +480,9 @@ class SiteDialog(BaseDialog):
             # Validate required fields
             nome_sito = self.fields['sito'].get().strip()
             if not nome_sito:
-                messagebox.showerror("Errore", "Il nome del sito è obbligatorio")
+                messagebox.showerror(_("Error"), _("Site name is required"))
                 return
-            
+
             # Prepare data
             site_data = {
                 'sito': nome_sito,
@@ -484,7 +493,7 @@ class SiteDialog(BaseDialog):
                 'definizione_sito': self.fields['definizione_sito'].get().strip() or None,
                 'descrizione': self.fields['descrizione'].get("1.0", tk.END).strip() or None
             }
-            
+
             # Save site
             if self.site:
                 # Update existing site - get ID handling both dict and DTO objects
@@ -494,36 +503,37 @@ class SiteDialog(BaseDialog):
                     site_id = self.site.get('id_sito')
                 else:
                     raise ValueError("Cannot get site ID from site object")
-                
+
                 updated_site = self.site_service.update_site_dto(site_id, site_data)
-                messagebox.showinfo("Successo", "Sito aggiornato con successo")
+                messagebox.showinfo(_("Success"), _("Site updated successfully"))
             else:
                 # Create new site
                 new_site = self.site_service.create_site_dto(site_data)
-                messagebox.showinfo("Successo", "Sito creato con successo")
-            
+                messagebox.showinfo(_("Success"), _("Site created successfully"))
+
             # Call callback to refresh data
             if self.callback:
                 self.callback()
-            
+
             self.dialog.destroy()
-            
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore durante il salvataggio: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error saving: {}").format(str(e)))
 
 class USDialog(BaseDialog):
     """Dialog for creating/editing US"""
-    
+
     def __init__(self, parent, us_service, site_names, us=None, callback=None):
-        super().__init__(parent, "Nuova US" if us is None else "Modifica US", 600, 500)
-        
+        title = _("New US") if us is None else _("Edit US")
+        super().__init__(parent, title, 600, 500)
+
         self.us_service = us_service
         self.site_names = site_names
         self.us = us
         self.callback = callback
-        
+
         self.create_form()
-        self.create_buttons("Salva", "Annulla")
+        self.create_buttons(_("Save"), _("Cancel"))
         
         if us:
             self.populate_form()
@@ -546,52 +556,52 @@ class USDialog(BaseDialog):
         # Form fields
         self.fields = {}
         row = 0
-        
+
         # Sito (required)
-        ttk.Label(scrollable_frame, text="Sito *:").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(scrollable_frame, text=_("Site *:")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['sito'] = ttk.Combobox(scrollable_frame, values=self.site_names, width=37)
         self.fields['sito'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Area
-        ttk.Label(scrollable_frame, text="Area:").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(scrollable_frame, text=_("Area:")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['area'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['area'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # US number (required)
-        ttk.Label(scrollable_frame, text="Numero US *:").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(scrollable_frame, text=_("US Number *:")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['us'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['us'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Descrizione stratigrafica
-        ttk.Label(scrollable_frame, text="Descrizione Stratigrafica:").grid(row=row, column=0, sticky="nw", pady=5)
+        ttk.Label(scrollable_frame, text=_("Stratigraphic Description:")).grid(row=row, column=0, sticky="nw", pady=5)
         self.fields['d_stratigrafica'] = tk.Text(scrollable_frame, width=40, height=3)
         self.fields['d_stratigrafica'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Descrizione interpretativa
-        ttk.Label(scrollable_frame, text="Descrizione Interpretativa:").grid(row=row, column=0, sticky="nw", pady=5)
+        ttk.Label(scrollable_frame, text=_("Interpretative Description:")).grid(row=row, column=0, sticky="nw", pady=5)
         self.fields['d_interpretativa'] = tk.Text(scrollable_frame, width=40, height=3)
         self.fields['d_interpretativa'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Anno scavo
-        ttk.Label(scrollable_frame, text="Anno Scavo:").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(scrollable_frame, text=_("Excavation Year:")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['anno_scavo'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['anno_scavo'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Schedatore
-        ttk.Label(scrollable_frame, text="Schedatore:").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(scrollable_frame, text=_("Cataloguer:")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['schedatore'] = ttk.Entry(scrollable_frame, width=40)
         self.fields['schedatore'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Formazione
-        ttk.Label(scrollable_frame, text="Formazione:").grid(row=row, column=0, sticky="w", pady=5)
-        self.fields['formazione'] = ttk.Combobox(scrollable_frame, values=["", "Natural", "Artificial"], width=37)
+        ttk.Label(scrollable_frame, text=_("Formation:")).grid(row=row, column=0, sticky="w", pady=5)
+        self.fields['formazione'] = ttk.Combobox(scrollable_frame, values=["", _("Natural"), _("Artificial")], width=37)
         self.fields['formazione'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
         
@@ -624,21 +634,21 @@ class USDialog(BaseDialog):
             # Validate required fields
             sito = self.fields['sito'].get().strip()
             us_number = self.fields['us'].get().strip()
-            
+
             if not sito:
-                messagebox.showerror("Errore", "Il sito è obbligatorio")
+                messagebox.showerror(_("Error"), _("Site is required"))
                 return
-            
+
             if not us_number:
-                messagebox.showerror("Errore", "Il numero US è obbligatorio")
+                messagebox.showerror(_("Error"), _("US number is required"))
                 return
-            
+
             try:
                 us_number = int(us_number)
             except ValueError:
-                messagebox.showerror("Errore", "Il numero US deve essere un numero intero")
+                messagebox.showerror(_("Error"), _("US number must be an integer"))
                 return
-            
+
             # Prepare data
             us_data = {
                 'sito': sito,
@@ -649,50 +659,51 @@ class USDialog(BaseDialog):
                 'schedatore': self.fields['schedatore'].get().strip() or None,
                 'formazione': self.fields['formazione'].get().strip() or None
             }
-            
+
             # Anno scavo
             anno_text = self.fields['anno_scavo'].get().strip()
             if anno_text:
                 try:
                     us_data['anno_scavo'] = int(anno_text)
                 except ValueError:
-                    messagebox.showerror("Errore", "L'anno scavo deve essere un numero")
+                    messagebox.showerror(_("Error"), _("Excavation year must be a number"))
                     return
             else:
                 us_data['anno_scavo'] = None
-            
+
             # Save US
             if self.us:
                 # Update existing US
                 updated_us = self.us_service.update_us(self.us.id_us, us_data)
-                messagebox.showinfo("Successo", "US aggiornata con successo")
+                messagebox.showinfo(_("Success"), _("US updated successfully"))
             else:
                 # Create new US
                 new_us = self.us_service.create_us(us_data)
-                messagebox.showinfo("Successo", "US creata con successo")
-            
+                messagebox.showinfo(_("Success"), _("US created successfully"))
+
             # Call callback to refresh data
             if self.callback:
                 self.callback()
-            
+
             self.dialog.destroy()
-            
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore durante il salvataggio: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error saving: {}").format(str(e)))
 
 class InventarioDialog(BaseDialog):
     """Dialog for creating/editing inventory items"""
-    
+
     def __init__(self, parent, inventario_service, site_names, inventario=None, callback=None):
-        super().__init__(parent, "Nuovo Reperto" if inventario is None else "Modifica Reperto", 500, 400)
-        
+        title = _("New Artifact") if inventario is None else _("Edit Artifact")
+        super().__init__(parent, title, 500, 400)
+
         self.inventario_service = inventario_service
         self.site_names = site_names
         self.inventario = inventario
         self.callback = callback
-        
+
         self.create_form()
-        self.create_buttons("Salva", "Annulla")
+        self.create_buttons(_("Save"), _("Cancel"))
         
         if inventario:
             self.populate_form()
@@ -701,53 +712,53 @@ class InventarioDialog(BaseDialog):
         """Create inventory form"""
         self.fields = {}
         row = 0
-        
+
         # Sito (required)
-        ttk.Label(self.content_frame, text="Sito *:").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(self.content_frame, text=_("Site *:")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['sito'] = ttk.Combobox(self.content_frame, values=self.site_names, width=37)
         self.fields['sito'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Numero inventario (required)
-        ttk.Label(self.content_frame, text="Numero Inventario *:").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(self.content_frame, text=_("Inventory Number *:")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['numero_inventario'] = ttk.Entry(self.content_frame, width=40)
         self.fields['numero_inventario'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Tipo reperto
-        ttk.Label(self.content_frame, text="Tipo Reperto:").grid(row=row, column=0, sticky="w", pady=5)
-        self.fields['tipo_reperto'] = ttk.Combobox(self.content_frame, 
-                                                  values=["", "Ceramica", "Metallo", "Pietra", "Osso", "Vetro"], 
+        ttk.Label(self.content_frame, text=_("Artifact Type:")).grid(row=row, column=0, sticky="w", pady=5)
+        self.fields['tipo_reperto'] = ttk.Combobox(self.content_frame,
+                                                  values=["", _("Ceramic"), _("Metal"), _("Stone"), _("Bone"), _("Glass")],
                                                   width=37)
         self.fields['tipo_reperto'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Definizione
-        ttk.Label(self.content_frame, text="Definizione:").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(self.content_frame, text=_("Definition:")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['definizione'] = ttk.Entry(self.content_frame, width=40)
         self.fields['definizione'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Area
-        ttk.Label(self.content_frame, text="Area:").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(self.content_frame, text=_("Area:")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['area'] = ttk.Entry(self.content_frame, width=40)
         self.fields['area'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # US
         ttk.Label(self.content_frame, text="US:").grid(row=row, column=0, sticky="w", pady=5)
         self.fields['us'] = ttk.Entry(self.content_frame, width=40)
         self.fields['us'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Peso
-        ttk.Label(self.content_frame, text="Peso (g):").grid(row=row, column=0, sticky="w", pady=5)
+        ttk.Label(self.content_frame, text=_("Weight (g):")).grid(row=row, column=0, sticky="w", pady=5)
         self.fields['peso'] = ttk.Entry(self.content_frame, width=40)
         self.fields['peso'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
-        
+
         # Descrizione
-        ttk.Label(self.content_frame, text="Descrizione:").grid(row=row, column=0, sticky="nw", pady=5)
+        ttk.Label(self.content_frame, text=_("Description:")).grid(row=row, column=0, sticky="nw", pady=5)
         self.fields['descrizione'] = tk.Text(self.content_frame, width=40, height=5)
         self.fields['descrizione'].grid(row=row, column=1, sticky="ew", padx=(10, 0), pady=5)
         row += 1
@@ -778,21 +789,21 @@ class InventarioDialog(BaseDialog):
             # Validate required fields
             sito = self.fields['sito'].get().strip()
             numero_inv = self.fields['numero_inventario'].get().strip()
-            
+
             if not sito:
-                messagebox.showerror("Errore", "Il sito è obbligatorio")
+                messagebox.showerror(_("Error"), _("Site is required"))
                 return
-            
+
             if not numero_inv:
-                messagebox.showerror("Errore", "Il numero inventario è obbligatorio")
+                messagebox.showerror(_("Error"), _("Inventory number is required"))
                 return
-            
+
             try:
                 numero_inv = int(numero_inv)
             except ValueError:
-                messagebox.showerror("Errore", "Il numero inventario deve essere un numero intero")
+                messagebox.showerror(_("Error"), _("Inventory number must be an integer"))
                 return
-            
+
             # Prepare data
             inv_data = {
                 'sito': sito,
@@ -802,64 +813,64 @@ class InventarioDialog(BaseDialog):
                 'area': self.fields['area'].get().strip() or None,
                 'descrizione': self.fields['descrizione'].get("1.0", tk.END).strip() or None
             }
-            
+
             # US
             us_text = self.fields['us'].get().strip()
             if us_text:
                 try:
                     inv_data['us'] = int(us_text)
                 except ValueError:
-                    messagebox.showerror("Errore", "US deve essere un numero")
+                    messagebox.showerror(_("Error"), _("US must be a number"))
                     return
             else:
                 inv_data['us'] = None
-            
+
             # Peso
             peso_text = self.fields['peso'].get().strip()
             if peso_text:
                 try:
                     inv_data['peso'] = float(peso_text)
                 except ValueError:
-                    messagebox.showerror("Errore", "Il peso deve essere un numero")
+                    messagebox.showerror(_("Error"), _("Weight must be a number"))
                     return
             else:
                 inv_data['peso'] = None
-            
+
             # Save inventory
             if self.inventario:
                 # Update existing item
                 updated_item = self.inventario_service.update_inventario(self.inventario.id_invmat, inv_data)
-                messagebox.showinfo("Successo", "Reperto aggiornato con successo")
+                messagebox.showinfo(_("Success"), _("Artifact updated successfully"))
             else:
                 # Create new item
                 new_item = self.inventario_service.create_inventario(inv_data)
-                messagebox.showinfo("Successo", "Reperto creato con successo")
-            
+                messagebox.showinfo(_("Success"), _("Artifact created successfully"))
+
             # Call callback to refresh data
             if self.callback:
                 self.callback()
-            
+
             self.dialog.destroy()
-            
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore durante il salvataggio: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error saving: {}").format(str(e)))
 
 class HarrisMatrixDialog(BaseDialog):
     """Dialog for generating and viewing Harris Matrix"""
-    
-    def __init__(self, parent, matrix_generator, matrix_visualizer, sites, 
+
+    def __init__(self, parent, matrix_generator, matrix_visualizer, sites,
                  site_service=None, us_service=None, db_manager=None):
-        super().__init__(parent, "Harris Matrix Generator", 1200, 900)
-        
+        super().__init__(parent, _("Harris Matrix Generator"), 1200, 900)
+
         self.matrix_generator = matrix_generator
         self.matrix_visualizer = matrix_visualizer
         self.sites = sites
         self.site_service = site_service
         self.us_service = us_service
         self.db_manager = db_manager
-        
+
         self.create_interface()
-        self.create_buttons("Chiudi", "")
+        self.create_buttons(_("Close"), "")
         # Remove OK button, only keep Close
         for widget in self.button_frame.winfo_children():
             if widget['text'] == '':
@@ -870,20 +881,20 @@ class HarrisMatrixDialog(BaseDialog):
         # Site selection
         selection_frame = ttk.Frame(self.content_frame)
         selection_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        ttk.Label(selection_frame, text="Seleziona Sito:").pack(side=tk.LEFT)
-        
+
+        ttk.Label(selection_frame, text=_("Select Site:")).pack(side=tk.LEFT)
+
         self.site_var = tk.StringVar()
         site_names = [site.sito for site in self.sites]
-        self.site_combobox = ttk.Combobox(selection_frame, textvariable=self.site_var, 
+        self.site_combobox = ttk.Combobox(selection_frame, textvariable=self.site_var,
                                          values=site_names, width=30)
         self.site_combobox.pack(side=tk.LEFT, padx=(10, 0))
-        
-        ttk.Button(selection_frame, text="Genera Matrix", 
+
+        ttk.Button(selection_frame, text=_("Generate Matrix"),
                   command=self.generate_matrix).pack(side=tk.LEFT, padx=(10, 0))
-        ttk.Button(selection_frame, text="Editor Avanzato", 
+        ttk.Button(selection_frame, text=_("Advanced Editor"),
                   command=self.open_advanced_editor).pack(side=tk.LEFT, padx=(10, 0))
-        ttk.Button(selection_frame, text="Esporta", 
+        ttk.Button(selection_frame, text=_("Export"),
                   command=self.export_matrix).pack(side=tk.LEFT, padx=(10, 0))
         
         # Results area
@@ -898,10 +909,10 @@ class HarrisMatrixDialog(BaseDialog):
         vis_label_frame = ttk.Frame(results_frame)
         vis_label_frame.pack(fill=tk.X, pady=(5, 0))
         
-        ttk.Label(vis_label_frame, text="Visualizzazione Matrix:").pack(side=tk.LEFT)
-        
+        ttk.Label(vis_label_frame, text=_("Matrix Visualization:")).pack(side=tk.LEFT)
+
         # Layout options
-        ttk.Label(vis_label_frame, text="Layout:").pack(side=tk.LEFT, padx=(20, 5))
+        ttk.Label(vis_label_frame, text=_("Layout:")).pack(side=tk.LEFT, padx=(20, 5))
         self.layout_var = tk.StringVar(value="period_area")
         layout_combo = ttk.Combobox(vis_label_frame, textvariable=self.layout_var, 
                                    values=["period_area", "period", "area", "none"], 
@@ -946,7 +957,7 @@ class HarrisMatrixDialog(BaseDialog):
         self.press_event = None
         
         # Initialize empty plot with pan instructions
-        instructions = 'Seleziona un sito e genera la Harris Matrix\n\nControlli:\n• Trascina con il mouse per spostare (PAN)\n• Rotella mouse per zoom\n• Pulsanti zoom per controllo preciso'
+        instructions = _('Select a site and generate the Harris Matrix\n\nControls:\n• Drag with mouse to pan\n• Mouse wheel to zoom\n• Zoom buttons for precise control')
         self.ax.text(0.5, 0.5, instructions, 
                     ha='center', va='center', transform=self.ax.transAxes, 
                     fontsize=12, color='gray')
@@ -965,13 +976,13 @@ class HarrisMatrixDialog(BaseDialog):
         """Generate Harris Matrix for selected site"""
         site_name = self.site_var.get()
         if not site_name:
-            messagebox.showwarning("Selezione", "Seleziona un sito")
+            messagebox.showwarning(_("Selection"), _("Select a site"))
             return
-        
+
         try:
             # Show progress
             self.stats_text.delete("1.0", tk.END)
-            self.stats_text.insert("1.0", f"Generando Harris Matrix per {site_name}...\n")
+            self.stats_text.insert("1.0", _("Generating Harris Matrix for {}...\n").format(site_name))
             self.dialog.update()
             
             # Generate matrix
@@ -988,49 +999,48 @@ class HarrisMatrixDialog(BaseDialog):
             
             # Visualize matrix
             self.visualize_matrix()
-            
-            messagebox.showinfo("Completato", "Harris Matrix generata con successo!")
-            
+
+            messagebox.showinfo(_("Completed"), _("Harris Matrix generated successfully!"))
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore nella generazione della matrix: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error generating matrix: {}").format(str(e)))
     
     def display_statistics(self, stats):
         """Display matrix statistics"""
         self.stats_text.delete("1.0", tk.END)
-        
-        stats_text = f"""STATISTICHE HARRIS MATRIX - {self.current_site}
 
-Totale US: {stats['total_us']}
-Relazioni stratigrafiche: {stats['total_relationships']}
-Livelli stratigrafici: {stats['levels']}
-Matrix valida: {'Sì' if stats['is_valid'] else 'No'}
-US isolate: {stats['isolated_us']}
+        stats_text = _("HARRIS MATRIX STATISTICS - {}\n\nTotal US: {}\nStratigraphic Relationships: {}\nStratigraphic Levels: {}\nValid Matrix: {}\nIsolated US: {}\n\n").format(
+            self.current_site,
+            stats['total_us'],
+            stats['total_relationships'],
+            stats['levels'],
+            _('Yes') if stats['is_valid'] else _('No'),
+            stats['isolated_us']
+        )
 
-"""
-        
         if not stats['is_valid']:
-            stats_text += "⚠️ ATTENZIONE: La matrix contiene cicli o errori logici\n"
-        
+            stats_text += _("⚠️ WARNING: The matrix contains cycles or logical errors\n")
+
         self.stats_text.insert("1.0", stats_text)
     
     def display_levels(self):
         """Display matrix levels"""
         if not self.current_levels:
             return
-        
-        levels_text = "\nLIVELLI STRATIGRAFICI:\n\n"
-        
+
+        levels_text = _("\nSTRATIGRAPHIC LEVELS:\n\n")
+
         for level, us_list in sorted(self.current_levels.items()):
-            levels_text += f"Livello {level}: US {', '.join(map(str, us_list))}\n"
-        
+            levels_text += _("Level {}: US {}\n").format(level, ', '.join(map(str, us_list)))
+
         self.stats_text.insert(tk.END, levels_text)
     
     def visualize_matrix(self):
         """Visualize Harris Matrix using PyArchInit-style Graphviz"""
         if not self.current_graph or not self.current_graph.nodes():
             self.ax.clear()
-            self.ax.text(0.5, 0.5, 'Nessun dato da visualizzare\nGenera prima una Harris Matrix', 
-                        ha='center', va='center', transform=self.ax.transAxes, 
+            self.ax.text(0.5, 0.5, _('No data to visualize\nGenerate a Harris Matrix first'),
+                        ha='center', va='center', transform=self.ax.transAxes,
                         fontsize=14, color='red')
             self.ax.set_xticks([])
             self.ax.set_yticks([])
@@ -1074,29 +1084,29 @@ US isolate: {stats['isolated_us']}
                 img = mpimg.imread(self.current_image_path)
                 self.ax.imshow(img)
                 self.ax.axis('off')
-                
+
                 # Add title
-                title = f"Harris Matrix - {self.current_site} (Layout: {grouping})"
+                title = _("Harris Matrix - {} (Layout: {})").format(self.current_site, grouping)
                 self.ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
-                
+
                 # Fit to window
                 self.zoom_fit()
-                
+
             else:
                 # Fallback message
-                self.ax.text(0.5, 0.5, 'Errore nella generazione dell\'immagine\nProva l\'Editor Avanzato', 
-                            ha='center', va='center', transform=self.ax.transAxes, 
+                self.ax.text(0.5, 0.5, _('Error generating image\nTry the Advanced Editor'),
+                            ha='center', va='center', transform=self.ax.transAxes,
                             fontsize=14, color='red')
                 self.ax.set_xticks([])
                 self.ax.set_yticks([])
-            
+
             self.canvas.draw()
-            
+
         except Exception as e:
             print(f"Error in visualize_matrix: {e}")
             self.ax.clear()
-            self.ax.text(0.5, 0.5, f'Errore nella visualizzazione:\n{str(e)}\n\nUsa l\'Editor Avanzato per maggiori opzioni', 
-                        ha='center', va='center', transform=self.ax.transAxes, 
+            self.ax.text(0.5, 0.5, _('Visualization error:\n{}\n\nUse the Advanced Editor for more options').format(str(e)),
+                        ha='center', va='center', transform=self.ax.transAxes,
                         fontsize=12, color='red')
             self.ax.set_xticks([])
             self.ax.set_yticks([])
@@ -1225,11 +1235,11 @@ US isolate: {stats['isolated_us']}
     def export_matrix(self):
         """Export Harris Matrix to files"""
         if not self.current_graph or not self.current_site:
-            messagebox.showwarning("Avviso", "Genera prima una matrix")
+            messagebox.showwarning(_("Warning"), _("Generate a matrix first"))
             return
-        
+
         # Select export directory
-        export_dir = filedialog.askdirectory(title="Seleziona cartella per l'export")
+        export_dir = filedialog.askdirectory(title=_("Select folder for export"))
         if not export_dir:
             return
         
@@ -1252,10 +1262,10 @@ US isolate: {stats['isolated_us']}
             
             # Show success message
             export_list = "\n".join([f"- {fmt}: {path}" for fmt, path in exports.items()])
-            messagebox.showinfo("Export Completato", f"Matrix esportata in:\n\n{export_list}")
-            
+            messagebox.showinfo(_("Export Completed"), _("Matrix exported to:\n\n{}").format(export_list))
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore durante l'export: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error during export: {}").format(str(e)))
     
     def open_advanced_editor(self):
         """Open advanced Harris Matrix editor"""
@@ -1264,7 +1274,7 @@ US isolate: {stats['isolated_us']}
             
             # Check if we have the necessary services
             if not hasattr(self, 'site_service') or not hasattr(self, 'us_service'):
-                messagebox.showerror("Errore", "Servizi non disponibili per l'editor avanzato")
+                messagebox.showerror(_("Error"), _("Services not available for advanced editor"))
                 return
             
             # Get services from parent or create them
@@ -1279,7 +1289,7 @@ US isolate: {stats['isolated_us']}
                 db_manager = self.db_manager
             else:
                 # This shouldn't happen but let's be safe
-                messagebox.showerror("Errore", "Database manager non disponibile")
+                messagebox.showerror(_("Error"), _("Database manager not available"))
                 return
             
             site_service = SiteService(db_manager)
@@ -1295,66 +1305,66 @@ US isolate: {stats['isolated_us']}
                 site_service, 
                 us_service
             )
-            
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore apertura editor: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error opening editor: {}").format(str(e)))
 
 class PDFExportDialog(BaseDialog):
     """Dialog for PDF export"""
-    
+
     def __init__(self, parent, pdf_generator, site_service, us_service, inventario_service, sites):
-        super().__init__(parent, "Export PDF", 600, 400)
-        
+        super().__init__(parent, _("Export PDF"), 600, 400)
+
         self.pdf_generator = pdf_generator
         self.site_service = site_service
         self.us_service = us_service
         self.inventario_service = inventario_service
         self.sites = sites
-        
+
         self.create_interface()
-        self.create_buttons("Esporta", "Annulla")
+        self.create_buttons(_("Export"), _("Cancel"))
     
     def create_interface(self):
         """Create PDF export interface"""
         # Site selection
-        ttk.Label(self.content_frame, text="Seleziona Sito:").grid(row=0, column=0, sticky="w", pady=5)
-        
+        ttk.Label(self.content_frame, text=_("Select Site:")).grid(row=0, column=0, sticky="w", pady=5)
+
         self.site_var = tk.StringVar()
         site_names = [site.sito for site in self.sites]
-        self.site_combobox = ttk.Combobox(self.content_frame, textvariable=self.site_var, 
+        self.site_combobox = ttk.Combobox(self.content_frame, textvariable=self.site_var,
                                          values=site_names, width=30)
         self.site_combobox.grid(row=0, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Export type selection
-        ttk.Label(self.content_frame, text="Tipo Export:").grid(row=1, column=0, sticky="w", pady=5)
-        
+        ttk.Label(self.content_frame, text=_("Export Type:")).grid(row=1, column=0, sticky="w", pady=5)
+
         self.export_type = tk.StringVar(value="us")
         export_frame = ttk.Frame(self.content_frame)
         export_frame.grid(row=1, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
-        ttk.Radiobutton(export_frame, text="Schede US", variable=self.export_type, value="us").pack(anchor="w")
-        ttk.Radiobutton(export_frame, text="Schede Inventario", variable=self.export_type, value="inventario").pack(anchor="w")
-        ttk.Radiobutton(export_frame, text="Report Completo Sito", variable=self.export_type, value="site").pack(anchor="w")
-        
+
+        ttk.Radiobutton(export_frame, text=_("US Sheets"), variable=self.export_type, value="us").pack(anchor="w")
+        ttk.Radiobutton(export_frame, text=_("Inventory Sheets"), variable=self.export_type, value="inventario").pack(anchor="w")
+        ttk.Radiobutton(export_frame, text=_("Complete Site Report"), variable=self.export_type, value="site").pack(anchor="w")
+
         # Logo selection
-        ttk.Label(self.content_frame, text="Logo Personalizzato:").grid(row=2, column=0, sticky="w", pady=5)
+        ttk.Label(self.content_frame, text=_("Custom Logo:")).grid(row=2, column=0, sticky="w", pady=5)
         
         logo_frame = ttk.Frame(self.content_frame)
         logo_frame.grid(row=2, column=1, sticky="ew", padx=(10, 0), pady=5)
         
         self.logo_file = tk.StringVar()
         ttk.Entry(logo_frame, textvariable=self.logo_file, width=25).pack(side=tk.LEFT, fill=tk.X, expand=True)
-        ttk.Button(logo_frame, text="Sfoglia...", command=self.select_logo_file).pack(side=tk.RIGHT, padx=(5, 0))
-        
+        ttk.Button(logo_frame, text=_("Browse..."), command=self.select_logo_file).pack(side=tk.RIGHT, padx=(5, 0))
+
         # Output file
-        ttk.Label(self.content_frame, text="File Output:").grid(row=3, column=0, sticky="w", pady=5)
-        
+        ttk.Label(self.content_frame, text=_("Output File:")).grid(row=3, column=0, sticky="w", pady=5)
+
         file_frame = ttk.Frame(self.content_frame)
         file_frame.grid(row=3, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         self.output_file = tk.StringVar()
         ttk.Entry(file_frame, textvariable=self.output_file, width=25).pack(side=tk.LEFT, fill=tk.X, expand=True)
-        ttk.Button(file_frame, text="Sfoglia...", command=self.select_output_file).pack(side=tk.RIGHT, padx=(5, 0))
+        ttk.Button(file_frame, text=_("Browse..."), command=self.select_output_file).pack(side=tk.RIGHT, padx=(5, 0))
         
         # Configure column weights
         self.content_frame.columnconfigure(1, weight=1)
@@ -1364,18 +1374,18 @@ class PDFExportDialog(BaseDialog):
     def select_logo_file(self):
         """Select logo file"""
         filename = filedialog.askopenfilename(
-            title="Seleziona logo",
-            filetypes=[("Immagini", "*.png *.jpg *.jpeg *.gif *.bmp"), ("Tutti i file", "*.*")]
+            title=_("Select logo"),
+            filetypes=[(_("Images"), "*.png *.jpg *.jpeg *.gif *.bmp"), (_("All files"), "*.*")]
         )
         if filename:
             self.logo_file.set(filename)
-    
+
     def select_output_file(self):
         """Select output file"""
         filename = filedialog.asksaveasfilename(
-            title="Salva report PDF",
+            title=_("Save PDF report"),
             defaultextension=".pdf",
-            filetypes=[("PDF files", "*.pdf"), ("All files", "*.*")]
+            filetypes=[("PDF files", "*.pdf"), (_("All files"), "*.*")]
         )
         if filename:
             self.output_file.set(filename)
@@ -1386,15 +1396,15 @@ class PDFExportDialog(BaseDialog):
         output_path = self.output_file.get()
         export_type = self.export_type.get()
         logo_path = self.logo_file.get() or None
-        
+
         if not site_name:
-            messagebox.showwarning("Selezione", "Seleziona un sito")
+            messagebox.showwarning(_("Selection"), _("Select a site"))
             return
-        
+
         if not output_path:
-            messagebox.showwarning("File Output", "Specifica il file di output")
+            messagebox.showwarning(_("Output File"), _("Specify the output file"))
             return
-        
+
         try:
             # Find site
             site = None
@@ -1402,9 +1412,9 @@ class PDFExportDialog(BaseDialog):
                 if s.sito == site_name:
                     site = s
                     break
-            
+
             if not site:
-                messagebox.showerror("Errore", "Sito non trovato")
+                messagebox.showerror(_("Error"), _("Site not found"))
                 return
             
             # Handle different export types
@@ -1412,7 +1422,7 @@ class PDFExportDialog(BaseDialog):
                 # Generate US PDF
                 us_list = self.us_service.get_all_us(size=1000, filters={'sito': site_name})
                 if not us_list:
-                    messagebox.showwarning("Dati", f"Nessuna US trovata per il sito {site_name}")
+                    messagebox.showwarning(_("Data"), _("No US found for site {}").format(site_name))
                     return
                 
                 # Convert to dict format
@@ -1435,13 +1445,13 @@ class PDFExportDialog(BaseDialog):
                 
                 # Generate US PDF with logo
                 result_path = self.pdf_generator.generate_us_pdf(site_name, us_data, output_path, logo_path)
-                messagebox.showinfo("Successo", f"Schede US salvate in:\n{result_path}")
-                
+                messagebox.showinfo(_("Success"), _("US sheets saved to:\n{}").format(result_path))
+
             elif export_type == "inventario":
                 # Generate Inventario PDF
                 inv_list = self.inventario_service.get_all_inventario(size=1000, filters={'sito': site_name})
                 if not inv_list:
-                    messagebox.showwarning("Dati", f"Nessun reperto trovato per il sito {site_name}")
+                    messagebox.showwarning(_("Data"), _("No artifacts found for site {}").format(site_name))
                     return
                 
                 # Convert to dict format
@@ -1470,7 +1480,7 @@ class PDFExportDialog(BaseDialog):
                 
                 # Generate Inventario PDF with logo
                 result_path = self.pdf_generator.generate_inventario_pdf(site_name, inv_data, output_path, logo_path)
-                messagebox.showinfo("Successo", f"Schede Inventario salvate in:\n{result_path}")
+                messagebox.showinfo(_("Success"), _("Inventory sheets saved to:\n{}").format(result_path))
                 
             else:  # site - complete report
                 # Get data
@@ -1514,124 +1524,122 @@ class PDFExportDialog(BaseDialog):
                 
                 # Generate complete site report
                 pdf_bytes = self.pdf_generator.generate_site_report(site_data, us_data, inventory_data, output_path=output_path)
-                
+
                 if pdf_bytes is None:
-                    messagebox.showerror("Errore", "Errore nella generazione del PDF")
+                    messagebox.showerror(_("Error"), _("Error generating PDF"))
                     return
-                
-                messagebox.showinfo("Successo", f"Report completo salvato in:\n{output_path}")
-            
+
+                messagebox.showinfo(_("Success"), _("Complete report saved to:\n{}").format(output_path))
+
             self.dialog.destroy()
-            
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore durante la generazione del PDF: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error generating PDF: {}").format(str(e)))
 
 
 class DatabaseConfigDialog(BaseDialog):
     """Dialog for database configuration"""
-    
+
     def __init__(self, parent, callback=None):
-        super().__init__(parent, "Configurazione Database", 600, 500)
-        
+        super().__init__(parent, _("Database Configuration"), 600, 500)
+
         self.callback = callback
         self.create_interface()
-        self.create_buttons("Connetti", "Annulla")
+        self.create_buttons(_("Connect"), _("Cancel"))
     
     def create_interface(self):
         """Create database configuration interface"""
-        
+
         # Database type selection
-        type_frame = ttk.LabelFrame(self.content_frame, text="Tipo Database", padding=10)
+        type_frame = ttk.LabelFrame(self.content_frame, text=_("Database Type"), padding=10)
         type_frame.pack(fill=tk.X, padx=10, pady=10)
-        
+
         self.db_type = tk.StringVar(value="sqlite")
-        ttk.Radiobutton(type_frame, text="SQLite (File locale)", 
+        ttk.Radiobutton(type_frame, text=_("SQLite (Local file)"),
                        variable=self.db_type, value="sqlite",
                        command=self.on_db_type_change).pack(anchor="w", pady=2)
-        ttk.Radiobutton(type_frame, text="PostgreSQL (Server)", 
+        ttk.Radiobutton(type_frame, text=_("PostgreSQL (Server)"),
                        variable=self.db_type, value="postgresql",
                        command=self.on_db_type_change).pack(anchor="w", pady=2)
-        
+
         # SQLite configuration
-        self.sqlite_frame = ttk.LabelFrame(self.content_frame, text="Configurazione SQLite", padding=10)
+        self.sqlite_frame = ttk.LabelFrame(self.content_frame, text=_("SQLite Configuration"), padding=10)
         self.sqlite_frame.pack(fill=tk.X, padx=10, pady=10)
-        
-        ttk.Label(self.sqlite_frame, text="File Database:").grid(row=0, column=0, sticky="w", pady=5)
+
+        ttk.Label(self.sqlite_frame, text=_("Database File:")).grid(row=0, column=0, sticky="w", pady=5)
         self.sqlite_path = tk.StringVar(value="./pyarchinit_mini.db")
         ttk.Entry(self.sqlite_frame, textvariable=self.sqlite_path, width=50).grid(row=0, column=1, sticky="ew", padx=(10, 0), pady=5)
-        ttk.Button(self.sqlite_frame, text="Sfoglia", command=self.browse_sqlite_file).grid(row=0, column=2, padx=(10, 0), pady=5)
+        ttk.Button(self.sqlite_frame, text=_("Browse"), command=self.browse_sqlite_file).grid(row=0, column=2, padx=(10, 0), pady=5)
         
         # Quick access buttons
         buttons_frame = ttk.Frame(self.sqlite_frame)
         buttons_frame.grid(row=1, column=0, columnspan=3, sticky="ew", pady=10)
-        
-        ttk.Button(buttons_frame, text="Database di Esempio", 
+
+        ttk.Button(buttons_frame, text=_("Sample Database"),
                   command=self.use_sample_database).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(buttons_frame, text="Nuovo Database", 
+        ttk.Button(buttons_frame, text=_("New Database"),
                   command=self.create_new_database).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(buttons_frame, text="Import Database", 
+        ttk.Button(buttons_frame, text=_("Import Database"),
                   command=self.import_database).pack(side=tk.LEFT)
-        
+
         self.sqlite_frame.columnconfigure(1, weight=1)
-        
+
         # PostgreSQL configuration
-        self.postgres_frame = ttk.LabelFrame(self.content_frame, text="Configurazione PostgreSQL", padding=10)
+        self.postgres_frame = ttk.LabelFrame(self.content_frame, text=_("PostgreSQL Configuration"), padding=10)
         self.postgres_frame.pack(fill=tk.X, padx=10, pady=10)
-        
+
         # Host
-        ttk.Label(self.postgres_frame, text="Host:").grid(row=0, column=0, sticky="w", pady=5)
+        ttk.Label(self.postgres_frame, text=_("Host:")).grid(row=0, column=0, sticky="w", pady=5)
         self.pg_host = tk.StringVar(value="localhost")
         ttk.Entry(self.postgres_frame, textvariable=self.pg_host, width=30).grid(row=0, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Port
-        ttk.Label(self.postgres_frame, text="Porta:").grid(row=0, column=2, sticky="w", pady=5, padx=(20, 0))
+        ttk.Label(self.postgres_frame, text=_("Port:")).grid(row=0, column=2, sticky="w", pady=5, padx=(20, 0))
         self.pg_port = tk.StringVar(value="5432")
         ttk.Entry(self.postgres_frame, textvariable=self.pg_port, width=10).grid(row=0, column=3, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Database
-        ttk.Label(self.postgres_frame, text="Database:").grid(row=1, column=0, sticky="w", pady=5)
+        ttk.Label(self.postgres_frame, text=_("Database:")).grid(row=1, column=0, sticky="w", pady=5)
         self.pg_database = tk.StringVar(value="pyarchinit")
         ttk.Entry(self.postgres_frame, textvariable=self.pg_database, width=30).grid(row=1, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Username
-        ttk.Label(self.postgres_frame, text="Username:").grid(row=2, column=0, sticky="w", pady=5)
+        ttk.Label(self.postgres_frame, text=_("Username:")).grid(row=2, column=0, sticky="w", pady=5)
         self.pg_username = tk.StringVar(value="postgres")
         ttk.Entry(self.postgres_frame, textvariable=self.pg_username, width=30).grid(row=2, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Password
-        ttk.Label(self.postgres_frame, text="Password:").grid(row=3, column=0, sticky="w", pady=5)
+        ttk.Label(self.postgres_frame, text=_("Password:")).grid(row=3, column=0, sticky="w", pady=5)
         self.pg_password = tk.StringVar()
         ttk.Entry(self.postgres_frame, textvariable=self.pg_password, show="*", width=30).grid(row=3, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Test connection button
-        ttk.Button(self.postgres_frame, text="Test Connessione", 
+        ttk.Button(self.postgres_frame, text=_("Test Connection"),
                   command=self.test_connection).grid(row=4, column=1, pady=10)
         
         self.postgres_frame.columnconfigure(1, weight=1)
         
         # Connection info
-        info_frame = ttk.LabelFrame(self.content_frame, text="Informazioni", padding=10)
+        info_frame = ttk.LabelFrame(self.content_frame, text=_("Information"), padding=10)
         info_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        
-        info_text = """
-CONFIGURAZIONE DATABASE
+
+        info_text = _("""DATABASE CONFIGURATION
 
 SQLite:
-• Database locale memorizzato in un file
-• Ideale per uso singolo utente
-• Facile da trasportare e condividere
+• Local database stored in a file
+• Ideal for single user
+• Easy to transport and share
 
 PostgreSQL:
-• Database server professionale
-• Supporta accesso multi-utente
-• Migliori prestazioni per grandi dataset
-• Richiede installazione server PostgreSQL
+• Professional database server
+• Supports multi-user access
+• Better performance for large datasets
+• Requires PostgreSQL server installation
 
-NOTA: Cambiare database ricaricherà l'interfaccia
-e potrebbero essere necessarie migrazioni dati.
-        """
-        
-        ttk.Label(info_frame, text=info_text.strip(), justify="left").pack(anchor="w")
+NOTE: Changing database will reload the interface
+and data migrations may be required.""")
+
+        ttk.Label(info_frame, text=info_text, justify="left").pack(anchor="w")
         
         # Initialize visibility
         self.on_db_type_change()
@@ -1648,8 +1656,8 @@ e potrebbero essere necessarie migrazioni dati.
     def browse_sqlite_file(self):
         """Browse for SQLite file"""
         filename = filedialog.askopenfilename(
-            title="Seleziona file database SQLite",
-            filetypes=[("SQLite files", "*.db"), ("All files", "*.*")]
+            title=_("Select SQLite database file"),
+            filetypes=[("SQLite files", "*.db"), (_("All files"), "*.*")]
         )
         if filename:
             self.sqlite_path.set(filename)
@@ -1658,28 +1666,28 @@ e potrebbero essere necessarie migrazioni dati.
         """Use the sample database"""
         import os
         sample_db_path = os.path.join("data", "pyarchinit_mini_sample.db")
-        
+
         if os.path.exists(sample_db_path):
             self.sqlite_path.set(sample_db_path)
-            messagebox.showinfo("Database di Esempio", 
-                               "Database di esempio caricato!\n\n"
-                               "Contenuto:\n"
-                               "• 1 Sito archeologico\n"
-                               "• 100 Unità Stratigrafiche\n" 
-                               "• 50 Materiali\n"
-                               "• 70+ Relazioni stratigrafiche")
+            messagebox.showinfo(_("Sample Database"),
+                               _("Sample database loaded!\n\n"
+                               "Contents:\n"
+                               "• 1 Archaeological site\n"
+                               "• 100 Stratigraphic units\n"
+                               "• 50 Artifacts\n"
+                               "• 70+ Stratigraphic relationships"))
         else:
-            if messagebox.askyesno("Database Mancante", 
-                                  "Il database di esempio non esiste.\n"
-                                  "Vuoi crearlo ora?"):
+            if messagebox.askyesno(_("Missing Database"),
+                                  _("The sample database does not exist.\n"
+                                  "Do you want to create it now?")):
                 self.create_sample_database()
     
     def create_new_database(self):
         """Create a new empty database"""
         filename = filedialog.asksaveasfilename(
-            title="Crea nuovo database SQLite",
+            title=_("Create new SQLite database"),
             defaultextension=".db",
-            filetypes=[("SQLite files", "*.db"), ("All files", "*.*")]
+            filetypes=[("SQLite files", "*.db"), (_("All files"), "*.*")]
         )
         if filename:
             # Remove file if it exists
@@ -1687,17 +1695,17 @@ e potrebbero essere necessarie migrazioni dati.
             if os.path.exists(filename):
                 os.remove(filename)
             self.sqlite_path.set(filename)
-            messagebox.showinfo("Nuovo Database", f"Nuovo database creato: {filename}")
-    
+            messagebox.showinfo(_("New Database"), _("New database created: {}").format(filename))
+
     def import_database(self):
         """Import database from file"""
         filename = filedialog.askopenfilename(
-            title="Importa database SQLite",
-            filetypes=[("SQLite files", "*.db"), ("All files", "*.*")]
+            title=_("Import SQLite database"),
+            filetypes=[("SQLite files", "*.db"), (_("All files"), "*.*")]
         )
         if filename:
             self.sqlite_path.set(filename)
-            messagebox.showinfo("Import Database", f"Database importato: {filename}")
+            messagebox.showinfo(_("Import Database"), _("Database imported: {}").format(filename))
     
     def create_sample_database(self):
         """Create sample database"""
@@ -1715,39 +1723,39 @@ e potrebbero essere necessarie migrazioni dati.
                 if result.returncode == 0:
                     sample_db_path = os.path.join("data", "pyarchinit_mini_sample.db")
                     self.sqlite_path.set(sample_db_path)
-                    messagebox.showinfo("Successo", 
-                                       "Database di esempio creato con successo!\n\n"
-                                       "Contenuto:\n"
-                                       "• 1 Sito archeologico\n"
-                                       "• 100 US con relazioni\n"
-                                       "• 50 Materiali")
+                    messagebox.showinfo(_("Success"),
+                                       _("Sample database created successfully!\n\n"
+                                       "Contents:\n"
+                                       "• 1 Archaeological site\n"
+                                       "• 100 US with relationships\n"
+                                       "• 50 Artifacts"))
                 else:
-                    messagebox.showerror("Errore", f"Errore creazione database: {result.stderr}")
+                    messagebox.showerror(_("Error"), _("Database creation error: {}").format(result.stderr))
             else:
-                messagebox.showerror("Errore", "Script di creazione database non trovato")
-                
+                messagebox.showerror(_("Error"), _("Database creation script not found"))
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore durante la creazione: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error during creation: {}").format(str(e)))
     
     def test_connection(self):
         """Test PostgreSQL connection"""
         try:
             connection_string = self.build_postgres_connection_string()
-            
+
             # Test connection
             from pyarchinit_mini.database.connection import DatabaseConnection
             test_conn = DatabaseConnection.from_url(connection_string)
-            
+
             if test_conn.test_connection():
-                messagebox.showinfo("Successo", "Connessione PostgreSQL riuscita!")
+                messagebox.showinfo(_("Success"), _("PostgreSQL connection successful!"))
             else:
-                messagebox.showerror("Errore", "Connessione PostgreSQL fallita")
-            
+                messagebox.showerror(_("Error"), _("PostgreSQL connection failed"))
+
             test_conn.close()
-            
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore test connessione: {str(e)}")
-    
+            messagebox.showerror(_("Error"), _("Connection test error: {}").format(str(e)))
+
     def build_postgres_connection_string(self):
         """Build PostgreSQL connection string"""
         host = self.pg_host.get().strip()
@@ -1755,10 +1763,10 @@ e potrebbero essere necessarie migrazioni dati.
         database = self.pg_database.get().strip()
         username = self.pg_username.get().strip()
         password = self.pg_password.get()
-        
+
         if not all([host, port, database, username]):
-            raise ValueError("Tutti i campi PostgreSQL sono obbligatori")
-        
+            raise ValueError(_("All PostgreSQL fields are required"))
+
         return f"postgresql://{username}:{password}@{host}:{port}/{database}"
     
     def ok(self):
@@ -1767,177 +1775,177 @@ e potrebbero essere necessarie migrazioni dati.
             if self.db_type.get() == "sqlite":
                 db_path = self.sqlite_path.get().strip()
                 if not db_path:
-                    messagebox.showerror("Errore", "Specifica il percorso del file SQLite")
+                    messagebox.showerror(_("Error"), _("Specify the SQLite file path"))
                     return
                 connection_string = f"sqlite:///{db_path}"
             else:
                 connection_string = self.build_postgres_connection_string()
-            
+
             # Test connection before applying
             from pyarchinit_mini.database.connection import DatabaseConnection
             test_conn = DatabaseConnection.from_url(connection_string)
-            
+
             if not test_conn.test_connection():
-                messagebox.showerror("Errore", "Impossibile connettersi al database")
+                messagebox.showerror(_("Error"), _("Unable to connect to database"))
                 test_conn.close()
                 return
-            
+
             test_conn.close()
-            
+
             # Apply connection
             if self.callback:
                 self.callback(connection_string)
-            
+
             self.dialog.destroy()
-            
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore configurazione database: {str(e)}")
+            messagebox.showerror(_("Error"), _("Database configuration error: {}").format(str(e)))
 
 class MediaManagerDialog(BaseDialog):
     """Dialog for media management"""
-    
+
     def __init__(self, parent, media_handler):
-        super().__init__(parent, "Gestione Media", 700, 500)
-        
+        super().__init__(parent, _("Media Management"), 700, 500)
+
         self.media_handler = media_handler
-        
+
         self.create_interface()
-        self.create_buttons("Chiudi", "")
+        self.create_buttons(_("Close"), "")
         # Remove OK button, only keep Close
         for widget in self.button_frame.winfo_children():
             if widget['text'] == '':
                 widget.destroy()
-    
+
     def create_interface(self):
         """Create media management interface"""
         # Upload section
-        upload_frame = ttk.LabelFrame(self.content_frame, text="Carica Nuovo File", padding=10)
+        upload_frame = ttk.LabelFrame(self.content_frame, text=_("Upload New File"), padding=10)
         upload_frame.pack(fill=tk.X, pady=(0, 10))
-        
+
         # File selection
-        ttk.Label(upload_frame, text="File:").grid(row=0, column=0, sticky="w", pady=5)
-        
+        ttk.Label(upload_frame, text=_("File:")).grid(row=0, column=0, sticky="w", pady=5)
+
         file_frame = ttk.Frame(upload_frame)
         file_frame.grid(row=0, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         self.selected_file = tk.StringVar()
         ttk.Entry(file_frame, textvariable=self.selected_file, width=30).pack(side=tk.LEFT, fill=tk.X, expand=True)
-        ttk.Button(file_frame, text="Sfoglia...", command=self.select_file).pack(side=tk.RIGHT, padx=(5, 0))
-        
+        ttk.Button(file_frame, text=_("Browse..."), command=self.select_file).pack(side=tk.RIGHT, padx=(5, 0))
+
         # Entity info
-        ttk.Label(upload_frame, text="Tipo Entità:").grid(row=1, column=0, sticky="w", pady=5)
+        ttk.Label(upload_frame, text=_("Entity Type:")).grid(row=1, column=0, sticky="w", pady=5)
         self.entity_type = ttk.Combobox(upload_frame, values=["site", "us", "inventario"], width=27)
         self.entity_type.grid(row=1, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
-        ttk.Label(upload_frame, text="ID Entità:").grid(row=2, column=0, sticky="w", pady=5)
+
+        ttk.Label(upload_frame, text=_("Entity ID:")).grid(row=2, column=0, sticky="w", pady=5)
         self.entity_id = ttk.Entry(upload_frame, width=30)
         self.entity_id.grid(row=2, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Description
-        ttk.Label(upload_frame, text="Descrizione:").grid(row=3, column=0, sticky="nw", pady=5)
+        ttk.Label(upload_frame, text=_("Description:")).grid(row=3, column=0, sticky="nw", pady=5)
         self.description = tk.Text(upload_frame, width=30, height=3)
         self.description.grid(row=3, column=1, sticky="ew", padx=(10, 0), pady=5)
-        
+
         # Upload button
-        ttk.Button(upload_frame, text="Carica File", command=self.upload_file).grid(row=4, column=1, sticky="e", pady=5)
-        
+        ttk.Button(upload_frame, text=_("Upload File"), command=self.upload_file).grid(row=4, column=1, sticky="e", pady=5)
+
         # Configure column weights
         upload_frame.columnconfigure(1, weight=1)
         file_frame.columnconfigure(0, weight=1)
-        
+
         # Media list section
-        list_frame = ttk.LabelFrame(self.content_frame, text="File Multimediali", padding=10)
+        list_frame = ttk.LabelFrame(self.content_frame, text=_("Media Files"), padding=10)
         list_frame.pack(fill=tk.BOTH, expand=True)
-        
+
         # TODO: Implement media file listing
-        ttk.Label(list_frame, text="Lista file multimediali (in sviluppo)").pack()
+        ttk.Label(list_frame, text=_("Media file list (in development)")).pack()
     
     def select_file(self):
         """Select file to upload"""
         filename = filedialog.askopenfilename(
-            title="Seleziona file da caricare",
+            title=_("Select file to upload"),
             filetypes=[
-                ("Immagini", "*.jpg *.jpeg *.png *.gif *.bmp"),
-                ("Documenti", "*.pdf *.doc *.docx *.txt"),
-                ("Video", "*.mp4 *.avi *.mov"),
-                ("Tutti i files", "*.*")
+                (_("Images"), "*.jpg *.jpeg *.png *.gif *.bmp"),
+                (_("Documents"), "*.pdf *.doc *.docx *.txt"),
+                (_("Videos"), "*.mp4 *.avi *.mov"),
+                (_("All files"), "*.*")
             ]
         )
         if filename:
             self.selected_file.set(filename)
-    
+
     def upload_file(self):
         """Upload selected file"""
         file_path = self.selected_file.get()
         entity_type = self.entity_type.get()
         entity_id_str = self.entity_id.get().strip()
         description = self.description.get("1.0", tk.END).strip()
-        
+
         if not file_path:
-            messagebox.showwarning("File", "Seleziona un file da caricare")
+            messagebox.showwarning(_("File"), _("Select a file to upload"))
             return
-        
+
         if not entity_type:
-            messagebox.showwarning("Entità", "Seleziona il tipo di entità")
+            messagebox.showwarning(_("Entity"), _("Select the entity type"))
             return
-        
+
         if not entity_id_str:
-            messagebox.showwarning("ID", "Inserisci l'ID dell'entità")
+            messagebox.showwarning(_("ID"), _("Enter the entity ID"))
             return
-        
+
         try:
             entity_id = int(entity_id_str)
         except ValueError:
-            messagebox.showerror("ID", "L'ID deve essere un numero")
+            messagebox.showerror(_("ID"), _("ID must be a number"))
             return
-        
+
         try:
             # Store file
             metadata = self.media_handler.store_file(
                 file_path, entity_type, entity_id, description, "", ""
             )
-            
-            messagebox.showinfo("Successo", "File caricato con successo!")
-            
+
+            messagebox.showinfo(_("Success"), _("File uploaded successfully!"))
+
             # Clear form
             self.selected_file.set("")
             self.entity_type.set("")
             self.entity_id.delete(0, tk.END)
             self.description.delete("1.0", tk.END)
-            
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore durante il caricamento: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error during upload: {}").format(str(e)))
 
 class StatisticsDialog(BaseDialog):
     """Dialog for viewing statistics"""
-    
+
     def __init__(self, parent, site_service, us_service, inventario_service):
-        super().__init__(parent, "Statistiche", 600, 400)
-        
+        super().__init__(parent, _("Statistics"), 600, 400)
+
         self.site_service = site_service
         self.us_service = us_service
         self.inventario_service = inventario_service
-        
+
         self.create_interface()
-        self.create_buttons("Chiudi", "")
+        self.create_buttons(_("Close"), "")
         # Remove OK button, only keep Close
         for widget in self.button_frame.winfo_children():
             if widget['text'] == '':
                 widget.destroy()
-        
+
         self.load_statistics()
-    
+
     def create_interface(self):
         """Create statistics interface"""
         # Statistics display
         self.stats_text = scrolledtext.ScrolledText(self.content_frame, wrap=tk.WORD)
         self.stats_text.pack(fill=tk.BOTH, expand=True)
-        
+
         # Refresh button
         refresh_frame = ttk.Frame(self.content_frame)
         refresh_frame.pack(fill=tk.X, pady=(10, 0))
-        
-        ttk.Button(refresh_frame, text="Aggiorna", command=self.load_statistics).pack(side=tk.RIGHT)
+
+        ttk.Button(refresh_frame, text=_("Refresh"), command=self.load_statistics).pack(side=tk.RIGHT)
     
     def load_statistics(self):
         """Load and display statistics"""
@@ -1949,32 +1957,28 @@ class StatisticsDialog(BaseDialog):
             
             # Get site statistics
             sites = self.site_service.get_all_sites(size=100)
-            
-            stats_text = f"""STATISTICHE PYARCHINIT-MINI
-Data: {datetime.now().strftime('%d/%m/%Y %H:%M')}
 
-TOTALI GENERALI:
-• Siti Archeologici: {total_sites}
-• Unità Stratigrafiche: {total_us}
-• Reperti Catalogati: {total_inventory}
+            stats_text = _("PYARCHINIT-MINI STATISTICS\nDate: {}\n\nOVERALL TOTALS:\n• Archaeological Sites: {}\n• Stratigraphic Units: {}\n• Catalogued Artifacts: {}\n\nDETAILS BY SITE:\n").format(
+                datetime.now().strftime('%d/%m/%Y %H:%M'),
+                total_sites,
+                total_us,
+                total_inventory
+            )
 
-DETTAGLIO PER SITO:
-"""
-            
             for site in sites:
                 site_name = site.sito
                 us_count = self.us_service.count_us({'sito': site_name})
                 inv_count = self.inventario_service.count_inventario({'sito': site_name})
-                
+
                 stats_text += f"\n{site_name}:\n"
-                stats_text += f"  - US: {us_count}\n"
-                stats_text += f"  - Reperti: {inv_count}\n"
+                stats_text += _("  - US: {}\n").format(us_count)
+                stats_text += _("  - Artifacts: {}\n").format(inv_count)
                 if site.comune:
-                    stats_text += f"  - Comune: {site.comune}\n"
+                    stats_text += _("  - Municipality: {}\n").format(site.comune)
             
             # Display statistics
             self.stats_text.delete("1.0", tk.END)
             self.stats_text.insert("1.0", stats_text)
-            
+
         except Exception as e:
-            messagebox.showerror("Errore", f"Errore caricamento statistiche: {str(e)}")
+            messagebox.showerror(_("Error"), _("Error loading statistics: {}").format(str(e)))
