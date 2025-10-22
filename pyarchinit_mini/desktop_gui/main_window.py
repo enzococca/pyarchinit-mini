@@ -57,6 +57,17 @@ class PyArchInitGUI:
         self.root.title(_("PyArchInit-Mini - Archaeological Data Management"))
         self.root.geometry("1200x800")
         self.root.minsize(1000, 600)
+        
+        # Try to set window icon
+        try:
+            import os
+            logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'docs', '_static', 'images', 'pyarchinit-mini-logo.png')
+            if os.path.exists(logo_path):
+                icon = tk.PhotoImage(file=logo_path)
+                self.root.iconphoto(True, icon)
+        except Exception:
+            # If icon loading fails, continue without it
+            pass
 
         # Initialize locale manager
         self.locale_manager = LocaleManager()
@@ -205,8 +216,26 @@ class PyArchInitGUI:
         toolbar = ttk.Frame(parent)
         toolbar.pack(fill=tk.X, pady=(0, 10))
 
-        # Title
-        title_label = ttk.Label(toolbar, text="PyArchInit-Mini", style="Title.TLabel")
+        # Logo and Title
+        logo_frame = ttk.Frame(toolbar)
+        logo_frame.pack(side=tk.LEFT)
+        
+        # Try to load logo
+        try:
+            import os
+            from PIL import Image, ImageTk
+            logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'docs', '_static', 'images', 'pyarchinit-mini-logo.png')
+            if os.path.exists(logo_path):
+                logo_img = Image.open(logo_path)
+                logo_img = logo_img.resize((40, 40), Image.Resampling.LANCZOS)
+                self.logo_photo = ImageTk.PhotoImage(logo_img)
+                logo_label = ttk.Label(logo_frame, image=self.logo_photo)
+                logo_label.pack(side=tk.LEFT, padx=(0, 10))
+        except Exception:
+            # If logo loading fails, just show text
+            pass
+        
+        title_label = ttk.Label(logo_frame, text="PyArchInit-Mini", style="Title.TLabel")
         title_label.pack(side=tk.LEFT)
 
         # Current site selection

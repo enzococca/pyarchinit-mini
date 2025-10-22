@@ -51,14 +51,28 @@ class PyArchInitCLI:
     
     def show_welcome(self):
         """Show welcome screen"""
-        welcome_text = """
-🏛️  [bold blue]PyArchInit-Mini CLI[/bold blue]
-Archaeological Data Management System
-
-Gestione dati archeologici via interfaccia a riga di comando
+        logo_art = """
+    ╔═══════════════════════════════════════════╗
+    ║          ┌─┐                              ║
+    ║          │ │  ┌─┐┬ ┬                     ║
+    ║          ├─┘  │─┘└┬┘                     ║
+    ║          │    │   └┘                      ║
+    ║      ╔═══════════════════════╗            ║
+    ║      ║ PyArchInit-Mini v1.2.12 ║           ║
+    ║      ╚═══════════════════════╝            ║
+    ╚═══════════════════════════════════════════╝
         """
         
-        self.console.print(Panel(welcome_text, title="Benvenuto", border_style="blue"))
+        welcome_text = f"""
+{logo_art}
+
+[bold blue]Archaeological Data Management System[/bold blue]
+[dim]Lightweight, Multi-Interface, Open Source[/dim]
+
+[yellow]Gestione dati archeologici via interfaccia a riga di comando[/yellow]
+        """
+        
+        self.console.print(Panel(welcome_text, title="PyArchInit-Mini", border_style="blue", expand=False))
     
     def show_main_menu(self):
         """Show main menu and handle selection"""
@@ -486,8 +500,9 @@ def main(database_url, version):
     """PyArchInit-Mini Interactive CLI"""
     
     if version:
-        console.print("[bold blue]PyArchInit-Mini CLI v0.1.0[/bold blue]")
+        console.print("[bold blue]PyArchInit-Mini CLI v1.2.12[/bold blue]")
         console.print("Archaeological Data Management System")
+        console.print("© 2025 PyArchInit Team - GPL v2 License")
         return
     
     cli = PyArchInitCLI(database_url)

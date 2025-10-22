@@ -42,11 +42,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_logo = '_static/images/pyarchinit-mini-logo.png'
 
-# Alabaster theme options for better path wrapping
+# Theme options
 html_theme_options = {
-    'code_font_size': '0.8em',
-    'page_width': '1200px',
+    'logo_only': False,
+    'display_version': True,
+    'style_nav_header_background': '#2E86AB',
 }
 
 # PDF output with pdflatex (more compatible)
