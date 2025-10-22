@@ -60,6 +60,20 @@ class PyArchInitGUI:
         self.root.geometry("1200x800")
         self.root.minsize(1000, 600)
 
+        # Set window icon
+        try:
+            logo_path = os.path.join(os.path.dirname(__file__), 'assets', 'logo.png')
+            if os.path.exists(logo_path):
+                from PIL import Image, ImageTk
+                logo_img = Image.open(logo_path)
+                logo_img = logo_img.resize((64, 64), Image.Resampling.LANCZOS)
+                logo_photo = ImageTk.PhotoImage(logo_img)
+                self.root.iconphoto(True, logo_photo)
+                # Keep a reference to prevent garbage collection
+                self.root._logo_ref = logo_photo
+        except Exception as e:
+            print(f"Could not load window icon: {e}")
+
         # Initialize database and services
         self.setup_database()
 
