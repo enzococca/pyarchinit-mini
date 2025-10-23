@@ -186,9 +186,9 @@ class PyArchInitMatrixVisualizer:
             self._create_simple_nodes(G, graph, us_rilevanti, settings)
 
         # Add edges with proper styling
-        self._add_sequence_edges(G, sequence_relations, settings)
-        self._add_negative_edges(G, negative_relations, settings)
-        self._add_contemporary_edges(G, contemporary_relations, settings)
+        self._add_sequence_edges(G, graph, sequence_relations, settings)
+        self._add_negative_edges(G, graph, negative_relations, settings)
+        self._add_contemporary_edges(G, graph, contemporary_relations, settings)
 
         # Add temporal ordering constraints (most recent above, oldest below)
         self._add_temporal_ordering(G, graph, us_rilevanti)
@@ -339,58 +339,92 @@ class PyArchInitMatrixVisualizer:
             fontname='Arial',
             fontsize='10'
         )
-    
-    def _add_sequence_edges(self, G: Digraph, relations: List[Tuple], settings: Dict):
-        """Add normal stratigraphic sequence edges"""
-        edge_list = []
+
+    def _get_edge_label_for_unit(self, graph: nx.DiGraph, node: int) -> str:
+        """
+        Get edge label symbol based on Extended Matrix Framework unit type
+
+        Args:
+            graph: NetworkX graph containing node data
+            node: Node ID (US number)
+
+        Returns:
+            '>' for standard units (USVA, USVB, USVC, TU, USD, CON, VSF, SF, US, USM)
+            '>>' for special units (Extractor, Combiner, DOC, property)
+        """
+        # Default to '>' for standard stratigraphic units
+        default_symbol = '>'
+
+        # Get node data if available
+        if node not in graph.nodes:
+            return default_symbol
+
+        node_data = graph.nodes[node]
+        unita_tipo = node_data.get('unita_tipo', 'US')
+
+        # Units that use double symbols (>> and <<)
+        double_symbol_units = ['Extractor', 'Combiner', 'DOC', 'property']
+
+        # Check if this unit type uses double symbols
+        if unita_tipo in double_symbol_units:
+            return '>>'
+        else:
+            return '>'
+
+    def _add_sequence_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict):
+        """Add normal stratigraphic sequence edges with Extended Matrix symbols"""
         for source, target, rel_type in relations:
-            edge_list.append((str(source), str(target)))
-        
-        if edge_list:
-            with G.subgraph(name='sequence_edges') as seq:
-                seq.edges(edge_list)
-                seq.edge_attr.update(
-                    style=settings['normal_edge_style'],
-                    color=settings['normal_edge_color'],
-                    arrowhead=settings['normal_arrowhead'],
-                    arrowsize=settings['normal_arrowsize'],
-                    penwidth=settings['normal_penwidth']
-                )
+            # Determine edge label symbol based on unit type
+            # Extended Matrix Framework specification:
+            # - USVA, USVB, USVC, TU, USD, CON, VSF, SF use > and <
+            # - Extractor, Combiner, DOC, property use >> and <<
+            edge_label = self._get_edge_label_for_unit(graph, source)
+
+            G.edge(
+                str(source),
+                str(target),
+                label=edge_label,
+                style=settings['normal_edge_style'],
+                color=settings['normal_edge_color'],
+                arrowhead=settings['normal_arrowhead'],
+                arrowsize=settings['normal_arrowsize'],
+                penwidth=settings['normal_penwidth']
+            )
     
-    def _add_negative_edges(self, G: Digraph, relations: List[Tuple], settings: Dict):
-        """Add negative (cuts) relationship edges"""
-        edge_list = []
+    def _add_negative_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict):
+        """Add negative (cuts) relationship edges with Extended Matrix symbols"""
         for source, target, rel_type in relations:
-            edge_list.append((str(source), str(target)))
-        
-        if edge_list:
-            with G.subgraph(name='negative_edges') as neg:
-                neg.edges(edge_list)
-                neg.edge_attr.update(
-                    style=settings['negative_edge_style'],
-                    color=settings['negative_edge_color'],
-                    arrowhead=settings['negative_arrowhead'],
-                    arrowsize=settings['normal_arrowsize'],
-                    penwidth=settings['normal_penwidth']
-                )
+            # Determine edge label symbol based on unit type
+            edge_label = self._get_edge_label_for_unit(graph, source)
+
+            G.edge(
+                str(source),
+                str(target),
+                label=edge_label,
+                style=settings['negative_edge_style'],
+                color=settings['negative_edge_color'],
+                arrowhead=settings['negative_arrowhead'],
+                arrowsize=settings['normal_arrowsize'],
+                penwidth=settings['normal_penwidth']
+            )
     
-    def _add_contemporary_edges(self, G: Digraph, relations: List[Tuple], settings: Dict):
-        """Add contemporary/equivalent relationship edges"""
-        edge_list = []
+    def _add_contemporary_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict):
+        """Add contemporary/equivalent relationship edges with Extended Matrix symbols"""
         for source, target, rel_type in relations:
-            edge_list.append((str(source), str(target)))
-        
-        if edge_list:
-            with G.subgraph(name='contemporary_edges') as cont:
-                cont.edges(edge_list)
-                cont.edge_attr.update(
-                    style=settings['contemp_edge_style'],
-                    color=settings['contemp_edge_color'],
-                    arrowhead=settings['contemp_arrowhead'],
-                    arrowsize=settings['normal_arrowsize'],
-                    penwidth=settings['normal_penwidth'],
-                    constraint='false'  # Don't affect layout
-                )
+            # Determine edge label symbol based on unit type
+            edge_label = self._get_edge_label_for_unit(graph, source)
+
+            G.edge(
+                str(source),
+                str(target),
+                label=edge_label,
+                style=settings['contemp_edge_style'],
+                color=settings['contemp_edge_color'],
+                arrowhead=settings['contemp_arrowhead'],
+                arrowsize=settings['normal_arrowsize'],
+                penwidth=settings['normal_penwidth'],
+                constraint='false'  # Don't affect layout
+            )
     
     def _add_temporal_ordering(self, G: Digraph, graph: nx.DiGraph, us_rilevanti: set):
         """Add temporal ordering constraints to ensure chronological sequence"""

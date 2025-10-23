@@ -77,94 +77,183 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **Multi-Interface Support**: Available in both Web UI (Chart.js) and Desktop GUI (matplotlib)
 - **Real-Time Data**: Charts update automatically with current database state
 
-### 🔄 GraphML Converter - Harris Matrix Export (NEW in v1.1.5)
-Export Harris Matrix diagrams to yEd Graph Editor with full EM_palette styling and archaeological metadata.
+### 🔄 Extended Matrix Framework & GraphML Export (v1.2.15+)
+Complete implementation of Extended Matrix Framework with GraphML export for yEd Graph Editor.
 
-**Core Features**:
-- **yEd Compatibility**: Export to yEd Graph Editor compatible GraphML format
-- **EM_palette Styling**: Automatic node colors and shapes based on `unita_tipo` (US, USM, USD, USV, USV/s)
-- **Archaeological Metadata**: Node descriptions with `d_stratigrafica` + `d_interpretativa` visible in yEd
-- **Clean Edge Display**: Edges without text labels (relationship types in tooltips)
-- **Period Preservation**: Automatic grouping by archaeological periods with color coding
-- **Flexible Grouping**: Support for period+area, period-only, area-only, or no grouping modes
-- **Transitive Reduction**: Automatic removal of redundant stratigraphic relationships
-- **Multi-Interface Support**: Available via Python API, CLI, REST API, Web UI, and Desktop GUI
+> 📖 **Full Documentation**: [Extended Matrix Framework Guide](docs/EXTENDED_MATRIX_FRAMEWORK.md)
 
-**EM_palette Node Styles** (based on `unita_tipo`):
-- **US/USM** (Stratigraphic Unit): Red border (#9B3333), white fill, rectangle
-- **USD** (Documentary US): Orange border (#D86400), white fill, rounded rectangle
-- **USV** (Virtual US negative): Green border (#31792D), black fill, hexagon
-- **USV/s** (Virtual US structural): Blue border (#248FE7), black fill, trapezium
+**Extended Matrix Framework**:
+PyArchInit-Mini supports the full Extended Matrix specification with **14 unit types** and **dual relationship symbols**.
 
-**Edge Styles** (PyArchInit convention):
-- **Contemporary** (uguale a, si lega a): No arrow, solid line
-- **Stratigraphic** (copre, sotto): Arrow, solid line
-- **Negative** (taglia): Arrow, dashed line
-- **Virtual/Uncertain**: Arrow, dashed line
+#### Unit Types Supported:
 
-**Data Requirements** (for external API use):
+**Stratigraphic Units** (use `>` / `<` symbols):
+- **US** - Stratigraphic Unit (traditional)
+- **USM** - Masonry Stratigraphic Unit
+- **VSF** - Virtual Stratigraphic Face
+- **SF** - Stratigraphic Face
+- **CON** - Connector
+- **USD** - Destructive Stratigraphic Unit
+- **USVA, USVB, USVC** - Virtual Stratigraphic Units (grouping)
+- **TU** - Typological Unit
+
+**Non-Stratigraphic Units** (use `>>` / `<<` symbols):
+- **DOC** - Document (with `tipo_documento` field: Image, PDF, DOCX, CSV, Excel, TXT)
+- **property** - Property/Attribute
+- **Extractor** - Data extractor node
+- **Combiner** - Data combiner node
+
+#### Relationship Symbols:
+
+**Standard Stratigraphic** (`>` and `<`):
+- Used by: US, USM, VSF, SF, CON, USD, USVA, USVB, USVC, TU
+- `>` indicates "above" or "more recent than"
+- `<` indicates "below" or "older than"
+- Example: `US 1001 > US 1002` (US 1001 covers US 1002)
+
+**Special Non-Stratigraphic** (`>>` and `<<`):
+- Used by: DOC, property, Extractor, Combiner
+- `>>` indicates "is connected to" or "derives from"
+- `<<` indicates "receives from" or "is source for"
+- Example: `DOC 8001 >> US 1001` (Document 8001 documents US 1001)
+
+#### DOC Units - Document Management with File Upload:
+
+DOC units have special functionality with **tipo_documento** field and **file upload**:
+
 ```python
-# Graph node structure
-graph.nodes[us_number] = {
-    'd_stratigrafica': str,        # Stratigraphic description
-    'd_interpretativa': str,       # Archaeological interpretation
-    'unita_tipo': str,             # Unit type: US, USM, USD, USV, USV/s
-    'period_initial': str,         # Initial chronological period
-    'area': str,                   # Archaeological area/sector
-}
-
-# Graph edge structure
-graph.edges[(source, target)] = {
-    'relationship': str,           # Type: copre, taglia, uguale a, si lega a
-    'certainty': str              # certain, uncertain
+# Creating a DOC unit with file upload
+us_data = {
+    'sito': 'Pompei',
+    'us': 'DOC-8001',
+    'unita_tipo': 'DOC',
+    'tipo_documento': 'Image',  # or: PDF, DOCX, CSV, Excel, TXT
+    'file_path': 'DoSC/Pompei_DOC-8001_20251023_142530_photo.jpg',
+    'd_interpretativa': 'General excavation photo, Area A'
 }
 ```
 
+**File Upload Features**:
+- **DoSC Folder**: All files automatically saved in centralized `DoSC/` directory
+- **Automatic Naming**: Files renamed as `{SITE}_{US}_{TIMESTAMP}_{ORIGINALNAME}`
+- **Database Tracking**: File paths stored in `file_path` field for retrieval
+- **Multiple Formats**: Support for Images, PDF, DOCX, CSV, Excel, TXT, and more
+- **Both Interfaces**: Available in Web Interface and Desktop GUI
+
+**Automatic Field Display**:
+- Web Interface: tipo_documento and file upload fields appear when unita_tipo="DOC" is selected
+- Desktop GUI: tipo_documento combobox and "Browse..." button shown/hidden based on unit type selection
+
+**Usage**:
+1. Select "DOC" as Unit Type
+2. Choose Document Type (Image, PDF, DOCX, CSV, Excel, TXT)
+3. Click "Browse..." / "Choose File" to select file
+4. Save → File uploaded to `DoSC/SITE_US_TIMESTAMP_filename.ext`
+
+> 📖 **Full Guide**: [DOC File Upload Documentation](docs/DOC_FILE_UPLOAD.md)
+
+#### GraphML Export Features:
+
+**Core Capabilities**:
+- **yEd Compatibility**: Full GraphML format support
+- **Extended Matrix Palette**: All 14 unit types with specific colors and shapes
+- **Relationship Symbols**: Automatic `>` or `>>` labeling based on unit type
+- **Archaeological Metadata**: Node descriptions with stratigraphic/interpretative data
+- **Period Grouping**: Automatic grouping by chronological periods
+- **Transitive Reduction**: Removes redundant stratigraphic relationships
+- **Multi-Interface Support**: Available in Web UI, Desktop GUI, CLI, and REST API
+
+**EM_palette Node Styles**:
+- **US/USM**: White fill, red border (#9B3333), rectangle
+- **VSF/SF**: White fill, yellow border (#D8BD30), rounded rectangle
+- **USVA**: Black fill, blue border (#248FE7), rectangle
+- **USVB**: Black fill, green border (#31792D), rectangle
+- **USVC**: Black fill, green border (#31792D), rectangle
+- **USD**: White fill, orange border (#D86400), rounded rectangle
+- **CON**: Black fill/border, small circle
+- **DOC**: Special document shape (BPMN Artifact)
+- **TU**: Standard stratigraphic style
+- **property**: BPMN Artifact shape
+- **Extractor**: SVG icon, 25x25px
+- **Combiner**: SVG icon, 25x25px
+
+**Edge Styles**:
+- **Standard stratigraphic** (>, <): Solid arrow, labeled with symbol
+- **Special non-stratigraphic** (>>, <<): Double arrow, labeled with symbol
+- **Contemporary** (uguale a, si lega a): No arrow, solid line
+- **Negative** (taglia): Dashed line
+
 **Usage Examples**:
 ```python
-# Python API - From NetworkX graph
-from pyarchinit_mini.graphml_converter import convert_dot_to_graphml
+# Python API - Create Extended Matrix graph
 import networkx as nx
 
 graph = nx.DiGraph()
+
+# Add stratigraphic units
 graph.add_node(1001,
-    d_stratigrafica='Strato di riempimento',
-    d_interpretativa='Deposito medievale',
     unita_tipo='US',
-    period_initial='Medievale')
+    d_stratigrafica='Fill layer',
+    d_interpretativa='Medieval deposit')
+
+graph.add_node(2001,
+    unita_tipo='USM',
+    d_stratigrafica='Wall',
+    d_interpretativa='Roman wall in opus reticulatum')
+
+# Add DOC unit with document type
+graph.add_node(8001,
+    unita_tipo='DOC',
+    tipo_documento='Image',
+    d_interpretativa='General photo of Area A')
+
+# Add stratigraphic relationship (uses >)
 graph.add_edge(1001, 1002, relationship='copre')
 
-# Generate DOT and convert
-# ... (see documentation for full example)
+# Add document relationship (uses >>)
+graph.add_edge(8001, 1001, relationship='documenta')
 
-# CLI - From DOT file
-pyarchinit-graphml convert harris.dot harris.graphml -t "Pompei - Regio VI"
+# Export to GraphML
+from pyarchinit_mini.graphml_converter import convert_dot_to_graphml
+# ... (see full documentation)
 
-# REST API - Upload DOT file
-curl -X POST http://localhost:8000/api/graphml/convert \
-     -F "file=@harris.dot" -F "title=Pompei"
+# Web Interface
+# Navigate to: US List → Export Harris Matrix to GraphML (yEd)
+# Select site, area, and options → Download .graphml
 
-# Web Interface - Export from database
-# Navigate to: Harris Matrix → Export GraphML (yEd)
-# Select site, configure options, download .graphml file
+# Desktop GUI
+# Tools → Export Harris Matrix (GraphML)
+```
 
-# Desktop GUI - Tools menu
-# Tools → Export GraphML (yEd)
+**Database Migration**:
+New installations have Extended Matrix support by default. Existing databases need migrations:
+
+```bash
+# Step 1: Add tipo_documento field (document type)
+python run_tipo_documento_migration.py upgrade
+
+# Step 2: Add file_path field (file upload support)
+python run_file_path_migration.py upgrade
+
+# Rollback if needed
+python run_file_path_migration.py downgrade
+python run_tipo_documento_migration.py downgrade
 ```
 
 **Available Interfaces**:
 - **Python Library**: `from pyarchinit_mini.graphml_converter import convert_dot_to_graphml`
 - **CLI Tool**: `pyarchinit-graphml convert|template|batch`
-- **REST API**: 4 endpoints at `/api/graphml/*` (convert, convert-content, template, health)
-- **Web Interface**: Form-based export with site selection and real-time download
-- **Desktop GUI**: Tkinter dialog in Tools menu with file save dialog
+- **REST API**: `/api/graphml/*` endpoints
+- **Web Interface**: Form-based export with site selection
+- **Desktop GUI**: Tools menu with file save dialog
 
 **Output**:
-- GraphML file compatible with yEd Graph Editor
-- Node descriptions visible in yEd "Description" field
+- GraphML file compatible with yEd Graph Editor (v3.23+)
+- All 14 Extended Matrix unit types with correct styling
+- Relationship symbols (`>`, `>>`) on edge labels
+- Node descriptions visible in yEd
+- Period-based hierarchical structure
 - EM_palette colors and shapes applied automatically
-- Edge relationships available as tooltips
-- Period-based table structure for hierarchical visualization
 
 ### 🎨 s3Dgraphy - 3D Stratigraphic Visualization (NEW in v1.6.0)
 

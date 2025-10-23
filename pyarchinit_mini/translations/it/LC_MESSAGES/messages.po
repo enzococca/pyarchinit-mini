@@ -4730,3 +4730,59 @@ msgstr "Combiner"
 
 msgid "Extractor"
 msgstr "Extractor"
+
+# Extended Matrix - Document Type field
+msgid "Document Type"
+msgstr "Tipo Documento"
+
+msgid "Image"
+msgstr "Immagine"
+
+msgid "PDF"
+msgstr "PDF"
+
+msgid "DOCX"
+msgstr "DOCX"
+
+msgid "CSV"
+msgstr "CSV"
+
+msgid "Excel"
+msgstr "Excel"
+
+msgid "TXT"
+msgstr "TXT"
+
+# Document file upload
+msgid "Upload Document File"
+msgstr "Carica File Documento"
+
+msgid "File will be saved in DoSC folder"
+msgstr "Il file verrà salvato nella cartella DoSC"
+
+msgid "Document File:"
+msgstr "File Documento:"
+
+msgid "Browse..."
+msgstr "Sfoglia..."
+
+msgid "Select Document File"
+msgstr "Seleziona File Documento"
+
+msgid "All Files"
+msgstr "Tutti i File"
+
+msgid "Images"
+msgstr "Immagini"
+
+msgid "Word Documents"
+msgstr "Documenti Word"
+
+msgid "Excel Files"
+msgstr "File Excel"
+
+msgid "CSV Files"
+msgstr "File CSV"
+
+msgid "Text Files"
+msgstr "File di Testo"

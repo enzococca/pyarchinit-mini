@@ -85,6 +85,16 @@ class USForm(FlaskForm):
         ('Combiner', _l('Combiner')),
         ('Extractor', _l('Extractor'))
     ])
+    tipo_documento = SelectField(_l('Document Type'), choices=[
+        ('', _l('-- Select --')),
+        ('image', _l('Image')),
+        ('PDF', _l('PDF')),
+        ('DOCX', _l('DOCX')),
+        ('CSV', _l('CSV')),
+        ('Excel', _l('Excel')),
+        ('TXT', _l('TXT'))
+    ])
+    documento_file = FileField(_l('Upload Document File'))
 
     # Dati di Scavo
     anno_scavo = IntegerField(_l('Excavation Year'), validators=[Optional()])
@@ -660,6 +670,7 @@ def create_app():
                     'area': form.area.data,
                     'us': form.us.data,
                     'unita_tipo': form.unita_tipo.data,
+                    'tipo_documento': form.tipo_documento.data if form.unita_tipo.data == 'DOC' else None,
                     'anno_scavo': form.anno_scavo.data,
                     'scavato': form.scavato.data,
                     'schedatore': form.schedatore.data,
@@ -720,6 +731,30 @@ def create_app():
                     'flottazione': form.flottazione.data,
                     'setacciatura': form.setacciatura.data,
                 }
+
+                # Handle file upload for DOC units
+                if form.unita_tipo.data == 'DOC' and form.documento_file.data:
+                    file = form.documento_file.data
+                    if file and file.filename:
+                        import os
+                        from werkzeug.utils import secure_filename
+                        import datetime
+
+                        # Create DoSC directory if it doesn't exist
+                        dosc_dir = os.path.join(os.getcwd(), 'DoSC')
+                        os.makedirs(dosc_dir, exist_ok=True)
+
+                        # Generate filename: SITE_US_timestamp_originalname
+                        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                        original_name = secure_filename(file.filename)
+                        filename = f"{us_data['sito']}_{us_data['us']}_{timestamp}_{original_name}"
+
+                        # Save file
+                        file_path = os.path.join(dosc_dir, filename)
+                        file.save(file_path)
+
+                        # Store relative path in database
+                        us_data['file_path'] = f"DoSC/{filename}"
 
                 us = us_service.create_us(us_data)
 
@@ -772,6 +807,7 @@ def create_app():
                     'area': form.area.data,
                     'us': form.us.data,
                     'unita_tipo': form.unita_tipo.data,
+                    'tipo_documento': form.tipo_documento.data if form.unita_tipo.data == 'DOC' else None,
                     'anno_scavo': form.anno_scavo.data,
                     'scavato': form.scavato.data,
                     'schedatore': form.schedatore.data,
@@ -832,6 +868,30 @@ def create_app():
                     'flottazione': form.flottazione.data,
                     'setacciatura': form.setacciatura.data,
                 }
+
+                # Handle file upload for DOC units
+                if form.unita_tipo.data == 'DOC' and form.documento_file.data:
+                    file = form.documento_file.data
+                    if file and file.filename:
+                        import os
+                        from werkzeug.utils import secure_filename
+                        import datetime
+
+                        # Create DoSC directory if it doesn't exist
+                        dosc_dir = os.path.join(os.getcwd(), 'DoSC')
+                        os.makedirs(dosc_dir, exist_ok=True)
+
+                        # Generate filename: SITE_US_timestamp_originalname
+                        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                        original_name = secure_filename(file.filename)
+                        filename = f"{update_data['sito']}_{update_data['us']}_{timestamp}_{original_name}"
+
+                        # Save file
+                        file_path = os.path.join(dosc_dir, filename)
+                        file.save(file_path)
+
+                        # Store relative path in database
+                        update_data['file_path'] = f"DoSC/{filename}"
 
                 us_service.update_us(us_id, update_data)
 
