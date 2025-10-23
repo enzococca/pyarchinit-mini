@@ -1171,7 +1171,7 @@ msgstr "Sites"
 #: pyarchinit_mini/pdf_export/pdf_generator.py:269
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:649
 msgid "US"
-msgstr "US"
+msgstr "SU"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:165
 #: pyarchinit_mini/desktop_gui/main_window.py:469
@@ -4898,3 +4898,43 @@ msgstr "No US found."
 #~ msgid "View Inventory"
 #~ msgstr "View Inventory"
 
+
+# Unit Type translations for Extended Matrix
+msgid "USM"
+msgstr "WSU"
+
+msgid "VSF"
+msgstr "VSF"
+
+msgid "SF"
+msgstr "SF"
+
+msgid "CON"
+msgstr "CON"
+
+msgid "USD"
+msgstr "USD"
+
+msgid "USVA"
+msgstr "USVA"
+
+msgid "USVB"
+msgstr "USVB"
+
+msgid "USVC"
+msgstr "USVC"
+
+msgid "DOC"
+msgstr "DOC"
+
+msgid "TU"
+msgstr "TU"
+
+msgid "property"
+msgstr "property"
+
+msgid "Combiner"
+msgstr "Combiner"
+
+msgid "Extractor"
+msgstr "Extractor"
