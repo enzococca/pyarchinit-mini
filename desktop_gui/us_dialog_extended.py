@@ -138,6 +138,40 @@ class ExtendedUSDialog:
                                                values=get_unit_types(), width=20)
         self.fields['unita_tipo'].grid(row=1, column=3, sticky="ew", padx=(10, 0), pady=5)
 
+        # Tipo documento (conditional field, shown only for DOC unit type)
+        self.tipo_documento_label = ttk.Label(id_frame, text=_("Document Type:"))
+        self.tipo_documento_label.grid(row=2, column=0, sticky="w", pady=5)
+        self.tipo_documento_label.grid_remove()  # Hide initially
+
+        self.fields['tipo_documento'] = ttk.Combobox(id_frame,
+                                                     values=[_("Image"), _("PDF"), _("DOCX"), _("CSV"), _("Excel"), _("TXT")],
+                                                     width=30)
+        self.fields['tipo_documento'].grid(row=2, column=1, sticky="ew", padx=(10, 0), pady=5)
+        self.fields['tipo_documento'].grid_remove()  # Hide initially
+
+        # File upload (conditional field, shown only for DOC unit type)
+        self.file_upload_label = ttk.Label(id_frame, text=_("Document File:"))
+        self.file_upload_label.grid(row=3, column=0, sticky="w", pady=5)
+        self.file_upload_label.grid_remove()  # Hide initially
+
+        file_upload_frame = ttk.Frame(id_frame)
+        file_upload_frame.grid(row=3, column=1, sticky="ew", padx=(10, 0), pady=5)
+        file_upload_frame.grid_remove()  # Hide initially
+        self.file_upload_frame = file_upload_frame
+
+        self.fields['file_path'] = ttk.Entry(file_upload_frame, width=25, state='readonly')
+        self.fields['file_path'].pack(side='left', fill='x', expand=True)
+
+        self.browse_file_btn = ttk.Button(file_upload_frame, text=_("Browse..."),
+                                          command=self._browse_file, width=10)
+        self.browse_file_btn.pack(side='left', padx=(5, 0))
+
+        # Variable to store selected file path
+        self.selected_file_path = None
+
+        # Bind event to show/hide tipo_documento field based on unita_tipo selection
+        self.fields['unita_tipo'].bind('<<ComboboxSelected>>', self._toggle_tipo_documento_field)
+
         # Configure grid weights
         id_frame.columnconfigure(1, weight=1)
         id_frame.columnconfigure(3, weight=1)
@@ -572,7 +606,7 @@ class ExtendedUSDialog:
         self.fields['sito'].set(self.us.sito or "")
         
         # Text fields
-        text_fields = ['area', 'us', 'schedatore', 'anno_scavo', 'unita_tipo', 'scavato', 
+        text_fields = ['area', 'us', 'schedatore', 'anno_scavo', 'unita_tipo', 'tipo_documento', 'scavato',
                       'metodo_di_scavo', 'data_schedatura', 'attivita', 'formazione',
                       'stato_di_conservazione', 'colore', 'consistenza', 'struttura',
                       'periodo_iniziale', 'fase_iniziale', 'periodo_finale', 'fase_finale',
@@ -612,7 +646,10 @@ class ExtendedUSDialog:
                 value = getattr(self.us, field)
                 if value is not None:
                     self.fields[field].insert("1.0", str(value))
-    
+
+        # After loading all fields, toggle tipo_documento visibility based on unita_tipo
+        self._toggle_tipo_documento_field()
+
     def load_relationships(self):
         """Load stratigraphic relationships for current US"""
         if not self.us:
@@ -1232,7 +1269,55 @@ class ExtendedUSDialog:
                 
             except Exception as e:
                 messagebox.showerror("Errore", f"Errore nell'esportazione: {str(e)}")
-    
+
+    def _toggle_tipo_documento_field(self, event=None):
+        """Show/hide tipo_documento and file upload fields based on unita_tipo selection"""
+        # Get original value (not translated) for comparison
+        translated_value = self.fields['unita_tipo'].get()
+        original_value = translate_unit_type_to_original(translated_value)
+
+        if original_value == 'DOC':
+            # Show tipo_documento and file upload fields
+            self.tipo_documento_label.grid()
+            self.fields['tipo_documento'].grid()
+            self.file_upload_label.grid()
+            self.file_upload_frame.grid()
+        else:
+            # Hide tipo_documento and file upload fields
+            self.tipo_documento_label.grid_remove()
+            self.fields['tipo_documento'].grid_remove()
+            self.file_upload_label.grid_remove()
+            self.file_upload_frame.grid_remove()
+
+    def _browse_file(self):
+        """Browse and select file for DOC unit"""
+        from tkinter import filedialog
+        import os
+
+        # Open file dialog
+        file_path = filedialog.askopenfilename(
+            title=_("Select Document File"),
+            filetypes=[
+                (_("All Files"), "*.*"),
+                (_("Images"), "*.jpg *.jpeg *.png *.tiff *.gif"),
+                (_("PDF"), "*.pdf"),
+                (_("Word Documents"), "*.docx *.doc"),
+                (_("Excel Files"), "*.xlsx *.xls"),
+                (_("CSV Files"), "*.csv"),
+                (_("Text Files"), "*.txt")
+            ]
+        )
+
+        if file_path:
+            # Store selected file path
+            self.selected_file_path = file_path
+            # Show filename in entry field
+            filename = os.path.basename(file_path)
+            self.fields['file_path'].config(state='normal')
+            self.fields['file_path'].delete(0, 'end')
+            self.fields['file_path'].insert(0, filename)
+            self.fields['file_path'].config(state='readonly')
+
     def save_us(self):
         """Save US data"""
         try:
@@ -1249,7 +1334,7 @@ class ExtendedUSDialog:
             us_data = {}
             
             # String fields (including 'us' which is now text)
-            string_fields = ['sito', 'area', 'us', 'schedatore', 'unita_tipo', 'scavato',
+            string_fields = ['sito', 'area', 'us', 'schedatore', 'unita_tipo', 'tipo_documento', 'scavato',
                            'metodo_di_scavo', 'data_schedatura', 'attivita', 'formazione',
                            'stato_di_conservazione', 'colore', 'consistenza', 'struttura',
                            'periodo_iniziale', 'fase_iniziale', 'periodo_finale', 'fase_finale',
@@ -1313,6 +1398,30 @@ class ExtendedUSDialog:
             elif 'rapporti' in us_data:
                 # Clear rapporti if no relationships
                 us_data['rapporti'] = ""
+
+            # Handle file upload for DOC units
+            if us_data.get('unita_tipo') == 'DOC' and self.selected_file_path:
+                import os
+                import shutil
+                from datetime import datetime
+
+                # Create DoSC directory if it doesn't exist
+                dosc_dir = os.path.join(os.getcwd(), 'DoSC')
+                os.makedirs(dosc_dir, exist_ok=True)
+
+                # Generate filename: SITE_US_timestamp_originalname
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                original_name = os.path.basename(self.selected_file_path)
+                # Clean filename to avoid issues
+                original_name = original_name.replace(' ', '_')
+                filename = f"{us_data['sito']}_{us_data['us']}_{timestamp}_{original_name}"
+
+                # Copy file to DoSC folder
+                dest_path = os.path.join(dosc_dir, filename)
+                shutil.copy2(self.selected_file_path, dest_path)
+
+                # Store relative path in database
+                us_data['file_path'] = f"DoSC/{filename}"
 
             # Save US
             if self.us_id:

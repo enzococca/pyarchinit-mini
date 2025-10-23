@@ -77,6 +77,8 @@ class US(BaseModel):
     
     # USM specific fields (Unità Stratigrafiche Murarie)
     unita_tipo = Column(String(200))
+    tipo_documento = Column(String(100))  # Document type for DOC units (image, PDF, DOCX, CSV, Excel, TXT)
+    file_path = Column(String(500))  # File path for DOC units (stored in DoSC folder)
     settore = Column(String(200))
     quad_par = Column(String(200))
     ambient = Column(String(200))

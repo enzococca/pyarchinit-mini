@@ -88,7 +88,16 @@
                         <div class="row">
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ _('Unit Type') }}</label>
-                                {{ form.unita_tipo(class="form-select") }}
+                                {{ form.unita_tipo(class="form-select", id="unita_tipo") }}
+                            </div>
+                            <div class="col-md-3 mb-3" id="tipo_documento_field" style="display:none;">
+                                <label class="form-label">{{ _('Document Type') }}</label>
+                                {{ form.tipo_documento(class="form-select") }}
+                            </div>
+                            <div class="col-md-6 mb-3" id="documento_file_field" style="display:none;">
+                                <label class="form-label">{{ _('Upload Document File') }}</label>
+                                {{ form.documento_file(class="form-control") }}
+                                <small class="text-muted">{{ _('File will be saved in DoSC folder') }}</small>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ _('Sector') }}</label>
@@ -439,4 +448,30 @@
         </div>
     </form>
 </div>
+
+<script>
+// Handle conditional display of tipo_documento and file upload fields based on unita_tipo selection
+document.addEventListener('DOMContentLoaded', function() {
+    const unitaTipoSelect = document.getElementById('unita_tipo');
+    const tipoDocumentoField = document.getElementById('tipo_documento_field');
+    const documentoFileField = document.getElementById('documento_file_field');
+
+    function toggleDocFields() {
+        if (unitaTipoSelect.value === 'DOC') {
+            tipoDocumentoField.style.display = 'block';
+            documentoFileField.style.display = 'block';
+        } else {
+            tipoDocumentoField.style.display = 'none';
+            documentoFileField.style.display = 'none';
+        }
+    }
+
+    // Initialize on page load
+    toggleDocFields();
+
+    // Listen for changes
+    unitaTipoSelect.addEventListener('change', toggleDocFields);
+});
+</script>
+
 {% endblock %}
