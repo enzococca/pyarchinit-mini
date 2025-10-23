@@ -164,6 +164,7 @@ pyarchinit-mini-setup = "pyarchinit_mini.scripts.setup_user_env:main"
 pyarchinit-mini-init = "pyarchinit_mini.scripts.create_admin_user:main"
 pyarchinit-export-import = "pyarchinit_mini.cli.export_import_cli:export_import"
 pyarchinit-graphml = "pyarchinit_mini.cli.graphml_cli:main"
+pyarchinit-mini-import = "pyarchinit_mini.cli.pyarchinit_import_export_cli:pyarchinit"
 
 [tool.setuptools.packages.find]
 where = ["."]
