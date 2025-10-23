@@ -15,7 +15,7 @@ import sys
 
 # Add parent directory to path for i18n import
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from desktop_gui.i18n import _
+from desktop_gui.i18n import _, get_unit_types, translate_unit_type_from_original, translate_unit_type_to_original
 
 class ExtendedUSDialog:
     """
@@ -135,7 +135,7 @@ class ExtendedUSDialog:
         # Unità tipo
         ttk.Label(id_frame, text=_("Unit Type:")).grid(row=1, column=2, sticky="w", pady=5, padx=(20, 0))
         self.fields['unita_tipo'] = ttk.Combobox(id_frame,
-                                               values=["US", "USM", "USV", "USR"], width=20)
+                                               values=get_unit_types(), width=20)
         self.fields['unita_tipo'].grid(row=1, column=3, sticky="ew", padx=(10, 0), pady=5)
 
         # Configure grid weights
@@ -586,7 +586,12 @@ class ExtendedUSDialog:
                     if isinstance(self.fields[field], ttk.Entry):
                         self.fields[field].insert(0, str(value))
                     elif isinstance(self.fields[field], ttk.Combobox):
-                        self.fields[field].set(str(value))
+                        # For unita_tipo, translate from original (US) to display value (SU if English)
+                        if field == 'unita_tipo':
+                            display_value = translate_unit_type_from_original(str(value))
+                            self.fields[field].set(display_value)
+                        else:
+                            self.fields[field].set(str(value))
         
         # Numeric fields
         numeric_fields = ['quota_relativa', 'quota_abs', 'lunghezza_max', 'altezza_max',
@@ -1243,28 +1248,24 @@ class ExtendedUSDialog:
             # Prepare data
             us_data = {}
             
-            # String fields
-            string_fields = ['sito', 'area', 'schedatore', 'unita_tipo', 'scavato', 
+            # String fields (including 'us' which is now text)
+            string_fields = ['sito', 'area', 'us', 'schedatore', 'unita_tipo', 'scavato',
                            'metodo_di_scavo', 'data_schedatura', 'attivita', 'formazione',
                            'stato_di_conservazione', 'colore', 'consistenza', 'struttura',
                            'periodo_iniziale', 'fase_iniziale', 'periodo_finale', 'fase_finale',
                            'datazione', 'affidabilita', 'direttore_us', 'responsabile_us',
                            'flottazione', 'setacciatura']
-            
+
             for field in string_fields:
                 if field in self.fields:
                     if isinstance(self.fields[field], ttk.Entry) or isinstance(self.fields[field], ttk.Combobox):
                         value = self.fields[field].get().strip()
                         if value:
-                            us_data[field] = value
-            
-            # Numeric fields
-            try:
-                us_number = int(self.fields['us'].get().strip())
-                us_data['us'] = us_number
-            except ValueError:
-                messagebox.showerror("Errore", "Il numero US deve essere un numero")
-                return
+                            # For unita_tipo, translate from display value (SU if English) to original (US)
+                            if field == 'unita_tipo':
+                                us_data[field] = translate_unit_type_to_original(value)
+                            else:
+                                us_data[field] = value
             
             # Year field
             if self.fields['anno_scavo'].get().strip():

@@ -66,14 +66,24 @@ class USForm(FlaskForm):
     # TAB 1: Informazioni Base
     # Identificazione
     sito = SelectField(_l('Site'), validators=[DataRequired()], coerce=str)
-    area = StringField(_l('Area'))
-    us = IntegerField(_l('US Number'), validators=[DataRequired()])
+    area = StringField(_l('Area'))  # Already a StringField
+    us = StringField(_l('US Number'), validators=[DataRequired()])  # Changed from IntegerField to StringField
     unita_tipo = SelectField(_l('Unit Type'), choices=[
         ('', _l('-- Select --')),
-        ('US', 'US'),
-        ('USM', 'USM'),
-        ('USV', 'USV'),
-        ('USR', 'USR')
+        ('US', _l('US')),
+        ('USM', _l('USM')),
+        ('VSF', _l('VSF')),
+        ('SF', _l('SF')),
+        ('CON', _l('CON')),
+        ('USD', _l('USD')),
+        ('USVA', _l('USVA')),
+        ('USVB', _l('USVB')),
+        ('USVC', _l('USVC')),
+        ('DOC', _l('DOC')),
+        ('TU', _l('TU')),
+        ('property', _l('property')),
+        ('Combiner', _l('Combiner')),
+        ('Extractor', _l('Extractor'))
     ])
 
     # Dati di Scavo

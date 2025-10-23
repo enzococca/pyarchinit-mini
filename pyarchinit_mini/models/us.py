@@ -16,8 +16,8 @@ class US(BaseModel):
     # Primary key and identification
     id_us = Column(Integer, primary_key=True, autoincrement=True)
     sito = Column(String(350), ForeignKey('site_table.sito', ondelete='CASCADE'), nullable=False)
-    area = Column(String(20))
-    us = Column(Integer, nullable=False)
+    area = Column(Text)  # Changed to Text for unlimited characters
+    us = Column(String(100), nullable=False)  # Changed from Integer to String
     
     # Basic stratigraphic information (i18n fields)
     # Legacy columns (kept for backward compatibility, map to IT)

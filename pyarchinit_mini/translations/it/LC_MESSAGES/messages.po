@@ -50,9 +50,8 @@ msgstr "Nuovo Sito"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:80
 #: web_interface/templates/sites/list.html:113
-#, fuzzy
 msgid "Edit Site"
-msgstr "Nuovo Sito"
+msgstr "Modifica Sito"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:93
 #: pyarchinit_mini/desktop_gui/dialogs.py:536
@@ -65,9 +64,8 @@ msgstr "Salva"
 #: pyarchinit_mini/desktop_gui/dialogs.py:134
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:97
 #: web_interface/templates/us/form.html:29
-#, fuzzy
 msgid "Basic Information"
-msgstr "Informazioni Database"
+msgstr "Informazioni di Base"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:156
 msgid "Site Name *:"
@@ -80,9 +78,8 @@ msgstr "Nazione:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:166
 #: pyarchinit_mini/pdf_export/pdf_generator.py:162
-#, fuzzy
 msgid "Region:"
-msgstr "Regioni"
+msgstr "Regione:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:171
 #: pyarchinit_mini/pdf_export/pdf_generator.py:160
@@ -91,9 +88,8 @@ msgstr "Municipality:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:176
 #: pyarchinit_mini/pdf_export/pdf_generator.py:161
-#, fuzzy
 msgid "Province:"
-msgstr "Province"
+msgstr "Provincia:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:181
 msgid "Site Definition:"
@@ -113,9 +109,8 @@ msgid "Description"
 msgstr "Descrizione"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:197
-#, fuzzy
 msgid "Site description:"
-msgstr "Descrizione"
+msgstr "Descrizione sito:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:204
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:438
@@ -124,18 +119,16 @@ msgid "Media"
 msgstr "Media"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:210
-#, fuzzy
 msgid "Add Media"
-msgstr "Carica Media"
+msgstr "Aggiungi Media"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:211
 msgid "Remove Selected"
 msgstr "Rimuovi Selezionato"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:212
-#, fuzzy
 msgid "Preview"
-msgstr "Province"
+msgstr "Anteprima"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:215
 msgid "Drag media files here"
@@ -211,12 +204,10 @@ msgid "Success"
 msgstr "Successo"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:508
-#, fuzzy
 msgid "Site updated successfully"
 msgstr "aggiornato con successo"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:512
-#, fuzzy
 msgid "Site created successfully"
 msgstr "creato con successo"
 
@@ -239,16 +230,14 @@ msgstr "Nuova US"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:527
 #: web_interface/templates/us/list.html:90
-#, fuzzy
 msgid "Edit US"
-msgstr "Nuova US"
+msgstr "Modifica US"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:561
 #: pyarchinit_mini/desktop_gui/dialogs.py:717
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:121
-#, fuzzy
 msgid "Site *:"
-msgstr "Sito"
+msgstr "Sito *:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:567
 #: pyarchinit_mini/desktop_gui/dialogs.py:743
@@ -263,9 +252,8 @@ msgstr "Numero US *:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:579
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:197
-#, fuzzy
 msgid "Stratigraphic Description:"
-msgstr "Unità stratigrafiche"
+msgstr "Descrizione Stratigrafica:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:585
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:202
@@ -283,9 +271,8 @@ msgid "Cataloguer:"
 msgstr "Schedatore:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:603
-#, fuzzy
 msgid "Formation:"
-msgstr "Informazioni Database"
+msgstr "Formazione:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:604
 #: pyarchinit_mini/pdf_export/pdf_generator.py:560
@@ -294,9 +281,8 @@ msgstr "Naturale"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:604
 #: pyarchinit_mini/pdf_export/pdf_generator.py:564
-#, fuzzy
 msgid "Artificial"
-msgstr "Reperto"
+msgstr "Artificiale"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:639
 #: pyarchinit_mini/desktop_gui/dialogs.py:794
@@ -304,7 +290,6 @@ msgid "Site is required"
 msgstr "Il sito è obbligatorio"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:643
-#, fuzzy
 msgid "US number is required"
 msgstr "Numero Record"
 
@@ -317,12 +302,10 @@ msgid "Excavation year must be a number"
 msgstr "L'anno scavo deve essere un numero"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:678
-#, fuzzy
 msgid "US updated successfully"
 msgstr "aggiornato con successo"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:682
-#, fuzzy
 msgid "US created successfully"
 msgstr "creato con successo"
 
@@ -337,19 +320,16 @@ msgstr "Nuovo Reperto"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:697
 #: web_interface/templates/inventario/list.html:98
-#, fuzzy
 msgid "Edit Artifact"
-msgstr "Nuovo Reperto"
+msgstr "Modifica Reperto"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:723
-#, fuzzy
 msgid "Inventory Number *:"
-msgstr "Inventario"
+msgstr "Numero Inventario *:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:729
-#, fuzzy
 msgid "Artifact Type:"
-msgstr "Reperto"
+msgstr "Tipo Reperto:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:731
 #: pyarchinit_mini/desktop_gui/main_window.py:500
@@ -359,21 +339,18 @@ msgstr "Ceramica"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:731
 #: pyarchinit_mini/desktop_gui/main_window.py:500
-#, fuzzy
 msgid "Metal"
-msgstr "Tabella"
+msgstr "Metallo"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:731
 #: pyarchinit_mini/desktop_gui/main_window.py:500
-#, fuzzy
 msgid "Stone"
-msgstr "Sito"
+msgstr "Pietra"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:731
 #: pyarchinit_mini/desktop_gui/main_window.py:500
-#, fuzzy
 msgid "Bone"
-msgstr "online"
+msgstr "Osso"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:731
 #: pyarchinit_mini/desktop_gui/main_window.py:500
@@ -382,9 +359,8 @@ msgstr "Vetro"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:737
 #: pyarchinit_mini/pdf_export/pdf_generator.py:164
-#, fuzzy
 msgid "Definition:"
-msgstr "Amministrazione"
+msgstr "Definizione:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:755
 msgid "Weight (g):"
@@ -392,9 +368,8 @@ msgstr "Weight (g):"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:761
 #: pyarchinit_mini/desktop_gui/dialogs.py:1845
-#, fuzzy
 msgid "Description:"
-msgstr "Descrizione"
+msgstr "Descrizione:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:798
 msgid "Inventory number is required"
@@ -413,17 +388,14 @@ msgid "Weight must be a number"
 msgstr "Il peso deve essere un numero"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:843
-#, fuzzy
 msgid "Artifact updated successfully"
 msgstr "aggiornato con successo"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:847
-#, fuzzy
 msgid "Artifact created successfully"
 msgstr "creato con successo"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:863
-#, fuzzy
 msgid "Harris Matrix Generator"
 msgstr "Harris Matrix"
 
@@ -435,12 +407,10 @@ msgstr "Chiudi"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:885
 #: pyarchinit_mini/desktop_gui/dialogs.py:1330
-#, fuzzy
 msgid "Select Site:"
 msgstr "ha eliminato il sito"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:893
-#, fuzzy
 msgid "Generate Matrix"
 msgstr "Errore generazione Harris Matrix"
 
@@ -451,18 +421,16 @@ msgstr "Editor Avanzato"
 #: pyarchinit_mini/desktop_gui/dialogs.py:897
 #: pyarchinit_mini/desktop_gui/dialogs.py:1325
 #: web_interface/templates/dashboard.html:11
-#, fuzzy
 msgid "Export"
-msgstr "Esporta/Importa"
+msgstr "Esporta"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:912
 msgid "Matrix Visualization:"
 msgstr "Visualizzazione Matrix:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:915
-#, fuzzy
 msgid "Layout:"
-msgstr "Esci"
+msgstr "Layout:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:960
 msgid ""
@@ -482,13 +450,11 @@ msgstr ""
 #: pyarchinit_mini/desktop_gui/main_window.py:832
 #: pyarchinit_mini/desktop_gui/main_window.py:848
 #: pyarchinit_mini/desktop_gui/main_window.py:863
-#, fuzzy
 msgid "Selection"
-msgstr "Sezioni Principali"
+msgstr "Selezione"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:979
 #: pyarchinit_mini/desktop_gui/dialogs.py:1401
-#, fuzzy
 msgid "Select a site"
 msgstr "ha eliminato il sito"
 
@@ -502,7 +468,6 @@ msgid "Completed"
 msgstr "Completato"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1003
-#, fuzzy
 msgid "Harris Matrix generated successfully!"
 msgstr "creato con successo"
 
@@ -533,16 +498,14 @@ msgstr "Sì"
 #: pyarchinit_mini/desktop_gui/dialogs.py:1017
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:157
 #: pyarchinit_mini/pdf_export/pdf_generator.py:408
-#, fuzzy
 msgid "No"
-msgstr "Ora"
+msgstr "No"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1022
 msgid "⚠️ WARNING: The matrix contains cycles or logical errors\n"
 msgstr "⚠️ WARNING: The matrix contains cycles or logical errors\n"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1031
-#, fuzzy
 msgid ""
 "\n"
 "STRATIGRAPHIC LEVELS:\n"
@@ -566,7 +529,6 @@ msgid "Harris Matrix - {} (Layout: {})"
 msgstr "Harris Matrix - {} (Layout: {})"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1097
-#, fuzzy
 msgid ""
 "Error generating image\n"
 "Try the Advanced Editor"
@@ -587,7 +549,6 @@ msgid "Warning"
 msgstr "Avviso"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1238
-#, fuzzy
 msgid "Generate a matrix first"
 msgstr "Errore generazione Harris Matrix"
 
@@ -596,7 +557,6 @@ msgid "Select folder for export"
 msgstr "Seleziona cartella per l'export"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1265
-#, fuzzy
 msgid "Export Completed"
 msgstr "Esporta/Importa"
 
@@ -618,7 +578,6 @@ msgid "Services not available for advanced editor"
 msgstr "Servizi non disponibili per l'editor avanzato"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1292
-#, fuzzy
 msgid "Database manager not available"
 msgstr "Gestione Database"
 
@@ -635,7 +594,6 @@ msgstr "Errore nell'aggiornamento del sito"
 #: web_interface/templates/inventario/list.html:11
 #: web_interface/templates/sites/list.html:122
 #: web_interface/templates/us/list.html:11
-#, fuzzy
 msgid "Export PDF"
 msgstr "Errore export PDF"
 
@@ -644,12 +602,10 @@ msgid "Export Type:"
 msgstr "Tipo Export:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1345
-#, fuzzy
 msgid "US Sheets"
 msgstr "Lista US"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1346
-#, fuzzy
 msgid "Inventory Sheets"
 msgstr "Inventario"
 
@@ -687,7 +643,6 @@ msgstr "Immagini"
 #: pyarchinit_mini/desktop_gui/dialogs.py:1690
 #: pyarchinit_mini/desktop_gui/dialogs.py:1704
 #: pyarchinit_mini/desktop_gui/dialogs.py:1871
-#, fuzzy
 msgid "All files"
 msgstr "Tutte le Tabelle"
 
@@ -704,13 +659,11 @@ msgid "Specify the output file"
 msgstr "Specifica il file di output"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1417
-#, fuzzy
 msgid "Site not found"
 msgstr "tabelle trovate"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1425
 #: pyarchinit_mini/desktop_gui/dialogs.py:1454
-#, fuzzy
 msgid "Data"
 msgstr "Database"
 
@@ -739,7 +692,6 @@ msgid ""
 msgstr ""
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1529
-#, fuzzy
 msgid "Error generating PDF"
 msgstr "Errore export PDF"
 
@@ -756,17 +708,14 @@ msgid "Error generating PDF: {}"
 msgstr "Errore export PDF"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1544
-#, fuzzy
 msgid "Database Configuration"
 msgstr "Informazioni Database"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1548
-#, fuzzy
 msgid "Connect"
-msgstr "Connessione"
+msgstr "Connetti"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1554
-#, fuzzy
 msgid "Database Type"
 msgstr "Database"
 
@@ -783,7 +732,6 @@ msgid "SQLite Configuration"
 msgstr "Configurazione SQLite"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1569
-#, fuzzy
 msgid "Database File:"
 msgstr "Database"
 
@@ -793,20 +741,17 @@ msgstr "Sfoglia"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1578
 #: pyarchinit_mini/desktop_gui/dialogs.py:1672
-#, fuzzy
 msgid "Sample Database"
 msgstr "Database Vuoto"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1580
 #: pyarchinit_mini/desktop_gui/dialogs.py:1698
-#, fuzzy
 msgid "New Database"
 msgstr "Database"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1582
 #: pyarchinit_mini/desktop_gui/dialogs.py:1708
 #: pyarchinit_mini/desktop_gui/main_window.py:154
-#, fuzzy
 msgid "Import Database"
 msgstr "Database Vuoto"
 
@@ -823,7 +768,6 @@ msgid "Port:"
 msgstr "Porta:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1602
-#, fuzzy
 msgid "Database:"
 msgstr "Database"
 
@@ -836,12 +780,10 @@ msgid "Password:"
 msgstr "Password:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1617
-#, fuzzy
 msgid "Test Connection"
 msgstr "Connessione Attiva"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1623
-#, fuzzy
 msgid "Information"
 msgstr "Informazioni Database"
 
@@ -880,7 +822,6 @@ msgid ""
 msgstr ""
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1680
-#, fuzzy
 msgid "Missing Database"
 msgstr "Database Vuoto"
 
@@ -900,7 +841,6 @@ msgid "New database created: {}"
 msgstr "Nuovo database creato: {}"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1703
-#, fuzzy
 msgid "Import SQLite database"
 msgstr "Database Vuoto"
 
@@ -964,12 +904,10 @@ msgid "Database configuration error: {}"
 msgstr "Informazioni Database"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1808
-#, fuzzy
 msgid "Media Management"
 msgstr "Gestione Database"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1822
-#, fuzzy
 msgid "Upload New File"
 msgstr "Errore caricamento file"
 
@@ -986,14 +924,12 @@ msgid "Entity ID:"
 msgstr "ID Entità:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1850
-#, fuzzy
 msgid "Upload File"
 msgstr "Errore caricamento file"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1857
 #: pyarchinit_mini/desktop_gui/main_window.py:307
 #: web_interface/templates/dashboard.html:53
-#, fuzzy
 msgid "Media Files"
 msgstr "ha modificato US"
 
@@ -1011,7 +947,6 @@ msgid "Documents"
 msgstr "Documenti"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1870
-#, fuzzy
 msgid "Videos"
 msgstr "Visualizza US"
 
@@ -1109,7 +1044,6 @@ msgid "Ready"
 msgstr "Pronto"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:123
-#, fuzzy
 msgid "Database Error"
 msgstr "Database"
 
@@ -1119,12 +1053,10 @@ msgid "Failed to initialize database: {}"
 msgstr "Database vuoto o incompatibile"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:144
-#, fuzzy
 msgid "New SQLite Database"
 msgstr "Database Vuoto"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:150
-#, fuzzy
 msgid "Configure Database"
 msgstr "Database Vuoto"
 
@@ -1133,12 +1065,10 @@ msgid "Install PostgreSQL"
 msgstr "Installa PostgreSQL"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:153
-#, fuzzy
 msgid "Load Sample Database"
 msgstr "Database Vuoto"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:155
-#, fuzzy
 msgid "Export Database"
 msgstr "Database Vuoto"
 
@@ -1148,9 +1078,8 @@ msgstr "Esci"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:161
 #: web_interface/templates/dashboard.html:96
-#, fuzzy
 msgid "View"
-msgstr "Visualizza US"
+msgstr "Visualizza"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:162
 #: pyarchinit_mini/desktop_gui/main_window.py:267
@@ -1198,7 +1127,6 @@ msgid "Export GraphML (yEd)"
 msgstr "Esporta GraphML (yEd)"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:173
-#, fuzzy
 msgid "Thesaurus Management"
 msgstr "Gestione Database"
 
@@ -1207,7 +1135,6 @@ msgid "Media Manager"
 msgstr "Media Manager"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:177
-#, fuzzy
 msgid "Export/Import Data"
 msgstr "Esporta/Importa"
 
@@ -1237,7 +1164,6 @@ msgid "User Guide"
 msgstr "Guida Utente"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:244
-#, fuzzy
 msgid "Current Site:"
 msgstr "ha creato il sito"
 
@@ -1263,7 +1189,6 @@ msgstr "Unità Stratigrafiche"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:306
 #: web_interface/templates/dashboard.html:43
-#, fuzzy
 msgid "Catalogued Artifacts"
 msgstr "ha creato reperto"
 
@@ -1289,9 +1214,8 @@ msgid "Name"
 msgstr "Nome"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:328
-#, fuzzy
 msgid "Date"
-msgstr "Database"
+msgstr "Data"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:369
 #: pyarchinit_mini/desktop_gui/main_window.py:416
@@ -1299,15 +1223,13 @@ msgstr "Database"
 #: web_interface/templates/inventario/list.html:64
 #: web_interface/templates/sites/list.html:50
 #: web_interface/templates/us/list.html:60
-#, fuzzy
 msgid "Edit"
-msgstr "Media"
+msgstr "Modifica"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:370
 #: pyarchinit_mini/desktop_gui/main_window.py:417
 #: pyarchinit_mini/desktop_gui/main_window.py:477
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:91
-#, fuzzy
 msgid "Delete"
 msgstr "ha eliminato US"
 
@@ -1320,7 +1242,6 @@ msgstr "Cerca:"
 #: pyarchinit_mini/desktop_gui/main_window.py:387
 #: pyarchinit_mini/pdf_export/pdf_generator.py:197
 #: web_interface/templates/dashboard.html:75
-#, fuzzy
 msgid "Site Name"
 msgstr "Sito"
 
@@ -1337,9 +1258,8 @@ msgstr "Comune"
 #: pyarchinit_mini/pdf_export/pdf_generator.py:199
 #: web_interface/templates/dashboard.html:77
 #: web_interface/templates/sites/form.html:33
-#, fuzzy
 msgid "Province"
-msgstr "Province"
+msgstr "Provincia"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:390
 #: pyarchinit_mini/pdf_export/pdf_generator.py:201
@@ -1360,9 +1280,8 @@ msgstr "Fix Rapporti"
 #: pyarchinit_mini/desktop_gui/main_window.py:434
 #: pyarchinit_mini/desktop_gui/main_window.py:492
 #: pyarchinit_mini/pdf_export/pdf_generator.py:159
-#, fuzzy
 msgid "Site:"
-msgstr "Sito"
+msgstr "Sito:"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:445
 #: pyarchinit_mini/desktop_gui/main_window.py:510
@@ -1412,9 +1331,8 @@ msgstr "N. Inv."
 #: web_interface/templates/inventario/form.html:126
 #: web_interface/templates/inventario/list.html:47
 #: web_interface/templates/inventario/list.html:84
-#, fuzzy
 msgid "Definition"
-msgstr "Descrizione"
+msgstr "Definizione"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:515
 #: pyarchinit_mini/pdf_export/pdf_generator.py:302
@@ -1442,7 +1360,6 @@ msgid "Are you sure you want to delete the selected site?"
 msgstr "Sei sicuro di voler eliminare il sito selezionato?"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:808
-#, fuzzy
 msgid "Site deleted successfully"
 msgstr "aggiornato con successo"
 
@@ -1466,12 +1383,10 @@ msgid "Are you sure you want to delete the selected US?"
 msgstr "Sei sicuro di voler eliminare la US selezionata?"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:840
-#, fuzzy
 msgid "US deleted successfully"
 msgstr "aggiornato con successo"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:848
-#, fuzzy
 msgid "Select an artifact to edit"
 msgstr "ha eliminato reperto"
 
@@ -1484,17 +1399,14 @@ msgid "Are you sure you want to delete the selected artifact?"
 msgstr "Sei sicuro di voler eliminare il reperto selezionato?"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:871
-#, fuzzy
 msgid "Artifact deleted successfully"
 msgstr "creato con successo"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:879
-#, fuzzy
 msgid "No sites available to generate Harris Matrix"
 msgstr "Errore generazione Harris Matrix"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:1445
-#, fuzzy
 msgid "Language Selection"
 msgstr "Sezioni Principali"
 
@@ -1520,14 +1432,12 @@ msgstr "Modifica US {}"
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:116
 #: web_interface/templates/inventario/form.html:29
 #: web_interface/templates/us/form.html:65
-#, fuzzy
 msgid "Identification"
-msgstr "Notifica"
+msgstr "Identificazione"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:136
-#, fuzzy
 msgid "Unit Type:"
-msgstr "US per Tipologia"
+msgstr "Tipo Unità:"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:146
 #: web_interface/templates/us/form.html:118
@@ -1547,18 +1457,16 @@ msgid "Excavation Method:"
 msgstr "Metodo Scavo:"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:168
-#, fuzzy
 msgid "Manual"
-msgstr "Menu"
+msgstr "Manuale"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:168
 msgid "Mechanical"
 msgstr "Meccanico"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:168
-#, fuzzy
 msgid "Mixed"
-msgstr "Media"
+msgstr "Misto"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:172
 msgid "Record Date:"
@@ -1574,14 +1482,12 @@ msgid "Descriptions"
 msgstr "Descrizioni"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:207
-#, fuzzy
 msgid "Interpretation:"
-msgstr "Amministrazione"
+msgstr "Interpretazione:"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:212
-#, fuzzy
 msgid "Observations:"
-msgstr "Azioni"
+msgstr "Osservazioni:"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:219
 #: web_interface/templates/inventario/form.html:44
@@ -1597,41 +1503,35 @@ msgstr "Cronologia"
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:389
 #: web_interface/templates/us/form.html:49
 #: web_interface/templates/us/form.html:368
-#, fuzzy
 msgid "Stratigraphic Relationships"
-msgstr "Unità stratigrafiche"
+msgstr "Relazioni Stratigrafiche"
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:516
 #: web_interface/templates/dashboard.html:169
 #: web_interface/templates/inventario/form.html:64
 #: web_interface/templates/us/form.html:54
 #: web_interface/templates/us/form.html:418
-#, fuzzy
 msgid "Documentation"
-msgstr "Amministrazione"
+msgstr "Documentazione"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:153
-#, fuzzy
 msgid "Archaeological Report"
 msgstr "Siti archeologici"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:153
 #: web_interface/templates/harris_matrix/graphml_export.html:26
-#, fuzzy
 msgid "Archaeological Site"
 msgstr "Siti archeologici"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:181
-#, fuzzy
 msgid "Date:"
-msgstr "Database"
+msgstr "Data:"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:183
 msgid "Generated by PyArchInit-Mini"
 msgstr "Generato da PyArchInit-Mini"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:191
-#, fuzzy
 msgid "1. SITE INFORMATION"
 msgstr "Informazioni Database"
 
@@ -1643,12 +1543,10 @@ msgstr "1.1 Localizzazione"
 #: web_interface/templates/sites/form.html:23
 #: web_interface/templates/sites/list.html:32
 #: web_interface/templates/sites/list.html:100
-#, fuzzy
 msgid "Region"
-msgstr "Regioni"
+msgstr "Regione"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:211
-#, fuzzy
 msgid "1.2 Description"
 msgstr "Descrizione"
 
@@ -1657,28 +1555,24 @@ msgid "1.3 Site Definition"
 msgstr "1.3 Definizione Sito"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:226
-#, fuzzy
 msgid "2. STRATIGRAPHIC UNITS"
 msgstr "Unità stratigrafiche"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:229
-#, fuzzy
 msgid "2.1 US List"
 msgstr "Lista US"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:232
 #: web_interface/templates/us/form.html:196
 #: web_interface/templates/us/list.html:80
-#, fuzzy
 msgid "Stratigraphic Description"
-msgstr "Unità stratigrafiche"
+msgstr "Descrizione Stratigrafica"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:232
 #: pyarchinit_mini/pdf_export/pdf_generator.py:277
 #: web_interface/templates/us/form.html:211
-#, fuzzy
 msgid "Interpretation"
-msgstr "Amministrazione"
+msgstr "Interpretazione"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:232
 #: web_interface/templates/us/form.html:123
@@ -1687,12 +1581,10 @@ msgid "Excavation Year"
 msgstr "Anno Scavo"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:265
-#, fuzzy
 msgid "2.2 Detailed Descriptions"
 msgstr "Descrizione"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:286
-#, fuzzy
 msgid "3. MATERIAL INVENTORY"
 msgstr "Inventario materiali"
 
@@ -1701,7 +1593,6 @@ msgid "3.1 Statistics"
 msgstr "3.1 Statistiche"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:294
-#, fuzzy
 msgid "Total catalogued artifacts"
 msgstr "ha creato reperto"
 
@@ -1714,7 +1605,6 @@ msgid "Metal materials"
 msgstr "Materiali metallici"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:300
-#, fuzzy
 msgid "3.2 Artifacts List"
 msgstr "Lista Reperti"
 
@@ -1723,9 +1613,8 @@ msgid "Area/US"
 msgstr "Area/US"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:302
-#, fuzzy
 msgid "State"
-msgstr "Sito"
+msgstr "Stato"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:335
 msgid "4. PHOTOGRAPHIC DOCUMENTATION"
@@ -1733,7 +1622,6 @@ msgstr "4. DOCUMENTAZIONE FOTOGRAFICA"
 
 # Analytics Dashboard translations
 #: pyarchinit_mini/pdf_export/pdf_generator.py:342
-#, fuzzy
 msgid "Total media files"
 msgstr "Siti Totali"
 
@@ -1754,7 +1642,6 @@ msgid "Matrix Statistics"
 msgstr "Statistiche Matrix"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:405
-#, fuzzy
 msgid "Total US:"
 msgstr "US Totali"
 
@@ -1767,17 +1654,14 @@ msgid "Levels:"
 msgstr "Livelli:"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:408
-#, fuzzy
 msgid "Valid Matrix:"
 msgstr "Harris Matrix"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:409
-#, fuzzy
 msgid "Isolated US:"
 msgstr "ha eliminato US"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:424
-#, fuzzy
 msgid "Harris Matrix Diagram"
 msgstr "Harris Matrix"
 
@@ -1786,7 +1670,6 @@ msgid "LOCALITY"
 msgstr "LOCALITÀ"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:554
-#, fuzzy
 msgid "AREA/BUILDING/STRUCTURE"
 msgstr "Struttura Valida"
 
@@ -1812,7 +1695,6 @@ msgid "DEFINITION AND POSITION"
 msgstr "DEFINIZIONE E POSIZIONE"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:570
-#, fuzzy
 msgid "Stratigraphic definition"
 msgstr "Unità stratigrafiche"
 
@@ -1821,12 +1703,10 @@ msgid "Interpretative definition"
 msgstr "Definizione interpretativa"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:573
-#, fuzzy
 msgid "DESCRIPTION"
 msgstr "Descrizione"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:576
-#, fuzzy
 msgid "INTERPRETATION"
 msgstr "Amministrazione"
 
@@ -1880,7 +1760,6 @@ msgid "EARLIER THAN"
 msgstr "ANTERIORE A"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:598
-#, fuzzy
 msgid "STATE OF CONSERVATION"
 msgstr "Connessione Attiva"
 
@@ -1893,7 +1772,6 @@ msgid "COLOR"
 msgstr "COLORE"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:601
-#, fuzzy
 msgid "INCLUSIONS"
 msgstr "Sezioni Principali"
 
@@ -1903,9 +1781,8 @@ msgstr "CAMPIONI"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:602
 #: web_interface/templates/us/form.html:408
-#, fuzzy
 msgid "Flotation"
-msgstr "Notifica"
+msgstr "Flottazione"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:602
 #: web_interface/templates/us/form.html:412
@@ -1935,7 +1812,6 @@ msgstr "SAGGIO"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:614
 #: pyarchinit_mini/pdf_export/pdf_generator.py:621
-#, fuzzy
 msgid "ELEVATIONS"
 msgstr "Azioni"
 
@@ -1952,7 +1828,6 @@ msgid "PLANS"
 msgstr "PIANTE"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:622
-#, fuzzy
 msgid "SECTIONS"
 msgstr "Azioni"
 
@@ -1983,7 +1858,6 @@ msgid "INORGANIC"
 msgstr "INORGANICI"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:637
-#, fuzzy
 msgid "DATING"
 msgstr "Azioni"
 
@@ -2024,7 +1898,6 @@ msgid "SAMPLING"
 msgstr "CAMPIONATURE"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:654
-#, fuzzy
 msgid "FLOTATION"
 msgstr "Notifica"
 
@@ -2033,7 +1906,6 @@ msgid "SIEVING"
 msgstr "SETACCIATURA"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:658
-#, fuzzy
 msgid "STRATIGRAPHIC RELIABILITY"
 msgstr "Unità stratigrafiche"
 
@@ -2046,7 +1918,6 @@ msgid "DATE OF FIELD SURVEY"
 msgstr "DATA RILEVAMENTO SUL CAMPO"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:663
-#, fuzzy
 msgid "DATE OF ELABORATION"
 msgstr "Informazioni Database"
 
@@ -2081,7 +1952,6 @@ msgid "ELABORATION SUPERVISOR"
 msgstr "RESPONSABILE RIELABORAZIONE"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:691
-#, fuzzy
 msgid "OBSERVATIONS"
 msgstr "Azioni"
 
@@ -2367,12 +2237,10 @@ msgid "Now"
 msgstr "Ora"
 
 #: web_interface/templates/dashboard.html:7
-#, fuzzy
 msgid "Archaeological Dashboard"
 msgstr "Siti archeologici"
 
 #: web_interface/templates/dashboard.html:66
-#, fuzzy
 msgid "Recent Sites"
 msgstr "ha eliminato il sito"
 
@@ -2385,12 +2253,10 @@ msgid "Actions"
 msgstr "Azioni"
 
 #: web_interface/templates/dashboard.html:115
-#, fuzzy
 msgid "View All Sites"
 msgstr "Visualizza Siti"
 
 #: web_interface/templates/dashboard.html:121
-#, fuzzy
 msgid "No sites found"
 msgstr "tabelle trovate"
 
@@ -2399,17 +2265,14 @@ msgid "Start by creating your first archaeological site"
 msgstr "Inizia creando il tuo primo sito archeologico"
 
 #: web_interface/templates/dashboard.html:124
-#, fuzzy
 msgid "Create First Site"
 msgstr "ha creato il sito"
 
 #: web_interface/templates/dashboard.html:137
-#, fuzzy
 msgid "Quick Actions"
 msgstr "Azioni"
 
 #: web_interface/templates/dashboard.html:162
-#, fuzzy
 msgid "System"
 msgstr "US per Sito"
 
@@ -2422,7 +2285,6 @@ msgid "Interface"
 msgstr "Interfaccia"
 
 #: web_interface/templates/dashboard.html:194
-#, fuzzy
 msgid "Statistics by Type"
 msgstr "Reperti per Tipologia"
 
@@ -2437,7 +2299,6 @@ msgstr "3D Model Viewer"
 
 # Analytics Dashboard translations
 #: web_interface/templates/3d_viewer/viewer.html:83
-#, fuzzy
 msgid "Back to Site"
 msgstr "Siti Totali"
 
@@ -2466,12 +2327,10 @@ msgid "Toggle Wireframe"
 msgstr "Toggle Wireframe"
 
 #: web_interface/templates/3d_viewer/viewer.html:135
-#, fuzzy
 msgid "Model Information"
 msgstr "Informazioni Database"
 
 #: web_interface/templates/3d_viewer/viewer.html:146
-#, fuzzy
 msgid "Stratigraphic Unit"
 msgstr "Unità stratigrafiche"
 
@@ -2480,7 +2339,6 @@ msgid "Format"
 msgstr "Format"
 
 #: web_interface/templates/3d_viewer/viewer.html:160
-#, fuzzy
 msgid "File Size"
 msgstr "ha modificato il sito"
 
@@ -2503,7 +2361,6 @@ msgid "3D Model"
 msgstr "3D Model"
 
 #: web_interface/templates/3d_viewer/viewer.html:225
-#, fuzzy
 msgid "View 3D archaeological model"
 msgstr "Siti archeologici"
 
@@ -2512,18 +2369,15 @@ msgid "Link copied to clipboard"
 msgstr "Link copied to clipboard"
 
 #: web_interface/templates/3d_viewer/viewer.html:256
-#, fuzzy
 msgid "Error loading 3D model"
 msgstr "Errore caricamento dashboard"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:3
 #: web_interface/templates/harris_matrix/graphml_export.html:7
-#, fuzzy
 msgid "Export Harris Matrix to GraphML (yEd)"
 msgstr "Errore export PDF Harris Matrix"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:11
-#, fuzzy
 msgid "GraphML Export"
 msgstr "Errore durante l'export GraphML"
 
@@ -2670,7 +2524,6 @@ msgid "Layout menu → Hierarchical/Organic to reorganize nodes"
 msgstr "Layout menu → Hierarchical/Organic to reorganize nodes"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:144
-#, fuzzy
 msgid "Node style:"
 msgstr "Nuovo Sito"
 
@@ -2703,7 +2556,6 @@ msgid "Export the final diagram in various formats:"
 msgstr "Export the final diagram in various formats:"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:163
-#, fuzzy
 msgid "Back to Sites List"
 msgstr "Lista Siti"
 
@@ -2718,7 +2570,6 @@ msgstr "Select a site to view"
 
 #: web_interface/templates/harris_matrix/stratigraph_viewer.html:3
 #: web_interface/templates/harris_matrix/stratigraph_viewer.html:115
-#, fuzzy
 msgid "Stratigraph Viewer"
 msgstr "Unità stratigrafiche"
 
@@ -2759,7 +2610,6 @@ msgid "Force"
 msgstr "Force"
 
 #: web_interface/templates/harris_matrix/stratigraph_viewer.html:166
-#, fuzzy
 msgid "Export SVG"
 msgstr "Errore export CSV"
 
@@ -2784,7 +2634,6 @@ msgid "Layer"
 msgstr "Layer"
 
 #: web_interface/templates/harris_matrix/stratigraph_viewer.html:204
-#, fuzzy
 msgid "Structure/Wall"
 msgstr "Struttura Valida"
 
@@ -2793,14 +2642,12 @@ msgid "Floor"
 msgstr "Floor"
 
 #: web_interface/templates/harris_matrix/stratigraph_viewer.html:212
-#, fuzzy
 msgid "Destruction"
-msgstr "Descrizione"
+msgstr "Distruzione"
 
 #: web_interface/templates/harris_matrix/stratigraph_viewer.html:216
-#, fuzzy
 msgid "Construction"
-msgstr "Connessione"
+msgstr "Costruzione"
 
 #: web_interface/templates/harris_matrix/stratigraph_viewer.html:220
 msgid "Other"
@@ -2844,9 +2691,8 @@ msgid "switch to Graphviz"
 msgstr "passa a Graphviz"
 
 #: web_interface/templates/harris_matrix/view.html:44
-#, fuzzy
 msgid "Relationships"
-msgstr "Regioni"
+msgstr "Relazioni"
 
 #: web_interface/templates/harris_matrix/view.html:52
 msgid "Maximum Depth"
@@ -2865,7 +2711,6 @@ msgid "No matrix available for this site."
 msgstr "Nessuna matrice disponibile per questo sito."
 
 #: web_interface/templates/harris_matrix/view.html:85
-#, fuzzy
 msgid "Stratigraphic Sequence"
 msgstr "Unità stratigrafiche"
 
@@ -2875,7 +2720,6 @@ msgstr "Livello"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:3
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:251
-#, fuzzy
 msgid "3D Harris Matrix Viewer"
 msgstr "Harris Matrix"
 
@@ -2888,14 +2732,12 @@ msgid "Period + Area"
 msgstr "Period + Area"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:267
-#, fuzzy
 msgid "None"
-msgstr "online"
+msgstr "Nessuno"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:271
-#, fuzzy
 msgid "Layout"
-msgstr "Esci"
+msgstr "Layout"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:274
 msgid "Tree"
@@ -2906,7 +2748,6 @@ msgid "Select model"
 msgstr "Select model"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:289
-#, fuzzy
 msgid "Upload Model"
 msgstr "Carica Media"
 
@@ -2915,14 +2756,12 @@ msgid "Synced"
 msgstr "Synced"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:323
-#, fuzzy
 msgid "Node Details"
 msgstr "Nessuna Tabella"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:326
-#, fuzzy
 msgid "Properties"
-msgstr "Province"
+msgstr "Proprietà"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:331
 msgid "Covered By / Cut By / Filled By"
@@ -2941,7 +2780,6 @@ msgid "Focused"
 msgstr "Focused"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:372
-#, fuzzy
 msgid "Upload 3D Model"
 msgstr "Carica Media"
 
@@ -2962,24 +2800,20 @@ msgid "Leave empty for site-level model"
 msgstr "Leave empty for site-level model"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:400
-#, fuzzy
 msgid "Upload"
-msgstr "Carica Media"
+msgstr "Carica"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:655
-#, fuzzy
 msgid "No data available"
 msgstr "Nessuna Tabella"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:831
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:878
-#, fuzzy
 msgid "Loading"
-msgstr "Accedi"
+msgstr "Caricamento"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:882
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:922
-#, fuzzy
 msgid "Error loading model"
 msgstr "Errore caricamento database"
 
@@ -2988,17 +2822,14 @@ msgid "Please select a file"
 msgstr "Please select a file"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:1058
-#, fuzzy
 msgid "Upload successful"
 msgstr "caricato con successo"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:1065
-#, fuzzy
 msgid "Upload failed"
 msgstr "Carica Media"
 
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:1070
-#, fuzzy
 msgid "Upload error"
 msgstr "Carica Media"
 
@@ -3008,18 +2839,16 @@ msgid "Form errors:"
 msgstr "Errori nel form:"
 
 #: web_interface/templates/inventario/form.html:34
-#, fuzzy
 msgid "Classification"
-msgstr "Notifica"
+msgstr "Classificazione"
 
 #: web_interface/templates/inventario/form.html:39
 msgid "Context"
 msgstr "Context"
 
 #: web_interface/templates/inventario/form.html:49
-#, fuzzy
 msgid "Conservation"
-msgstr "Connessione"
+msgstr "Conservazione"
 
 #: web_interface/templates/inventario/form.html:59
 #: web_interface/templates/us/form.html:259
@@ -3027,14 +2856,12 @@ msgid "Measurements"
 msgstr "Measurements"
 
 #: web_interface/templates/inventario/form.html:81
-#, fuzzy
 msgid "Inventory Number"
-msgstr "Inventario"
+msgstr "Numero Inventario"
 
 #: web_interface/templates/inventario/form.html:90
-#, fuzzy
 msgid "Artifact No."
-msgstr "Reperto"
+msgstr "N. Reperto"
 
 #: web_interface/templates/inventario/form.html:94
 #: web_interface/templates/us/form.html:142
@@ -3052,9 +2879,8 @@ msgstr "Format: YYYY-MM-DD"
 
 #: web_interface/templates/inventario/form.html:115
 #: web_interface/templates/inventario/list.html:80
-#, fuzzy
 msgid "Artifact Type"
-msgstr "Reperto"
+msgstr "Tipo Reperto"
 
 #: web_interface/templates/inventario/form.html:117
 #: web_interface/templates/inventario/form.html:184
@@ -3073,14 +2899,12 @@ msgstr "Container Type"
 
 #: web_interface/templates/inventario/form.html:140
 #: web_interface/templates/us/form.html:249
-#, fuzzy
 msgid "Structure"
-msgstr "Struttura Valida"
+msgstr "Struttura"
 
 #: web_interface/templates/inventario/form.html:154
-#, fuzzy
 msgid "Archaeological Context:"
-msgstr "Siti archeologici"
+msgstr "Contesto Archeologico:"
 
 #: web_interface/templates/inventario/form.html:154
 msgid "Information about the stratigraphic origin of the artifact"
@@ -3091,18 +2915,16 @@ msgid "SU"
 msgstr "SU"
 
 #: web_interface/templates/inventario/form.html:167
-#, fuzzy
 msgid "Find Spot"
-msgstr "Reperti per Sito"
+msgstr "Punto di Rinvenimento"
 
 #: web_interface/templates/inventario/form.html:169
 msgid "Specify the exact location of the find"
 msgstr "Specify the exact location of the find"
 
 #: web_interface/templates/inventario/form.html:172
-#, fuzzy
 msgid "Artifact Elements"
-msgstr "Reperto"
+msgstr "Elementi del Reperto"
 
 #: web_interface/templates/inventario/form.html:174
 msgid "Describe the constituent elements of the artifact"
@@ -3110,9 +2932,8 @@ msgstr "Describe the constituent elements of the artifact"
 
 #: web_interface/templates/inventario/form.html:182
 #: web_interface/templates/us/form.html:235
-#, fuzzy
 msgid "Conservation State"
-msgstr "Reperti per Stato di Conservazione"
+msgstr "Stato di Conservazione"
 
 #: web_interface/templates/inventario/form.html:187
 msgid "Washed"
@@ -3207,9 +3028,8 @@ msgid "e.g. 125.5"
 msgstr "e.g. 125.5"
 
 #: web_interface/templates/inventario/form.html:270
-#, fuzzy
 msgid "Total Fragments"
-msgstr "Reperti Totali"
+msgstr "Frammenti Totali"
 
 #: web_interface/templates/inventario/form.html:271
 msgid "e.g. 5"
@@ -3224,7 +3044,6 @@ msgid "e.g. 1"
 msgstr "e.g. 1"
 
 #: web_interface/templates/inventario/form.html:278
-#, fuzzy
 msgid "Minimum number of individuals"
 msgstr "Numero Reperti"
 
@@ -3237,7 +3056,6 @@ msgid "e.g. 3"
 msgstr "e.g. 3"
 
 #: web_interface/templates/inventario/form.html:283
-#, fuzzy
 msgid "Maximum number of individuals"
 msgstr "Numero Reperti"
 
@@ -3250,12 +3068,10 @@ msgid "Other measurements: length, width, height, thickness, etc."
 msgstr "Other measurements: length, width, height, thickness, etc."
 
 #: web_interface/templates/inventario/form.html:298
-#, fuzzy
 msgid "Artifact Dating"
-msgstr "Reperto"
+msgstr "Datazione Reperto"
 
 #: web_interface/templates/inventario/form.html:300
-#, fuzzy
 msgid "Proposed dating for the artifact"
 msgstr "Errore nell'aggiornamento reperto"
 
@@ -3280,37 +3096,31 @@ msgid "Photo Negative"
 msgstr "Photo Negative"
 
 #: web_interface/templates/inventario/form.html:318
-#, fuzzy
 msgid "Slide"
-msgstr "Sito"
+msgstr "Diapositiva"
 
 #: web_interface/templates/inventario/form.html:328
-#, fuzzy
 msgid "Save Artifact"
-msgstr "Nuovo Reperto"
+msgstr "Salva Reperto"
 
 # Analytics Dashboard translations
 #: web_interface/templates/inventario/list.html:22
 #: web_interface/templates/us/list.html:22
-#, fuzzy
 msgid "All sites"
-msgstr "Siti Totali"
+msgstr "Tutti i siti"
 
 #: web_interface/templates/inventario/list.html:29
-#, fuzzy
 msgid "Artifact type"
 msgstr "Reperto"
 
 #: web_interface/templates/inventario/list.html:32
 #: web_interface/templates/us/list.html:29
-#, fuzzy
 msgid "Filter"
-msgstr "Sito"
+msgstr "Filtra"
 
 #: web_interface/templates/inventario/list.html:44
-#, fuzzy
 msgid "Inventory No."
-msgstr "Inventario"
+msgstr "N. Inventario"
 
 #: web_interface/templates/inventario/list.html:76
 msgid "Inv."
@@ -3322,22 +3132,18 @@ msgstr "Peso"
 
 #: web_interface/templates/inventario/list.html:104
 #: web_interface/templates/us/list.html:96
-#, fuzzy
 msgid "Total"
-msgstr "US Totali"
+msgstr "Totale"
 
 #: web_interface/templates/inventario/list.html:104
-#, fuzzy
 msgid "artifacts"
-msgstr "Reperto"
+msgstr "reperti"
 
 #: web_interface/templates/inventario/list.html:106
-#, fuzzy
 msgid "No artifacts found."
 msgstr "Nuovo Reperto"
 
 #: web_interface/templates/sites/form.html:38
-#, fuzzy
 msgid "Site Definition"
 msgstr "Siti per Regione"
 
@@ -3359,49 +3165,41 @@ msgid "Validate Relationships"
 msgstr "Valida Rapporti"
 
 #: web_interface/templates/sites/list.html:66
-#, fuzzy
 msgid "Validate"
-msgstr "Errore validazione"
+msgstr "Valida"
 
 #: web_interface/templates/sites/list.html:74
-#, fuzzy
 msgid "Site Report"
 msgstr "Siti per Regione"
 
 #: web_interface/templates/sites/list.html:77
-#, fuzzy
 msgid "Harris Matrix PDF"
 msgstr "Harris Matrix"
 
 #: web_interface/templates/sites/list.html:110
-#, fuzzy
 msgid "View Details"
 msgstr "Visualizza US"
 
 # Analytics Dashboard translations
 #: web_interface/templates/sites/list.html:131
-#, fuzzy
 msgid "Total sites"
 msgstr "Siti Totali"
 
 #: web_interface/templates/sites/list.html:135
-#, fuzzy
 msgid "No sites found."
 msgstr "tabelle trovate"
 
 #: web_interface/templates/sites/list.html:135
-#, fuzzy
 msgid "Create the first site"
 msgstr "ha creato il sito"
 
 #: web_interface/templates/us/form.html:81
 msgid "SU Number"
-msgstr "SU Number"
+msgstr "Numero US"
 
 #: web_interface/templates/us/form.html:90
-#, fuzzy
 msgid "Unit Type"
-msgstr "US per Tipologia"
+msgstr "Tipo Unità"
 
 #: web_interface/templates/us/form.html:94
 msgid "Sector"
@@ -3424,9 +3222,8 @@ msgid "Excavation Method"
 msgstr "Excavation Method"
 
 #: web_interface/templates/us/form.html:135
-#, fuzzy
 msgid "Recording Date"
-msgstr "Errore caricamento database"
+msgstr "Data Schedatura"
 
 #: web_interface/templates/us/form.html:146
 msgid "SU Director"
@@ -3465,23 +3262,20 @@ msgid "Interpretative Description"
 msgstr "Interpretative Description"
 
 #: web_interface/templates/us/form.html:206
-#, fuzzy
 msgid "Detailed Description"
-msgstr "Descrizione"
+msgstr "Descrizione Dettagliata"
 
 #: web_interface/templates/us/form.html:216
-#, fuzzy
 msgid "Observations"
-msgstr "Azioni"
+msgstr "Osservazioni"
 
 #: web_interface/templates/us/form.html:226
 msgid "Characteristics"
 msgstr "Characteristics"
 
 #: web_interface/templates/us/form.html:231
-#, fuzzy
 msgid "Formation"
-msgstr "Azioni"
+msgstr "Formazione"
 
 #: web_interface/templates/us/form.html:239
 msgid "Color"
@@ -3492,7 +3286,6 @@ msgid "Consistency"
 msgstr "Consistency"
 
 #: web_interface/templates/us/form.html:264
-#, fuzzy
 msgid "Relative Elevation"
 msgstr "Connessione Attiva"
 
@@ -3594,9 +3387,8 @@ msgid "Final Phase"
 msgstr "Final Phase"
 
 #: web_interface/templates/us/form.html:341
-#, fuzzy
 msgid "Dating"
-msgstr "Azioni"
+msgstr "Datazione"
 
 #: web_interface/templates/us/form.html:342
 msgid "e.g. 1st century AD"
@@ -3637,7 +3429,6 @@ msgid "Example: \"Covers 1002, Covers 1003, Cuts 1005, Leans on 1010\""
 msgstr "Example: \"Covers 1002, Covers 1003, Cuts 1005, Leans on 1010\""
 
 #: web_interface/templates/us/form.html:377
-#, fuzzy
 msgid "Harris Matrix Relationships"
 msgstr "Harris Matrix"
 
@@ -3654,9 +3445,8 @@ msgid ""
 msgstr ""
 
 #: web_interface/templates/us/form.html:395
-#, fuzzy
 msgid "Inclusions"
-msgstr "Sezioni Principali"
+msgstr "Inclusi"
 
 #: web_interface/templates/us/form.html:397
 msgid "Materials or elements included in the SU"
@@ -3683,9 +3473,8 @@ msgid "Containment relationships (e.g. \"Container: SU 1000\")"
 msgstr "Containment relationships (e.g. \"Container: SU 1000\")"
 
 #: web_interface/templates/us/form.html:434
-#, fuzzy
 msgid "Save US"
-msgstr "Visualizza US"
+msgstr "Salva US"
 
 #: web_interface/templates/us/list.html:98
 msgid "No US found."
@@ -4898,3 +4687,46 @@ msgstr "Nessuna US trovata."
 #~ msgid "View Inventory"
 #~ msgstr "Visualizza Inventario"
 
+
+# Unit Type translations for Extended Matrix
+msgid "US"
+msgstr "US"
+
+msgid "USM"
+msgstr "USM"
+
+msgid "VSF"
+msgstr "VSF"
+
+msgid "SF"
+msgstr "SF"
+
+msgid "CON"
+msgstr "CON"
+
+msgid "USD"
+msgstr "USD"
+
+msgid "USVA"
+msgstr "USVA"
+
+msgid "USVB"
+msgstr "USVB"
+
+msgid "USVC"
+msgstr "USVC"
+
+msgid "DOC"
+msgstr "DOC"
+
+msgid "TU"
+msgstr "TU"
+
+msgid "property"
+msgstr "property"
+
+msgid "Combiner"
+msgstr "Combiner"
+
+msgid "Extractor"
+msgstr "Extractor"
