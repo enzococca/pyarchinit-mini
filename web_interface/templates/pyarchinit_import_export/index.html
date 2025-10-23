@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Import/Export PyArchInit') }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-exchange-alt me-2"></i>
+                {{ _('Import/Export from PyArchInit') }}
+            </h1>
+            <p class="text-muted mt-2">
+                {{ _('Import data from PyArchInit (full version) or export data to PyArchInit database') }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" id="importExportTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="import-tab" data-bs-toggle="tab" data-bs-target="#import"
+                    type="button" role="tab" aria-controls="import" aria-selected="true">
+                <i class="fas fa-download me-2"></i>{{ _('Import from PyArchInit') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="export-tab" data-bs-toggle="tab" data-bs-target="#export"
+                    type="button" role="tab" aria-controls="export" aria-selected="false">
+                <i class="fas fa-upload me-2"></i>{{ _('Export to PyArchInit') }}
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="importExportTabContent">
+        <!-- IMPORT TAB -->
+        <div class="tab-pane fade show active" id="import" role="tabpanel" aria-labelledby="import-tab">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Database Connection -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ _('Source PyArchInit Database') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Database Type -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ _('Database Type') }}</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="import_db_type" id="import_sqlite"
+                                           value="sqlite" checked autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="import_sqlite">
+                                        <i class="fas fa-database me-2"></i>SQLite
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="import_db_type" id="import_postgresql"
+                                           value="postgresql" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="import_postgresql">
+                                        <i class="fas fa-server me-2"></i>PostgreSQL
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- SQLite Connection -->
+                            <div id="import_sqlite_config">
+                                <div class="mb-3">
+                                    <label for="import_db_path" class="form-label">{{ _('Database File Path') }}</label>
+                                    <input type="text" class="form-control" id="import_db_path"
+                                           placeholder="/path/to/pyarchinit_db.sqlite">
+                                    <div class="form-text">{{ _('Full path to PyArchInit SQLite database file') }}</div>
+                                </div>
+                            </div>
+
+                            <!-- PostgreSQL Connection -->
+                            <div id="import_postgresql_config" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-8 mb-3">
+                                        <label for="import_pg_host" class="form-label">{{ _('Host') }}</label>
+                                        <input type="text" class="form-control" id="import_pg_host"
+                                               value="localhost" placeholder="localhost">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="import_pg_port" class="form-label">{{ _('Port') }}</label>
+                                        <input type="text" class="form-control" id="import_pg_port"
+                                               value="5432" placeholder="5432">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="import_pg_database" class="form-label">{{ _('Database Name') }}</label>
+                                    <input type="text" class="form-control" id="import_pg_database"
+                                           value="pyarchinit" placeholder="pyarchinit">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="import_pg_user" class="form-label">{{ _('User') }}</label>
+                                        <input type="text" class="form-control" id="import_pg_user" placeholder="postgres">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="import_pg_password" class="form-label">{{ _('Password') }}</label>
+                                        <input type="password" class="form-control" id="import_pg_password">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-outline-secondary" id="test_import_connection">
+                                <i class="fas fa-check-circle me-2"></i>{{ _('Test Connection') }}
+                            </button>
+                            <span id="import_connection_status" class="ms-3"></span>
+                        </div>
+                    </div>
+
+                    <!-- What to Import -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ _('What to Import') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="import_sites" checked>
+                                <label class="form-check-label" for="import_sites">
+                                    <strong>{{ _('Sites') }}</strong> (site_table)
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="import_us" checked>
+                                <label class="form-check-label" for="import_us">
+                                    <strong>{{ _('US - Stratigraphic Units') }}</strong> (us_table)
+                                </label>
+                            </div>
+                            <div class="form-check mb-2 ms-4">
+                                <input class="form-check-input" type="checkbox" id="import_relationships" checked>
+                                <label class="form-check-label" for="import_relationships">
+                                    {{ _('Import US Relationships (from rapporti field)') }}
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="import_inventario" checked>
+                                <label class="form-check-label" for="import_inventario">
+                                    <strong>{{ _('Inventario Materiali') }}</strong> (inventario_materiali_table)
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="import_periodizzazione">
+                                <label class="form-check-label" for="import_periodizzazione">
+                                    <strong>{{ _('Periodizzazione') }}</strong> (periodizzazione_table)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="import_thesaurus">
+                                <label class="form-check-label" for="import_thesaurus">
+                                    <strong>{{ _('Thesaurus') }}</strong> (pyarchinit_thesaurus_sigle)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Site Filter -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ _('Filter by Sites') }} <small class="text-muted">({{ _('optional') }})</small></h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="available_sites_container" style="display: none;">
+                                <p class="text-muted mb-2">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    {{ _('Select specific sites to import, or leave unselected to import all') }}
+                                </p>
+                                <select multiple class="form-select" id="import_site_filter" size="8">
+                                    <!-- Sites will be populated after connection test -->
+                                </select>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="select_all_import_sites">
+                                        {{ _('Select All') }}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect_all_import_sites">
+                                        {{ _('Deselect All') }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="no_sites_message">
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-arrow-up me-2"></i>
+                                    {{ _('Test connection first to load available sites') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Start Import Button -->
+                    <button type="button" class="btn btn-primary btn-lg" id="start_import_btn">
+                        <i class="fas fa-download me-2"></i>{{ _('Start Import') }}
+                    </button>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Status Panel -->
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">{{ _('Status') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="import_status" class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>{{ _('Ready to import') }}
+                            </div>
+
+                            <div id="import_progress" style="display: none;">
+                                <div class="progress mb-3">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar" style="width: 100%"></div>
+                                </div>
+                            </div>
+
+                            <div id="import_results" style="display: none;">
+                                <h6 class="mb-3">{{ _('Import Results:') }}</h6>
+                                <div id="import_results_content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPORT TAB -->
+        <div class="tab-pane fade" id="export" role="tabpanel" aria-labelledby="export-tab">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Target Database -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ _('Target PyArchInit Database') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Database Type -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ _('Database Type') }}</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="export_db_type" id="export_sqlite"
+                                           value="sqlite" checked autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="export_sqlite">
+                                        <i class="fas fa-database me-2"></i>SQLite
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="export_db_type" id="export_postgresql"
+                                           value="postgresql" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="export_postgresql">
+                                        <i class="fas fa-server me-2"></i>PostgreSQL
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- SQLite Connection -->
+                            <div id="export_sqlite_config">
+                                <div class="mb-3">
+                                    <label for="export_db_path" class="form-label">{{ _('Database File Path') }}</label>
+                                    <input type="text" class="form-control" id="export_db_path"
+                                           placeholder="/path/to/pyarchinit_db.sqlite">
+                                    <div class="form-text">{{ _('Full path to target PyArchInit SQLite database') }}</div>
+                                </div>
+                            </div>
+
+                            <!-- PostgreSQL Connection -->
+                            <div id="export_postgresql_config" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-8 mb-3">
+                                        <label for="export_pg_host" class="form-label">{{ _('Host') }}</label>
+                                        <input type="text" class="form-control" id="export_pg_host"
+                                               value="localhost" placeholder="localhost">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="export_pg_port" class="form-label">{{ _('Port') }}</label>
+                                        <input type="text" class="form-control" id="export_pg_port"
+                                               value="5432" placeholder="5432">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="export_pg_database" class="form-label">{{ _('Database Name') }}</label>
+                                    <input type="text" class="form-control" id="export_pg_database"
+                                           value="pyarchinit" placeholder="pyarchinit">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="export_pg_user" class="form-label">{{ _('User') }}</label>
+                                        <input type="text" class="form-control" id="export_pg_user" placeholder="postgres">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="export_pg_password" class="form-label">{{ _('Password') }}</label>
+                                        <input type="password" class="form-control" id="export_pg_password">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- What to Export -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ _('What to Export') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="export_sites" checked>
+                                <label class="form-check-label" for="export_sites">
+                                    <strong>{{ _('Sites') }}</strong>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="export_us" checked>
+                                <label class="form-check-label" for="export_us">
+                                    <strong>{{ _('US - Stratigraphic Units') }}</strong>
+                                </label>
+                            </div>
+                            <div class="form-check mb-3 ms-4">
+                                <input class="form-check-input" type="checkbox" id="export_relationships" checked>
+                                <label class="form-check-label" for="export_relationships">
+                                    {{ _('Export US Relationships (to rapporti field)') }}
+                                </label>
+                            </div>
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <small>{{ _('Note: Only Sites and US can be exported to PyArchInit full version') }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Start Export Button -->
+                    <button type="button" class="btn btn-success btn-lg" id="start_export_btn">
+                        <i class="fas fa-upload me-2"></i>{{ _('Start Export') }}
+                    </button>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Status Panel -->
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">{{ _('Status') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="export_status" class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>{{ _('Ready to export') }}
+                            </div>
+
+                            <div id="export_progress" style="display: none;">
+                                <div class="progress mb-3">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                         role="progressbar" style="width: 100%"></div>
+                                </div>
+                            </div>
+
+                            <div id="export_results" style="display: none;">
+                                <h6 class="mb-3">{{ _('Export Results:') }}</h6>
+                                <div id="export_results_content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle database type visibility (Import)
+document.querySelectorAll('input[name="import_db_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.value === 'sqlite') {
+            document.getElementById('import_sqlite_config').style.display = 'block';
+            document.getElementById('import_postgresql_config').style.display = 'none';
+        } else {
+            document.getElementById('import_sqlite_config').style.display = 'none';
+            document.getElementById('import_postgresql_config').style.display = 'block';
+        }
+    });
+});
+
+// Toggle database type visibility (Export)
+document.querySelectorAll('input[name="export_db_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.value === 'sqlite') {
+            document.getElementById('export_sqlite_config').style.display = 'block';
+            document.getElementById('export_postgresql_config').style.display = 'none';
+        } else {
+            document.getElementById('export_sqlite_config').style.display = 'none';
+            document.getElementById('export_postgresql_config').style.display = 'block';
+        }
+    });
+});
+
+// Test Import Connection
+document.getElementById('test_import_connection').addEventListener('click', function() {
+    const dbType = document.querySelector('input[name="import_db_type"]:checked').value;
+    const statusEl = document.getElementById('import_connection_status');
+
+    let data = { db_type: dbType };
+
+    if (dbType === 'sqlite') {
+        data.db_path = document.getElementById('import_db_path').value;
+    } else {
+        data.pg_host = document.getElementById('import_pg_host').value;
+        data.pg_port = document.getElementById('import_pg_port').value;
+        data.pg_database = document.getElementById('import_pg_database').value;
+        data.pg_user = document.getElementById('import_pg_user').value;
+        data.pg_password = document.getElementById('import_pg_password').value;
+    }
+
+    statusEl.innerHTML = '<span class="text-muted"><i class="fas fa-spinner fa-spin me-2"></i>{{ _("Testing...") }}</span>';
+
+    fetch('/pyarchinit-import-export/api/pyarchinit/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            statusEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-2"></i>${result.message} (${result.sites_count} {{ _("sites") }})</span>`;
+
+            // Populate sites dropdown
+            const sitesSelect = document.getElementById('import_site_filter');
+            sitesSelect.innerHTML = '';
+            result.sites.forEach(site => {
+                const option = document.createElement('option');
+                option.value = site;
+                option.textContent = site;
+                sitesSelect.appendChild(option);
+            });
+
+            document.getElementById('available_sites_container').style.display = 'block';
+            document.getElementById('no_sites_message').style.display = 'none';
+        } else {
+            statusEl.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-2"></i>${result.message}</span>`;
+        }
+    })
+    .catch(error => {
+        statusEl.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-2"></i>{{ _("Error") }}: ${error.message}</span>`;
+    });
+});
+
+// Select/Deselect All Sites
+document.getElementById('select_all_import_sites').addEventListener('click', function() {
+    const select = document.getElementById('import_site_filter');
+    for (let option of select.options) {
+        option.selected = true;
+    }
+});
+
+document.getElementById('deselect_all_import_sites').addEventListener('click', function() {
+    const select = document.getElementById('import_site_filter');
+    for (let option of select.options) {
+        option.selected = false;
+    }
+});
+
+// Start Import
+document.getElementById('start_import_btn').addEventListener('click', function() {
+    if (!confirm('{{ _("Start importing data from PyArchInit? This may take several minutes.") }}')) {
+        return;
+    }
+
+    const dbType = document.querySelector('input[name="import_db_type"]:checked').value;
+    let data = { db_type: dbType };
+
+    if (dbType === 'sqlite') {
+        data.db_path = document.getElementById('import_db_path').value;
+    } else {
+        data.pg_host = document.getElementById('import_pg_host').value;
+        data.pg_port = document.getElementById('import_pg_port').value;
+        data.pg_database = document.getElementById('import_pg_database').value;
+        data.pg_user = document.getElementById('import_pg_user').value;
+        data.pg_password = document.getElementById('import_pg_password').value;
+    }
+
+    data.import_sites = document.getElementById('import_sites').checked;
+    data.import_us = document.getElementById('import_us').checked;
+    data.import_inventario = document.getElementById('import_inventario').checked;
+    data.import_periodizzazione = document.getElementById('import_periodizzazione').checked;
+    data.import_thesaurus = document.getElementById('import_thesaurus').checked;
+    data.import_relationships = document.getElementById('import_relationships').checked;
+
+    const siteFilter = Array.from(document.getElementById('import_site_filter').selectedOptions).map(opt => opt.value);
+    data.site_filter = siteFilter;
+
+    document.getElementById('import_status').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Importing...") }}';
+    document.getElementById('import_status').className = 'alert alert-info';
+    document.getElementById('import_progress').style.display = 'block';
+    document.getElementById('import_results').style.display = 'none';
+
+    fetch('/pyarchinit-import-export/api/pyarchinit/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        document.getElementById('import_progress').style.display = 'none';
+
+        if (result.success) {
+            document.getElementById('import_status').innerHTML = '<i class="fas fa-check-circle me-2"></i>{{ _("Import completed successfully!") }}';
+            document.getElementById('import_status').className = 'alert alert-success';
+
+            // Display results
+            let resultsHTML = '<table class="table table-sm">';
+            resultsHTML += '<thead><tr><th>{{ _("Table") }}</th><th>{{ _("Imported") }}</th><th>{{ _("Updated") }}</th><th>{{ _("Errors") }}</th></tr></thead><tbody>';
+
+            for (const [table, stats] of Object.entries(result.results)) {
+                resultsHTML += `<tr>
+                    <td><strong>${table}</strong></td>
+                    <td class="text-success">${stats.imported || 0}</td>
+                    <td class="text-warning">${stats.updated || 0}</td>
+                    <td class="text-danger">${stats.errors ? stats.errors.length : 0}</td>
+                </tr>`;
+            }
+
+            resultsHTML += '</tbody></table>';
+            document.getElementById('import_results_content').innerHTML = resultsHTML;
+            document.getElementById('import_results').style.display = 'block';
+        } else {
+            document.getElementById('import_status').innerHTML = `<i class="fas fa-times-circle me-2"></i>{{ _("Error") }}: ${result.message}`;
+            document.getElementById('import_status').className = 'alert alert-danger';
+        }
+    })
+    .catch(error => {
+        document.getElementById('import_progress').style.display = 'none';
+        document.getElementById('import_status').innerHTML = `<i class="fas fa-times-circle me-2"></i>{{ _("Error") }}: ${error.message}`;
+        document.getElementById('import_status').className = 'alert alert-danger';
+    });
+});
+
+// Start Export
+document.getElementById('start_export_btn').addEventListener('click', function() {
+    if (!confirm('{{ _("Start exporting data to PyArchInit? Existing data may be updated.") }}')) {
+        return;
+    }
+
+    const dbType = document.querySelector('input[name="export_db_type"]:checked').value;
+    let data = { db_type: dbType };
+
+    if (dbType === 'sqlite') {
+        data.db_path = document.getElementById('export_db_path').value;
+    } else {
+        data.pg_host = document.getElementById('export_pg_host').value;
+        data.pg_port = document.getElementById('export_pg_port').value;
+        data.pg_database = document.getElementById('export_pg_database').value;
+        data.pg_user = document.getElementById('export_pg_user').value;
+        data.pg_password = document.getElementById('export_pg_password').value;
+    }
+
+    data.export_sites = document.getElementById('export_sites').checked;
+    data.export_us = document.getElementById('export_us').checked;
+    data.export_relationships = document.getElementById('export_relationships').checked;
+
+    document.getElementById('export_status').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Exporting...") }}';
+    document.getElementById('export_status').className = 'alert alert-info';
+    document.getElementById('export_progress').style.display = 'block';
+    document.getElementById('export_results').style.display = 'none';
+
+    fetch('/pyarchinit-import-export/api/pyarchinit/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        document.getElementById('export_progress').style.display = 'none';
+
+        if (result.success) {
+            document.getElementById('export_status').innerHTML = '<i class="fas fa-check-circle me-2"></i>{{ _("Export completed successfully!") }}';
+            document.getElementById('export_status').className = 'alert alert-success';
+
+            // Display results
+            let resultsHTML = '<table class="table table-sm">';
+            resultsHTML += '<thead><tr><th>{{ _("Table") }}</th><th>{{ _("Exported") }}</th><th>{{ _("Updated") }}</th><th>{{ _("Errors") }}</th></tr></thead><tbody>';
+
+            for (const [table, stats] of Object.entries(result.results)) {
+                resultsHTML += `<tr>
+                    <td><strong>${table}</strong></td>
+                    <td class="text-success">${stats.exported || 0}</td>
+                    <td class="text-warning">${stats.updated || 0}</td>
+                    <td class="text-danger">${stats.errors ? stats.errors.length : 0}</td>
+                </tr>`;
+            }
+
+            resultsHTML += '</tbody></table>';
+            document.getElementById('export_results_content').innerHTML = resultsHTML;
+            document.getElementById('export_results').style.display = 'block';
+        } else {
+            document.getElementById('export_status').innerHTML = `<i class="fas fa-times-circle me-2"></i>{{ _("Error") }}: ${result.message}`;
+            document.getElementById('export_status').className = 'alert alert-danger';
+        }
+    })
+    .catch(error => {
+        document.getElementById('export_progress').style.display = 'none';
+        document.getElementById('export_status').innerHTML = `<i class="fas fa-times-circle me-2"></i>{{ _("Error") }}: ${error.message}`;
+        document.getElementById('export_status').className = 'alert alert-danger';
+    });
+});
+</script>
+{% endblock %}

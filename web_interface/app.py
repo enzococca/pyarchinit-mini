@@ -38,6 +38,9 @@ from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
 # Import authentication routes
 from auth_routes import auth_bp, init_login_manager, write_permission_required
 
+# Import PyArchInit import/export routes
+from pyarchinit_import_export_routes import pyarchinit_import_export_bp
+
 # Import WebSocket events
 from socketio_events import (
     init_socketio_events,
@@ -437,6 +440,9 @@ def create_app():
 
     # Register authentication blueprint
     app.register_blueprint(auth_bp)
+
+    # Register PyArchInit import/export blueprint
+    app.register_blueprint(pyarchinit_import_export_bp, url_prefix='/pyarchinit-import-export')
 
     # Initialize Flask-SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*")

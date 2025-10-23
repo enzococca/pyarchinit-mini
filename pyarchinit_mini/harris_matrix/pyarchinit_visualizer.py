@@ -340,45 +340,56 @@ class PyArchInitMatrixVisualizer:
             fontsize='10'
         )
 
-    def _get_edge_label_for_unit(self, graph: nx.DiGraph, node: int) -> str:
+    def _get_edge_label_for_unit(self, graph: nx.DiGraph, node: int, rel_type: str = '') -> str:
         """
-        Get edge label symbol based on Extended Matrix Framework unit type
+        Get edge label based on Extended Matrix Framework unit type
+
+        Extended Matrix Framework Rules:
+        - US and USM: Use traditional textual labels (e.g., "Copre", "Coperto da", etc.)
+        - USVA, USVB, USVC, TU, USD, CON, VSF, SF: Use single symbols (> and <)
+        - Extractor, Combiner, DOC, property: Use double symbols (>> and <<)
 
         Args:
             graph: NetworkX graph containing node data
             node: Node ID (US number)
+            rel_type: Relationship type (e.g., "Copre", "Taglia", "Uguale a")
 
         Returns:
-            '>' for standard units (USVA, USVB, USVC, TU, USD, CON, VSF, SF, US, USM)
-            '>>' for special units (Extractor, Combiner, DOC, property)
+            - rel_type for US/USM (traditional labels)
+            - '>' for standard Extended Matrix units
+            - '>>' for special Extended Matrix units
         """
-        # Default to '>' for standard stratigraphic units
-        default_symbol = '>'
-
         # Get node data if available
         if node not in graph.nodes:
-            return default_symbol
+            # Default: if we don't have node data, use traditional label
+            return rel_type if rel_type else '>'
 
         node_data = graph.nodes[node]
         unita_tipo = node_data.get('unita_tipo', 'US')
 
+        # US and USM use traditional textual relationship labels
+        if unita_tipo in ['US', 'USM']:
+            return rel_type if rel_type else 'Copre'
+
         # Units that use double symbols (>> and <<)
         double_symbol_units = ['Extractor', 'Combiner', 'DOC', 'property']
 
-        # Check if this unit type uses double symbols
+        # Special units use double symbols
         if unita_tipo in double_symbol_units:
             return '>>'
-        else:
-            return '>'
+
+        # Other Extended Matrix units use single symbol
+        return '>'
 
     def _add_sequence_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict):
         """Add normal stratigraphic sequence edges with Extended Matrix symbols"""
         for source, target, rel_type in relations:
-            # Determine edge label symbol based on unit type
+            # Determine edge label based on unit type
             # Extended Matrix Framework specification:
-            # - USVA, USVB, USVC, TU, USD, CON, VSF, SF use > and <
-            # - Extractor, Combiner, DOC, property use >> and <<
-            edge_label = self._get_edge_label_for_unit(graph, source)
+            # - US/USM: Use textual labels (Copre, Coperto da, etc.)
+            # - USVA, USVB, USVC, TU, USD, CON, VSF, SF: Use > and <
+            # - Extractor, Combiner, DOC, property: Use >> and <<
+            edge_label = self._get_edge_label_for_unit(graph, source, rel_type)
 
             G.edge(
                 str(source),
@@ -394,8 +405,8 @@ class PyArchInitMatrixVisualizer:
     def _add_negative_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict):
         """Add negative (cuts) relationship edges with Extended Matrix symbols"""
         for source, target, rel_type in relations:
-            # Determine edge label symbol based on unit type
-            edge_label = self._get_edge_label_for_unit(graph, source)
+            # Determine edge label based on unit type
+            edge_label = self._get_edge_label_for_unit(graph, source, rel_type)
 
             G.edge(
                 str(source),
@@ -407,12 +418,12 @@ class PyArchInitMatrixVisualizer:
                 arrowsize=settings['normal_arrowsize'],
                 penwidth=settings['normal_penwidth']
             )
-    
+
     def _add_contemporary_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict):
         """Add contemporary/equivalent relationship edges with Extended Matrix symbols"""
         for source, target, rel_type in relations:
-            # Determine edge label symbol based on unit type
-            edge_label = self._get_edge_label_for_unit(graph, source)
+            # Determine edge label based on unit type
+            edge_label = self._get_edge_label_for_unit(graph, source, rel_type)
 
             G.edge(
                 str(source),
