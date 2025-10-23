@@ -76,6 +76,8 @@ Features
    features/authentication
    features/export_import
    features/media_management
+   EXTENDED_MATRIX_FRAMEWORK
+   DOC_FILE_UPLOAD
 
 Data Management
 ---------------
