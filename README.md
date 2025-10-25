@@ -579,6 +579,99 @@ The project is actively maintained with regular updates. Check the [CHANGELOG](C
 
 ---
 
+## 🔧 System Requirements
+
+### Python
+- **Python 3.8-3.14** (Python 3.10+ recommended)
+
+### Graphviz (Required for Harris Matrix / GraphML Export)
+
+PyArchInit-Mini uses **Graphviz software** for Harris Matrix visualization and GraphML export. The Python module `graphviz` is installed automatically via pip, but requires the **native Graphviz software** to be installed on your system.
+
+**Installation per Sistema Operativo:**
+
+#### Linux (Debian/Ubuntu)
+```bash
+sudo apt-get update
+sudo apt-get install graphviz
+```
+
+#### Linux (Fedora/RHEL)
+```bash
+sudo dnf install graphviz
+```
+
+#### macOS (Homebrew)
+```bash
+brew install graphviz
+```
+
+#### macOS (MacPorts)
+```bash
+sudo port install graphviz
+```
+
+#### Windows
+1. **Option 1 - Chocolatey** (Recommended, aggiunge automaticamente al PATH):
+   ```powershell
+   choco install graphviz
+   ```
+
+2. **Option 2 - Direct Download** (Richiede configurazione manuale PATH):
+
+   **Step 1: Download e Installazione**
+   - Download installer da: https://graphviz.org/download/
+   - Esegui il file `.msi` scaricato
+   - Durante l'installazione, **seleziona "Add Graphviz to the system PATH for all users"**
+   - Se non selezioni questa opzione, dovrai aggiungere manualmente al PATH
+
+   **Step 2: Aggiungi Manualmente al PATH (se necessario)**
+
+   Se Graphviz non è stato aggiunto automaticamente al PATH:
+
+   1. Trova il percorso di installazione (default: `C:\Program Files\Graphviz\bin`)
+   2. Apri Impostazioni Sistema:
+      - Windows 10/11: `Settings → System → About → Advanced system settings`
+      - Oppure: cerca "Variabili d'ambiente" nel menu Start
+   3. Click su "Environment Variables..." (Variabili d'ambiente)
+   4. Nella sezione "System variables" (Variabili di sistema), trova e seleziona "Path"
+   5. Click su "Edit..." (Modifica)
+   6. Click su "New" (Nuovo)
+   7. Incolla il percorso: `C:\Program Files\Graphviz\bin`
+   8. Click OK su tutte le finestre
+   9. **IMPORTANTE**: Riapri qualsiasi Command Prompt o PowerShell già aperto
+
+   **Step 3: Verifica (IMPORTANTE)**
+
+   Apri un **nuovo** Command Prompt o PowerShell e verifica:
+   ```powershell
+   dot -V
+   tred -V
+   ```
+
+   Se vedi "command not found" o "non riconosciuto":
+   - Hai chiuso e riaperto il terminale dopo aver modificato PATH?
+   - Il percorso `C:\Program Files\Graphviz\bin` contiene `dot.exe` e `tred.exe`?
+   - Controlla che il PATH sia stato aggiunto correttamente nelle variabili d'ambiente
+
+**Verifica Installazione:**
+```bash
+# Check if dot command is available
+dot -V
+
+# Check if tred command is available (for transitive reduction)
+tred -V
+```
+
+Output atteso:
+```
+dot - graphviz version X.X.X (XXXXXXXX.XXXX)
+```
+
+> **Note**: If Harris Matrix / GraphML export is not needed, you can skip Graphviz installation and use only other features.
+
+---
+
 ## 📦 Installation
 
 ### Basic Installation (API Only)

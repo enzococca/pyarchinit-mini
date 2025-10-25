@@ -10,6 +10,81 @@ Il sistema di export GraphML implementa la **Extended Matrix Palette** di PyArch
 - **Periodizzazione archeologica**: Organizzazione automatica per periodi con datazione estesa
 - **Compatibilità yEd**: Export ottimizzato per yEd Graph Editor
 
+## Requisiti Software
+
+### Python Dependencies (Installati Automaticamente)
+```bash
+pip install 'pyarchinit-mini[harris]'
+```
+
+Questo installa:
+- `networkx>=3.0.0` - Struttura dati grafo in memoria
+- `graphviz>=0.20.0` - Modulo Python per generare file DOT
+
+### Graphviz Software (Richiede Installazione Manuale)
+
+**IMPORTANTE**: Il modulo Python `graphviz` è solo un wrapper. Richiede il software nativo **Graphviz** installato nel sistema.
+
+#### Installazione per Sistema Operativo:
+
+**Linux (Debian/Ubuntu)**:
+```bash
+sudo apt-get update
+sudo apt-get install graphviz
+```
+
+**Linux (Fedora/RHEL)**:
+```bash
+sudo dnf install graphviz
+```
+
+**macOS (Homebrew)**:
+```bash
+brew install graphviz
+```
+
+**macOS (MacPorts)**:
+```bash
+sudo port install graphviz
+```
+
+**Windows (Chocolatey)** - Aggiunge automaticamente al PATH:
+```powershell
+choco install graphviz
+```
+
+**Windows (Download Diretto)** - Richiede configurazione PATH:
+1. **Installazione**:
+   - Download da: https://graphviz.org/download/
+   - Esegui `.msi` installer
+   - Durante installazione: **seleziona "Add Graphviz to the system PATH for all users"**
+
+2. **Aggiungere manualmente al PATH** (se necessario):
+   - Trova percorso installazione: `C:\Program Files\Graphviz\bin`
+   - Settings → System → About → Advanced system settings
+   - Environment Variables → System variables → Path → Edit
+   - New → Incolla: `C:\Program Files\Graphviz\bin`
+   - OK → **Riapri terminali aperti**
+
+3. **Verifica** (nuovo terminale):
+   ```powershell
+   dot -V
+   tred -V
+   ```
+
+#### Verifica Installazione:
+```bash
+# Comando dot (per generare DOT)
+dot -V
+# Output: dot - graphviz version X.X.X
+
+# Comando tred (per riduzione transitiva)
+tred -V
+# Output: tred - graphviz version X.X.X
+```
+
+> **Note**: Se Graphviz software non è installato, il sistema mostrerà un errore chiaro con istruzioni di installazione.
+
 ## Architettura del Sistema
 
 ### 1. Flusso di Trasformazione
