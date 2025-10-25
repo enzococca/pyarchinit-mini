@@ -277,6 +277,11 @@ class HarrisMatrixGenerator:
 
         relationships = []
 
+        # Define filters for use throughout the function
+        filters = {'sito': site_name}
+        if area:
+            filters['area'] = area
+
         # Method 1: Read from us_relationships_table (PyArchInit-Mini format)
         try:
             from sqlalchemy import text
@@ -355,9 +360,6 @@ class HarrisMatrixGenerator:
         # Method 2: Fallback to rapporti field (PyArchInit legacy format)
         if len(relationships) == 0:
             print("Falling back to rapporti field method...")
-            filters = {'sito': site_name}
-            if area:
-                filters.update({'area': area})
 
             # Get US records to extract relationships from rapporti field
             if self.us_service:
