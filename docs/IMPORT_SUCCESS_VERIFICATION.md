@@ -126,6 +126,18 @@ If you still don't see the data:
 **Solution**: Replaced all critical queries with raw SQL
 **Commit**: `b1e67d6`
 
+### Issue 4: Missing Spatial Relationship Types ✅ **FIXED**
+
+**Problem**: Harris Matrix was skipping 201 spatial relationships:
+- 195 "Connected to" relationships
+- 3 "Supports" relationships
+- 3 "Abuts" relationships
+
+**Solution**: Added spatial relationship types to valid relationships list
+**Commit**: `497d974`
+
+**Impact**: Harris Matrix now includes all spatial connections between stratigraphic units
+
 ---
 
 ## Files Modified
