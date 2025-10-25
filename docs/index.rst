@@ -74,6 +74,7 @@ Features
    features/s3dgraphy
    features/graphml_export
    features/pyarchinit_import_export
+   AUTOMATIC_IMPORT_AND_BACKUP_GUIDE
    features/analytics
    features/authentication
    features/export_import
