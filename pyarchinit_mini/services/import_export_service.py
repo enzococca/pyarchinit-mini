@@ -724,21 +724,22 @@ class ImportExportService:
         session.execute(query, data)
 
     def _update_us_mini(self, session: Session, data: Dict[str, Any]):
-        """Update US in PyArchInit-Mini database using ORM"""
-        from pyarchinit_mini.models.us import US
+        """Update US in PyArchInit-Mini database using raw SQL"""
+        # Build UPDATE query dynamically based on provided fields
+        # Exclude identity fields (sito, us, id_us) from update
+        update_fields = {k: v for k, v in data.items() if k not in ['sito', 'us', 'id_us']}
 
-        # Query for existing US record
-        us_obj = session.query(US).filter(
-            US.sito == data['sito'],
-            US.us == data['us']
-        ).first()
+        if update_fields:
+            set_clause = ', '.join([f"{k} = :{k}" for k in update_fields.keys()])
+            query = text(f"""
+                UPDATE us_table
+                SET {set_clause}
+                WHERE sito = :sito AND us = :us
+            """)
 
-        if us_obj:
-            # Update all fields except sito and us (identity fields)
-            for key, value in data.items():
-                if key not in ['sito', 'us'] and hasattr(us_obj, key):
-                    setattr(us_obj, key, value)
-            session.flush()
+            # Combine update fields with identity fields for WHERE clause
+            params = {**update_fields, 'sito': data['sito'], 'us': data['us']}
+            session.execute(query, params)
 
     def export_us(self, target_db_connection: str, sito_filter: Optional[List[str]] = None,
                   export_relationships: bool = True) -> Dict[str, Any]:
