@@ -15,17 +15,30 @@ Il sistema di export GraphML implementa la **Extended Matrix Palette** di PyArch
 ### 1. Flusso di Trasformazione
 
 ```
-Database → NetworkX Graph → DOT → GraphML (yEd)
-    ↓           ↓              ↓        ↓
-  SQLite    Python obj    Graphviz   XML
+Database → NetworkX DiGraph → Graphviz Digraph → DOT → DOT Ridotto → GraphML (yEd)
+    ↓           ↓                    ↓              ↓         ↓            ↓
+  SQLite    Struttura dati      Python graphviz   Text    tred cmd      XML
+            intermedia             module          file    (Graphviz)
 ```
+
+**Componenti Software**:
+- **NetworkX**: Struttura dati in memoria per costruire e manipolare il grafo (normalizzazione relazioni, rimozione cicli)
+- **Python `graphviz` module**: Genera il file DOT con attributi Graphviz
+- **Graphviz `tred`**: Comando per riduzione transitiva del grafo
+- **Custom parser**: Converte DOT in GraphML con struttura yEd TableNode
 
 ### 2. Pipeline Completa
 
-#### Fase 1: Database → NetworkX Graph
+#### Fase 1: Database → NetworkX Graph (Struttura Dati Intermedia)
 
 **File**: `pyarchinit_mini/harris_matrix/matrix_generator.py`
 **Metodo**: `generate_matrix(site_name)`
+
+**Ruolo**: NetworkX è usato SOLO come struttura dati in memoria per:
+- Organizzare nodi e archi da database
+- Normalizzare relazioni inverse (coperto da → copre)
+- Invertire direzioni per nodi EM speciali
+- Validare e rimuovere cicli
 
 ```python
 # Query database
@@ -66,15 +79,21 @@ for rel in relationships:
 - Deduplicazione relazioni inverse
 - Inversione automatica per nodi EM (esclusi `>`, `>>`, `<`, `<<`)
 
-#### Fase 2: NetworkX Graph → DOT
+#### Fase 2: NetworkX → Graphviz Digraph → DOT File
 
 **File**: `pyarchinit_mini/harris_matrix/matrix_generator.py`
 **Metodo**: `export_to_graphml(...)`
 
+**Ruolo**: Il modulo Python `graphviz` genera il file DOT (NON NetworkX):
+- Trasferisce nodi e archi da NetworkX a Graphviz Digraph
+- Applica attributi Graphviz (shape, style, arrowhead, color)
+- Organizza nodi in subgraph per periodo
+- Genera file DOT usando `G.render()`
+
 ```python
 from graphviz import Digraph
 
-# Crea Graphviz Digraph
+# Crea Graphviz Digraph (NON NetworkX!)
 G = Digraph(engine='dot', strict=False)
 G.attr(rankdir='TB')  # Top to Bottom
 
@@ -140,33 +159,40 @@ G.render(filename='output.dot', format='dot')
 - `arrowhead`: normal, dot, box, none
 - `dir`: both (per doppi archi)
 
-#### Fase 3: DOT → GraphML con Transitive Reduction
+#### Fase 3: DOT → DOT Ridotto (Transitive Reduction)
 
 **File**: `pyarchinit_mini/harris_matrix/matrix_generator.py`
 **Metodo**: `export_to_graphml(...)`
 
+**Ruolo**: Graphviz `tred` command esegue la riduzione transitiva:
+- Comando shell `tred` (parte della suite Graphviz software)
+- NON un algoritmo NetworkX
+- Processa il file DOT come testo e genera DOT ridotto
+
 ```python
 import subprocess
 
-# Applica riduzione transitiva con Graphviz tred
+# Applica riduzione transitiva con comando Graphviz tred
+# tred è un COMANDO di Graphviz software (non Python)
 with open('output_tred.dot', 'w') as f:
-    subprocess.run(['tred', 'output.dot'], stdout=f)
+    subprocess.run(['tred', 'output.dot'], stdout=f, timeout=30)
 
 # Converti DOT ridotto in GraphML
-from pyarchinit_mini.graphml_converter.converter import DotToGraphMLConverter
+from pyarchinit_mini.graphml_converter.converter import convert_dot_to_graphml
 
-converter = DotToGraphMLConverter()
-converter.convert_dot_to_graphml(
+success = convert_dot_to_graphml(
     dot_file='output_tred.dot',
     graphml_file='output.graphml',
-    epoch_list=list_of_period_names
+    title='Harris Matrix',
+    reverse_epochs=False
 )
 ```
 
-**Transitive Reduction**:
+**Transitive Reduction** (comando `tred` di Graphviz):
 - Rimuove archi ridondanti mantenendo le relazioni
 - Esempio: se US1→US2→US3 e US1→US3, rimuove US1→US3
-- Usa comando `tred` di Graphviz
+- Richiede Graphviz installato nel sistema (`sudo apt install graphviz` o `brew install graphviz`)
+- Fallback: se tred non disponibile, usa DOT non ridotto
 
 #### Fase 4: DOT → GraphML (Parsing e Rendering)
 
