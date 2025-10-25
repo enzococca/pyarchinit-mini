@@ -5,6 +5,82 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-10-25
+
+### Added
+- **Automatic Database Backup System** (CRITICAL SAFETY FEATURE)
+  - Automatic SQLite backup using file copy with timestamp (e.g., `database.db.backup_20251025_165843`)
+  - PostgreSQL backup support using pg_dump to create SQL dumps
+  - Backup created BEFORE any database modification during import
+  - Only one backup per session (multiple imports reuse same backup)
+  - Backup path returned in import statistics for verification
+  - New `auto_backup` parameter (default=True) for all import functions
+  - Backup can be disabled with `auto_backup=False` for trusted sources
+  - Complete logging of all backup operations
+  - Tested with real databases (5.8 MB → 4.7 MB backup verified)
+
+- **Spatial Relationship Types Support**
+  - Added support for 3 spatial relationship types in Harris Matrix generation:
+    * "connected to" / "collegato a" / "connects to" (195 relationships in Dom zu Lund)
+    * "supports" (3 relationships)
+    * "abuts" / "confina con" / "adiacente a" (3 relationships)
+  - Previously these 201 relationships were being skipped with warning messages
+  - Now properly included in Harris Matrix visualization and GraphML export
+  - Represents 8.9% increase in relationship data for typical archaeological sites
+
+- **Complete Dom zu Lund Import**
+  - Successfully imported complete archaeological site from PyArchInit database
+  - 1 site record (Lund Cathedral, Sweden)
+  - 758 stratigraphic units (US)
+  - 2,459 relationships (100% imported, no skipped relationships)
+  - 42 periodization records (21 new + 21 existing)
+  - Comprehensive test with real-world dataset
+
+### Fixed
+- **UnboundLocalError in Harris Matrix Generator**
+  - Fixed variable 'filters' not being defined at function start
+  - Moved filters definition to beginning of `_get_relationships()` function
+  - Eliminated warning messages: "cannot access local variable 'filters' where it is not associated with a value"
+  - Affects USRelationships and HarrisMatrix table queries
+
+- **PyArchInit Import Issues** (Session: Dom zu Lund)
+  - Fixed ORM metadata cache issues when importing from PyArchInit databases
+  - Replaced ORM queries with raw SQL in critical import functions
+  - Fixed missing i18n columns handling with automatic migration
+  - Fixed relationship column name (`id_us_relationship` → `id_relationship`)
+  - All import errors resolved for both SQLite and PostgreSQL sources
+
+### Changed
+- **Import Functions Enhanced**
+  - `import_sites()` now accepts `auto_backup` parameter
+  - `import_us()` now accepts `auto_backup` parameter
+  - `import_inventario()` now accepts `auto_backup` parameter
+  - `migrate_source_database()` now accepts `auto_backup` parameter
+  - All import functions return backup path in statistics dictionary
+  - Import service tracks backup creation with `_backup_created` and `_backup_path` instance variables
+
+### Documentation
+- Added `docs/AUTOMATIC_IMPORT_AND_BACKUP_GUIDE.md`: Comprehensive guide for automatic import and backup
+- Added `docs/SESSION_DOM_ZU_LUND_IMPORT_COMPLETE.md`: Complete session summary for Dom zu Lund import
+- Updated `docs/IMPORT_SUCCESS_VERIFICATION.md`: Added spatial relationship fix documentation
+- Added `test_backup_system.py`: Test script for automatic backup functionality
+- Added `import_complete_dom_zu_lund.py`: Complete import script for all entity types
+- Added `test_import_dom_zu_lund.py`: Diagnostic script for import verification
+
+### Technical
+- New method: `_backup_source_database()` for automatic database backup
+- Supports both SQLite (shutil.copy2) and PostgreSQL (pg_dump) backups
+- Backup creation is idempotent - only one backup per service instance
+- Non-destructive: backups created before any ALTER TABLE operations
+- Timestamped filenames ensure unique backup names
+- Complete error handling with fallback to continue if backup fails (with warning)
+
+### Security
+- **CRITICAL**: Source database is now automatically backed up before ANY modification
+- Backup is created BEFORE adding i18n columns during migration
+- Provides safety net for accidental data loss or corruption
+- Allows easy rollback to pre-import state if needed
+
 ## [1.3.2] - 2025-10-25
 
 ### Added
