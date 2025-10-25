@@ -553,7 +553,7 @@ class ImportExportService:
                                 try:
                                     # Check if relationship already exists
                                     existing_rel = mini_session.execute(
-                                        text("""SELECT id_us_relationship FROM us_relationships_table
+                                        text("""SELECT id_relationship FROM us_relationships_table
                                                 WHERE sito = :sito AND us_from = :us_from AND us_to = :us_to
                                                 AND relationship_type = :rel_type"""),
                                         {
