@@ -521,14 +521,13 @@ class ImportExportService:
 
             for us_row in source_us_list:
                 try:
-                    from pyarchinit_mini.models.us import US
                     us_data = dict(us_row._mapping)
 
-                    # Check if US already exists using ORM
-                    existing = mini_session.query(US).filter(
-                        US.sito == us_data['sito'],
-                        US.us == us_data['us']
-                    ).first()
+                    # Check if US already exists using raw SQL (avoids ORM metadata issues)
+                    existing = mini_session.execute(
+                        text("SELECT id_us FROM us_table WHERE sito = :sito AND us = :us LIMIT 1"),
+                        {'sito': us_data['sito'], 'us': us_data['us']}
+                    ).fetchone()
 
                     # Map fields from PyArchInit to PyArchInit-Mini
                     mapped_data = self._map_us_fields_import(us_data)
