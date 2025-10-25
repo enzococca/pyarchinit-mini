@@ -77,10 +77,10 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **Multi-Interface Support**: Available in both Web UI (Chart.js) and Desktop GUI (matplotlib)
 - **Real-Time Data**: Charts update automatically with current database state
 
-### 🔄 Extended Matrix Framework & GraphML Export (v1.2.15+)
-Complete implementation of Extended Matrix Framework with GraphML export for yEd Graph Editor.
+### 🔄 Extended Matrix Framework & GraphML Export (v1.3.0+)
+Complete implementation of Extended Matrix Framework with GraphML export for yEd Graph Editor, including PyArchInit-compatible edge styling and DOT-based workflow.
 
-> 📖 **Full Documentation**: [Extended Matrix Framework Guide](docs/EXTENDED_MATRIX_FRAMEWORK.md)
+> 📖 **Full Documentation**: [Extended Matrix Export Technical Guide](docs/EXTENDED_MATRIX_EXPORT.md)
 
 **Extended Matrix Framework**:
 PyArchInit-Mini supports the full Extended Matrix specification with **14 unit types** and **dual relationship symbols**.
@@ -177,11 +177,14 @@ us_data = {
 - **Extractor**: SVG icon, 25x25px
 - **Combiner**: SVG icon, 25x25px
 
-**Edge Styles**:
-- **Standard stratigraphic** (>, <): Solid arrow, labeled with symbol
-- **Special non-stratigraphic** (>>, <<): Double arrow, labeled with symbol
-- **Contemporary** (uguale a, si lega a): No arrow, solid line
-- **Negative** (taglia): Dashed line
+**Edge Styles** (PyArchInit EM Palette):
+All edges are **black** with differentiated styles and arrowheads:
+- **Dotted** (taglia, tagliato da, property, EM symbols >, >>, <, <<): Dotted line with normal arrow
+- **Bold double arrows** (uguale a, si lega a): Bold solid line, arrows on both ends (dir=both)
+- **Dot arrowhead** (si appoggia, si appoggia a, gli si appoggia): Solid line with filled circle arrowhead
+- **Box arrowhead** (riempie, riempito da): Solid line with square arrowhead
+- **No arrowhead** (continuità/CON): Solid line without arrowhead
+- **Normal arrows** (copre, coperto da, sopra): Standard solid line with normal arrowhead
 
 **Usage Examples**:
 ```python

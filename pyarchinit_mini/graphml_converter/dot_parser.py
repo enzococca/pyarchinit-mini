@@ -325,7 +325,30 @@ class Node:
         o.write("    \"%s\"\n" % self.getLabel(conf).encode(latinenc, errors="ignore"))
         o.write("  ]\n")
     
-    def get_y(self,epoch, nome_us) :
+    def get_y(self, epoch, nome_us, node_to_cluster=None) :
+        """Calculate Y coordinate for node positioning.
+
+        If node_to_cluster mapping is provided, use cluster assignment.
+        Otherwise fall back to epoch matching.
+        """
+        # First try using cluster mapping (more accurate)
+        if node_to_cluster and nome_us in node_to_cluster:
+            cluster_id = node_to_cluster[nome_us]
+            # Convert cluster_id to integer and calculate Y position
+            # Each row should be ~1000 units apart
+            return (int(cluster_id) - 1) * 1000
+
+        # Second: try using 'period' attribute if available
+        if 'period' in self.attribs and self.attribs['period']:
+            period_value = self.attribs['period']
+            # Search for this period in epoch list
+            index = 0
+            while index < len(epoch):
+                if epoch[index] in period_value:
+                    return index * 1000
+                index += 1
+
+        # Fallback to old method: search for epoch in node label
         index=0
         y_value=0
         while index <len(epoch):
@@ -337,11 +360,12 @@ class Node:
             #print(str(y_value))
         return y_value
     
-    def exportGraphml(self, doc, parent, conf, epoch_sigla):        
+    def exportGraphml(self, doc, parent, conf, epoch_sigla, node_to_cluster=None):
         """ export the node in Graphml format and append it to the parent XML node """
+
         graph1 = doc.createElement('graph')
-        graph1.setAttribute('edgedefault','directed')    
-        graph1.setAttribute('id','n0:')     
+        graph1.setAttribute('edgedefault','directed')
+        graph1.setAttribute('id','n0:')
         node = doc.createElement('node')
         node.setAttribute('id','n0::n%d' % self.id)
         data0 = doc.createElement('data')
@@ -352,8 +376,11 @@ class Node:
         LabelText = self.getLabel(conf, True)
         #label in generic info#
         nodeLabelText = escapeNewlines(self.getLabel(conf, True))
-        a = nodeLabelText.rsplit('_',)[0]        
-        
+        # Use FULL label instead of extracting only first part before underscore
+        a = nodeLabelText  # Original: nodeLabelText.rsplit('_',)[0]
+        # But for type detection, extract first part
+        a_type = nodeLabelText.rsplit('_',)[0] if '_' in nodeLabelText else nodeLabelText
+
         data1 = doc.createElement('data')
         geom = doc.createElement('y:Geometry')
         #elementi per  il DOC#
@@ -366,41 +393,41 @@ class Node:
         prop3=doc.createElement('y:Property')
         prop4=doc.createElement('y:Property')
         prop5=doc.createElement('y:Property')
-        
-        
+
+
         svg_node=doc.createElement('y:SVGNode')
         svg_node_p=doc.createElement('y:SVGNodeProperties')
         svg_model=doc.createElement('y:SVGModel')
         svg_content=doc.createElement('y:SVGContent')
-        if 'DOC' in a:
+        if 'DOC' in a_type:
             snode=generic_node
             snode.setAttribute('configuration','com.yworks.bpmn.Artifact.withShadow')
-        if 'property' in a:
+        if 'property' in a_type:
             snode=generic_node
             snode.setAttribute('configuration','com.yworks.bpmn.Artifact.withShadow')
-        if 'Combinar' in a:
+        if 'Combinar' in a_type:
             snode=svg_node
-        if 'Extractor' in a:
+        if 'Extractor' in a_type:
             snode=svg_node
-        if 'CON' in a:        
+        if 'CON' in a_type:
             snode=svg_node
             geom.setAttribute('height','26.0')
-            geom.setAttribute('width','26.0')        
-        elif 'DOC' in a:        
+            geom.setAttribute('width','26.0')
+        elif 'DOC' in a_type:
             geom.setAttribute('height','55.0')
-            geom.setAttribute('width','35.0')    
-        elif 'Extractor' in a :
+            geom.setAttribute('width','35.0')
+        elif 'Extractor' in a_type :
             geom.setAttribute('height','25.0')
-            geom.setAttribute('width','25.0') 
-        elif 'Combinar' in a :
+            geom.setAttribute('width','25.0')
+        elif 'Combinar' in a_type :
             geom.setAttribute('height','25.0')
-            geom.setAttribute('width','25.0')         
+            geom.setAttribute('width','25.0')
         else:
             geom.setAttribute('height','30.0')
             geom.setAttribute('width','90.0')
-        
+
         geom.setAttribute('x','520.0')
-        geom.setAttribute('y','%r'% self.get_y(epoch_sigla, LabelText))
+        geom.setAttribute('y','%r'% self.get_y(epoch_sigla, LabelText, node_to_cluster))
         
         snode.appendChild(geom)
         
@@ -412,29 +439,28 @@ class Node:
         mp=doc.createElement('y:ModelParameter')
         mps=doc.createElement('y:SmartNodeLabelModelParameter')
         label = doc.createElement('y:NodeLabel')
-        bb = LabelText.rsplit('_',)[:-1]        
+        bb = LabelText.rsplit('_',)[:-1]
         b = ' '.join(map(str, bb))
-        
-        
-        if a.startswith('CON'):       
-            
-            label.appendChild(doc.createTextNode('{}'.format(a)))
-        elif a.startswith('property'):   
-            a=b
-            l =' '.join(a.split()[1:2])
+
+
+        if a_type.startswith('CON'):
+            label.appendChild(doc.createTextNode('{}'.format(a_type)))
+        elif a_type.startswith('property'):
+            a_temp=b
+            l =' '.join(a_temp.split()[1:2])
             label.appendChild(doc.createTextNode(l))
-        
-        
-        elif a.startswith('DOC'):   
-            
+
+
+        elif a_type.startswith('DOC'):
+
             ##inserisco il punto prima dell'ultimo carattere(questo sognifica che i doc non devono essere più di 9 per estrattore)###
-            a=a[:-1] + "."+a[-1:]
+            a_label=a_type[:-1] + "."+a_type[-1:]
             ##scrivo il nome della doc cambiando le iniziali DOC in D.###
-            label.appendChild(doc.createTextNode('{}'.format(a).replace('DOC','D.')))
-        
+            label.appendChild(doc.createTextNode('{}'.format(a_label).replace('DOC','D.')))
+
         else:
             label.appendChild(doc.createTextNode('{}'.format(a).replace('USVA','USV').replace('USVB','USV').replace('USVC','USV').replace('Extractor','D.').replace('Combinar','C.')))     
-        if 'USVA' in a:    
+        if 'USVA' in a_type:    
             
             fill.setAttribute('color','#000000')
             fill.setAttribute('transparent','false')
@@ -460,7 +486,7 @@ class Node:
             label.setAttribute('xml:space','preserve')
             label.setAttribute('y','5.6494140625')
         
-        elif 'USVB' in a:    
+        elif 'USVB' in a_type:    
             
             fill.setAttribute('color','#000000')
             fill.setAttribute('transparent','false')
@@ -487,7 +513,7 @@ class Node:
             label.setAttribute('y','5.6494140625')
         
         
-        elif 'USVC' in a:    
+        elif 'USVC' in a_type:    
             
             fill.setAttribute('color','#000000')
             fill.setAttribute('transparent','false')
@@ -515,7 +541,7 @@ class Node:
         
         
         
-        elif 'USD' in a:    
+        elif 'USD' in a_type:    
             
             fill.setAttribute('color','#ffffff')
             fill.setAttribute('transparent','false')
@@ -541,7 +567,7 @@ class Node:
             label.setAttribute('xml:space','preserve')
             label.setAttribute('y','5.6494140625')
         
-        elif 'USM' in a:
+        elif 'USM' in a_type:
             
             fill.setAttribute('color','#C0C0C0')
             fill.setAttribute('transparent','false')
@@ -645,7 +671,7 @@ class Node:
             label.setAttribute('xml:space','preserve')
             label.setAttribute('y','5.6494140625')
         
-        elif 'CON' in a:
+        elif 'CON' in a_type:
             
             fill.setAttribute('color','#000000')
             fill.setAttribute('transparent','false')
@@ -671,7 +697,7 @@ class Node:
             label.setAttribute('xml:space','preserve')
             label.setAttribute('y','5.6494140625')
             
-        elif 'SF' in a:            
+        elif 'SF' in a_type:            
             fill.setAttribute('color','#FFFFFF')
             fill.setAttribute('transparent','false')
             border.setAttribute('color','#d8bd30')
@@ -746,7 +772,7 @@ class Node:
             label.setAttribute('xml:space','preserve')
             label.setAttribute('y','5.6494140625')
         
-        elif 'Extractor' in a:            
+        elif 'Extractor' in a_type:            
             fill.setAttribute('color','#CCCCFF')
             fill.setAttribute('transparent','false')
             border.setAttribute('color','#000000')
@@ -774,7 +800,7 @@ class Node:
             label.setAttribute('xml:space','preserve')
             label.setAttribute('y','5.6494140625')
             
-        elif 'Combinar' in a:    
+        elif 'Combinar' in a_type:    
             fill.setAttribute('color','#CCCCFF')
             fill.setAttribute('transparent','false')
             border.setAttribute('color','#000000')
@@ -802,7 +828,7 @@ class Node:
             label.setAttribute('xml:space','preserve')
             label.setAttribute('y','5.6494140625')
         
-        elif 'DOC' in a:    
+        elif 'DOC' in a_type:    
             
             fill.setAttribute('color','#FFFFFF')
             fill.setAttribute('transparent','false')
@@ -828,7 +854,7 @@ class Node:
             label.setAttribute('xml:space','preserve')
             label.setAttribute('y','5.6494140625')
         
-        elif 'property' in a:    
+        elif 'property' in a_type:    
             
             fill.setAttribute('color','#FFFFFFE6')
             fill.setAttribute('transparent','false')
@@ -866,14 +892,14 @@ class Node:
         
         
         
-        if 'USVA' in a:         
+        if 'USVA' in a_type:         
             shape.setAttribute('type','parallelogram')
             snode.appendChild(shape)
-        elif 'USVB' in a:
+        elif 'USVB' in a_type:
             
             shape.setAttribute('type','hexagon')
             snode.appendChild(shape)
-        elif 'USVC' in a:
+        elif 'USVC' in a_type:
             
             shape.setAttribute('type','ellipse')
             snode.appendChild(shape)
@@ -882,12 +908,12 @@ class Node:
            
             shape.setAttribute('type','rectangle')
             snode.appendChild(shape)
-        elif 'USD' in a:
+        elif 'USD' in a_type:
            
             shape.setAttribute('type','rectangle')
             snode.appendChild(shape)
         
-        elif 'USM' in a:
+        elif 'USM' in a_type:
             
             shape.setAttribute('type','rectangle')
             snode.appendChild(shape)
@@ -900,14 +926,14 @@ class Node:
             shape.setAttribute('type','rectangle')
             snode.appendChild(shape)
         
-        elif 'CON' in a:
+        elif 'CON' in a_type:
             svg_node_p.setAttribute('usingVisualBounds','true')
             snode.appendChild(svg_node_p)   
             svg_model.setAttribute('svgBoundsPolicy','0')            
             svg_content.setAttribute('refid','3')
             svg_model.appendChild(svg_content)
             snode.appendChild(svg_model)
-        elif 'SF' in a:
+        elif 'SF' in a_type:
             
             shape.setAttribute('type','octagon')
             snode.appendChild(shape)
@@ -920,7 +946,7 @@ class Node:
             
             shape.setAttribute('type','ellipse')
             snode.appendChild(shape)
-        elif 'Extractor' in a:
+        elif 'Extractor' in a_type:
             
             svg_node_p.setAttribute('usingVisualBounds','true')
             snode.appendChild(svg_node_p)   
@@ -929,14 +955,14 @@ class Node:
             svg_content.setAttribute('refid','1')
             svg_model.appendChild(svg_content)
             snode.appendChild(svg_model)
-        elif 'Combinar' in a:
+        elif 'Combinar' in a_type:
             svg_node_p.setAttribute('usingVisualBounds','true')
             snode.appendChild(svg_node_p)   
             svg_model.setAttribute('svgBoundsPolicy','0')
             svg_content.setAttribute('refid','2')
             svg_model.appendChild(svg_content)
             snode.appendChild(svg_model)
-        elif 'property' in a:
+        elif 'property' in a_type:
             shape = style_prop2
             prop.setAttribute('class','java.awt.Color')
             prop.setAttribute('name','com.yworks.bpmn.icon.line.color')
@@ -959,7 +985,7 @@ class Node:
             shape.appendChild(prop5)
             snode.appendChild(shape)    
             
-        elif 'DOC' in a:
+        elif 'DOC' in a_type:
             shape = style_prop
             prop.setAttribute('class','java.awt.Color')
             prop.setAttribute('name','com.yworks.bpmn.icon.line.color')
@@ -993,13 +1019,13 @@ class Node:
         
         
         
-        if 'USVA' in a:         
+        if 'USVA' in a_type:         
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
-        elif 'USVB' in a:
+        elif 'USVB' in a_type:
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
-        elif 'USVC' in a:
+        elif 'USVC' in a_type:
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
         elif 'USVD' in a:
@@ -1008,7 +1034,7 @@ class Node:
         elif 'US' in a:
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
-        elif 'USM' in a:
+        elif 'USM' in a_type:
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
         elif 'SU' in a:
@@ -1018,32 +1044,45 @@ class Node:
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
         
-        elif 'CON' in a:
+        elif 'CON' in a_type:
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
             
         elif 'SUS' in a:
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
-        elif 'Extractor' in a:
+        elif 'Extractor' in a_type:
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
-        elif 'Combinar' in a:
+        elif 'Combinar' in a_type:
             data1.setAttribute('key', 'd7')
             data1.setAttribute('xml:space','preserve') 
-        elif 'DOC' in a:
+        elif 'DOC' in a_type:
             data1.setAttribute('key', 'd4')
             data1.setAttribute('xml:space','preserve') 
-        elif 'property' in a:
+        elif 'property' in a_type:
             data1.setAttribute('key', 'd5')
             data1.setAttribute('xml:space','preserve') 
             
         
         c=' '.join(b.split()[1:])
-        
-        data1.appendChild(doc.createTextNode('{}'.format(c)))
-        node.appendChild(data1)        
-        node.appendChild(data0)            
+
+        # Use tooltip for description if available, otherwise use parsed label parts
+        if 'tooltip' in self.attribs and self.attribs['tooltip']:
+            data1.appendChild(doc.createTextNode(self.attribs['tooltip']))
+        else:
+            data1.appendChild(doc.createTextNode('{}'.format(c)))
+
+        # Add URL if present (key d4)
+        if 'URL' in self.attribs and self.attribs['URL']:
+            data_url = doc.createElement('data')
+            data_url.setAttribute('key', 'd4')
+            data_url.appendChild(doc.createTextNode(self.attribs['URL']))
+            node.appendChild(data_url)
+
+        node.appendChild(data1)
+        node.appendChild(data0)
+
         parent.appendChild(node)
         #parent.appendChild(data_r)
         
@@ -1217,3 +1256,60 @@ class Edge:
         
         parent.appendChild(edge)
        
+def parse_clusters(dot_content):
+    """
+    Parse cluster_datazione subgraphs from DOT content
+    Returns: dict mapping cluster_id -> {'label': datazione, 'nodes': [node_labels]}
+    """
+    import re
+    
+    clusters = {}
+    
+    # Find all cluster_datazione subgraphs  
+    # Match nested structure with proper bracket counting
+    lines = dot_content.split('\n')
+    in_cluster = False
+    cluster_id = None
+    cluster_label = None
+    cluster_nodes = []
+    bracket_count = 0
+    
+    for line in lines:
+        # Check for cluster start
+        cluster_match = re.match(r'\s*subgraph cluster_datazione_(\d+)', line)
+        if cluster_match:
+            cluster_id = cluster_match.group(1)
+            in_cluster = True
+            cluster_nodes = []
+            bracket_count = 0
+            continue
+        
+        if in_cluster:
+            # Count brackets
+            bracket_count += line.count('{') - line.count('}')
+            
+            # Extract label
+            if not cluster_label:
+                label_match = re.search(r'label="([^"]+)"', line)
+                if label_match:
+                    cluster_label = label_match.group(1)
+            
+            # Extract node definitions (lines with node labels and attributes)
+            node_match = re.match(r'\s*"([^"]+)"\s*\[', line)
+            if node_match:
+                node_label = node_match.group(1)
+                if not node_label.startswith('cluster'):
+                    cluster_nodes.append(node_label)
+            
+            # Check if cluster ended
+            if bracket_count < 0:
+                if cluster_id and cluster_label:
+                    clusters[cluster_id] = {
+                        'label': cluster_label,
+                        'nodes': cluster_nodes
+                    }
+                in_cluster = False
+                cluster_id = None
+                cluster_label = None
+    
+    return clusters

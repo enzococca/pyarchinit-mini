@@ -70,13 +70,16 @@ Features
    :caption: Feature Documentation:
 
    features/harris_matrix
+   features/stratigraphic_relationships
    features/s3dgraphy
    features/graphml_export
+   features/pyarchinit_import_export
    features/analytics
    features/authentication
    features/export_import
    features/media_management
    EXTENDED_MATRIX_FRAMEWORK
+   EXTENDED_MATRIX_EXPORT
    DOC_FILE_UPLOAD
 
 Data Management
