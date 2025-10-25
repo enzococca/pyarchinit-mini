@@ -372,6 +372,57 @@ INFO:pyarchinit_mini.services.import_export_service:Migration complete: 1 tables
 
 ---
 
+## Additional Fix: US Relationship Column Name
+
+**Date**: 2025-10-25
+**Issue**: Relationship import fails with column name error
+**Status**: ✅ Fixed (Commit 3b4ae42)
+
+### Problem
+
+After fixing the i18n column issues, US relationship imports were failing with:
+
+```
+(sqlite3.OperationalError) no such column: id_us_relationship
+[SQL: SELECT id_us_relationship FROM us_relationships_table WHERE ...]
+```
+
+### Root Cause
+
+The code in `import_export_service.py` at line 556 was using the wrong column name:
+- **Wrong**: `id_us_relationship`
+- **Correct**: `id_relationship`
+
+The `us_relationships_table` schema uses `id_relationship` as the primary key column name.
+
+### Fix Applied
+
+Changed the SELECT query in the relationship existence check:
+
+```python
+# BEFORE (line 556):
+existing_rel = mini_session.execute(
+    text("""SELECT id_us_relationship FROM us_relationships_table
+            WHERE sito = :sito AND us_from = :us_from AND us_to = :us_to
+            AND relationship_type = :rel_type"""),
+    {...}
+).fetchone()
+
+# AFTER:
+existing_rel = mini_session.execute(
+    text("""SELECT id_relationship FROM us_relationships_table
+            WHERE sito = :sito AND us_from = :us_from AND us_to = :us_to
+            AND relationship_type = :rel_type"""),
+    {...}
+).fetchone()
+```
+
+### Result
+
+✅ US relationships now import successfully without column name errors
+
+---
+
 ## Future Enhancements
 
 - [ ] Add migration progress bar for large databases
