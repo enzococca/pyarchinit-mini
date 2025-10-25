@@ -247,102 +247,10 @@ class S3DConverter:
 
         return nx_graph
 
-    def export_to_graphml(self, graph: 's3dgraphy.Graph',
-                         output_path: str) -> str:
-        """
-        Export s3dgraphy graph to GraphML format with yEd compatible labels
-
-        Args:
-            graph: s3dgraphy Graph object
-            output_path: Path to output GraphML file
-
-        Returns:
-            Path to the generated GraphML file
-        """
-        # Convert to NetworkX graph
-        nx_graph = self._convert_to_networkx(graph)
-
-        # Add yEd-specific node labels
-        for node_id, node_data in nx_graph.nodes(data=True):
-            # Create label from us_number or name
-            label_text = node_data.get('us_number', node_data.get('name', node_id))
-            node_data['label'] = f"US {label_text}" if node_data.get('us_number') else label_text
-
-        # Add yEd-specific edge labels
-        for source, target, edge_data in nx_graph.edges(data=True):
-            if 'relation_label' in edge_data:
-                edge_data['label'] = edge_data['relation_label']
-
-        # Export to GraphML using NetworkX
-        nx.write_graphml(nx_graph, output_path, encoding='utf-8', prettyprint=True)
-
-        # Post-process to add yEd formatting
-        self._add_yed_formatting(output_path, graph)
-
-        return output_path
-
-    def _add_yed_formatting(self, graphml_path: str, graph: 's3dgraphy.Graph'):
-        """Add yEd-specific formatting to GraphML file"""
-        import xml.etree.ElementTree as ET
-
-        # Parse GraphML
-        ET.register_namespace('', 'http://graphml.graphdrawing.org/xmlns')
-        ET.register_namespace('y', 'http://www.yworks.com/xml/graphml')
-        ET.register_namespace('yed', 'http://www.yworks.com/xml/yed/3')
-
-        tree = ET.parse(graphml_path)
-        root = tree.getroot()
-
-        ns = {
-            'g': 'http://graphml.graphdrawing.org/xmlns',
-            'y': 'http://www.yworks.com/xml/graphml'
-        }
-
-        # Find all nodes and add yEd NodeLabel with text
-        for node in root.findall('.//g:node', ns):
-            node_id = node.get('id')
-
-            # Find the label data element
-            label_elem = node.find('.//g:data[@key="d17"]', ns)  # name field
-            us_number_elem = node.find('.//g:data[@key="d15"]', ns)  # us_number field
-
-            if us_number_elem is not None and us_number_elem.text:
-                label_text = f"US {us_number_elem.text.strip()}"
-            elif label_elem is not None and label_elem.text:
-                label_text = label_elem.text.strip()
-            else:
-                continue
-
-            # Find yEd graphics element
-            graphics = node.find('.//y:ShapeNode/y:NodeLabel', ns)
-            if graphics is not None:
-                graphics.set('hasText', 'true')
-                graphics.text = label_text
-
-        # Find all edges and add yEd EdgeLabel with text
-        for edge in root.findall('.//g:edge', ns):
-            # Find the relation_label data element
-            label_elem = edge.find('.//g:data[@key="d22"]', ns)  # relation_label field
-
-            if label_elem is not None and label_elem.text:
-                label_text = label_elem.text.strip()
-
-                # Find or create yEd graphics element
-                graphics = edge.find('.//y:PolyLineEdge', ns)
-                if graphics is not None:
-                    # Add EdgeLabel if doesn't exist
-                    edge_label = graphics.find('y:EdgeLabel', ns)
-                    if edge_label is None:
-                        edge_label = ET.SubElement(graphics, '{http://www.yworks.com/xml/graphml}EdgeLabel')
-                    edge_label.text = label_text
-
-        # Write back
-        tree.write(graphml_path, encoding='utf-8', xml_declaration=True)
-
     def export_to_json(self, graph: 's3dgraphy.Graph',
                       output_path: str) -> str:
         """
-        Export s3dgraphy graph to JSON format using NetworkX node-link format
+        Export s3dgraphy graph to JSON format v1.5 specification
 
         Args:
             graph: s3dgraphy Graph object
@@ -351,17 +259,563 @@ class S3DConverter:
         Returns:
             Path to the generated JSON file
         """
-        # Convert to NetworkX graph
-        nx_graph = self._convert_to_networkx(graph)
+        # Build s3Dgraphy v1.5 JSON structure
+        json_data = {
+            "version": "1.5",
+            "context": {
+                "absolute_time_Epochs": {}
+            },
+            "graphs": {}
+        }
 
-        # Export to JSON using NetworkX node-link format
-        json_data = nx.node_link_data(nx_graph, edges='edges')
+        # Extract unique periods/epochs from nodes
+        epochs = {}
+        epoch_counter = 1
+
+        for node in graph.nodes:
+            if hasattr(node, 'attributes') and 'period' in node.attributes:
+                period_name = node.attributes['period']
+                if period_name and period_name not in epochs:
+                    epoch_id = f"epoch_{epoch_counter:02d}"
+                    epochs[period_name] = {
+                        "id": epoch_id,
+                        "name": period_name,
+                        "start": None,  # Can be enriched with actual dates
+                        "end": None,
+                        "color": self._generate_epoch_color(epoch_counter)
+                    }
+                    epoch_counter += 1
+
+        # Add epochs to context
+        for period_name, epoch_data in epochs.items():
+            json_data["context"]["absolute_time_Epochs"][epoch_data["id"]] = {
+                "name": epoch_data["name"],
+                "start": epoch_data["start"],
+                "end": epoch_data["end"],
+                "color": epoch_data["color"]
+            }
+
+        # Build graph structure
+        graph_data = {
+            "id": graph.graph_id,
+            "name": graph.name,
+            "description": graph.description,
+            "defaults": {
+                "license": "CC-BY-NC-ND",
+                "authors": [f"pyarchinit_export_{datetime.now().strftime('%Y%m%d')}"],
+                "embargo_until": None
+            },
+            "nodes": {
+                "authors": {},
+                "stratigraphic": {
+                    "US": {},
+                    "USVs": {},
+                    "SF": {}
+                },
+                "epochs": {},
+                "groups": {},
+                "properties": {},
+                "documents": {},
+                "extractors": {},
+                "combiners": {},
+                "links": {},
+                "geo": {}
+            },
+            "edges": {
+                "is_before": [],
+                "has_same_time": [],
+                "has_data_provenance": [],
+                "has_author": [],
+                "has_first_epoch": [],
+                "survive_in_epoch": [],
+                "is_in_activity": [],
+                "has_property": [],
+                "has_timebranch": [],
+                "has_linked_resource": []
+            }
+        }
+
+        # Organize nodes by category
+        for node in graph.nodes:
+            node_data = {
+                "name": node.name,
+                "description": node.description
+            }
+
+            # Add all custom attributes
+            if hasattr(node, 'attributes') and node.attributes:
+                for key, value in node.attributes.items():
+                    if key not in ['name', 'description']:
+                        node_data[key] = value
+
+            # Categorize node by unit_type
+            unit_type = node.attributes.get('unit_type', 'US') if hasattr(node, 'attributes') else 'US'
+
+            # Map unit types to s3Dgraphy categories
+            if unit_type in ['USVA', 'USVB', 'USVC', 'USD']:
+                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
+            elif unit_type in ['SF', 'VSF']:
+                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
+            elif unit_type == 'DOC':
+                graph_data["nodes"]["documents"][node.node_id] = node_data
+            elif unit_type == 'Extractor':
+                graph_data["nodes"]["extractors"][node.node_id] = node_data
+            elif unit_type == 'Combiner':
+                graph_data["nodes"]["combiners"][node.node_id] = node_data
+            else:
+                # Default to US category
+                graph_data["nodes"]["stratigraphic"]["US"][node.node_id] = node_data
+
+        # Organize edges by type
+        for edge in graph.edges:
+            edge_data = {
+                "from": edge.edge_source,
+                "to": edge.edge_target
+            }
+
+            # Add edge attributes
+            if hasattr(edge, 'attributes') and edge.attributes:
+                edge_data.update(edge.attributes)
+
+            # Map edge types to s3Dgraphy categories
+            edge_type = edge.edge_type if hasattr(edge, 'edge_type') else 'generic_connection'
+
+            if edge_type == 'is_before' or edge_data.get('stratigraphic_relation') in ['COVERS', 'CUTS', 'FILLS']:
+                graph_data["edges"]["is_before"].append(edge_data)
+            elif edge_type == 'has_same_time' or edge_data.get('stratigraphic_relation') in ['EQUAL_TO', 'BONDS_TO']:
+                graph_data["edges"]["has_same_time"].append(edge_data)
+            else:
+                # Add to generic connection or appropriate category
+                if 'is_before' not in graph_data["edges"]:
+                    graph_data["edges"]["is_before"] = []
+                graph_data["edges"]["is_before"].append(edge_data)
+
+        # Add graph to graphs collection
+        json_data["graphs"][graph.graph_id] = graph_data
 
         # Write to file
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(json_data, f, indent=2, ensure_ascii=False)
 
         return output_path
+
+    def _generate_epoch_color(self, epoch_number: int) -> str:
+        """Generate color for epoch based on number"""
+        colors = [
+            "#FFD700",  # Gold
+            "#FF6347",  # Tomato
+            "#4169E1",  # Royal Blue
+            "#32CD32",  # Lime Green
+            "#FF1493",  # Deep Pink
+            "#00CED1",  # Dark Turquoise
+            "#FF8C00",  # Dark Orange
+            "#9370DB",  # Medium Purple
+            "#20B2AA",  # Light Sea Green
+            "#DC143C",  # Crimson
+        ]
+        return colors[(epoch_number - 1) % len(colors)]
+
+    def export_to_heriverse_json(self, graph: 's3dgraphy.Graph',
+                                  output_path: str,
+                                  site_name: str = "Archaeological Site",
+                                  creator_id: str = None,
+                                  resource_path: str = None) -> str:
+        """
+        Export s3dgraphy graph to Heriverse/ATON JSON format
+
+        This format includes:
+        - Full CouchDB/scene wrapper with metadata
+        - environment, scenegraph, multigraph sections
+        - Additional node categories: USVn, semantic_shapes, representation_models, panorama_models
+        - Additional edge types: generic_connection, changed_from, contrasts_with
+
+        Args:
+            graph: s3dgraphy Graph object
+            output_path: Path to output JSON file
+            site_name: Name of the archaeological site
+            creator_id: Creator user ID (default: generated)
+            resource_path: Base URL for uploaded resources (default: placeholder)
+
+        Returns:
+            Path to the generated JSON file
+        """
+        import uuid
+
+        # Generate UUIDs for scene
+        scene_id = f"scene:{uuid.uuid4()}"
+        if not creator_id:
+            creator_id = f"user:{uuid.uuid4()}"
+        if not resource_path:
+            resource_path = f"https://server/uploads/{uuid.uuid4()}"
+
+        # Extract unique periods/epochs from nodes
+        epochs = {}
+        epoch_counter = 1
+
+        for node in graph.nodes:
+            if hasattr(node, 'attributes') and 'period' in node.attributes:
+                period_name = node.attributes['period']
+                if period_name and period_name not in epochs:
+                    epoch_id = f"epoch_{epoch_counter:02d}"
+                    epochs[period_name] = {
+                        "id": epoch_id,
+                        "name": period_name,
+                        "start": None,
+                        "end": None,
+                        "color": self._generate_epoch_color(epoch_counter)
+                    }
+                    epoch_counter += 1
+
+        # Build context with absolute_time_Epochs
+        context = {"absolute_time_Epochs": {}}
+        for period_name, epoch_data in epochs.items():
+            context["absolute_time_Epochs"][epoch_data["id"]] = {
+                "name": epoch_data["name"],
+                "start": epoch_data["start"],
+                "end": epoch_data["end"],
+                "color": epoch_data["color"]
+            }
+
+        # Build multigraph structure (s3Dgraphy v1.5 with Heriverse extensions)
+        graph_data = {
+            "id": graph.graph_id,
+            "name": graph.name,
+            "description": graph.description,
+            "defaults": {
+                "license": "CC-BY-NC-ND",
+                "authors": [f"pyarchinit_heriverse_export_{datetime.now().strftime('%Y%m%d')}"],
+                "embargo_until": None
+            },
+            "nodes": {
+                "authors": {},
+                "stratigraphic": {
+                    "US": {},
+                    "USVs": {},
+                    "USVn": {},  # Heriverse: Virtual negative units
+                    "SF": {}
+                },
+                "epochs": {},
+                "groups": {},
+                "properties": {},
+                "documents": {},
+                "extractors": {},
+                "combiners": {},
+                "links": {},
+                "geo": {},
+                "semantic_shapes": {},        # Heriverse: 3D proxy models (GLB)
+                "representation_models": {},  # Heriverse: Full 3D models (GLTF)
+                "panorama_models": {}         # Heriverse: Panoramic images
+            },
+            "edges": {
+                "is_before": [],
+                "has_same_time": [],
+                "has_data_provenance": [],
+                "has_author": [],
+                "has_first_epoch": [],
+                "survive_in_epoch": [],
+                "is_in_activity": [],
+                "has_property": [],
+                "has_timebranch": [],
+                "has_linked_resource": [],
+                "generic_connection": [],  # Heriverse: Generic paradata connections
+                "changed_from": [],        # Heriverse: Stratigraphic evolution
+                "contrasts_with": []       # Heriverse: Conflicting interpretations
+            }
+        }
+
+        # Organize nodes by category
+        for node in graph.nodes:
+            node_data = {
+                "name": node.name,
+                "description": node.description
+            }
+
+            # Add all custom attributes
+            if hasattr(node, 'attributes') and node.attributes:
+                for key, value in node.attributes.items():
+                    if key not in ['name', 'description']:
+                        node_data[key] = value
+
+            # Categorize node by unit_type
+            unit_type = node.attributes.get('unit_type', 'US') if hasattr(node, 'attributes') else 'US'
+
+            # Map unit types to Heriverse categories
+            if unit_type in ['USVA', 'USVB', 'USVC', 'USD']:
+                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
+            elif unit_type == 'USVn':
+                # Heriverse: Virtual negative units (separate category)
+                graph_data["nodes"]["stratigraphic"]["USVn"][node.node_id] = node_data
+            elif unit_type in ['SF', 'VSF']:
+                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
+            elif unit_type == 'DOC':
+                graph_data["nodes"]["documents"][node.node_id] = node_data
+            elif unit_type == 'Extractor':
+                graph_data["nodes"]["extractors"][node.node_id] = node_data
+            elif unit_type == 'Combiner':
+                graph_data["nodes"]["combiners"][node.node_id] = node_data
+            else:
+                # Default to US category
+                graph_data["nodes"]["stratigraphic"]["US"][node.node_id] = node_data
+
+                # Heriverse: Auto-generate semantic_shape placeholder for each US
+                # In production, these would link to actual 3D models
+                shape_id = f"shape_{node.node_id}"
+                graph_data["nodes"]["semantic_shapes"][shape_id] = {
+                    "name": f"3D Model for {node.name}",
+                    "description": f"Proxy 3D model",
+                    "url": f"{resource_path}/models/{node.node_id}.glb",
+                    "format": "glb",
+                    "us_reference": node.node_id
+                }
+
+        # Organize edges by type
+        for edge in graph.edges:
+            edge_data = {
+                "from": edge.edge_source,
+                "to": edge.edge_target
+            }
+
+            # Add edge attributes
+            if hasattr(edge, 'attributes') and edge.attributes:
+                edge_data.update(edge.attributes)
+
+            # Map edge types to Heriverse categories
+            edge_type = edge.edge_type if hasattr(edge, 'edge_type') else 'generic_connection'
+            strat_rel = edge_data.get('stratigraphic_relation', '')
+
+            if edge_type == 'is_before' or strat_rel in ['COVERS', 'CUTS', 'FILLS']:
+                graph_data["edges"]["is_before"].append(edge_data)
+            elif edge_type == 'has_same_time' or strat_rel in ['EQUAL_TO', 'BONDS_TO']:
+                graph_data["edges"]["has_same_time"].append(edge_data)
+            elif edge_type == 'changed_from':
+                graph_data["edges"]["changed_from"].append(edge_data)
+            elif edge_type == 'contrasts_with':
+                graph_data["edges"]["contrasts_with"].append(edge_data)
+            else:
+                # Generic connection for paradata
+                graph_data["edges"]["generic_connection"].append(edge_data)
+
+        # Build full Heriverse JSON structure with CouchDB/scene wrapper
+        heriverse_data = {
+            "_id": scene_id,
+            "_rev": "1-" + uuid.uuid4().hex[:32],  # CouchDB revision format
+            "type": "scene",
+            "creator": creator_id,
+            "resource_path": resource_path,
+            "title": graph.name,
+            "description": graph.description,
+            "resource_json": {
+                "title": graph.name,
+                "environment": {
+                    "mainpano": {
+                        "url": "s"  # Placeholder for main panorama
+                    },
+                    "lightprobes": {
+                        "auto": "true"
+                    },
+                    "mainlight": {
+                        "direction": ["0.0", "0.0", "0.0"]
+                    }
+                },
+                "viewpoints": {},
+                "scenegraph": {
+                    "nodes": {},
+                    "edges": {
+                        ".": []  # Root scenegraph edges
+                    }
+                },
+                "multigraph": {
+                    "version": "1.5",
+                    "context": context,
+                    "graphs": {
+                        graph.graph_id: graph_data
+                    }
+                }
+            },
+            "wapp": "heriverse",
+            "thumbnail": "",
+            "tag": [],
+            "categories": [],
+            "visibility": "public",
+            "created_at": datetime.now().strftime("%-m/%-d/%Y, %-I:%M:%S %p")
+        }
+
+        # Write to file
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(heriverse_data, f, indent=2, ensure_ascii=False)
+
+        return output_path
+
+    def import_graphml_to_json(self, graphml_path: str, output_json_path: str,
+                               site_name: str = "Archaeological Site") -> str:
+        """
+        Import PyArchInit GraphML and convert to s3Dgraphy JSON v1.5
+
+        Args:
+            graphml_path: Path to input GraphML file (PyArchInit native export)
+            output_json_path: Path to output JSON file
+            site_name: Name of the archaeological site
+
+        Returns:
+            Path to the generated JSON file
+        """
+        import xml.etree.ElementTree as ET
+
+        # Parse GraphML
+        tree = ET.parse(graphml_path)
+        root = tree.getroot()
+
+        ns = {'g': 'http://graphml.graphdrawing.org/xmlns'}
+
+        # Extract nodes and edges from GraphML
+        nodes_data = []
+        edges_data = []
+
+        # Find key definitions to map data fields
+        keys = {}
+        for key in root.findall('.//g:key', ns):
+            key_id = key.get('id')
+            key_name = key.get('attr.name')
+            keys[key_id] = key_name
+
+        # Extract nodes
+        for node in root.findall('.//g:node', ns):
+            node_id = node.get('id')
+            node_dict = {'id': node_id}
+
+            # Extract data fields
+            for data in node.findall('g:data', ns):
+                key_id = data.get('key')
+                key_name = keys.get(key_id, key_id)
+                node_dict[key_name] = data.text
+
+            # Parse label to extract unit type and number (e.g., "US12" → type="US", number="12")
+            label = node_dict.get('label', node_id)
+            import re
+            match = re.match(r'([A-Z]+)(\d+)', label)
+            if match:
+                node_dict['unit_type'] = match.group(1)
+                node_dict['us_number'] = match.group(2)
+
+            nodes_data.append(node_dict)
+
+        # Extract edges
+        for edge in root.findall('.//g:edge', ns):
+            edge_dict = {
+                'source': edge.get('source'),
+                'target': edge.get('target')
+            }
+
+            # Extract edge data
+            for data in edge.findall('g:data', ns):
+                key_id = data.get('key')
+                key_name = keys.get(key_id, key_id)
+                edge_dict[key_name] = data.text
+
+            edges_data.append(edge_dict)
+
+        # Convert to s3dgraphy format
+        graph_id = f"{site_name}_stratigraphy"
+        graph_name = f"{site_name} Stratigraphy (from GraphML)"
+        graph_description = f"Imported from GraphML on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+
+        # Build s3Dgraphy JSON v1.5 structure
+        json_data = {
+            "version": "1.5",
+            "context": {
+                "absolute_time_Epochs": {}
+            },
+            "graphs": {
+                graph_id: {
+                    "id": graph_id,
+                    "name": graph_name,
+                    "description": graph_description,
+                    "defaults": {
+                        "license": "CC-BY-NC-ND",
+                        "authors": [f"graphml_import_{datetime.now().strftime('%Y%m%d')}"],
+                        "embargo_until": None
+                    },
+                    "nodes": {
+                        "authors": {},
+                        "stratigraphic": {
+                            "US": {},
+                            "USVs": {},
+                            "SF": {}
+                        },
+                        "epochs": {},
+                        "groups": {},
+                        "properties": {},
+                        "documents": {},
+                        "extractors": {},
+                        "combiners": {},
+                        "links": {},
+                        "geo": {}
+                    },
+                    "edges": {
+                        "is_before": [],
+                        "has_same_time": [],
+                        "has_data_provenance": [],
+                        "has_author": [],
+                        "has_first_epoch": [],
+                        "survive_in_epoch": [],
+                        "is_in_activity": [],
+                        "has_property": [],
+                        "has_timebranch": [],
+                        "has_linked_resource": []
+                    }
+                }
+            }
+        }
+
+        # Categorize nodes
+        for node_data in nodes_data:
+            node_id = node_data['id']
+            unit_type = node_data.get('unit_type', 'US')
+
+            # Remove internal fields
+            clean_data = {k: v for k, v in node_data.items() if k not in ['id']}
+
+            # Map to categories
+            if unit_type in ['USVA', 'USVB', 'USVC', 'USD']:
+                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["USVs"][node_id] = clean_data
+            elif unit_type in ['SF', 'VSF']:
+                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["SF"][node_id] = clean_data
+            elif unit_type == 'DOC':
+                json_data["graphs"][graph_id]["nodes"]["documents"][node_id] = clean_data
+            elif unit_type == 'Extractor':
+                json_data["graphs"][graph_id]["nodes"]["extractors"][node_id] = clean_data
+            elif unit_type == 'Combiner':
+                json_data["graphs"][graph_id]["nodes"]["combiners"][node_id] = clean_data
+            else:
+                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["US"][node_id] = clean_data
+
+        # Categorize edges
+        for edge_data in edges_data:
+            edge_obj = {
+                "from": edge_data['source'],
+                "to": edge_data['target']
+            }
+
+            # Add other attributes
+            for k, v in edge_data.items():
+                if k not in ['source', 'target']:
+                    edge_obj[k] = v
+
+            # Determine edge type from label or attributes
+            edge_label = edge_data.get('label', '').lower()
+
+            if 'cover' in edge_label or 'cut' in edge_label or 'fill' in edge_label:
+                json_data["graphs"][graph_id]["edges"]["is_before"].append(edge_obj)
+            elif 'uguale' in edge_label or 'same' in edge_label or 'lega' in edge_label:
+                json_data["graphs"][graph_id]["edges"]["has_same_time"].append(edge_obj)
+            else:
+                json_data["graphs"][graph_id]["edges"]["is_before"].append(edge_obj)
+
+        # Write JSON
+        with open(output_json_path, 'w', encoding='utf-8') as f:
+            json.dump(json_data, f, indent=2, ensure_ascii=False)
+
+        return output_json_path
 
     def get_graph_statistics(self, graph: 's3dgraphy.Graph') -> Dict[str, Any]:
         """

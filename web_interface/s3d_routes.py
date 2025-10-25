@@ -163,52 +163,10 @@ def init_s3d_routes(app, db_manager, media_handler):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
-    @s3d_bp.route('/export/graphml/<site_name>')
-    @login_required
-    def export_graphml(site_name):
-        """Export site stratigraphy as s3dgraphy GraphML"""
-        try:
-            # Get all US for the site
-            from pyarchinit_mini.models.us import US as USModel
-            with db_manager.connection.get_session() as session:
-                us_list = session.query(USModel).filter(
-                    USModel.sito == site_name
-                ).all()
-
-                # Convert to dictionaries
-                us_data = []
-                for us in us_list:
-                    us_dict = {}
-                    for column in us.__table__.columns:
-                        us_dict[column.name] = getattr(us, column.name)
-                    us_data.append(us_dict)
-
-            # Create s3dgraphy graph
-            converter = S3DConverter()
-            graph = converter.create_graph_from_us(us_data, site_name)
-
-            # Export to GraphML
-            output_path = Path(app.config['UPLOAD_FOLDER']) / 'graphml' / f"{site_name}_stratigraphy.graphml"
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-
-            converter.export_to_graphml(graph, str(output_path))
-
-            # Send file
-            return send_file(
-                str(output_path),
-                as_attachment=True,
-                download_name=f"{site_name}_stratigraphy.graphml",
-                mimetype='application/xml'
-            )
-
-        except Exception as e:
-            flash(f'Error exporting GraphML: {str(e)}', 'error')
-            return redirect(request.referrer or url_for('index'))
-
     @s3d_bp.route('/export/json/<site_name>')
     @login_required
     def export_json(site_name):
-        """Export site stratigraphy as s3dgraphy JSON"""
+        """Export site stratigraphy as s3dgraphy JSON (from database)"""
         try:
             # Get all US for the site
             from pyarchinit_mini.models.us import US as USModel
@@ -247,10 +205,10 @@ def init_s3d_routes(app, db_manager, media_handler):
             flash(f'Error exporting JSON: {str(e)}', 'error')
             return redirect(request.referrer or url_for('index'))
 
-    @s3d_bp.route('/viewer/<site_name>')
+    @s3d_bp.route('/export/heriverse/<site_name>')
     @login_required
-    def stratigraph_viewer(site_name):
-        """Interactive stratigraph viewer with Extended Matrix colors"""
+    def export_heriverse(site_name):
+        """Export site stratigraphy as Heriverse/ATON JSON (from database)"""
         try:
             # Get all US for the site
             from pyarchinit_mini.models.us import US as USModel
@@ -271,15 +229,116 @@ def init_s3d_routes(app, db_manager, media_handler):
             converter = S3DConverter()
             graph = converter.create_graph_from_us(us_data, site_name)
 
-            # Convert to NetworkX and then to JSON
-            nx_graph = converter._convert_to_networkx(graph)
+            # Export to Heriverse JSON
+            output_path = Path(app.config['UPLOAD_FOLDER']) / 'graphml' / f"{site_name}_heriverse.json"
+            output_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # Prepare JSON data for D3.js
-            import networkx as nx
-            graph_data = nx.node_link_data(nx_graph, edges='edges')
+            # Get creator and resource path from current user if available
+            creator_id = None
+            if current_user and hasattr(current_user, 'id'):
+                creator_id = f"user:{current_user.id}"
+
+            converter.export_to_heriverse_json(
+                graph,
+                str(output_path),
+                site_name=site_name,
+                creator_id=creator_id,
+                resource_path=request.url_root.rstrip('/') + '/static/uploads'
+            )
+
+            # Send file
+            return send_file(
+                str(output_path),
+                as_attachment=True,
+                download_name=f"{site_name}_heriverse.json",
+                mimetype='application/json'
+            )
+
+        except Exception as e:
+            flash(f'Error exporting Heriverse JSON: {str(e)}', 'error')
+            return redirect(request.referrer or url_for('index'))
+
+    @s3d_bp.route('/import/graphml', methods=['POST'])
+    @login_required
+    def import_graphml():
+        """Import GraphML and convert to s3dgraphy JSON"""
+        if 'graphml_file' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
+
+        file = request.files['graphml_file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+
+        site_name = request.form.get('site_name', 'Unknown Site')
+
+        try:
+            # Save temporary GraphML file
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='wb', suffix='.graphml', delete=False) as tmp:
+                file.save(tmp.name)
+                graphml_path = tmp.name
+
+            # Convert to JSON
+            converter = S3DConverter()
+            output_path = Path(app.config['UPLOAD_FOLDER']) / 'graphml' / f"{site_name}_stratigraphy.json"
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+
+            converter.import_graphml_to_json(graphml_path, str(output_path), site_name)
+
+            # Clean up temp file
+            os.unlink(graphml_path)
+
+            return jsonify({
+                'success': True,
+                'message': 'GraphML imported successfully',
+                'json_path': str(output_path)
+            })
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': str(e)}), 500
+
+    @s3d_bp.route('/viewer/<site_name>')
+    @login_required
+    def stratigraph_viewer(site_name):
+        """Interactive stratigraph viewer with Extended Matrix colors"""
+        try:
+            # Check if s3Dgraphy JSON file exists, if not create it
+            json_path = Path(app.config['UPLOAD_FOLDER']) / 'graphml' / f"{site_name}_stratigraphy.json"
+
+            if not json_path.exists():
+                # Create JSON file first
+                from pyarchinit_mini.models.us import US as USModel
+                with db_manager.connection.get_session() as session:
+                    us_list = session.query(USModel).filter(
+                        USModel.sito == site_name
+                    ).all()
+
+                    # Convert to dictionaries
+                    us_data = []
+                    for us in us_list:
+                        us_dict = {}
+                        for column in us.__table__.columns:
+                            us_dict[column.name] = getattr(us, column.name)
+                        us_data.append(us_dict)
+
+                # Create s3dgraphy graph and export to JSON
+                converter = S3DConverter()
+                graph = converter.create_graph_from_us(us_data, site_name)
+
+                # Ensure directory exists
+                json_path.parent.mkdir(parents=True, exist_ok=True)
+
+                # Export to s3Dgraphy JSON v1.5 format
+                converter.export_to_json(graph, str(json_path))
+
+            # Read the s3Dgraphy JSON v1.5 file
+            import json
+            with open(json_path, 'r', encoding='utf-8') as f:
+                graph_data = json.load(f)
 
             # Convert to JSON string for template
-            import json
             graph_json = json.dumps(graph_data, ensure_ascii=False)
 
             # Get available 3D models for site
