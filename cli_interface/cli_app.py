@@ -375,14 +375,45 @@ Gestione dati archeologici via interfaccia a riga di comando
                     
                     # Ask for export
                     if Confirm.ask("Vuoi esportare la matrix?"):
+                        # Ask for format
+                        self.console.print("\n[bold]FORMATO EXPORT:[/bold]")
+                        self.console.print("1. PNG/SVG/HTML (visualizzazione)")
+                        self.console.print("2. GraphML (yEd - Extended Matrix)")
+                        self.console.print("3. Entrambi")
+
+                        export_choice = Prompt.ask("Seleziona formato", choices=["1","2","3"], default="3")
+
                         filename = f"harris_matrix_{site_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                        
-                        with self.console.status("[bold green]Esportando matrix..."):
-                            exports = self.matrix_visualizer.export_to_formats(graph, levels, filename)
-                        
-                        self.console.print(f"[green]✅ Matrix esportata in: {', '.join(exports.keys())}[/green]")
-                        for format_type, path in exports.items():
-                            self.console.print(f"  {format_type}: {path}")
+                        exports = {}
+
+                        # Export PNG/SVG/HTML
+                        if export_choice in ["1", "3"]:
+                            with self.console.status("[bold green]Esportando matrix (PNG/SVG/HTML)..."):
+                                viz_exports = self.matrix_visualizer.export_to_formats(graph, levels, filename)
+                                exports.update(viz_exports)
+
+                        # Export GraphML
+                        if export_choice in ["2", "3"]:
+                            with self.console.status("[bold green]Esportando matrix (GraphML)..."):
+                                graphml_path = f"{filename}.graphml"
+                                result = self.matrix_generator.export_to_graphml(
+                                    graph=graph,
+                                    output_path=graphml_path,
+                                    site_name=site_name,
+                                    title=site_name,
+                                    use_extended_labels=True,
+                                    include_periods=True,
+                                    reverse_epochs=False
+                                )
+                                if result:
+                                    exports['graphml'] = result
+
+                        if exports:
+                            self.console.print(f"[green]✅ Matrix esportata in: {', '.join(exports.keys())}[/green]")
+                            for format_type, path in exports.items():
+                                self.console.print(f"  {format_type}: {path}")
+                        else:
+                            self.console.print("[red]❌ Errore durante l'export[/red]")
                 
             except (ValueError, IndexError):
                 self.console.print("[red]Selezione non valida[/red]")
