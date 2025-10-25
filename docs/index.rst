@@ -107,6 +107,7 @@ Development
    development/contributing
    development/testing
    development/changelog
+   DOCUMENTATION_VERIFICATION
 
 Examples & Tutorials
 --------------------
