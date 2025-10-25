@@ -757,7 +757,25 @@ class HarrisMatrixGenerator:
         try:
             from graphviz import Digraph
         except ImportError:
-            print("ERROR: graphviz module not installed. Install with: pip install graphviz")
+            print("❌ ERROR: Python graphviz module not installed")
+            print("   Install with: pip install 'pyarchinit-mini[harris]'")
+            print("   or: pip install graphviz")
+            return ""
+
+        # Check if Graphviz software is installed
+        import shutil
+        if not shutil.which('dot'):
+            print("⚠️  WARNING: Graphviz software not found in system PATH")
+            print("   The Python module 'graphviz' requires Graphviz software to be installed.")
+            print("   ")
+            print("   Install instructions:")
+            print("   - Linux (Debian/Ubuntu): sudo apt install graphviz")
+            print("   - Linux (Fedora/RHEL):   sudo dnf install graphviz")
+            print("   - macOS (Homebrew):      brew install graphviz")
+            print("   - Windows (Chocolatey):  choco install graphviz")
+            print("   - Or download from:      https://graphviz.org/download/")
+            print("   ")
+            print("   After installation, verify with: dot -V")
             return ""
 
         # Create Graphviz Digraph (PyArchInit method)
@@ -1018,8 +1036,12 @@ class HarrisMatrixGenerator:
                 print(f"⚠️  tred command failed: {result.stderr}")
                 print(f"ℹ️  Using unreduced DOT file")
         except FileNotFoundError:
-            print(f"⚠️  tred command not found. Install Graphviz to use transitive reduction.")
-            print(f"ℹ️  Using unreduced DOT file")
+            print(f"⚠️  tred command not found (Graphviz software not installed)")
+            print(f"   Install Graphviz: https://graphviz.org/download/")
+            print(f"   - Linux: sudo apt install graphviz")
+            print(f"   - macOS: brew install graphviz")
+            print(f"   - Windows: choco install graphviz")
+            print(f"ℹ️  Using unreduced DOT file (matrix may have redundant edges)")
         except Exception as e:
             print(f"⚠️  Error running tred: {e}")
             print(f"ℹ️  Using unreduced DOT file")
