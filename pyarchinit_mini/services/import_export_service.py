@@ -16,6 +16,8 @@ Database support: SQLite and PostgreSQL (both source and target)
 
 import ast
 import json
+import shutil
+import os
 from datetime import datetime, date
 from typing import Dict, List, Optional, Tuple, Any
 import logging
@@ -44,6 +46,9 @@ class ImportExportService:
 
         self.source_engine = None
         self.source_session_maker = None
+        self._backup_created = False  # Track if backup was already created for this session
+        self._backup_path = None  # Store backup path
+
         if source_db_connection:
             self.source_engine = create_engine(source_db_connection)
             self.source_session_maker = sessionmaker(bind=self.source_engine)
@@ -52,6 +57,100 @@ class ImportExportService:
         """Set or change the source database connection"""
         self.source_engine = create_engine(source_db_connection)
         self.source_session_maker = sessionmaker(bind=self.source_engine)
+
+    def _backup_source_database(self) -> Optional[str]:
+        """
+        Create a backup of the source database before migration
+
+        For SQLite: Copies the database file with timestamp
+        For PostgreSQL: Uses pg_dump to create SQL backup
+
+        Returns:
+            Path to backup file, or None if backup failed
+        """
+        if not self.source_engine:
+            logger.warning("No source database configured, skipping backup")
+            return None
+
+        connection_string = str(self.source_engine.url)
+
+        # SQLite backup
+        if connection_string.startswith('sqlite:///'):
+            # Extract file path from connection string
+            # Format: sqlite:///path/to/file.db or sqlite:////absolute/path/to/file.db
+            db_path = connection_string.replace('sqlite:///', '')
+
+            # Handle absolute paths (start with /)
+            if not db_path.startswith('/'):
+                db_path = '/' + db_path
+
+            if not os.path.exists(db_path):
+                logger.error(f"Source database file not found: {db_path}")
+                return None
+
+            # Create backup with timestamp
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            backup_path = f"{db_path}.backup_{timestamp}"
+
+            try:
+                shutil.copy2(db_path, backup_path)
+                file_size = os.path.getsize(backup_path) / (1024 * 1024)  # MB
+                logger.info(f"✓ Database backup created: {backup_path} ({file_size:.2f} MB)")
+                return backup_path
+            except Exception as e:
+                logger.error(f"Failed to create backup: {e}")
+                return None
+
+        # PostgreSQL backup
+        elif connection_string.startswith('postgresql'):
+            try:
+                import subprocess
+
+                # Extract connection details
+                url = self.source_engine.url
+                host = url.host or 'localhost'
+                port = url.port or 5432
+                database = url.database
+                user = url.username
+                password = url.password
+
+                # Create backup file path
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                backup_path = f"{database}_backup_{timestamp}.sql"
+
+                # Set password environment variable
+                env = os.environ.copy()
+                if password:
+                    env['PGPASSWORD'] = password
+
+                # Run pg_dump
+                cmd = [
+                    'pg_dump',
+                    '-h', host,
+                    '-p', str(port),
+                    '-U', user,
+                    '-F', 'p',  # Plain SQL format
+                    '-f', backup_path,
+                    database
+                ]
+
+                result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+
+                if result.returncode == 0:
+                    file_size = os.path.getsize(backup_path) / (1024 * 1024)  # MB
+                    logger.info(f"✓ Database backup created: {backup_path} ({file_size:.2f} MB)")
+                    return backup_path
+                else:
+                    logger.error(f"pg_dump failed: {result.stderr}")
+                    return None
+
+            except Exception as e:
+                logger.error(f"Failed to create PostgreSQL backup: {e}")
+                return None
+
+        else:
+            logger.warning(f"Unsupported database type for backup: {connection_string}")
+            return None
 
     def _check_i18n_columns_exist(self, table_name: str) -> Dict[str, bool]:
         """
@@ -133,7 +232,8 @@ class ImportExportService:
 
         return stats
 
-    def migrate_source_database(self, tables: Optional[List[str]] = None) -> Dict[str, Any]:
+    def migrate_source_database(self, tables: Optional[List[str]] = None,
+                                auto_backup: bool = True) -> Dict[str, Any]:
         """
         Migrate source PyArchInit database to add i18n columns
 
@@ -141,9 +241,10 @@ class ImportExportService:
 
         Args:
             tables: List of tables to migrate (None = all tables)
+            auto_backup: If True, create automatic backup before migration
 
         Returns:
-            Dictionary with migration statistics
+            Dictionary with migration statistics including backup_path
         """
         if not self.source_engine:
             raise ValueError("Source database not configured")
@@ -154,8 +255,23 @@ class ImportExportService:
         total_stats = {
             'tables_migrated': 0,
             'columns_added': 0,
-            'errors': []
+            'errors': [],
+            'backup_path': None
         }
+
+        # Create backup before migration if requested (only once per session)
+        if auto_backup and not self._backup_created:
+            logger.info("Creating database backup before migration...")
+            backup_path = self._backup_source_database()
+            self._backup_path = backup_path
+            self._backup_created = True
+
+            if backup_path:
+                logger.info(f"✓ Backup created successfully: {backup_path}")
+            else:
+                logger.warning("⚠ Backup failed, but continuing with migration...")
+
+        total_stats['backup_path'] = self._backup_path
 
         for table in tables_to_migrate:
             try:
@@ -178,16 +294,18 @@ class ImportExportService:
     # ============================================================================
 
     def import_sites(self, sito_filter: Optional[List[str]] = None,
-                    auto_migrate: bool = True) -> Dict[str, Any]:
+                    auto_migrate: bool = True,
+                    auto_backup: bool = True) -> Dict[str, Any]:
         """
         Import sites from PyArchInit to PyArchInit-Mini
 
         Args:
             sito_filter: List of site names to import (None = import all)
             auto_migrate: If True, automatically add missing i18n columns to source database
+            auto_backup: If True, create backup before database migration
 
         Returns:
-            Dictionary with import statistics
+            Dictionary with import statistics including backup_path
         """
         if not self.source_engine:
             raise ValueError("Source database not configured")
@@ -195,9 +313,11 @@ class ImportExportService:
         # Auto-migrate source database to add i18n columns if needed
         if auto_migrate:
             logger.info("Checking source database for missing i18n columns...")
-            migration_stats = self.migrate_source_database(tables=['site_table'])
+            migration_stats = self.migrate_source_database(tables=['site_table'], auto_backup=auto_backup)
             if migration_stats['columns_added'] > 0:
                 logger.info(f"Added {migration_stats['columns_added']} i18n columns to source database")
+            if migration_stats.get('backup_path'):
+                logger.info(f"Database backup: {migration_stats['backup_path']}")
 
         stats = {'imported': 0, 'updated': 0, 'skipped': 0, 'errors': []}
 
@@ -476,7 +596,8 @@ class ImportExportService:
 
     def import_us(self, sito_filter: Optional[List[str]] = None,
                   import_relationships: bool = True,
-                  auto_migrate: bool = True) -> Dict[str, Any]:
+                  auto_migrate: bool = True,
+                  auto_backup: bool = True) -> Dict[str, Any]:
         """
         Import US (Stratigraphic Units) from PyArchInit to PyArchInit-Mini
 
@@ -484,9 +605,10 @@ class ImportExportService:
             sito_filter: List of site names to import (None = import all)
             import_relationships: If True, parse rapporti field and create relationships
             auto_migrate: If True, automatically add missing i18n columns to source database
+            auto_backup: If True, create backup before database migration
 
         Returns:
-            Dictionary with import statistics
+            Dictionary with import statistics including backup_path
         """
         if not self.source_engine:
             raise ValueError("Source database not configured")
@@ -494,9 +616,11 @@ class ImportExportService:
         # Auto-migrate source database to add i18n columns if needed
         if auto_migrate:
             logger.info("Checking source database for missing i18n columns...")
-            migration_stats = self.migrate_source_database(tables=['us_table'])
+            migration_stats = self.migrate_source_database(tables=['us_table'], auto_backup=auto_backup)
             if migration_stats['columns_added'] > 0:
                 logger.info(f"Added {migration_stats['columns_added']} i18n columns to source database")
+            if migration_stats.get('backup_path'):
+                logger.info(f"Database backup: {migration_stats['backup_path']}")
 
         stats = {
             'imported': 0,
@@ -941,16 +1065,18 @@ class ImportExportService:
     # ============================================================================
 
     def import_inventario(self, sito_filter: Optional[List[str]] = None,
-                         auto_migrate: bool = True) -> Dict[str, Any]:
+                         auto_migrate: bool = True,
+                         auto_backup: bool = True) -> Dict[str, Any]:
         """
         Import Inventario Materiali from PyArchInit to PyArchInit-Mini
 
         Args:
             sito_filter: List of site names to import (None = import all)
             auto_migrate: If True, automatically add missing i18n columns to source database
+            auto_backup: If True, create backup before database migration
 
         Returns:
-            Dictionary with import statistics
+            Dictionary with import statistics including backup_path
         """
         if not self.source_engine:
             raise ValueError("Source database not configured")
@@ -958,9 +1084,11 @@ class ImportExportService:
         # Auto-migrate source database to add i18n columns if needed
         if auto_migrate:
             logger.info("Checking source database for missing i18n columns...")
-            migration_stats = self.migrate_source_database(tables=['inventario_materiali_table'])
+            migration_stats = self.migrate_source_database(tables=['inventario_materiali_table'], auto_backup=auto_backup)
             if migration_stats['columns_added'] > 0:
                 logger.info(f"Added {migration_stats['columns_added']} i18n columns to source database")
+            if migration_stats.get('backup_path'):
+                logger.info(f"Database backup: {migration_stats['backup_path']}")
 
         stats = {'imported': 0, 'updated': 0, 'skipped': 0, 'errors': []}
 
