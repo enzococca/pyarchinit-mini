@@ -111,8 +111,11 @@ class HarrisMatrixGenerator:
             'riempie', 'riempito da', 'filled by', 'fills',
             'uguale a', 'same as', 'equal to',
             'si lega a', 'bonds with',
-            'si appoggia a', 'si appoggia', 'gli si appoggia', 'leans against',
+            'si appoggia a', 'si appoggia', 'gli si appoggia', 'leans against', 'supports',
             'contemporaneo', 'contemporary',
+            # Spatial relationships
+            'collegato a', 'connected to', 'connects to',
+            'confina con', 'adiacente a', 'abuts',
             # Extended Matrix symbolic relationships
             '>', '<', '>>', '<<'
         ]
