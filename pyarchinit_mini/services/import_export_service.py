@@ -16,7 +16,7 @@ Database support: SQLite and PostgreSQL (both source and target)
 
 import ast
 import json
-from datetime import datetime
+from datetime import datetime, date
 from typing import Dict, List, Optional, Tuple, Any
 import logging
 from sqlalchemy import create_engine, text, inspect
@@ -53,22 +53,151 @@ class ImportExportService:
         self.source_engine = create_engine(source_db_connection)
         self.source_session_maker = sessionmaker(bind=self.source_engine)
 
+    def _check_i18n_columns_exist(self, table_name: str) -> Dict[str, bool]:
+        """
+        Check which i18n columns exist in the source database table
+
+        Args:
+            table_name: Name of the table to check
+
+        Returns:
+            Dictionary with column_name: exists mapping
+        """
+        if not self.source_engine:
+            raise ValueError("Source database not configured")
+
+        inspector = inspect(self.source_engine)
+        columns = [col['name'] for col in inspector.get_columns(table_name)]
+
+        # Define i18n columns for each table
+        i18n_columns = {
+            'site_table': [
+                'definizione_sito_en', 'descrizione_en'
+            ],
+            'us_table': [
+                'd_stratigrafica_en', 'd_interpretativa_en', 'descrizione_en',
+                'interpretazione_en', 'formazione_en', 'stato_di_conservazione_en',
+                'colore_en', 'consistenza_en', 'struttura_en', 'inclusi_en',
+                'campioni_en', 'documentazione_en', 'osservazioni_en'
+            ],
+            'inventario_materiali_table': [
+                'tipo_reperto_en', 'definizione_reperto_en', 'descrizione_en',
+                'tecnologia_en', 'forma_en', 'stato_conservazione_en',
+                'osservazioni_en'
+            ]
+        }
+
+        result = {}
+        for col in i18n_columns.get(table_name, []):
+            result[col] = col in columns
+
+        return result
+
+    def _add_missing_i18n_columns(self, table_name: str) -> Dict[str, Any]:
+        """
+        Add missing i18n (_en) columns to source database table
+
+        Args:
+            table_name: Name of the table to migrate
+
+        Returns:
+            Dictionary with migration statistics
+        """
+        if not self.source_engine:
+            raise ValueError("Source database not configured")
+
+        stats = {'columns_added': 0, 'columns_skipped': 0, 'errors': []}
+
+        # Check which columns are missing
+        missing_columns = {k: v for k, v in self._check_i18n_columns_exist(table_name).items() if not v}
+
+        if not missing_columns:
+            logger.info(f"Table {table_name} already has all i18n columns")
+            return stats
+
+        logger.info(f"Adding {len(missing_columns)} missing i18n columns to {table_name}: {list(missing_columns.keys())}")
+
+        with self.source_engine.begin() as conn:
+            for col_name in missing_columns.keys():
+                try:
+                    # Add TEXT column with NULL default
+                    sql = text(f"ALTER TABLE {table_name} ADD COLUMN {col_name} TEXT")
+                    conn.execute(sql)
+                    stats['columns_added'] += 1
+                    logger.info(f"Added column {col_name} to {table_name}")
+                except Exception as e:
+                    error_msg = f"Failed to add column {col_name} to {table_name}: {str(e)}"
+                    logger.error(error_msg)
+                    stats['errors'].append(error_msg)
+                    stats['columns_skipped'] += 1
+
+        return stats
+
+    def migrate_source_database(self, tables: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Migrate source PyArchInit database to add i18n columns
+
+        This is called automatically before import to ensure compatibility.
+
+        Args:
+            tables: List of tables to migrate (None = all tables)
+
+        Returns:
+            Dictionary with migration statistics
+        """
+        if not self.source_engine:
+            raise ValueError("Source database not configured")
+
+        all_tables = ['site_table', 'us_table', 'inventario_materiali_table']
+        tables_to_migrate = tables if tables else all_tables
+
+        total_stats = {
+            'tables_migrated': 0,
+            'columns_added': 0,
+            'errors': []
+        }
+
+        for table in tables_to_migrate:
+            try:
+                logger.info(f"Migrating table: {table}")
+                stats = self._add_missing_i18n_columns(table)
+                total_stats['columns_added'] += stats['columns_added']
+                total_stats['errors'].extend(stats['errors'])
+                if stats['columns_added'] > 0:
+                    total_stats['tables_migrated'] += 1
+            except Exception as e:
+                error_msg = f"Failed to migrate table {table}: {str(e)}"
+                logger.error(error_msg)
+                total_stats['errors'].append(error_msg)
+
+        logger.info(f"Migration complete: {total_stats['tables_migrated']} tables migrated, {total_stats['columns_added']} columns added")
+        return total_stats
+
     # ============================================================================
     # SITE TABLE IMPORT/EXPORT
     # ============================================================================
 
-    def import_sites(self, sito_filter: Optional[List[str]] = None) -> Dict[str, Any]:
+    def import_sites(self, sito_filter: Optional[List[str]] = None,
+                    auto_migrate: bool = True) -> Dict[str, Any]:
         """
         Import sites from PyArchInit to PyArchInit-Mini
 
         Args:
             sito_filter: List of site names to import (None = import all)
+            auto_migrate: If True, automatically add missing i18n columns to source database
 
         Returns:
             Dictionary with import statistics
         """
         if not self.source_engine:
             raise ValueError("Source database not configured")
+
+        # Auto-migrate source database to add i18n columns if needed
+        if auto_migrate:
+            logger.info("Checking source database for missing i18n columns...")
+            migration_stats = self.migrate_source_database(tables=['site_table'])
+            if migration_stats['columns_added'] > 0:
+                logger.info(f"Added {migration_stats['columns_added']} i18n columns to source database")
 
         stats = {'imported': 0, 'updated': 0, 'skipped': 0, 'errors': []}
 
@@ -346,19 +475,28 @@ class ImportExportService:
             return '[]'
 
     def import_us(self, sito_filter: Optional[List[str]] = None,
-                  import_relationships: bool = True) -> Dict[str, Any]:
+                  import_relationships: bool = True,
+                  auto_migrate: bool = True) -> Dict[str, Any]:
         """
         Import US (Stratigraphic Units) from PyArchInit to PyArchInit-Mini
 
         Args:
             sito_filter: List of site names to import (None = import all)
             import_relationships: If True, parse rapporti field and create relationships
+            auto_migrate: If True, automatically add missing i18n columns to source database
 
         Returns:
             Dictionary with import statistics
         """
         if not self.source_engine:
             raise ValueError("Source database not configured")
+
+        # Auto-migrate source database to add i18n columns if needed
+        if auto_migrate:
+            logger.info("Checking source database for missing i18n columns...")
+            migration_stats = self.migrate_source_database(tables=['us_table'])
+            if migration_stats['columns_added'] > 0:
+                logger.info(f"Added {migration_stats['columns_added']} i18n columns to source database")
 
         stats = {
             'imported': 0,
@@ -383,13 +521,14 @@ class ImportExportService:
 
             for us_row in source_us_list:
                 try:
+                    from pyarchinit_mini.models.us import US
                     us_data = dict(us_row._mapping)
 
-                    # Check if US already exists
-                    existing = mini_session.execute(
-                        text("SELECT id_us FROM us_table WHERE sito = :sito AND us = :us"),
-                        {'sito': us_data['sito'], 'us': us_data['us']}
-                    ).fetchone()
+                    # Check if US already exists using ORM
+                    existing = mini_session.query(US).filter(
+                        US.sito == us_data['sito'],
+                        US.us == us_data['us']
+                    ).first()
 
                     # Map fields from PyArchInit to PyArchInit-Mini
                     mapped_data = self._map_us_fields_import(us_data)
@@ -404,30 +543,54 @@ class ImportExportService:
                         stats['imported'] += 1
 
                     # Handle relationships
-                    if import_relationships and us_data.get('rapporti'):
-                        relationships = self._parse_pyarchinit_rapporti(us_data['rapporti'])
-                        for rel_type, us_to in relationships:
-                            try:
-                                # Insert relationship
-                                rel_query = text("""
-                                    INSERT INTO us_relationships_table
-                                    (sito, us_from, us_to, relationship_type, created_at, updated_at)
-                                    VALUES (:sito, :us_from, :us_to, :rel_type, :created_at, :updated_at)
-                                """)
+                    if import_relationships:
+                        rapporti_field = us_data.get('rapporti')
+                        if rapporti_field:
+                            logger.info(f"Processing relationships for US {us_data['sito']}/{us_data['us']}: {rapporti_field}")
+                            relationships = self._parse_pyarchinit_rapporti(rapporti_field)
+                            logger.info(f"Parsed {len(relationships)} relationships: {relationships}")
 
-                                mini_session.execute(rel_query, {
-                                    'sito': us_data['sito'],
-                                    'us_from': int(us_data['us']),
-                                    'us_to': int(us_to),
-                                    'rel_type': rel_type,
-                                    'created_at': datetime.now(),
-                                    'updated_at': datetime.now()
-                                })
-                                stats['relationships_created'] += 1
+                            for rel_type, us_to in relationships:
+                                try:
+                                    # Check if relationship already exists
+                                    existing_rel = mini_session.execute(
+                                        text("""SELECT id_us_relationship FROM us_relationships_table
+                                                WHERE sito = :sito AND us_from = :us_from AND us_to = :us_to
+                                                AND relationship_type = :rel_type"""),
+                                        {
+                                            'sito': us_data['sito'],
+                                            'us_from': int(us_data['us']),
+                                            'us_to': int(us_to),
+                                            'rel_type': rel_type
+                                        }
+                                    ).fetchone()
 
-                            except Exception as e:
-                                # Relationship might already exist, skip
-                                pass
+                                    if existing_rel:
+                                        logger.debug(f"Relationship already exists: {us_data['sito']} US {us_data['us']} -{rel_type}-> {us_to}")
+                                        continue
+
+                                    # Insert relationship
+                                    rel_query = text("""
+                                        INSERT INTO us_relationships_table
+                                        (sito, us_from, us_to, relationship_type, created_at, updated_at)
+                                        VALUES (:sito, :us_from, :us_to, :rel_type, :created_at, :updated_at)
+                                    """)
+
+                                    mini_session.execute(rel_query, {
+                                        'sito': us_data['sito'],
+                                        'us_from': int(us_data['us']),
+                                        'us_to': int(us_to),
+                                        'rel_type': rel_type,
+                                        'created_at': datetime.now(),
+                                        'updated_at': datetime.now()
+                                    })
+                                    stats['relationships_created'] += 1
+                                    logger.info(f"Created relationship: {us_data['sito']} US {us_data['us']} -{rel_type}-> {us_to}")
+
+                                except Exception as e:
+                                    logger.warning(f"Failed to create relationship {us_data['sito']} US {us_data['us']} -{rel_type}-> {us_to}: {str(e)}")
+                        else:
+                            logger.debug(f"No rapporti field for US {us_data['sito']}/{us_data['us']}")
 
                     mini_session.commit()
 
@@ -449,6 +612,24 @@ class ImportExportService:
 
     def _map_us_fields_import(self, source_data: Dict[str, Any]) -> Dict[str, Any]:
         """Map US fields from PyArchInit to PyArchInit-Mini format"""
+
+        # Handle date conversion
+        data_schedatura = source_data.get('data_schedatura')
+        if data_schedatura and isinstance(data_schedatura, str):
+            # Try to parse date string (common formats: YYYY-MM-DD, DD/MM/YYYY)
+            for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%Y/%m/%d', '%d-%m-%Y']:
+                try:
+                    data_schedatura = datetime.strptime(data_schedatura, fmt).date()
+                    break
+                except (ValueError, AttributeError):
+                    continue
+            else:
+                # If parsing fails, set to None
+                data_schedatura = None
+        elif not isinstance(data_schedatura, (type(None), date)):
+            # If it's not None or date, set to None
+            data_schedatura = None
+
         mapped = {
             # Core fields
             'sito': source_data.get('sito'),
@@ -470,7 +651,7 @@ class ImportExportService:
             'attivita': source_data.get('attivita'),
             'anno_scavo': source_data.get('anno_scavo'),
             'metodo_di_scavo': source_data.get('metodo_di_scavo'),
-            'data_schedatura': source_data.get('data_schedatura'),
+            'data_schedatura': data_schedatura,
             'schedatore': source_data.get('schedatore'),
 
             # Physical description
@@ -483,6 +664,7 @@ class ImportExportService:
             # Text fields
             'inclusi': source_data.get('inclusi'),
             'campioni': source_data.get('campioni'),
+            'rapporti': source_data.get('rapporti'),  # Copy rapporti field for compatibility
             'documentazione': source_data.get('documentazione'),
             'cont_per': source_data.get('cont_per'),
 
@@ -526,67 +708,38 @@ class ImportExportService:
 
     def _insert_us_mini(self, session: Session, data: Dict[str, Any]):
         """Insert US into PyArchInit-Mini database"""
-        query = text("""
-            INSERT INTO us_table
-            (sito, area, us, d_stratigrafica, d_interpretativa, descrizione, interpretazione,
-             periodo_iniziale, fase_iniziale, periodo_finale, fase_finale,
-             scavato, attivita, anno_scavo, metodo_di_scavo, data_schedatura, schedatore,
-             formazione, stato_di_conservazione, colore, consistenza, struttura,
-             inclusi, campioni, documentazione, cont_per, order_layer,
-             unita_tipo, settore, quad_par, ambient, saggio,
-             n_catalogo_generale, n_catalogo_interno, n_catalogo_internazionale, soprintendenza,
-             quota_relativa, quota_abs, lunghezza_max, altezza_max, altezza_min,
-             profondita_max, profondita_min, larghezza_media,
-             osservazioni, datazione, flottazione, setacciatura, affidabilita,
-             direttore_us, responsabile_us, created_at, updated_at)
-            VALUES
-            (:sito, :area, :us, :d_stratigrafica, :d_interpretativa, :descrizione, :interpretazione,
-             :periodo_iniziale, :fase_iniziale, :periodo_finale, :fase_finale,
-             :scavato, :attivita, :anno_scavo, :metodo_di_scavo, :data_schedatura, :schedatore,
-             :formazione, :stato_di_conservazione, :colore, :consistenza, :struttura,
-             :inclusi, :campioni, :documentazione, :cont_per, :order_layer,
-             :unita_tipo, :settore, :quad_par, :ambient, :saggio,
-             :n_catalogo_generale, :n_catalogo_interno, :n_catalogo_internazionale, :soprintendenza,
-             :quota_relativa, :quota_abs, :lunghezza_max, :altezza_max, :altezza_min,
-             :profondita_max, :profondita_min, :larghezza_media,
-             :osservazioni, :datazione, :flottazione, :setacciatura, :affidabilita,
-             :direttore_us, :responsabile_us, :created_at, :updated_at)
+        # Generate next id_us (VARCHAR field, sequential)
+        max_id_result = session.execute(text("SELECT MAX(CAST(id_us AS INTEGER)) FROM us_table")).fetchone()
+        next_id = (max_id_result[0] or 0) + 1 if max_id_result else 1
+        data['id_us'] = str(next_id)
+
+        # Build INSERT with all fields including id_us
+        fields = list(data.keys())
+        placeholders = [f':{k}' for k in fields]
+
+        query = text(f"""
+            INSERT INTO us_table ({', '.join(fields)})
+            VALUES ({', '.join(placeholders)})
         """)
 
         session.execute(query, data)
 
     def _update_us_mini(self, session: Session, data: Dict[str, Any]):
-        """Update US in PyArchInit-Mini database"""
-        query = text("""
-            UPDATE us_table
-            SET area = :area, d_stratigrafica = :d_stratigrafica,
-                d_interpretativa = :d_interpretativa, descrizione = :descrizione,
-                interpretazione = :interpretazione, periodo_iniziale = :periodo_iniziale,
-                fase_iniziale = :fase_iniziale, periodo_finale = :periodo_finale,
-                fase_finale = :fase_finale, scavato = :scavato, attivita = :attivita,
-                anno_scavo = :anno_scavo, metodo_di_scavo = :metodo_di_scavo,
-                data_schedatura = :data_schedatura, schedatore = :schedatore,
-                formazione = :formazione, stato_di_conservazione = :stato_di_conservazione,
-                colore = :colore, consistenza = :consistenza, struttura = :struttura,
-                inclusi = :inclusi, campioni = :campioni, documentazione = :documentazione,
-                cont_per = :cont_per, order_layer = :order_layer, unita_tipo = :unita_tipo,
-                settore = :settore, quad_par = :quad_par, ambient = :ambient,
-                saggio = :saggio, n_catalogo_generale = :n_catalogo_generale,
-                n_catalogo_interno = :n_catalogo_interno,
-                n_catalogo_internazionale = :n_catalogo_internazionale,
-                soprintendenza = :soprintendenza, quota_relativa = :quota_relativa,
-                quota_abs = :quota_abs, lunghezza_max = :lunghezza_max,
-                altezza_max = :altezza_max, altezza_min = :altezza_min,
-                profondita_max = :profondita_max, profondita_min = :profondita_min,
-                larghezza_media = :larghezza_media, osservazioni = :osservazioni,
-                datazione = :datazione, flottazione = :flottazione,
-                setacciatura = :setacciatura, affidabilita = :affidabilita,
-                direttore_us = :direttore_us, responsabile_us = :responsabile_us,
-                updated_at = :updated_at
-            WHERE sito = :sito AND us = :us
-        """)
+        """Update US in PyArchInit-Mini database using ORM"""
+        from pyarchinit_mini.models.us import US
 
-        session.execute(query, data)
+        # Query for existing US record
+        us_obj = session.query(US).filter(
+            US.sito == data['sito'],
+            US.us == data['us']
+        ).first()
+
+        if us_obj:
+            # Update all fields except sito and us (identity fields)
+            for key, value in data.items():
+                if key not in ['sito', 'us'] and hasattr(us_obj, key):
+                    setattr(us_obj, key, value)
+            session.flush()
 
     def export_us(self, target_db_connection: str, sito_filter: Optional[List[str]] = None,
                   export_relationships: bool = True) -> Dict[str, Any]:
@@ -787,18 +940,27 @@ class ImportExportService:
     # INVENTARIO MATERIALI IMPORT/EXPORT
     # ============================================================================
 
-    def import_inventario(self, sito_filter: Optional[List[str]] = None) -> Dict[str, Any]:
+    def import_inventario(self, sito_filter: Optional[List[str]] = None,
+                         auto_migrate: bool = True) -> Dict[str, Any]:
         """
         Import Inventario Materiali from PyArchInit to PyArchInit-Mini
 
         Args:
             sito_filter: List of site names to import (None = import all)
+            auto_migrate: If True, automatically add missing i18n columns to source database
 
         Returns:
             Dictionary with import statistics
         """
         if not self.source_engine:
             raise ValueError("Source database not configured")
+
+        # Auto-migrate source database to add i18n columns if needed
+        if auto_migrate:
+            logger.info("Checking source database for missing i18n columns...")
+            migration_stats = self.migrate_source_database(tables=['inventario_materiali_table'])
+            if migration_stats['columns_added'] > 0:
+                logger.info(f"Added {migration_stats['columns_added']} i18n columns to source database")
 
         stats = {'imported': 0, 'updated': 0, 'skipped': 0, 'errors': []}
 
