@@ -544,6 +544,177 @@ s3dgraphy:
     target: [0, 0, 0]
 ```
 
+### 🌐 Heriverse/ATON Export Integration (NEW in v1.3.2)
+
+**Full CouchDB/Scene Wrapper for Heriverse and ATON Platforms**
+
+PyArchInit-Mini now supports complete Heriverse/ATON JSON export format with CouchDB wrapper, semantic shapes, and extended metadata for advanced 3D stratigraphic visualization on Heriverse and ATON platforms.
+
+#### Key Features
+
+- **CouchDB/Scene Wrapper**: Auto-generated scene metadata with UUIDs for CouchDB compatibility
+- **Environment Configuration**: Panoramas, lighting, and scene settings
+- **Scenegraph Support**: 3D scene hierarchy for rendering engines
+- **USVn Category**: Virtual negative units (separate from USVs)
+- **Semantic Shapes**: Auto-generated 3D proxy models (GLB) for each stratigraphic unit
+- **Representation Models**: Full-detail 3D models (GLTF) support
+- **Panorama Models**: 360° panoramic image integration
+- **Extended Edge Types**: generic_connection, changed_from, contrasts_with for paradata
+- **13 Node Categories**: Complete Extended Matrix compliance + Heriverse extensions
+- **13 Edge Types**: Comprehensive relationship modeling
+
+#### Export Formats Comparison
+
+| Feature | s3Dgraphy JSON v1.5 | Heriverse JSON |
+|---------|---------------------|----------------|
+| **Format** | JSON v1.5 | Heriverse/CouchDB |
+| **Wrapper** | No | CouchDB scene wrapper |
+| **UUIDs** | No | Auto-generated |
+| **Environment** | No | Panoramas, lighting |
+| **Scenegraph** | No | 3D scene hierarchy |
+| **USVn Category** | No | Yes (virtual negative units) |
+| **Semantic Shapes** | No | Auto-generated GLB placeholders |
+| **Use Case** | General web platforms | Heriverse/ATON platforms |
+
+#### Web Interface Usage
+
+1. Navigate to: **Menu → Harris Matrix → Export GraphML**
+2. Scroll to **"Export s3Dgraphy (Extended Matrix)"** section
+3. Select your archaeological site
+4. Click **"Export Heriverse"** button (orange)
+5. Download `{site_name}_heriverse.json`
+
+#### API Endpoints
+
+**Export Heriverse JSON**:
+```bash
+# Get Heriverse-formatted JSON with CouchDB wrapper
+GET /3d/export/heriverse/<site_name>
+
+# Example
+curl http://localhost:5000/3d/export/heriverse/Pompeii \
+  -o pompeii_heriverse.json
+```
+
+**Compare with standard s3Dgraphy export**:
+```bash
+# Standard s3Dgraphy JSON v1.5
+GET /3d/export/json/<site_name>
+
+# Heriverse JSON (with wrapper)
+GET /3d/export/heriverse/<site_name>
+```
+
+#### Python API
+
+```python
+from pyarchinit_mini.s3d_integration import S3DConverter
+
+converter = S3DConverter()
+graph = converter.create_graph_from_us(us_list, "Pompeii")
+
+# Export to Heriverse format
+converter.export_to_heriverse_json(
+    graph,
+    "pompeii_heriverse.json",
+    site_name="Pompeii",
+    creator_id="user:abc123",           # Optional: defaults to auto-generated UUID
+    resource_path="https://server.org/uploads"  # Optional: defaults to placeholder
+)
+```
+
+#### JSON Structure
+
+```json
+{
+  "_id": "scene:auto-generated-uuid",
+  "_rev": "1-auto-generated-revision",
+  "type": "scene",
+  "creator": "user:auto-generated-uuid",
+  "resource_path": "https://server/uploads/...",
+  "title": "Site Name Stratigraphy",
+  "resource_json": {
+    "environment": {
+      "mainpano": {"url": "s"},
+      "lightprobes": {"auto": "true"},
+      "mainlight": {"direction": ["0.0", "0.0", "0.0"]}
+    },
+    "scenegraph": {
+      "nodes": {},
+      "edges": {".": []}
+    },
+    "multigraph": {
+      "version": "1.5",
+      "context": {"absolute_time_Epochs": {}},
+      "graphs": {
+        "graph_id": {
+          "nodes": {
+            "stratigraphic": {
+              "US": {},
+              "USVs": {},
+              "USVn": {},  // Virtual negative units
+              "SF": {}
+            },
+            "semantic_shapes": {},        // 3D proxy models (GLB)
+            "representation_models": {},  // Full 3D models (GLTF)
+            "panorama_models": {}         // 360° images
+          },
+          "edges": {
+            "is_before": [],
+            "generic_connection": [],  // Paradata
+            "changed_from": [],        // Evolution
+            "contrasts_with": []       // Interpretations
+          }
+        }
+      }
+    }
+  },
+  "wapp": "heriverse",
+  "visibility": "public"
+}
+```
+
+#### When to Use
+
+**Use Heriverse Export for**:
+- Uploading stratigraphic data to Heriverse platform
+- Integration with ATON 3D viewer
+- CouchDB-based archaeological data systems
+- Advanced 3D visualization with semantic proxy models
+- Full scene environment configuration
+
+**Use Standard s3Dgraphy Export for**:
+- General web platform integration
+- Programmatic analysis and data processing
+- Extended Matrix Framework compliance
+- Simpler JSON structure without CouchDB wrapper
+
+#### Semantic Shapes Auto-Generation
+
+The Heriverse export automatically creates semantic_shape placeholders for each stratigraphic unit:
+
+```python
+# For each US, a semantic shape is auto-generated:
+{
+  "shape_us_001": {
+    "name": "3D Model for US 001",
+    "description": "Proxy 3D model",
+    "url": "https://server/uploads/models/us_001.glb",
+    "format": "glb",
+    "us_reference": "site_us_001"
+  }
+}
+```
+
+These placeholders are ready for integration with actual 3D models uploaded through the model management system.
+
+#### Resources
+
+- **Heriverse Platform**: https://heriverse.org
+- **ATON Framework**: https://github.com/phoenixbf/aton
+- **s3Dgraphy Docs**: https://docs.extendedmatrix.org/projects/s3dgraphy/
+- **Import/Export Spec**: https://docs.extendedmatrix.org/projects/s3dgraphy/en/latest/s3dgraphy_import_export.html
+
 ### 🚀 Technical Features
 - **Production Ready**: v1.1.5 with EM_palette GraphML Export + Archaeological Metadata + Clean Edges
 - **Python 3.8-3.14**: Full support for latest Python versions including 3.12, 3.13, 3.14

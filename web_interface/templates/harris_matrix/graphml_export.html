@@ -86,16 +86,39 @@
                 </select>
             </div>
 
+            <!-- Source Selection -->
+            <div class="mb-3">
+                <label class="form-label"><strong>{{ _('Data Source') }}</strong></label>
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="dataSource" id="sourceDatabase" value="database" checked>
+                    <label class="btn btn-outline-primary" for="sourceDatabase">
+                        <i class="fas fa-database"></i> {{ _('From Database') }}
+                    </label>
+
+                    <input type="radio" class="btn-check" name="dataSource" id="sourceGraphML" value="graphml">
+                    <label class="btn btn-outline-primary" for="sourceGraphML">
+                        <i class="fas fa-file-code"></i> {{ _('Import GraphML') }}
+                    </label>
+                </div>
+            </div>
+
+            <!-- GraphML Upload (hidden by default) -->
+            <div id="graphml-upload-section" class="mb-3" style="display: none;">
+                <label for="graphml_file" class="form-label"><strong>{{ _('GraphML File') }}</strong></label>
+                <input type="file" class="form-control" id="graphml_file" accept=".graphml" onchange="handleGraphMLUpload()">
+                <div class="form-text">{{ _('Upload a PyArchInit GraphML file to convert to s3Dgraphy JSON') }}</div>
+            </div>
+
             <!-- Export Buttons -->
             <div class="row g-2">
                 <div class="col-md-4">
-                    <button type="button" class="btn btn-success w-100" onclick="exportS3DGraphML()">
-                        <i class="fas fa-file-export"></i> {{ _('Export GraphML') }}
+                    <button type="button" class="btn btn-success w-100" onclick="exportS3DJSON()">
+                        <i class="fas fa-code"></i> {{ _('Export JSON') }}
                     </button>
                 </div>
                 <div class="col-md-4">
-                    <button type="button" class="btn btn-outline-success w-100" onclick="exportS3DJSON()">
-                        <i class="fas fa-code"></i> {{ _('Export JSON') }}
+                    <button type="button" class="btn btn-warning w-100" onclick="exportHeriverse()">
+                        <i class="fas fa-cube"></i> {{ _('Export Heriverse') }}
                     </button>
                 </div>
                 <div class="col-md-4">
@@ -112,8 +135,9 @@
                     <li><i class="fas fa-check text-success"></i> {{ _('Complete metadata for each SU') }}</li>
                     <li><i class="fas fa-check text-success"></i> {{ _('3D model support (GLB/GLTF)') }}</li>
                     <li><i class="fas fa-check text-success"></i> {{ _('Extended Matrix Framework compliant') }}</li>
-                    <li><i class="fas fa-check text-success"></i> {{ _('Analysis with NetworkX, Gephi, yEd') }}</li>
-                    <li><i class="fas fa-check text-success"></i> {{ _('JSON export for programmatic analysis') }}</li>
+                    <li><i class="fas fa-check text-success"></i> {{ _('JSON v1.5 format for web platforms') }}</li>
+                    <li><i class="fas fa-check text-success"></i> {{ _('Heriverse/ATON format with CouchDB wrapper and semantic shapes') }}</li>
+                    <li><i class="fas fa-check text-success"></i> {{ _('Interactive 3D stratigraph viewer') }}</li>
                 </ul>
             </div>
         </div>
@@ -166,13 +190,61 @@
 </div>
 
 <script>
-function exportS3DGraphML() {
+// Toggle GraphML upload section based on source selection
+document.querySelectorAll('input[name="dataSource"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const uploadSection = document.getElementById('graphml-upload-section');
+        if (this.value === 'graphml') {
+            uploadSection.style.display = 'block';
+        } else {
+            uploadSection.style.display = 'none';
+        }
+    });
+});
+
+function handleGraphMLUpload() {
+    const fileInput = document.getElementById('graphml_file');
     const site = document.getElementById('s3d_site').value;
-    if (!site) {
-        alert('{{ _("Select a site for export") }}');
+
+    if (!fileInput.files || fileInput.files.length === 0) {
         return;
     }
-    window.location.href = `/3d/export/graphml/${site}`;
+
+    if (!site) {
+        alert('{{ _("Please select a site first") }}');
+        fileInput.value = '';
+        return;
+    }
+
+    // Upload GraphML and convert to JSON
+    const formData = new FormData();
+    formData.append('graphml_file', fileInput.files[0]);
+    formData.append('site_name', site);
+
+    // Show loading indicator
+    const uploadBtn = document.createElement('div');
+    uploadBtn.className = 'alert alert-info mt-2';
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ _("Converting GraphML to JSON...") }}';
+    document.getElementById('graphml-upload-section').appendChild(uploadBtn);
+
+    fetch('/3d/import/graphml', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        uploadBtn.remove();
+        if (data.success) {
+            alert('{{ _("GraphML imported successfully! JSON file created.") }}');
+            fileInput.value = '';
+        } else {
+            alert('{{ _("Error importing GraphML:") }} ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        uploadBtn.remove();
+        alert('{{ _("Error:") }} ' + error.message);
+    });
 }
 
 function exportS3DJSON() {
@@ -181,7 +253,39 @@ function exportS3DJSON() {
         alert('{{ _("Select a site for export") }}');
         return;
     }
-    window.location.href = `/3d/export/json/${site}`;
+
+    const dataSource = document.querySelector('input[name="dataSource"]:checked').value;
+
+    if (dataSource === 'graphml') {
+        const fileInput = document.getElementById('graphml_file');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert('{{ _("Please upload a GraphML file first") }}');
+            return;
+        }
+        // If GraphML was uploaded, the JSON was already created
+        alert('{{ _("JSON file created from GraphML. You can now use the Interactive Viewer.") }}');
+    } else {
+        // Export from database
+        window.location.href = `/3d/export/json/${site}`;
+    }
+}
+
+function exportHeriverse() {
+    const site = document.getElementById('s3d_site').value;
+    if (!site) {
+        alert('{{ _("Select a site for export") }}');
+        return;
+    }
+
+    const dataSource = document.querySelector('input[name="dataSource"]:checked').value;
+
+    if (dataSource === 'graphml') {
+        alert('{{ _("Heriverse export from GraphML is not yet supported. Please use database export.") }}');
+        return;
+    }
+
+    // Export from database to Heriverse format
+    window.location.href = `/3d/export/heriverse/${site}`;
 }
 
 function viewInteractive() {

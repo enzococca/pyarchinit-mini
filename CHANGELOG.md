@@ -5,6 +5,40 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2025-10-25
+
+### Added
+- **Heriverse/ATON Export Integration**: Complete support for Heriverse and ATON platform JSON format
+  - New `export_to_heriverse_json()` method in S3DConverter with CouchDB/scene wrapper
+  - Auto-generated UUIDs for scene and creator metadata
+  - Environment configuration (panoramas, lighting, scene settings)
+  - Scenegraph support for 3D scene hierarchy
+  - USVn category for virtual negative stratigraphic units (separate from USVs)
+  - Semantic shapes: Auto-generated 3D proxy model placeholders (GLB) for each US
+  - Representation models and panorama models support
+  - Extended edge types: generic_connection, changed_from, contrasts_with for paradata
+  - 13 node categories including semantic_shapes, representation_models, panorama_models
+  - 13 edge types for comprehensive relationship modeling
+  - New Flask route: `GET /3d/export/heriverse/<site_name>`
+  - Web UI button: "Export Heriverse" (orange button in s3Dgraphy section)
+  - Complete test suite with 4/4 tests passing
+
+### Updated
+- **Documentation**:
+  - Updated `README.md` with comprehensive Heriverse/ATON section
+  - Updated `docs/features/s3dgraphy.rst` with Heriverse export documentation
+  - Updated `docs/s3dgraphy_integration.md` with Heriverse format comparison
+  - Added `docs/HERIVERSE_INTEGRATION_SUMMARY.md` technical guide
+  - Created `test_heriverse_export.py` validation suite
+- **Web Interface**: Added third export button in s3Dgraphy section (JSON, Heriverse, Interactive Viewer)
+
+### Technical
+- Complete Heriverse JSON v1.5 specification compliance
+- Auto-generates semantic_shape placeholders for each stratigraphic unit
+- Full CouchDB/scene wrapper with proper UUID generation
+- Compatible with Heriverse platform and ATON 3D viewer
+- Supports both standard s3Dgraphy v1.5 and Heriverse formats as separate export options
+
 ## [1.2.12] - 2025-10-22
 
 ### Fixed
