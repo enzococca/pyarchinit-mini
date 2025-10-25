@@ -1428,6 +1428,54 @@ pip install -e '.[dev]'
 pre-commit install  # Optional: install pre-commit hooks
 ```
 
+### Documentation Verification System
+
+PyArchInit-Mini includes an automated system to ensure documentation quality and consistency:
+
+**Features:**
+- ✅ **Version Alignment**: Automatically checks that versions match across `pyproject.toml`, `docs/conf.py`, and `CHANGELOG.md`
+- ✅ **Language Consistency**: Verifies documentation is in English
+- ✅ **ReadTheDocs Readiness**: Validates configuration and buildability
+- ✅ **Changelog Updates**: Ensures each version has proper changelog entry
+
+**Quick Usage:**
+
+```bash
+# Run verification
+python scripts/verify_docs.py
+
+# Auto-fix version misalignments
+python scripts/verify_docs.py --fix
+
+# Install pre-commit hooks (runs verification before each commit)
+bash scripts/setup_pre_commit.sh
+```
+
+**Before Publishing a New Version:**
+
+```bash
+# 1. Update version in pyproject.toml
+# 2. Run auto-fix to sync all version numbers
+python scripts/verify_docs.py --fix
+
+# 3. Update CHANGELOG.md with new version entry
+# 4. Verify everything is aligned
+python scripts/verify_docs.py
+
+# 5. Commit and push (pre-commit hook will run automatically)
+git add pyproject.toml docs/conf.py CHANGELOG.md
+git commit -m "chore: Bump version to X.Y.Z"
+git push
+
+# 6. Build and publish to PyPI
+python -m build
+twine upload dist/*
+```
+
+**Documentation:** See [docs/DOCUMENTATION_VERIFICATION.md](docs/DOCUMENTATION_VERIFICATION.md) for complete guide.
+
+**CI/CD:** GitHub Actions automatically runs verification on every push and pull request.
+
 ---
 
 ## 📄 License
