@@ -202,6 +202,9 @@ Controls:
 GraphML Export for yEd
 -----------------------
 
+.. versionadded:: 1.5.0
+   Fixed periodization display in GraphML export. All archaeological periods now properly visible in yEd (previously only 3-4 periods were displayed). Period ordering now follows chronological sequence based on periodo/fase instead of alphabetical sorting.
+
 Export Format
 ^^^^^^^^^^^^^
 
@@ -234,6 +237,20 @@ yEd Features
 * Label editing and formatting
 * Group nodes and subgraphs
 * Export to various formats (PDF, SVG, PNG)
+
+Periodization Support
+^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 1.5.0
+
+GraphML export now supports complete archaeological periodization:
+
+* **Chronological Ordering**: Periods are arranged in chronological sequence (oldest to newest) based on periodo_iniziale and fase_iniziale fields
+* **Reverse Epochs**: Optional reverse ordering shows newest to oldest periods
+* **Complete Period Display**: All archaeological periods from database are now visible in GraphML export
+* **Large Site Support**: Tested with Dom zu Lund site (758 US nodes, 8 periods)
+
+Period rows in GraphML correspond to datazione_estesa values from the database, arranged in correct chronological order for proper stratigraphic visualization in yEd.
 
 Advanced Features
 -----------------
