@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Harris Matrix Creator - PyArchInit-Mini{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2">
+                <i class="fas fa-project-diagram"></i> Harris Matrix Creator
+            </h1>
+            <p class="text-muted">
+                Interactive visual editor for creating and editing Harris Matrix diagrams
+            </p>
+        </div>
+    </div>
+
+    <!-- Create New Matrix -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-plus-circle"></i> Create New Matrix
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="createNewForm" action="{{ url_for('harris_creator.editor') }}" method="get">
+                        <div class="mb-3">
+                            <label for="newSiteName" class="form-label">Site Name</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="newSiteName"
+                                   name="site"
+                                   required
+                                   placeholder="Enter new site name">
+                            <div class="form-text">
+                                Create a new Harris Matrix for a new archaeological site
+                            </div>
+                        </div>
+                        <input type="hidden" name="mode" value="new">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create New Matrix
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Existing Matrix -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-edit"></i> Edit Existing Matrix
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if sites %}
+                    <form id="editExistingForm" action="{{ url_for('harris_creator.editor') }}" method="get">
+                        <div class="mb-3">
+                            <label for="existingSite" class="form-label">Select Site</label>
+                            <select class="form-select" id="existingSite" name="site" required>
+                                <option value="">-- Choose a site --</option>
+                                {% for site in sites %}
+                                <option value="{{ site.sito }}">{{ site.sito }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Edit an existing Harris Matrix
+                            </div>
+                        </div>
+                        <input type="hidden" name="mode" value="edit">
+                        <button type="submit" class="btn btn-info">
+                            <i class="fas fa-edit"></i> Edit Matrix
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle"></i> No existing sites found. Create a new matrix to get started.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-star"></i> Features
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-mouse-pointer text-primary"></i> Visual Editor</h6>
+                            <ul>
+                                <li>Drag-and-drop node creation</li>
+                                <li>Interactive relationship connections</li>
+                                <li>Real-time visual preview</li>
+                                <li>Zoom and pan navigation</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-shapes text-success"></i> Extended Matrix Support</h6>
+                            <ul>
+                                <li>14 different node types (US, USM, USVA, DOC, Extractor, etc.)</li>
+                                <li>14 relationship types (Covers, Cuts, Continuity, etc.)</li>
+                                <li>Period and area grouping</li>
+                                <li>Custom node descriptions</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-database text-warning"></i> Database Integration</h6>
+                            <ul>
+                                <li>Save directly to database</li>
+                                <li>Edit existing matrices</li>
+                                <li>Automatic validation</li>
+                                <li>Relationship consistency checks</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-download text-info"></i> Export Options</h6>
+                            <ul>
+                                <li>Export to GraphML (yEd compatible)</li>
+                                <li>Export to DOT (Graphviz)</li>
+                                <li>High-resolution PDF rendering</li>
+                                <li>Share with colleagues</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alternative: CSV/Excel Import -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-excel"></i> Alternative: CSV/Excel Import
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Prefer working with spreadsheets? You can also create Harris Matrices by importing
+                        CSV or Excel files using the command-line tool.
+                    </p>
+                    <div class="bg-light p-3 rounded">
+                        <h6>Command-line Usage:</h6>
+                        <pre class="mb-2"><code># Generate template
+pyarchinit-harris-template
+
+# Import your data
+pyarchinit-harris-import your_matrix.xlsx --site "Your Site" --export-graphml</code></pre>
+                    </div>
+                    <a href="https://pyarchinit-mini.readthedocs.io/en/latest/"
+                       class="btn btn-outline-secondary btn-sm mt-2"
+                       target="_blank">
+                        <i class="fas fa-book"></i> View Documentation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation
+document.getElementById('createNewForm').addEventListener('submit', function(e) {
+    const siteName = document.getElementById('newSiteName').value.trim();
+    if (!siteName) {
+        e.preventDefault();
+        alert('Please enter a site name');
+    }
+});
+
+document.getElementById('editExistingForm')?.addEventListener('submit', function(e) {
+    const siteSelect = document.getElementById('existingSite').value;
+    if (!siteSelect) {
+        e.preventDefault();
+        alert('Please select a site');
+    }
+});
+</script>
+{% endblock %}

@@ -88,6 +88,7 @@ Features
    :caption: Feature Documentation:
 
    features/harris_matrix
+   features/harris_matrix_import
    features/stratigraphic_relationships
    features/s3dgraphy
    features/graphml_export

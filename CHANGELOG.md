@@ -5,6 +5,81 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.3] - 2025-10-26
+
+### Added
+- **Harris Matrix Import Tool (CLI)**
+  - New command-line tool `pyarchinit-harris-import` for bulk import of Harris Matrix data
+  - Supports CSV and Excel (.xlsx, .xls) file formats
+  - Import complete stratigraphic sequences with nodes and relationships
+  - Full Extended Matrix node types support: US, USM, USVA, USVB, SF, VSF, TU, DOC, Extractor, Combiner, etc.
+  - All relationship types: Covers, Fills, Cuts, Bonds_to, Equal_to, Continuity, >, >>, etc.
+  - Automatic periodization (periodo/fase) support with area grouping
+  - Built-in validation with detailed error messages and warnings
+  - Export to GraphML and DOT formats after import
+  - Duplicate detection and update handling
+  - Transaction safety with automatic rollback on error
+  - Command: `pyarchinit-harris-import matrix.xlsx --site "Site Name" --export-graphml`
+
+- **Harris Matrix Template Generator**
+  - New command `pyarchinit-harris-template` to generate Excel template
+  - Pre-configured sheets: NODES and RELATIONSHIPS
+  - Column headers and format ready to use
+  - Helpful for creating new import files
+
+- **Comprehensive Documentation**
+  - Added `docs/features/harris_matrix_import.rst` - Complete 600+ line guide
+  - Covers file format specification (CSV/Excel structure)
+  - All Extended Matrix node types with examples
+  - Complete relationship types reference (Italian/English)
+  - Step-by-step usage guide with real-world examples
+  - Validation and error handling documentation
+  - Best practices and troubleshooting
+  - Python API usage examples
+  - Web GUI integration documentation
+
+### Changed
+- Updated main documentation index to include Harris Matrix Import guide
+- Enhanced CLI interface with comprehensive help messages
+- Improved error reporting with clear actionable messages
+
+### Technical
+- Files added:
+  - `pyarchinit_mini/cli/harris_import.py` - Main import tool implementation
+  - `pyarchinit_mini/cli/harris_template.py` - Template generator
+  - `docs/features/harris_matrix_import.rst` - Complete documentation
+- Files modified:
+  - `docs/index.rst` - Added reference to new documentation
+  - `pyproject.toml` - Version 1.5.3, added CLI entry points
+- New entry points:
+  - `pyarchinit-harris-import` - Import Harris Matrix from file
+  - `pyarchinit-harris-template` - Generate import template
+- Supported node types: US, USM, USVA, USVB, USVC, SF, VSF, TU, USD, CON, DOC, Extractor, Combiner, property
+- Supported relationships: Covers, Covered_by, Fills, Filled_by, Cuts, Cut_by, Bonds_to, Equal_to, Leans_on, Continuity, >, <, >>, <<
+
+### Documentation
+- Complete Harris Matrix Import guide with:
+  - File format specification (Excel with 2 sheets, CSV with 2 sections)
+  - Column definitions (required/optional for NODES and RELATIONSHIPS)
+  - All 14 Extended Matrix node types with descriptions
+  - All 14 relationship types (stratigraphic + Extended Matrix)
+  - Command-line usage examples (basic, with exports, custom database)
+  - Complete working example with 10-US test site
+  - Web interface integration guide
+  - Validation and error handling reference
+  - Database integration details
+  - Best practices and troubleshooting
+  - Python API programmatic usage
+  - Appendix with complete type/relationship reference tables
+
+### Impact
+- Users can now import entire Harris Matrix datasets from spreadsheets
+- Bulk creation of stratigraphic sequences from external systems
+- Standardized data exchange format for archaeological projects
+- Simplified testing with sample datasets
+- Full Extended Matrix methodology support in imports
+- Seamless integration with existing GraphML export workflow
+
 ## [1.5.2] - 2025-10-26
 
 ### Fixed
