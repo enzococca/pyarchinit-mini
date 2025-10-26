@@ -41,6 +41,9 @@ from auth_routes import auth_bp, init_login_manager, write_permission_required
 # Import PyArchInit import/export routes
 from pyarchinit_import_export_routes import pyarchinit_import_export_bp
 
+# Import Harris Matrix Creator routes
+from harris_creator_routes import harris_creator_bp
+
 # Import WebSocket events
 from socketio_events import (
     init_socketio_events,
@@ -432,8 +435,9 @@ def create_app():
     pdf_generator = PDFGenerator()
     media_handler = MediaHandler()
 
-    # Store user service in app for authentication
+    # Store services in app for access in routes
     app.user_service = user_service
+    app.db_manager = db_manager
 
     # Initialize Flask-Login
     init_login_manager(app, user_service)
@@ -444,8 +448,12 @@ def create_app():
     # Register PyArchInit import/export blueprint
     app.register_blueprint(pyarchinit_import_export_bp, url_prefix='/pyarchinit-import-export')
 
+    # Register Harris Matrix Creator blueprint
+    app.register_blueprint(harris_creator_bp)
+
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
     csrf.exempt(pyarchinit_import_export_bp)
+    csrf.exempt(harris_creator_bp)
 
     # Initialize Flask-SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*")

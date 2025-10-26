@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.5.2"
+version = "1.5.3"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, and Heriverse/ATON export integration"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -165,6 +165,8 @@ pyarchinit-mini-init = "pyarchinit_mini.scripts.create_admin_user:main"
 pyarchinit-export-import = "pyarchinit_mini.cli.export_import_cli:export_import"
 pyarchinit-graphml = "pyarchinit_mini.cli.graphml_cli:main"
 pyarchinit-mini-import = "pyarchinit_mini.cli.pyarchinit_import_export_cli:pyarchinit"
+pyarchinit-harris-import = "pyarchinit_mini.cli.harris_import:import_harris_matrix"
+pyarchinit-harris-template = "pyarchinit_mini.cli.harris_template:generate_template"
 
 [tool.setuptools.packages.find]
 where = ["."]
