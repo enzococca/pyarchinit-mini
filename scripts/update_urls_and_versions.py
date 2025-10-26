@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import List, Tuple, Dict
 
 # Repository URLs
-OLD_REPO_URL = "https://github.com/pyarchinit/pyarchinit-mini"
+OLD_REPO_URL = "https://github.com/enzococca/pyarchinit-mini"
 NEW_REPO_URL = "https://github.com/enzococca/pyarchinit-mini"
 
 # Files da controllare per la versione

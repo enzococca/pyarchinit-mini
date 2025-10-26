@@ -644,21 +644,77 @@ def create_app():
     @app.route('/us')
     @login_required
     def us_list():
+        from flask import session
+
         page = request.args.get('page', 1, type=int)
+
+        # Advanced filters
         sito_filter = request.args.get('sito', '')
-        
+        area_filter = request.args.get('area', '')
+        unita_tipo_filter = request.args.get('unita_tipo', '')
+        anno_scavo_filter = request.args.get('anno_scavo', '')
+        periodo_filter = request.args.get('periodo', '')
+        fase_filter = request.args.get('fase', '')
+        us_number_filter = request.args.get('us_number', '')
+
+        # Build filters dictionary
         filters = {}
         if sito_filter:
             filters['sito'] = sito_filter
-        
+        if area_filter:
+            filters['area'] = area_filter
+        if unita_tipo_filter:
+            filters['unita_tipo'] = unita_tipo_filter
+        if anno_scavo_filter:
+            filters['anno_scavo'] = int(anno_scavo_filter)
+        if us_number_filter:
+            filters['us'] = us_number_filter
+
+        # Save filters in session for navigation and PDF export
+        session['us_filters'] = {
+            'sito': sito_filter,
+            'area': area_filter,
+            'unita_tipo': unita_tipo_filter,
+            'anno_scavo': anno_scavo_filter,
+            'periodo': periodo_filter,
+            'fase': fase_filter,
+            'us_number': us_number_filter
+        }
+
         us_list = us_service.get_all_us(page=page, size=20, filters=filters)
         total = us_service.count_us(filters=filters)
-        
+
         # Get sites for filter
         sites = site_service.get_all_sites(size=100)
-        
-        return render_template('us/list.html', us_list=us_list, sites=sites,
-                             total=total, page=page, sito_filter=sito_filter)
+
+        # Get distinct values for filters
+        with db_manager.connection.get_session() as db_session:
+            from pyarchinit_mini.models.us import US as USModel
+            from sqlalchemy import distinct
+
+            areas = db_session.query(distinct(USModel.area)).filter(USModel.area.isnot(None), USModel.area != '').all()
+            areas = sorted([a[0] for a in areas if a[0]])
+
+            unit_types = ['US', 'USM', 'VSF', 'SF', 'CON', 'USD', 'USVA', 'USVB', 'USVC', 'DOC', 'TU', 'property', 'Combiner', 'Extractor']
+
+            years = db_session.query(distinct(USModel.anno_scavo)).filter(USModel.anno_scavo.isnot(None)).all()
+            years = sorted([y[0] for y in years if y[0]], reverse=True)
+
+        return render_template('us/list.html',
+                             us_list=us_list,
+                             sites=sites,
+                             areas=areas,
+                             unit_types=unit_types,
+                             years=years,
+                             total=total,
+                             page=page,
+                             sito_filter=sito_filter,
+                             area_filter=area_filter,
+                             unita_tipo_filter=unita_tipo_filter,
+                             anno_scavo_filter=anno_scavo_filter,
+                             periodo_filter=periodo_filter,
+                             fase_filter=fase_filter,
+                             us_number_filter=us_number_filter)
     
     @app.route('/us/create', methods=['GET', 'POST'])
     @login_required
