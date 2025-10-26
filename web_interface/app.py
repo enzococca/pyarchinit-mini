@@ -1739,27 +1739,63 @@ def create_app():
 
     @app.route('/export/us_pdf')
     def export_us_pdf():
-        """Export US list PDF"""
+        """Export US list PDF with active filters"""
+        from flask import session
+
         try:
-            site_name = request.args.get('sito')
+            # Get filters from session (set by us_list view)
+            filters = session.get('us_filters', {})
+
+            # Build query filters
+            query_filters = {}
+            if filters.get('sito'):
+                query_filters['sito'] = filters['sito']
+            if filters.get('area'):
+                query_filters['area'] = filters['area']
+            if filters.get('unita_tipo'):
+                query_filters['unita_tipo'] = filters['unita_tipo']
+            if filters.get('anno_scavo'):
+                try:
+                    query_filters['anno_scavo'] = int(filters['anno_scavo'])
+                except (ValueError, TypeError):
+                    pass
+            if filters.get('us_number'):
+                query_filters['us'] = filters['us_number']
 
             # Get US data within session
-            with db_manager.connection.get_session() as session:
+            with db_manager.connection.get_session() as db_session:
                 from pyarchinit_mini.models.us import US as USModel
 
-                query = session.query(USModel)
-                if site_name:
-                    query = query.filter(USModel.sito == site_name)
+                query = db_session.query(USModel)
+
+                # Apply all filters
+                if query_filters.get('sito'):
+                    query = query.filter(USModel.sito == query_filters['sito'])
+                if query_filters.get('area'):
+                    query = query.filter(USModel.area == query_filters['area'])
+                if query_filters.get('unita_tipo'):
+                    query = query.filter(USModel.unita_tipo == query_filters['unita_tipo'])
+                if query_filters.get('anno_scavo'):
+                    query = query.filter(USModel.anno_scavo == query_filters['anno_scavo'])
+                if query_filters.get('us'):
+                    query = query.filter(USModel.us == query_filters['us'])
 
                 us_records = query.limit(500).all()
                 us_list = [us.to_dict() for us in us_records]
 
             if not us_list:
-                flash('Nessuna US trovata', 'warning')
+                flash('Nessuna US trovata con i filtri attuali', 'warning')
                 return redirect(url_for('us_list'))
 
-            # Generate PDF
-            site_name_clean = site_name if site_name else 'Tutti_i_siti'
+            # Generate PDF filename based on filters
+            site_name_clean = filters.get('sito', 'Filtered_Results')
+            filter_suffix = ''
+            if filters.get('area'):
+                filter_suffix += f'_area_{filters["area"]}'
+            if filters.get('unita_tipo'):
+                filter_suffix += f'_{filters["unita_tipo"]}'
+            if filters.get('anno_scavo'):
+                filter_suffix += f'_{filters["anno_scavo"]}'
 
             # Create temporary file for PDF output
             with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
@@ -1769,7 +1805,7 @@ def create_app():
             pdf_generator.generate_us_pdf(site_name_clean, us_list, output_path)
 
             return send_file(output_path, as_attachment=True,
-                           download_name=f"us_{site_name_clean}.pdf",
+                           download_name=f"us_{site_name_clean}{filter_suffix}.pdf",
                            mimetype='application/pdf')
 
         except Exception as e:
