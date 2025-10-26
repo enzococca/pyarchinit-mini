@@ -54,7 +54,7 @@ def exportGML(o, nodes, edges, options):
 
     o.write("]\n")
 
-def exportGraphml(o, nodes, edges, options, title="", reverse_epochs=False, ff=0):
+def exportGraphml(o, nodes, edges, options, title="", reverse_epochs=False, ff=0, clusters=None):
     """
     Export nodes and edges to GraphML format (yEd compatible).
 
@@ -230,28 +230,55 @@ def exportGraphml(o, nodes, edges, options, title="", reverse_epochs=False, ff=0
     epoch=[]
 
     epoch_sigla = []
-    for i in sorted(nodes):
-        if i.startswith('Periodo') or i.startswith('Period'):
-            epoch.append(i)
-        elif i.startswith('US') or i.startswith('SU') or i.startswith('WSU'):
-            # Handle US labels with underscore format: US_1001_description_epoch
-            # Only process if label contains underscores
-            if '_' in i and i.count('_') >= 2:
-                try:
-                    descrizione_us, singola_epoca = i.rsplit('_', 1)
-                    #print(singola_epoca)
-                    nome_us, descrizione_us = descrizione_us.split('_', 1)
-                    #print(f"La US {nome_us}, {descrizione_us}, appartiene all'epoca {singola_epoca}")
-                    if singola_epoca not in epoch_sigla:
-                        epoch_sigla.append(singola_epoca)
-                        #print(epoch_sigla)
-                except ValueError:
-                    # Skip nodes that don't follow the expected format
-                    pass
+    node_to_cluster = {}  # Map node label -> cluster_id for positioning
 
-    #print(epoch_sigla)
-    
-    for i in sorted(epoch, reverse=tf):
+    # Use clusters if available (from DOT subgraphs), otherwise extract from node labels
+    if clusters:
+        # Build epoch from clusters
+        for cluster_id in sorted(clusters.keys(), key=int):
+            cluster = clusters[cluster_id]
+            datazione = cluster['label']
+            epoch.append(datazione)
+            epoch_sigla.append(datazione)
+
+            # Map nodes to this cluster for Y positioning
+            for node_label in cluster['nodes']:
+                node_to_cluster[node_label] = cluster_id
+    else:
+        # Fallback: extract from node labels (old method)
+        for i in sorted(nodes):
+            if i.startswith('Periodo') or i.startswith('Period'):
+                epoch.append(i)
+            elif i.startswith('US') or i.startswith('SU') or i.startswith('WSU'):
+                # Handle US labels with underscore format: US_1001_description_epoch
+                # Only process if label contains underscores
+                if '_' in i and i.count('_') >= 2:
+                    try:
+                        descrizione_us, singola_epoca = i.rsplit('_', 1)
+                        #print(singola_epoca)
+                        nome_us, descrizione_us = descrizione_us.split('_', 1)
+                        #print(f"La US {nome_us}, {descrizione_us}, appartiene all'epoca {singola_epoca}")
+                        if singola_epoca not in epoch_sigla:
+                            epoch_sigla.append(singola_epoca)
+                            #print(epoch_sigla)
+                    except ValueError:
+                        # Skip nodes that don't follow the expected format
+                        pass
+
+    # Determine epoch order
+    # When clusters are available, they're already in chronological order (oldest to newest)
+    # Use chronological order (not alphabetical) and reverse if needed
+    if clusters:
+        # Clusters are sorted by cluster_id (chronological order)
+        # If reverse_epochs, invert to show newest to oldest
+        epoch_ordered = list(reversed(epoch)) if tf else epoch
+        epoch_sigla_ordered = list(reversed(epoch_sigla)) if tf else epoch_sigla
+    else:
+        # Fallback: alphabetical sort (old behavior)
+        epoch_ordered = sorted(epoch, reverse=tf)
+        epoch_sigla_ordered = sorted(epoch_sigla, reverse=tf)
+
+    for i in epoch_ordered:
         color = "#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
         s=i.split(' : ')
         a=len(i)
@@ -486,9 +513,9 @@ def exportGraphml(o, nodes, edges, options, title="", reverse_epochs=False, ff=0
     #n.initFromString(l)
     rows=doc.createElement('y:Rows')
     x=1000.0
-    
-    
-    for i in sorted(epoch,reverse=tf):
+
+
+    for i in epoch_ordered:
         
         
         s=i.split(' : ')
@@ -519,9 +546,10 @@ def exportGraphml(o, nodes, edges, options, title="", reverse_epochs=False, ff=0
     
     
     for k,nod in nodes.items():
-        
-        
-        nod.exportGraphml(doc, graph1, options, sorted(epoch_sigla, reverse=tf))
+
+
+        nod.exportGraphml(doc, graph1, options, epoch_sigla_ordered, node_to_cluster)
+
     node1.appendChild(graph1)
    
     graph.appendChild(node1)
@@ -530,8 +558,7 @@ def exportGraphml(o, nodes, edges, options, title="", reverse_epochs=False, ff=0
         el.exportGraphml(doc, graph, nodes, options)
     
     root.appendChild(graph)
-    
-    
+
     #######creo i simboli  svg per gli estrattori, i combinar e le continuity########
     data = doc.createElement('data')
     data.setAttribute('key','d7')    
@@ -795,7 +822,7 @@ sodipodi:docname="New document 20">
     root.appendChild(data)
     
     o.write('{}'.format(doc.toxml(encoding='UTF-8').decode()))
-    
+
 
     # parsed_xml = xml.dom.minidom.parseString(xml_string)
     # pretty_xml_as_string = parsed_xml.toprettyxml()
