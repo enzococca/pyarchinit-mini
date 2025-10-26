@@ -13,13 +13,34 @@ This document describes the implementation of advanced search, record navigation
    - Filter persistence in session
    - Results counter
    - Responsive UI with Bootstrap cards
-
-### 🔄 In Progress / To Complete
+   - **Status**: ✅ Implemented and committed
 
 2. **Record Navigation in Detail View**
+   - Previous/Next buttons in edit form
+   - Position counter (e.g., "Record 5 of 20")
+   - Back to List button
+   - Navigation respects active filters
+   - **Status**: ✅ Implemented in web_interface/app.py:868-915 and templates/us/form.html:9-46
+
 3. **Filtered PDF Export**
+   - Exports only filtered results based on active search
+   - Applies all session filters (site, area, unit type, year, US number)
+   - Descriptive filename with filter indicators
+   - Filter badge on Export PDF button
+   - **Status**: ✅ Implemented in web_interface/app.py:1863-1936
+
 4. **Filtered Harris Matrix Export**
+   - Exports filtered GraphML with active search criteria
+   - Creates subgraph containing only matching nodes
+   - Preserves relationships between filtered nodes
+   - Descriptive title and filename with filter indicators
+   - Conditional Export Matrix button (visible when site selected)
+   - **Status**: ✅ Implemented in web_interface/app.py:1534-1655
+
+### 🔄 To Complete
+
 5. **Advanced Search for Inventory**
+   - Apply same pattern to Inventory module (following US implementation)
 
 ## Implemented Features
 
