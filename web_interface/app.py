@@ -1531,6 +1531,129 @@ def create_app():
 
         return render_template('harris_matrix/graphml_export.html', form=form)
 
+    @app.route('/export/harris_matrix_filtered')
+    @login_required
+    def export_harris_matrix_filtered():
+        """Export Harris Matrix GraphML with active filters from search"""
+        from flask import session
+        import networkx as nx
+
+        try:
+            # Get filters from session (set by us_list view)
+            filters = session.get('us_filters', {})
+
+            site_name = filters.get('sito')
+            if not site_name:
+                flash('Seleziona un sito per generare il Harris Matrix', 'warning')
+                return redirect(url_for('us_list'))
+
+            # Generate matrix for the site
+            graph = matrix_generator.generate_matrix(site_name)
+
+            # If filters are active (beyond site), filter the graph nodes
+            if any([filters.get('area'), filters.get('unita_tipo'), filters.get('anno_scavo'), filters.get('us_number')]):
+                # Get filtered US list
+                with db_manager.connection.get_session() as db_session:
+                    from pyarchinit_mini.models.us import US as USModel
+
+                    query = db_session.query(USModel).filter(USModel.sito == site_name)
+
+                    if filters.get('area'):
+                        query = query.filter(USModel.area == filters['area'])
+                    if filters.get('unita_tipo'):
+                        query = query.filter(USModel.unita_tipo == filters['unita_tipo'])
+                    if filters.get('anno_scavo'):
+                        try:
+                            query = query.filter(USModel.anno_scavo == int(filters['anno_scavo']))
+                        except (ValueError, TypeError):
+                            pass
+                    if filters.get('us_number'):
+                        query = query.filter(USModel.us == filters['us_number'])
+
+                    filtered_us = query.all()
+                    filtered_us_numbers = set([str(us.us) for us in filtered_us])
+
+                # Create subgraph with only filtered nodes and their relationships
+                filtered_graph = nx.DiGraph()
+
+                # Add filtered nodes with their attributes
+                for node in graph.nodes():
+                    node_us = str(node)
+                    if node_us in filtered_us_numbers:
+                        filtered_graph.add_node(node, **graph.nodes[node])
+
+                # Add edges only between filtered nodes
+                for u, v in graph.edges():
+                    if str(u) in filtered_us_numbers and str(v) in filtered_us_numbers:
+                        filtered_graph.add_edge(u, v, **graph.edges[u, v])
+
+                graph = filtered_graph
+
+            if len(graph.nodes()) == 0:
+                flash('Nessuna US trovata con i filtri attuali per generare il Harris Matrix', 'warning')
+                return redirect(url_for('us_list'))
+
+            # Export to GraphML
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.graphml', delete=False) as f:
+                temp_path = f.name
+
+            # Generate descriptive title based on filters
+            title_parts = [site_name]
+            if filters.get('area'):
+                title_parts.append(f"Area {filters['area']}")
+            if filters.get('unita_tipo'):
+                title_parts.append(filters['unita_tipo'])
+            if filters.get('anno_scavo'):
+                title_parts.append(str(filters['anno_scavo']))
+            title = ' - '.join(title_parts) + ' (Filtered)'
+
+            result_path = matrix_generator.export_to_graphml(
+                graph=graph,
+                output_path=temp_path,
+                site_name=site_name,
+                title=title,
+                reverse_epochs=False
+            )
+
+            if not result_path:
+                flash('Errore durante l\'export GraphML', 'error')
+                return redirect(url_for('us_list'))
+
+            # Generate filename with filter indicators
+            filename_parts = [site_name]
+            if filters.get('area'):
+                filename_parts.append(f"area_{filters['area']}")
+            if filters.get('unita_tipo'):
+                filename_parts.append(filters['unita_tipo'])
+            if filters.get('anno_scavo'):
+                filename_parts.append(str(filters['anno_scavo']))
+            filename = '_'.join(filename_parts) + '_harris_matrix_filtered.graphml'
+
+            # Send file
+            response = send_file(
+                temp_path,
+                mimetype='application/xml',
+                as_attachment=True,
+                download_name=filename
+            )
+
+            # Clean up temp file after sending
+            @response.call_on_close
+            def cleanup():
+                try:
+                    os.remove(temp_path)
+                except:
+                    pass
+
+            return response
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            flash(f'Errore durante l\'export GraphML: {str(e)}', 'error')
+            return redirect(url_for('us_list'))
+
     # Stratigraphic Validation routes
     @app.route('/validate/<site_name>')
     def validate_stratigraphic(site_name):
