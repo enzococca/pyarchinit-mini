@@ -970,7 +970,7 @@ Copyright and License
 
 PyArchInit-Mini is licensed under GPL v2.
 
-For support, visit: https://github.com/pyarchinit/pyarchinit-mini
+For support, visit: https://github.com/enzococca/pyarchinit-mini
 
 ---
 

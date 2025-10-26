@@ -492,7 +492,7 @@ export DATABASE_URL="postgresql://user:pass@localhost/pyarchinit"
 export DATABASE_URL="sqlite:///./mio_database.db"
 
 [bold]SUPPORTO:[/bold]
-GitHub: https://github.com/pyarchinit/pyarchinit-mini
+GitHub: https://github.com/enzococca/pyarchinit-mini
 Email: enzo.ccc@gmail.com
         """
         

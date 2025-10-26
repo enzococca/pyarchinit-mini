@@ -332,7 +332,7 @@ Verifica che:
 Per problemi con la pubblicazione:
 - PyPI Documentation: https://packaging.python.org/
 - PyPI Help: https://pypi.org/help/
-- Issue tracker: https://github.com/pyarchinit/pyarchinit-mini/issues
+- Issue tracker: https://github.com/enzococca/pyarchinit-mini/issues
 
 ## Riferimenti
 

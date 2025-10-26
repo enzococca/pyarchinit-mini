@@ -563,7 +563,7 @@ L'Extended Matrix Framework implementato in PyArchInit-Mini offre:
 Per ulteriori informazioni, consulta:
 - [README principale](../README.md)
 - [Documentazione completa](https://docs.pyarchinit.org)
-- [Repository GitHub](https://github.com/pyarchinit/pyarchinit-mini)
+- [Repository GitHub](https://github.com/enzococca/pyarchinit-mini)
 
 ---
 

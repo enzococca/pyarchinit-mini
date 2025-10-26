@@ -418,7 +418,7 @@ def main():
             if choice == "0":
                 print("\n👋 Thank you for trying PyArchInit-Mini!")
                 print("📧 Support: enzo.ccc@gmail.com")
-                print("🐛 Issues: https://github.com/pyarchinit/pyarchinit-mini/issues")
+                print("🐛 Issues: https://github.com/enzococca/pyarchinit-mini/issues")
                 break
             elif choice == "1":
                 demo_api_server()
