@@ -851,6 +851,8 @@ def create_app():
     @write_permission_required
     def edit_us(us_id):
         """Edit existing US - us_id is a composite string: sito__area__us_number"""
+        from flask import session
+
         form = USForm()
 
         # Populate site choices
@@ -862,6 +864,55 @@ def create_app():
         if not us:
             flash('US non trovata', 'error')
             return redirect(url_for('us_list'))
+
+        # Calculate prev/next navigation based on filters
+        prev_id = None
+        next_id = None
+        current_position = 0
+        total_records = 0
+
+        try:
+            # Get filters from session
+            filters = session.get('us_filters', {})
+
+            # Build query filters
+            query_filters = {}
+            if filters.get('sito'):
+                query_filters['sito'] = filters['sito']
+            if filters.get('area'):
+                query_filters['area'] = filters['area']
+            if filters.get('unita_tipo'):
+                query_filters['unita_tipo'] = filters['unita_tipo']
+            if filters.get('anno_scavo'):
+                try:
+                    query_filters['anno_scavo'] = int(filters['anno_scavo'])
+                except (ValueError, TypeError):
+                    pass
+            if filters.get('us_number'):
+                query_filters['us'] = filters['us_number']
+
+            # Get full list of filtered US IDs
+            all_us = us_service.get_all_us(size=10000, filters=query_filters)
+            us_ids = [u.id_us for u in all_us]
+            total_records = len(us_ids)
+
+            # Find current position
+            try:
+                current_position = us_ids.index(us_id) + 1  # 1-based for display
+                current_index = current_position - 1  # 0-based for array
+
+                # Calculate prev/next
+                if current_index > 0:
+                    prev_id = us_ids[current_index - 1]
+                if current_index < len(us_ids) - 1:
+                    next_id = us_ids[current_index + 1]
+            except ValueError:
+                # Current US not in filtered list - this is ok, just no navigation
+                pass
+        except Exception as e:
+            # If navigation calculation fails, just continue without it
+            print(f"Navigation calculation error: {e}")
+            pass
 
         if form.validate_on_submit():
             try:
@@ -1028,7 +1079,14 @@ def create_app():
             form.flottazione.data = us.flottazione
             form.setacciatura.data = us.setacciatura
 
-        return render_template('us/form.html', form=form, title='Modifica US', edit_mode=True)
+        return render_template('us/form.html',
+                             form=form,
+                             title='Modifica US',
+                             edit_mode=True,
+                             prev_id=prev_id,
+                             next_id=next_id,
+                             current_position=current_position,
+                             total_records=total_records)
 
     # Inventory routes
     @app.route('/inventario')
