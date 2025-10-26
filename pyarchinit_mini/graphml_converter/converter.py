@@ -226,6 +226,16 @@ def convert_dot_to_graphml(input_dot_path, output_graphml_path, title="", revers
         # Parse DOT file
         nodes, edges, options = parse_dot_file(input_dot_path, options)
 
+        # Parse clusters from DOT file (for periodization rows)
+        clusters = None
+        try:
+            with open(input_dot_path, 'r') as f:
+                dot_content = f.read()
+            clusters = dot.parse_clusters(dot_content)
+        except Exception as e:
+            if options and options.verbose:
+                print(f"Warning: Could not parse clusters: {e}")
+
         # Export to GraphML
         with open(output_graphml_path, 'w', encoding='utf-8') as output_file:
             exporter.exportGraphml(
@@ -234,7 +244,8 @@ def convert_dot_to_graphml(input_dot_path, output_graphml_path, title="", revers
                 edges,
                 options,
                 title=title,
-                reverse_epochs=reverse_epochs
+                reverse_epochs=reverse_epochs,
+                clusters=clusters
             )
 
         return True

@@ -1,0 +1,119 @@
+digraph {
+	graph [dpi=150 nodesep=1 pad=0.5 ranksep=1.5 splines=ortho]
+	rankdir=TB
+	compound=true
+	subgraph cluster_datazione_1 {
+		color=lightblue label="Età contemporanea" rank=same style=filled
+		"US1_Fondazione_in_muratura_1-1" [label="US1_Fondazione_in_muratura_1-1" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_2 {
+		color=lightblue label="Età moderna" rank=same style=filled
+		"US2_Livellamento_1-2" [label="US2_Livellamento_1-2" fillcolor=white shape=box style=filled]
+		"US7_Buca_1-2" [label="US7_Buca_1-2" fillcolor=white shape=box style=filled]
+		"US8_Buca_1-2" [label="US8_Buca_1-2" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_3 {
+		color=lightblue label="Fine XVI secolo - Inizi XVII secolo" rank=same style=filled
+		"US10_Disfacimento_2-1" [label="US10_Disfacimento_2-1" fillcolor=white shape=box style=filled]
+		"US11_Battuto_2-1" [label="US11_Battuto_2-1" fillcolor=white shape=box style=filled]
+		"US14_Palo_2-1" [label="US14_Palo_2-1" fillcolor=white shape=box style=filled]
+		"US16_Palo_2-1" [label="US16_Palo_2-1" fillcolor=white shape=box style=filled]
+		"US3_Abbandono_2-1" [label="US3_Abbandono_2-1" fillcolor=white shape=box style=filled]
+		"CON500_continuità_con_US_12_2-1" [label="CON500_continuità_con_US_12_2-1" fillcolor=white shape=box style=filled]
+		"US9_Disfacimento_2-1" [label="US9_Disfacimento_2-1" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_4 {
+		color=lightblue label="Prima metà del XVI secolo" rank=same style=filled
+		"US13_Palo_2-2" [label="US13_Palo_2-2" fillcolor=white shape=box style=filled]
+		"US15_Palo_2-2" [label="US15_Palo_2-2" fillcolor=white shape=box style=filled]
+		"US4_Pavimentazione_in_terra_2-2" [label="US4_Pavimentazione_in_terra_2-2" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_5 {
+		color=lightblue label="XV sec rec" rank=same style=filled
+		"USVA102_test_2-2.1" [label="USVA102_test_2-2.1" fillcolor=white shape=box style=filled]
+		"USVA103_bla_bla_bla_2-2.1" [label="USVA103_bla_bla_bla_2-2.1" fillcolor=white shape=box style=filled]
+		"USVA106_USV_1_2-2.1" [label="USVA106_USV_1_2-2.1" fillcolor=white shape=box style=filled]
+		"SF300_blabla_bla_2-2.1" [label="SF300_blabla_bla_2-2.1" fillcolor=white shape=box style=filled]
+		"Extractor400_bla_bla_bla_2-2.1" [label="Extractor400_bla_bla_bla_2-2.1" fillcolor=white shape=box style=filled]
+		"DOC4001_DosCo\test1_1.graphml_2-2.1" [label="DOC4001_DosCo\test1_1.graphml_2-2.1" fillcolor=white shape=box style=filled]
+		"DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1" [label="DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1" fillcolor=white shape=box style=filled]
+		"property800_Materiale_pietra_dura_2-2.1" [label="property800_Materiale_pietra_dura_2-2.1" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_6 {
+		color=lightblue label="XV secolo" rank=same style=filled
+		"USM12_Muro_2-3" [label="USM12_Muro_2-3" fillcolor=white shape=box style=filled]
+		"US17_Punto_di_fuoco_2-3" [label="US17_Punto_di_fuoco_2-3" fillcolor=white shape=box style=filled]
+		"US18_Pavimentazione_in_terra_2-3" [label="US18_Pavimentazione_in_terra_2-3" fillcolor=white shape=box style=filled]
+		"USM19_Muro_2-3" [label="USM19_Muro_2-3" fillcolor=white shape=box style=filled]
+		"US20_Punto_di_fuoco_2-3" [label="US20_Punto_di_fuoco_2-3" fillcolor=white shape=box style=filled]
+		"US21_Palo_2-3" [label="US21_Palo_2-3" fillcolor=white shape=box style=filled]
+		"US22_Palo_2-3" [label="US22_Palo_2-3" fillcolor=white shape=box style=filled]
+		"US23_Palo_2-3" [label="US23_Palo_2-3" fillcolor=white shape=box style=filled]
+		"US24_Palo_2-3" [label="US24_Palo_2-3" fillcolor=white shape=box style=filled]
+		"US25_Palo_2-3" [label="US25_Palo_2-3" fillcolor=white shape=box style=filled]
+		"US26_Palo_2-3" [label="US26_Palo_2-3" fillcolor=white shape=box style=filled]
+		"US27_Palo_2-3" [label="US27_Palo_2-3" fillcolor=white shape=box style=filled]
+		"US28_Punto_di_fuoco_2-3" [label="US28_Punto_di_fuoco_2-3" fillcolor=white shape=box style=filled]
+		"US30_Punto_di_fuoco_2-3" [label="US30_Punto_di_fuoco_2-3" fillcolor=white shape=box style=filled]
+		"US32_Preparazione_2-3" [label="US32_Preparazione_2-3" fillcolor=white shape=box style=filled]
+		"US5_Focolare_2-3" [label="US5_Focolare_2-3" fillcolor=white shape=box style=filled]
+		"USM6_Muro_2-3" [label="USM6_Muro_2-3" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_7 {
+		color=lightblue label="Prima metà' del XV secolo rec" rank=same style=filled
+		"USVB104_gggg_2-3.1" [label="USVB104_gggg_2-3.1" fillcolor=white shape=box style=filled]
+		"Extractor402_hhhh_2-3.1" [label="Extractor402_hhhh_2-3.1" fillcolor=white shape=box style=filled]
+		"Combinar900_ggggg_2-3.1" [label="Combinar900_ggggg_2-3.1" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_8 {
+		color=lightblue label="Prima metà' del XV secolo" rank=same style=filled
+		"US29_Preparazione_2-4" [label="US29_Preparazione_2-4" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_9 {
+		color=lightblue label="Inizi XV secolo" rank=same style=filled
+		"US31_Pavimentazione_in_terra_3-1" [label="US31_Pavimentazione_in_terra_3-1" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_10 {
+		color=lightblue label="Fine XIV secolo" rank=same style=filled
+		"US33_Livellamento_3-2" [label="US33_Livellamento_3-2" fillcolor=white shape=box style=filled]
+		"US34_Disfacimento_3-2" [label="US34_Disfacimento_3-2" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_11 {
+		color=lightblue label="Seconda metà' del XIV secolo" rank=same style=filled
+		"US35_Pavimentazione_in_terra_3-3" [label="US35_Pavimentazione_in_terra_3-3" fillcolor=white shape=box style=filled]
+		"US36_Pilastro_3-3" [label="US36_Pilastro_3-3" fillcolor=white shape=box style=filled]
+		"US37_Fossa_di_spoliazione_3-3" [label="US37_Fossa_di_spoliazione_3-3" fillcolor=white shape=box style=filled]
+	}
+	subgraph cluster_datazione_12 {
+		color=lightblue label="Generico XIII secolo - Primi del XIV secolo" rank=same style=filled
+		"US38_Livellamento_4-1" [label="US38_Livellamento_4-1" fillcolor=white shape=box style=filled]
+		"US39_Livellamento_4-1" [label="US39_Livellamento_4-1" fillcolor=white shape=box style=filled]
+	}
+	subgraph main {
+		edge [arrowhead=normal color=black style=solid]
+		"US1_Fondazione_in_muratura_1-1" -> "US2_Livellamento_1-2"
+		"US2_Livellamento_1-2" -> "US3_Abbandono_2-1"
+		"US7_Buca_1-2" -> "US8_Buca_1-2"
+	}
+	subgraph main1 {
+		edge [arrowhead=none color=blue constraint=False style=dotted]
+		"USM12_Muro_2-3" -> "CON500_continuità_con_US_12_2-1"
+		"USM19_Muro_2-3" -> "USVA103_bla_bla_bla_2-2.1"
+		"US5_Focolare_2-3" -> "USVA106_USV_1_2-2.1"
+		"USM6_Muro_2-3" -> "USVA102_test_2-2.1"
+	}
+	subgraph main3 {
+		edge [arrowhead=diamond color=green style=bold]
+		"USVA106_USV_1_2-2.1" -> "SF300_blabla_bla_2-2.1"
+	}
+	subgraph main4 {
+		edge [arrowhead=odiamond color=purple style=bold]
+		"USVB104_gggg_2-3.1" -> "Combinar900_ggggg_2-3.1"
+		"USVA106_USV_1_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1"
+		"USVA106_USV_1_2-2.1" -> "property800_Materiale_pietra_dura_2-2.1"
+		"Extractor400_bla_bla_bla_2-2.1" -> "DOC4001_DosCo\test1_1.graphml_2-2.1"
+		"Extractor400_bla_bla_bla_2-2.1" -> "DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1"
+		"Extractor402_hhhh_2-3.1" -> "Combinar900_ggggg_2-3.1"
+		"Extractor402_hhhh_2-3.1" -> "US29_Preparazione_2-4"
+	}
+}

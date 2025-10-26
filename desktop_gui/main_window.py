@@ -49,6 +49,7 @@ from .postgres_installer_dialog import PostgreSQLInstallerDialog
 from .export_import_dialog import show_export_import_dialog
 from .analytics_dialog import show_analytics_dialog
 from .graphml_export_dialog import show_graphml_export_dialog
+from .pyarchinit_import_export_dialog import PyArchInitImportExportDialog
 
 class PyArchInitGUI:
     """Main GUI application for PyArchInit-Mini"""
@@ -171,6 +172,8 @@ class PyArchInitGUI:
         menubar.add_cascade(label=_("Tools"), menu=tools_menu)
         tools_menu.add_command(label=_("Harris Matrix"), command=self.show_harris_matrix_dialog)
         tools_menu.add_command(label=_("Export GraphML (yEd)"), command=self.show_graphml_export_dialog)
+        tools_menu.add_separator()
+        tools_menu.add_command(label=_("PyArchInit Import/Export"), command=self.show_pyarchinit_import_export_dialog)
         tools_menu.add_separator()
         tools_menu.add_command(label=_("Thesaurus Management"), command=self.show_thesaurus_dialog)
         tools_menu.add_separator()
@@ -1780,6 +1783,16 @@ SCORCIATOIE:
             show_analytics_dialog(self.root, self.db_manager)
         except Exception as e:
             messagebox.showerror("Errore", f"Errore apertura analytics: {str(e)}")
+
+    def show_pyarchinit_import_export_dialog(self):
+        """Show PyArchInit import/export dialog"""
+        try:
+            dialog = PyArchInitImportExportDialog(self.root, self.db_manager)
+            dialog.wait_window()
+            # Refresh data after dialog closes
+            self.refresh_data()
+        except Exception as e:
+            messagebox.showerror(_("Error"), f"{_('Error opening PyArchInit import/export')}: {str(e)}")
 
     def refresh_current_tab(self):
         """Refresh the current tab (called by export/import dialog after import)"""

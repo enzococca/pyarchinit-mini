@@ -65,9 +65,17 @@
                             <div id="import_sqlite_config">
                                 <div class="mb-3">
                                     <label for="import_db_path" class="form-label">{{ _('Database File Path') }}</label>
-                                    <input type="text" class="form-control" id="import_db_path"
-                                           placeholder="/path/to/pyarchinit_db.sqlite">
-                                    <div class="form-text">{{ _('Full path to PyArchInit SQLite database file') }}</div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="import_db_path"
+                                               placeholder="/Users/yourname/pyarchinit/pyarchinit_DB_folder/pyarchinit_db.sqlite">
+                                        <button class="btn btn-outline-secondary" type="button" id="browse_import_db">
+                                            <i class="fas fa-folder-open me-1"></i>{{ _('Browse') }}
+                                        </button>
+                                    </div>
+                                    <div class="form-text">
+                                        {{ _('Full absolute path to PyArchInit SQLite database file') }}<br>
+                                        <small class="text-muted">{{ _('Click Browse to select a file or type the path manually') }}</small>
+                                    </div>
                                 </div>
                             </div>
 
@@ -252,9 +260,17 @@
                             <div id="export_sqlite_config">
                                 <div class="mb-3">
                                     <label for="export_db_path" class="form-label">{{ _('Database File Path') }}</label>
-                                    <input type="text" class="form-control" id="export_db_path"
-                                           placeholder="/path/to/pyarchinit_db.sqlite">
-                                    <div class="form-text">{{ _('Full path to target PyArchInit SQLite database') }}</div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="export_db_path"
+                                               placeholder="/Users/yourname/pyarchinit/pyarchinit_DB_folder/pyarchinit_db.sqlite">
+                                        <button class="btn btn-outline-secondary" type="button" id="browse_export_db">
+                                            <i class="fas fa-folder-open me-1"></i>{{ _('Browse') }}
+                                        </button>
+                                    </div>
+                                    <div class="form-text">
+                                        {{ _('Full absolute path to target PyArchInit SQLite database') }}<br>
+                                        <small class="text-muted">{{ _('Click Browse to select a file or type the path manually') }}</small>
+                                    </div>
                                 </div>
                             </div>
 
@@ -592,6 +608,261 @@ document.getElementById('start_export_btn').addEventListener('click', function()
         document.getElementById('export_status').innerHTML = `<i class="fas fa-times-circle me-2"></i>{{ _("Error") }}: ${error.message}`;
         document.getElementById('export_status').className = 'alert alert-danger';
     });
+});
+
+// ============================================
+// FILE BROWSER
+// ============================================
+
+let fileBrowserTargetInput = null;
+
+// File Browser Modal
+const fileBrowserModal = `
+<div class="modal fade" id="fileBrowserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-folder-open me-2"></i>{{ _('Select SQLite Database') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb" id="fileBrowserBreadcrumb"></ol>
+                </nav>
+
+                <!-- File List -->
+                <div id="fileBrowserList" class="list-group" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-center p-4">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">{{ _('Loading...') }}</p>
+                    </div>
+                </div>
+
+                <!-- Current Selection -->
+                <div class="mt-3">
+                    <label class="form-label">{{ _('Selected File') }}:</label>
+                    <input type="text" class="form-control" id="fileBrowserSelected" readonly>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                <button type="button" class="btn btn-primary" id="fileBrowserConfirm" disabled>
+                    <i class="fas fa-check me-2"></i>{{ _('Select') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+
+// Add modal to page
+document.body.insertAdjacentHTML('beforeend', fileBrowserModal);
+
+// File browser functions
+let currentBrowserPath = '';
+let selectedFilePath = '';
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+function loadDirectory(path) {
+    const listEl = document.getElementById('fileBrowserList');
+    listEl.innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+
+    // Ensure path is a string, use empty string if null/undefined
+    const requestPath = path ? path.trim() : '';
+
+    console.log('Loading directory:', requestPath || '(home)');
+
+    fetch('/pyarchinit-import-export/api/pyarchinit/browse-files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: requestPath })
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers.get('Content-Type'));
+
+        // Get the raw text first to see what we're actually receiving
+        return response.text().then(text => {
+            console.log('Raw response text:', text);
+
+            // Try to parse as JSON
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Failed to parse JSON:', e);
+                console.error('Response was:', text);
+                throw new Error('Server returned invalid JSON: ' + text.substring(0, 100));
+            }
+        });
+    })
+    .then(result => {
+        console.log('Parsed result:', result);
+        if (result.success) {
+            currentBrowserPath = result.current_path;
+            renderBreadcrumb(result.current_path);
+            renderFileList(result.items, result.parent_path);
+        } else {
+            listEl.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
+        }
+    })
+    .catch(error => {
+        console.error('File browser error:', error);
+        listEl.innerHTML = `<div class="alert alert-danger">{{ _('Error') }}: ${error.message}</div>`;
+    });
+}
+
+function renderBreadcrumb(path) {
+    const breadcrumb = document.getElementById('fileBrowserBreadcrumb');
+    const parts = path.split('/').filter(p => p);
+
+    let html = '<li class="breadcrumb-item"><a href="#" data-path="/"><i class="fas fa-home"></i></a></li>';
+
+    let currentPath = '';
+    parts.forEach((part, index) => {
+        currentPath += '/' + part;
+        const isLast = index === parts.length - 1;
+
+        if (isLast) {
+            html += `<li class="breadcrumb-item active">${part}</li>`;
+        } else {
+            html += `<li class="breadcrumb-item"><a href="#" data-path="${currentPath}">${part}</a></li>`;
+        }
+    });
+
+    breadcrumb.innerHTML = html;
+
+    // Add click handlers to breadcrumb links
+    breadcrumb.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            loadDirectory(this.getAttribute('data-path'));
+        });
+    });
+}
+
+function renderFileList(items, parentPath) {
+    const listEl = document.getElementById('fileBrowserList');
+    let html = '';
+
+    // Parent directory link
+    if (parentPath) {
+        html += `
+        <a href="#" class="list-group-item list-group-item-action" data-path="${parentPath}" data-type="parent">
+            <i class="fas fa-level-up-alt me-2"></i>
+            <strong>{{ _('Parent Directory') }}</strong>
+        </a>`;
+    }
+
+    // Directories and files
+    items.forEach(item => {
+        const icon = item.is_dir ? 'fa-folder' : 'fa-database';
+        const iconColor = item.is_dir ? 'text-warning' : 'text-primary';
+        const sizeText = item.is_dir ? '' : `<small class="text-muted">(${formatFileSize(item.size)})</small>`;
+
+        html += `
+        <a href="#" class="list-group-item list-group-item-action"
+           data-path="${item.path}"
+           data-type="${item.is_dir ? 'dir' : 'file'}"
+           data-is-sqlite="${item.is_sqlite}">
+            <i class="fas ${icon} ${iconColor} me-2"></i>
+            ${item.name}
+            ${sizeText}
+        </a>`;
+    });
+
+    if (html === '') {
+        html = '<div class="alert alert-info m-3">{{ _('No directories or SQLite databases found') }}</div>';
+    }
+
+    listEl.innerHTML = html;
+
+    // Add click handlers
+    listEl.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const path = this.getAttribute('data-path');
+            const type = this.getAttribute('data-type');
+            const isSqlite = this.getAttribute('data-is-sqlite') === 'true';
+
+            if (type === 'parent' || type === 'dir') {
+                // Navigate to directory
+                loadDirectory(path);
+                selectedFilePath = '';
+                document.getElementById('fileBrowserSelected').value = '';
+                document.getElementById('fileBrowserConfirm').disabled = true;
+            } else if (type === 'file' && isSqlite) {
+                // Select file
+                selectedFilePath = path;
+                document.getElementById('fileBrowserSelected').value = path;
+                document.getElementById('fileBrowserConfirm').disabled = false;
+
+                // Highlight selection
+                listEl.querySelectorAll('.list-group-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                this.classList.add('active');
+            }
+        });
+    });
+}
+
+// Browse button handlers
+document.getElementById('browse_import_db').addEventListener('click', function() {
+    fileBrowserTargetInput = document.getElementById('import_db_path');
+    const currentValue = fileBrowserTargetInput.value || '';
+
+    selectedFilePath = currentValue;
+    document.getElementById('fileBrowserSelected').value = selectedFilePath;
+    document.getElementById('fileBrowserConfirm').disabled = !selectedFilePath;
+
+    const modal = new bootstrap.Modal(document.getElementById('fileBrowserModal'));
+    modal.show();
+
+    // If there's a current value, start from its parent directory, otherwise start from home
+    let startPath = '';
+    if (currentValue && currentValue.includes('/')) {
+        startPath = currentValue.substring(0, currentValue.lastIndexOf('/'));
+    }
+    console.log('Opening file browser, start path:', startPath || '(home)');
+    loadDirectory(startPath);
+});
+
+document.getElementById('browse_export_db').addEventListener('click', function() {
+    fileBrowserTargetInput = document.getElementById('export_db_path');
+    const currentValue = fileBrowserTargetInput.value || '';
+
+    selectedFilePath = currentValue;
+    document.getElementById('fileBrowserSelected').value = selectedFilePath;
+    document.getElementById('fileBrowserConfirm').disabled = !selectedFilePath;
+
+    const modal = new bootstrap.Modal(document.getElementById('fileBrowserModal'));
+    modal.show();
+
+    // If there's a current value, start from its parent directory, otherwise start from home
+    let startPath = '';
+    if (currentValue && currentValue.includes('/')) {
+        startPath = currentValue.substring(0, currentValue.lastIndexOf('/'));
+    }
+    console.log('Opening file browser, start path:', startPath || '(home)');
+    loadDirectory(startPath);
+});
+
+// Confirm selection
+document.getElementById('fileBrowserConfirm').addEventListener('click', function() {
+    if (selectedFilePath && fileBrowserTargetInput) {
+        fileBrowserTargetInput.value = selectedFilePath;
+        bootstrap.Modal.getInstance(document.getElementById('fileBrowserModal')).hide();
+    }
 });
 </script>
 {% endblock %}

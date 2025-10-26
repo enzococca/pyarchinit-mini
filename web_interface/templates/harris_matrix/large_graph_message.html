@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Harris Matrix - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Harris Matrix - {{ site_name }}</h2>
+
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Graph Too Large for Web Rendering</h4>
+        <p>This Harris Matrix has <strong>{{ num_nodes }} nodes</strong>, which is too complex for direct web rendering.</p>
+        <p>Direct rendering with Graphviz fails due to memory constraints and layout complexity.</p>
+        <hr>
+        <p class="mb-0">
+            <strong>Solution:</strong> Use <strong>GraphML Export</strong> instead, which works perfectly for large graphs:
+        </p>
+        <ul>
+            <li>GraphML export handles graphs of any size (tested with 758+ nodes)</li>
+            <li>Exports include complete periodization structure (all periods visible)</li>
+            <li>Compatible with yEd Graph Editor for professional visualization</li>
+            <li>Supports hierarchical layout, clustering, and custom styling in yEd</li>
+        </ul>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Harris Matrix Statistics</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-value">{{ stats.total_us }}</div>
+                        <div class="stat-label">Total US</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-value">{{ stats.total_relationships }}</div>
+                        <div class="stat-label">Relationships</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-value">{{ stats.top_level_us }}</div>
+                        <div class="stat-label">Top Level US</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-value">{{ stats.bottom_level_us }}</div>
+                        <div class="stat-label">Bottom Level US</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Export Options</h5>
+        </div>
+        <div class="card-body">
+            <h6>Recommended: GraphML Export</h6>
+            <p>
+                Export this large Harris Matrix to GraphML format for visualization in yEd Graph Editor.
+                This is the best solution for large and complex stratigraphic sequences.
+            </p>
+            <a href="{{ url_for('export_harris_graphml') }}?site={{ site_name }}" class="btn btn-primary">
+                <i class="bi bi-download"></i> Export to GraphML (Recommended)
+            </a>
+            <hr>
+            <h6>Alternative: Desktop GUI</h6>
+            <p>
+                For large graphs, consider using the Desktop GUI application which has optimized rendering for complex matrices.
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('sites_list') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Sites
+        </a>
+    </div>
+</div>
+
+<style>
+.stat-box {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-top: 5px;
+}
+</style>
+{% endblock %}

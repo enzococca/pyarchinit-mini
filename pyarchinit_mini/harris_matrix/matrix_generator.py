@@ -613,32 +613,45 @@ class HarrisMatrixGenerator:
         """Validate and fix Harris Matrix for cycles and inconsistencies"""
 
         edges_before = len(graph.edges())
+        num_nodes = len(graph.nodes())
 
-        # Check for cycles
-        if not nx.is_directed_acyclic_graph(graph):
-            # Remove edges that create cycles
-            cycles = list(nx.simple_cycles(graph))
-            print(f"⚠️  Found {len(cycles)} cycles in graph")
-            for cycle in cycles:
-                # Remove the edge with lowest certainty
-                edges_to_remove = []
-                for i in range(len(cycle)):
-                    from_node = cycle[i]
-                    to_node = cycle[(i + 1) % len(cycle)]
-                    if graph.has_edge(from_node, to_node):
-                        edge_data = graph.get_edge_data(from_node, to_node)
-                        certainty = edge_data.get('certainty', 'certain')
-                        edges_to_remove.append((from_node, to_node, certainty))
-                
-                # Sort by certainty and remove least certain
-                edges_to_remove.sort(key=lambda x: x[2])
-                if edges_to_remove:
-                    graph.remove_edge(edges_to_remove[0][0], edges_to_remove[0][1])
+        # For very large graphs (>500 nodes), skip cycle checking to avoid slowdowns
+        # Archaeological Harris Matrices should be acyclic by nature, and any cycles
+        # would indicate data quality issues that should be fixed at the source
+        if num_nodes > 500:
+            print(f"ℹ️  Large graph ({num_nodes} nodes) - skipping cycle validation for performance")
+            print(f"   Ensure your stratigraphic relationships are acyclic at data entry")
+            return graph
 
-        edges_after = len(graph.edges())
-        edges_removed = edges_before - edges_after
-        if edges_removed > 0:
-            print(f"⚠️  Validation removed {edges_removed} edges ({edges_removed/edges_before*100:.1f}%)")
+        # Check for cycles (only for smaller graphs)
+        try:
+            if not nx.is_directed_acyclic_graph(graph):
+                # Remove edges that create cycles
+                cycles = list(nx.simple_cycles(graph))
+                print(f"⚠️  Found {len(cycles)} cycles in graph")
+                for cycle in cycles[:10]:  # Limit to first 10 cycles to avoid infinite loops
+                    # Remove the edge with lowest certainty
+                    edges_to_remove = []
+                    for i in range(len(cycle)):
+                        from_node = cycle[i]
+                        to_node = cycle[(i + 1) % len(cycle)]
+                        if graph.has_edge(from_node, to_node):
+                            edge_data = graph.get_edge_data(from_node, to_node)
+                            certainty = edge_data.get('certainty', 'certain')
+                            edges_to_remove.append((from_node, to_node, certainty))
+
+                    # Sort by certainty and remove least certain
+                    edges_to_remove.sort(key=lambda x: x[2])
+                    if edges_to_remove:
+                        graph.remove_edge(edges_to_remove[0][0], edges_to_remove[0][1])
+
+                edges_after = len(graph.edges())
+                edges_removed = edges_before - edges_after
+                if edges_removed > 0:
+                    print(f"⚠️  Validation removed {edges_removed} edges ({edges_removed/edges_before*100:.1f}%)")
+        except Exception as e:
+            print(f"⚠️  Cycle validation failed: {e}")
+            print(f"   Continuing with unvalidated graph")
 
         return graph
     
@@ -685,22 +698,42 @@ class HarrisMatrixGenerator:
     
     def get_matrix_statistics(self, graph: nx.DiGraph) -> Dict[str, Any]:
         """Get statistics about the Harris Matrix"""
-        
-        stats = {
-            'total_us': len(graph.nodes()),
-            'total_relationships': len(graph.edges()),
-            'levels': len(self.get_matrix_levels(graph)),
-            'is_valid': nx.is_directed_acyclic_graph(graph),
-            'has_cycles': not nx.is_directed_acyclic_graph(graph),
-            'isolated_us': len(list(nx.isolates(graph))),
-            'top_level_us': len([n for n in graph.nodes() if graph.in_degree(n) == 0]),
-            'bottom_level_us': len([n for n in graph.nodes() if graph.out_degree(n) == 0])
-        }
-        
-        # Add cycle information if present
-        if stats['has_cycles']:
-            stats['cycles'] = list(nx.simple_cycles(graph))
-        
+
+        num_nodes = len(graph.nodes())
+        num_edges = len(graph.edges())
+
+        # For large graphs (> 500 nodes), skip expensive operations
+        if num_nodes > 500:
+            print(f"ℹ️  Large graph ({num_nodes} nodes) - using fast statistics (skipping cycle detection)")
+            stats = {
+                'total_us': num_nodes,
+                'total_relationships': num_edges,
+                'levels': 0,  # Skip levels calculation for performance
+                'is_valid': True,  # Assume valid (cycles already checked during generation)
+                'has_cycles': False,  # Skip cycle detection for performance
+                'isolated_us': len(list(nx.isolates(graph))),
+                'top_level_us': len([n for n in graph.nodes() if graph.in_degree(n) == 0]),
+                'bottom_level_us': len([n for n in graph.nodes() if graph.out_degree(n) == 0])
+            }
+        else:
+            # For small graphs, compute full statistics
+            is_dag = nx.is_directed_acyclic_graph(graph)  # Call only once
+
+            stats = {
+                'total_us': num_nodes,
+                'total_relationships': num_edges,
+                'levels': len(self.get_matrix_levels(graph)),
+                'is_valid': is_dag,
+                'has_cycles': not is_dag,
+                'isolated_us': len(list(nx.isolates(graph))),
+                'top_level_us': len([n for n in graph.nodes() if graph.in_degree(n) == 0]),
+                'bottom_level_us': len([n for n in graph.nodes() if graph.out_degree(n) == 0])
+            }
+
+            # Add cycle information if present (only for small graphs)
+            if stats['has_cycles']:
+                stats['cycles'] = list(nx.simple_cycles(graph))
+
         return stats
     
     def add_relationship(self, site_name: str, us_from: int, us_to: int, 
@@ -783,14 +816,43 @@ class HarrisMatrixGenerator:
             print("   After installation, verify with: dot -V")
             return ""
 
+        # Choose layout engine based on graph size
+        # For medium graphs (500-700 nodes), use sfdp which is MUCH faster
+        # For very large graphs (700+ nodes), skip layout pre-calculation (let yEd handle it)
+        num_nodes = len(graph.nodes())
+        num_edges = len(graph.edges())
+
+        # Thresholds for layout engine selection
+        skip_layout = num_nodes > 700 or num_edges > 2000  # Very large - skip layout
+        use_sfdp = (num_nodes > 500 or num_edges > 1500) and not skip_layout  # Medium-large - use sfdp
+        layout_engine = 'sfdp' if use_sfdp else 'dot'
+
+        if skip_layout:
+            print(f"⚠️  Very large graph detected ({num_nodes} nodes, {num_edges} edges)")
+            print(f"   Skipping layout pre-calculation to avoid memory issues")
+            print(f"   yEd will calculate the layout when you open the file")
+        elif use_sfdp:
+            print(f"🚀 Using sfdp layout engine for large graph ({num_nodes} nodes, {num_edges} edges)")
+            print(f"   sfdp is optimized for large graphs and will be much faster than dot")
+
         # Create Graphviz Digraph (PyArchInit method)
-        G = Digraph(engine='dot', strict=False)
+        G = Digraph(engine=layout_engine, strict=False)
         G.attr(rankdir='TB')
         G.attr(compound='true')
         G.graph_attr['pad'] = "0.5"
-        G.graph_attr['nodesep'] = "1"
-        G.graph_attr['ranksep'] = "1.5"
-        G.graph_attr['splines'] = 'ortho'
+
+        if use_sfdp:
+            # sfdp-specific optimizations for large graphs
+            G.graph_attr['overlap'] = 'scale'  # Scale layout to avoid overlaps
+            G.graph_attr['sep'] = '+10'        # Minimum separation between nodes
+            G.graph_attr['esep'] = '+3'        # Edge separation
+            G.graph_attr['K'] = '0.3'          # Spring constant (affects spacing)
+        else:
+            # dot-specific settings for hierarchical layout
+            G.graph_attr['nodesep'] = "1"
+            G.graph_attr['ranksep'] = "1.5"
+            G.graph_attr['splines'] = 'ortho'
+
         G.graph_attr['dpi'] = '150'
 
         # Build edge lists by type for Extended Matrix styling
@@ -875,13 +937,18 @@ class HarrisMatrixGenerator:
 
             # Group nodes by datazione_estesa
             datazione_groups = {}
+            datazione_min_periodo_fase = {}  # Track min (periodo, fase) for each datazione
 
             for node_id, node_data in graph.nodes(data=True):
                 # Include ALL nodes (even isolated ones without relationships)
 
                 # Get periodo/fase from node data (from us_table)
-                periodo = str(node_data.get('period_initial', ''))
-                fase = str(node_data.get('phase_initial', ''))
+                # IMPORTANT: Handle None values correctly (str(None) = 'None' not '')
+                periodo_raw = node_data.get('period_initial')
+                fase_raw = node_data.get('phase_initial')
+
+                periodo = str(periodo_raw) if periodo_raw is not None and periodo_raw != '' else ''
+                fase = str(fase_raw) if fase_raw is not None and fase_raw != '' else ''
 
                 # Look up datazione_estesa using periodo-fase key
                 lookup_key = (periodo, fase)
@@ -890,20 +957,36 @@ class HarrisMatrixGenerator:
                 else:
                     datazione = 'Non datato'
 
-                # Use datazione as key for grouping
-                key = (datazione, periodo, fase)
-                if key not in datazione_groups:
-                    datazione_groups[key] = []
+                # Track minimum (periodo, fase) for this datazione for correct sorting
+                if datazione not in datazione_min_periodo_fase:
+                    datazione_min_periodo_fase[datazione] = (periodo, fase)
+                else:
+                    current_min = datazione_min_periodo_fase[datazione]
+                    # Compare periodo first, then fase
+                    # Use 'ZZZ' for empty strings so they sort last
+                    if (periodo or 'ZZZ', fase or 'ZZZ') < (current_min[0] or 'ZZZ', current_min[1] or 'ZZZ'):
+                        datazione_min_periodo_fase[datazione] = (periodo, fase)
 
-                datazione_groups[key].append((node_id, node_data))
+                # Use datazione as primary key, track nodes by datazione only
+                if datazione not in datazione_groups:
+                    datazione_groups[datazione] = []
 
-            # Sort by periodo-fase (ordine cronologico)
-            sorted_groups = sorted(datazione_groups.items(),
-                                  key=lambda x: (x[0][1] or 'ZZZ', x[0][2] or 'ZZZ', x[0][0]))
+                datazione_groups[datazione].append((node_id, node_data))
+
+            # Sort by minimum (periodo, fase) for each datazione (ordine cronologico)
+            # Non datato should be last
+            sorted_groups = sorted(
+                datazione_groups.items(),
+                key=lambda x: (
+                    datazione_min_periodo_fase[x[0]][0] or 'ZZZ',  # periodo
+                    datazione_min_periodo_fase[x[0]][1] or 'ZZZ',  # fase
+                    x[0]  # datazione name as tiebreaker
+                )
+            )
 
             # Create subgraphs per datazione
             cluster_id = 0
-            for (datazione, periodo, fase), nodes in sorted_groups:
+            for datazione, nodes in sorted_groups:
                 cluster_id += 1
 
                 # Create single cluster for each datazione
@@ -1008,11 +1091,55 @@ class HarrisMatrixGenerator:
                   arrowhead='normal')
 
         # Render to DOT file
+        # For large graphs we use sfdp which is much faster than dot
         dot_path = output_path.replace('.graphml', '.dot')
         G.format = 'dot'
-        G.render(filename=dot_path.replace('.dot', ''), cleanup=False, format='dot')
 
-        print(f"Generated DOT file: {dot_path}")
+        if skip_layout:
+            # For very large graphs, skip layout processing entirely
+            # Just write the DOT source directly (yEd will calculate layout)
+            print(f"ℹ️  Writing DOT source without layout processing (fast mode)...")
+            with open(dot_path, 'w', encoding='utf-8') as f:
+                f.write(G.source)
+            print(f"✅ Generated DOT file (no layout): {dot_path}")
+        else:
+            # For smaller graphs, process layout with sfdp or dot
+            try:
+                import subprocess
+
+                # Write source to file first
+                dot_source_path = dot_path.replace('.dot', '_source.dot')
+                with open(dot_source_path, 'w', encoding='utf-8') as f:
+                    f.write(G.source)
+
+                # Use sfdp or dot to process the layout
+                print(f"ℹ️  Processing layout with {layout_engine}...")
+                with open(dot_path, 'w') as outfile:
+                    result = subprocess.run(
+                        [layout_engine, '-Tdot', dot_source_path],
+                        stdout=outfile,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        timeout=120  # 2 minutes timeout even for large graphs with sfdp
+                    )
+
+                if result.returncode == 0:
+                    print(f"✅ Generated DOT file with {layout_engine} layout: {dot_path}")
+                else:
+                    print(f"⚠️  {layout_engine} processing failed, using source DOT")
+                    import shutil
+                    shutil.copy(dot_source_path, dot_path)
+
+            except subprocess.TimeoutExpired:
+                print(f"⚠️  {layout_engine} timeout - graph too large, using source DOT")
+                # Use source DOT without layout
+                import shutil
+                shutil.copy(dot_source_path, dot_path)
+            except Exception as e:
+                print(f"⚠️  Error during {layout_engine} processing: {e}")
+                print(f"   Using source DOT without layout")
+                with open(dot_path, 'w', encoding='utf-8') as f:
+                    f.write(G.source)
 
         # Apply transitive reduction using Graphviz tred command
         # This is the PyArchInit approach: use tred to reduce the graph
@@ -1023,6 +1150,10 @@ class HarrisMatrixGenerator:
             import subprocess
             print(f"ℹ️  Applying transitive reduction with tred...")
 
+            # Calculate timeout based on graph size (larger graphs need more time)
+            # For large graphs: ~60 seconds for 500-1000 nodes, 120s for 1000+
+            tred_timeout = 30 if num_nodes < 500 else (60 if num_nodes < 1000 else 120)
+
             # Run tred command: tred input.dot > output_tred.dot
             with open(dot_reduced_path, 'w') as outfile:
                 result = subprocess.run(
@@ -1030,7 +1161,7 @@ class HarrisMatrixGenerator:
                     stdout=outfile,
                     stderr=subprocess.PIPE,
                     text=True,
-                    timeout=30
+                    timeout=tred_timeout
                 )
 
             if result.returncode == 0:

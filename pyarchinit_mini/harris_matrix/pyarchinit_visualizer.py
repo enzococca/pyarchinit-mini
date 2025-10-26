@@ -107,25 +107,19 @@ class PyArchInitMatrixVisualizer:
         # Generate output
         if output_path is None:
             output_path = tempfile.mktemp(suffix='.png')
-        
+
         try:
-            # Try different formats based on available renderers
-            # First try with cairo for high quality
-            G.render(output_path, format='png:cairo:cairo', cleanup=True)
+            # Use standard PNG format (compatible with all Graphviz installations)
+            G.render(output_path, format='png', cleanup=True)
             return output_path + '.png'
         except Exception as e:
-            print(f"Error rendering matrix with cairo: {e}")
-            try:
-                # Fallback to standard PNG
-                G.render(output_path, format='png', cleanup=True)
-                return output_path + '.png'
-            except Exception as e2:
-                print(f"Error with default PNG: {e2}")
-                # Final fallback to saving DOT source
-                dot_path = output_path.replace('.png', '.dot')
-                with open(dot_path, 'w') as f:
-                    f.write(G.source)
-                return dot_path
+            print(f"Error rendering matrix to PNG: {e}")
+            # Fallback to saving DOT source
+            dot_path = output_path.replace('.png', '.dot')
+            with open(dot_path, 'w') as f:
+                f.write(G.source)
+            print(f"Saved DOT file instead: {dot_path}")
+            return dot_path
 
     def _create_digraph(self, graph: nx.DiGraph, grouping: str, settings: Dict) -> Digraph:
         """
@@ -139,19 +133,44 @@ class PyArchInitMatrixVisualizer:
         Returns:
             Graphviz Digraph object
         """
-        # Create Graphviz Digraph
-        G = Digraph(engine='dot', strict=False)
+        # Always use dot engine to preserve hierarchical structure and clusters
+        # Even for large graphs - the optimization in get_matrix_statistics() already speeds up processing
+        num_nodes = len(graph.nodes())
+        engine = 'dot'
 
-        # Set graph attributes - PyArchInit style with size limits
+        if num_nodes > 500:
+            print(f"ℹ️  Large graph ({num_nodes} nodes) - using optimized dot layout with hierarchical structure")
+
+        # Create Graphviz Digraph
+        G = Digraph(engine=engine, strict=False)
+
+        # dot-specific attributes for hierarchical layout
+        # For large graphs, use more compact spacing
+        if num_nodes > 500:
+            nodesep = "0.3"  # Compact spacing for large graphs
+            ranksep = "0.5"  # Compact rank spacing
+        else:
+            nodesep = settings['nodesep']
+            ranksep = settings['ranksep']
+
+        # IMPORTANT: Graphviz dot with orthogonal splines requires xlabel instead of label
+        # Error: "Warning: Orthogonal edges do not currently handle edge labels. Try using xlabels."
+        # Solution: Track if we're using ortho splines to use xlabel instead of label for edges
+        splines = settings['splines']
+        use_xlabel = (splines == 'ortho')  # Use xlabel for edge labels with orthogonal splines
+
+        if use_xlabel and grouping != 'none':
+            print(f"ℹ️  Using xlabel for edge labels (required for orthogonal splines with clusters)")
+
         G.attr(
             rankdir=settings['rankdir'],
             viewport="",
             ratio=settings.get('ratio', 'auto'),
             compound='true',
             pad=settings['pad'],
-            nodesep=settings['nodesep'],
-            ranksep=settings['ranksep'],
-            splines=settings['splines'],
+            nodesep=nodesep,
+            ranksep=ranksep,
+            splines=splines,
             dpi=settings['dpi'],
             size=settings.get('size', '20,30'),  # Limit max size
             bgcolor='white'
@@ -185,10 +204,10 @@ class PyArchInitMatrixVisualizer:
         else:
             self._create_simple_nodes(G, graph, us_rilevanti, settings)
 
-        # Add edges with proper styling
-        self._add_sequence_edges(G, graph, sequence_relations, settings)
-        self._add_negative_edges(G, graph, negative_relations, settings)
-        self._add_contemporary_edges(G, graph, contemporary_relations, settings)
+        # Add edges with proper styling (use xlabel for orthogonal splines)
+        self._add_sequence_edges(G, graph, sequence_relations, settings, use_xlabel)
+        self._add_negative_edges(G, graph, negative_relations, settings, use_xlabel)
+        self._add_contemporary_edges(G, graph, contemporary_relations, settings, use_xlabel)
 
         # Add temporal ordering constraints (most recent above, oldest below)
         self._add_temporal_ordering(G, graph, us_rilevanti)
@@ -381,7 +400,7 @@ class PyArchInitMatrixVisualizer:
         # Other Extended Matrix units use single symbol
         return '>'
 
-    def _add_sequence_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict):
+    def _add_sequence_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict, use_xlabel: bool = False):
         """Add normal stratigraphic sequence edges with Extended Matrix symbols"""
         for source, target, rel_type in relations:
             # Determine edge label based on unit type
@@ -391,51 +410,54 @@ class PyArchInitMatrixVisualizer:
             # - Extractor, Combiner, DOC, property: Use >> and <<
             edge_label = self._get_edge_label_for_unit(graph, source, rel_type)
 
-            G.edge(
-                str(source),
-                str(target),
-                label=edge_label,
-                style=settings['normal_edge_style'],
-                color=settings['normal_edge_color'],
-                arrowhead=settings['normal_arrowhead'],
-                arrowsize=settings['normal_arrowsize'],
-                penwidth=settings['normal_penwidth']
-            )
+            # Use xlabel for orthogonal splines, label otherwise
+            edge_params = {
+                'xlabel' if use_xlabel else 'label': edge_label,
+                'style': settings['normal_edge_style'],
+                'color': settings['normal_edge_color'],
+                'arrowhead': settings['normal_arrowhead'],
+                'arrowsize': settings['normal_arrowsize'],
+                'penwidth': settings['normal_penwidth']
+            }
+
+            G.edge(str(source), str(target), **edge_params)
     
-    def _add_negative_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict):
+    def _add_negative_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict, use_xlabel: bool = False):
         """Add negative (cuts) relationship edges with Extended Matrix symbols"""
         for source, target, rel_type in relations:
             # Determine edge label based on unit type
             edge_label = self._get_edge_label_for_unit(graph, source, rel_type)
 
-            G.edge(
-                str(source),
-                str(target),
-                label=edge_label,
-                style=settings['negative_edge_style'],
-                color=settings['negative_edge_color'],
-                arrowhead=settings['negative_arrowhead'],
-                arrowsize=settings['normal_arrowsize'],
-                penwidth=settings['normal_penwidth']
-            )
+            # Use xlabel for orthogonal splines, label otherwise
+            edge_params = {
+                'xlabel' if use_xlabel else 'label': edge_label,
+                'style': settings['negative_edge_style'],
+                'color': settings['negative_edge_color'],
+                'arrowhead': settings['negative_arrowhead'],
+                'arrowsize': settings['normal_arrowsize'],
+                'penwidth': settings['normal_penwidth']
+            }
 
-    def _add_contemporary_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict):
+            G.edge(str(source), str(target), **edge_params)
+
+    def _add_contemporary_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict, use_xlabel: bool = False):
         """Add contemporary/equivalent relationship edges with Extended Matrix symbols"""
         for source, target, rel_type in relations:
             # Determine edge label based on unit type
             edge_label = self._get_edge_label_for_unit(graph, source, rel_type)
 
-            G.edge(
-                str(source),
-                str(target),
-                label=edge_label,
-                style=settings['contemp_edge_style'],
-                color=settings['contemp_edge_color'],
-                arrowhead=settings['contemp_arrowhead'],
-                arrowsize=settings['normal_arrowsize'],
-                penwidth=settings['normal_penwidth'],
-                constraint='false'  # Don't affect layout
-            )
+            # Use xlabel for orthogonal splines, label otherwise
+            edge_params = {
+                'xlabel' if use_xlabel else 'label': edge_label,
+                'style': settings['contemp_edge_style'],
+                'color': settings['contemp_edge_color'],
+                'arrowhead': settings['contemp_arrowhead'],
+                'arrowsize': settings['normal_arrowsize'],
+                'penwidth': settings['normal_penwidth'],
+                'constraint': 'false'  # Don't affect layout
+            }
+
+            G.edge(str(source), str(target), **edge_params)
     
     def _add_temporal_ordering(self, G: Digraph, graph: nx.DiGraph, us_rilevanti: set):
         """Add temporal ordering constraints to ensure chronological sequence"""

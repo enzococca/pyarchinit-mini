@@ -5,6 +5,32 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2025-10-26
+
+### Fixed
+- **Harris Matrix - Graphviz Orthogonal Splines Crash**
+  - Fixed Graphviz crash when using orthogonal splines with edge labels and clusters
+  - Error: "Warning: Orthogonal edges do not currently handle edge labels"
+  - Error: "Assertion failed: (np->cells[0]), function chkSgraph, file maze.c, line 317"
+  - Solution: Use `xlabel` instead of `label` for edge labels when `splines='ortho'`
+  - **Impact**: Harris Matrix now renders correctly for all graph sizes with period/area clustering
+  - Affects both small graphs (51 nodes) and large graphs (758+ nodes)
+  - Maintains hierarchical structure and orthogonal splines as before
+
+### Changed
+- **Web Dashboard Updated**
+  - Version display updated to v1.5.1 (was v0.1.0)
+  - GitHub link updated to correct repository: https://github.com/enzococca/pyarchinit-mini
+  - API documentation link functional
+
+### Technical
+- Files modified:
+  - `pyarchinit_mini/harris_matrix/pyarchinit_visualizer.py` (lines 156-163, 403-460)
+  - `web_interface/templates/dashboard.html` (lines 167, 179)
+  - `pyproject.toml` (version 1.5.1)
+- Modified edge label handling: `xlabel` for orthogonal splines, `label` for other spline types
+- Ensures compatibility with Graphviz dot engine for complex archaeological matrices
+
 ## [1.5.0] - 2025-10-26
 
 ### Fixed
@@ -24,6 +50,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reverse epochs properly shows newest → oldest: Non datato → Geologisch
   - Maintains consistency with database periodization (periodo_iniziale, fase_iniziale)
 
+- **Harris Matrix - Large Graph Rendering**
+  - Fixed Graphviz crash for large archaeological sites (> 500 nodes)
+  - Web interface now detects large graphs and shows informative message instead of attempting render
+  - Optimized `get_matrix_statistics()` to skip expensive operations (cycle detection, levels) for large graphs
+  - Statistics calculation reduced from minutes to seconds for large sites
+  - Users directed to GraphML export solution which works perfectly for any graph size
+  - **Error Fixed**: "Assertion failed: trouble in init_rank" Graphviz crashes eliminated
+  - **Impact**: Large sites like Dom zu Lund (758 nodes) now have graceful UX with working export path
+  - Created `large_graph_message.html` template with statistics display and export options
+
 ### Changed
 - **DOT Parser Enhanced**
   - `parse_clusters()` now more robust with flexible label format detection
@@ -31,15 +67,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved cluster boundary detection using balanced bracket counting
 
 ### Documentation
-- Added `docs/FIX_GRAPHML_8_PERIODS.md`: Complete technical documentation of the fix
+- Added `docs/FIX_GRAPHML_8_PERIODS.md`: Complete technical documentation of the GraphML fix
+- Added `docs/HARRIS_MATRIX_LARGE_GRAPHS.md`: Technical guide for large graph handling
 - Added test scripts: `debug_parse_clusters.py`, `verify_graphml_periods.py`, `verify_graphml_reverse.py`
 
 ### Technical
 - Files modified:
   - `pyarchinit_mini/graphml_converter/dot_parser.py` (lines 1259-1331)
   - `pyarchinit_mini/graphml_converter/graphml_exporter.py` (lines 268-279, 518, 551)
+  - `web_interface/app.py` (lines 1268-1282) - Large graph detection
+  - `pyarchinit_mini/harris_matrix/matrix_generator.py` (lines 699-739) - Statistics optimization
+- Created templates:
+  - `web_interface/templates/harris_matrix/large_graph_message.html` - Large graph informative page
 - Verified on Dom zu Lund site: 758 US nodes, 8 periods, all correctly positioned
 - Export performance: ~0.5 seconds for 758 nodes, 0.81 MB GraphML file
+- Web interface gracefully handles large graphs with informative message and working export path
 
 ## [1.4.0] - 2025-10-25
 
