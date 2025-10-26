@@ -1,0 +1,341 @@
+digraph {
+	graph [bb="0,0,4403.5,364.5",
+		compound=true,
+		dpi=150,
+		nodesep=1,
+		pad=0.5,
+		rankdir=TB,
+		ranksep=1.5,
+		splines=ortho
+	];
+	node [label="\N"];
+	subgraph cluster_datazione_1 {
+		graph [bb="8,280,129,356.5",
+			color=lightblue,
+			label="Età contemporanea",
+			lheight=0.23,
+			lp="68.5,344.25",
+			lwidth=1.46,
+			rank=same,
+			style=filled
+		];
+		US1	[fillcolor=white,
+			height=0.5,
+			label=US1,
+			pos="44,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+	}
+	subgraph cluster_datazione_2 {
+		graph [bb="137,280,333,356.5",
+			color=lightblue,
+			label="Età moderna",
+			lheight=0.23,
+			lp="235,344.25",
+			lwidth=0.97,
+			rank=same,
+			style=filled
+		];
+		US2	[fillcolor=white,
+			height=0.5,
+			label=US2,
+			pos="172,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US8	[fillcolor=white,
+			height=0.5,
+			label=US8,
+			pos="298,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+	}
+	subgraph cluster_datazione_3 {
+		graph [bb="385,280,598,356.5",
+			color=lightblue,
+			label="Fine XVI secolo - Inizi XVII secolo",
+			lheight=0.23,
+			lp="491.5,344.25",
+			lwidth=2.74,
+			rank=same,
+			style=filled
+		];
+		US3	[fillcolor=white,
+			height=0.5,
+			label=US3,
+			pos="424,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US500	[fillcolor=white,
+			height=0.5,
+			label=US500,
+			pos="558,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+	}
+	subgraph cluster_datazione_4 {
+		graph [bb="649,280,1613,356.5",
+			color=lightblue,
+			label="XV sec rec",
+			lheight=0.23,
+			lp="1131,344.25",
+			lwidth=0.83,
+			rank=same,
+			style=filled
+		];
+		US102	[fillcolor=white,
+			height=0.5,
+			label=US102,
+			pos="684,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US103	[fillcolor=white,
+			height=0.5,
+			label=US103,
+			pos="810,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US106	[fillcolor=white,
+			height=0.5,
+			label=US106,
+			pos="936,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US300	[fillcolor=white,
+			height=0.5,
+			label=US300,
+			pos="1062,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US400	[fillcolor=white,
+			height=0.5,
+			label=US400,
+			pos="1188,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US4001	[fillcolor=white,
+			height=0.5,
+			label=US4001,
+			pos="1317,306",
+			shape=box,
+			style=filled,
+			width=0.83681];
+		US4002	[fillcolor=white,
+			height=0.5,
+			label=US4002,
+			pos="1449,306",
+			shape=box,
+			style=filled,
+			width=0.83681];
+		US800	[fillcolor=white,
+			height=0.5,
+			label=US800,
+			pos="1578,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+	}
+	subgraph cluster_datazione_5 {
+		graph [bb="1669,280,2117,356.5",
+			color=lightblue,
+			label="XV secolo",
+			lheight=0.23,
+			lp="1893,344.25",
+			lwidth=0.79,
+			rank=same,
+			style=filled
+		];
+		US12	[fillcolor=white,
+			height=0.5,
+			label=US12,
+			pos="1704,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US19	[fillcolor=white,
+			height=0.5,
+			label=US19,
+			pos="1830,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US5	[fillcolor=white,
+			height=0.5,
+			label=US5,
+			pos="1956,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US6	[fillcolor=white,
+			height=0.5,
+			label=US6,
+			pos="2082,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+	}
+	subgraph cluster_datazione_6 {
+		graph [bb="2173,280,2495,356.5",
+			color=lightblue,
+			label="Prima metà' del XV secolo rec",
+			lheight=0.23,
+			lp="2334,344.25",
+			lwidth=2.32,
+			rank=same,
+			style=filled
+		];
+		US104	[fillcolor=white,
+			height=0.5,
+			label=US104,
+			pos="2208,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US402	[fillcolor=white,
+			height=0.5,
+			label=US402,
+			pos="2334,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+		US900	[fillcolor=white,
+			height=0.5,
+			label=US900,
+			pos="2460,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+	}
+	subgraph cluster_datazione_7 {
+		graph [bb="2508,280,2671,356.5",
+			color=lightblue,
+			label="Prima metà' del XV secolo",
+			lheight=0.23,
+			lp="2589.5,344.25",
+			lwidth=2.04,
+			rank=same,
+			style=filled
+		];
+		US29	[fillcolor=white,
+			height=0.5,
+			label=US29,
+			pos="2611,306",
+			shape=box,
+			style=filled,
+			width=0.75];
+	}
+	subgraph main {
+		edge [arrowhead=normal,
+			color=black,
+			style=solid
+		];
+		"US 2"	[height=0.5,
+			pos="2740,306",
+			width=0.82932];
+		"US 3"	[height=0.5,
+			pos="2740,162",
+			width=0.82932];
+		"US 2" -> "US 3"	[pos="e,2740,180.09 2740,287.76 2740,287.76 2740,191.6 2740,191.6"];
+		"US 1"	[height=0.5,
+			pos="2872,162",
+			width=0.82932];
+		"US 2" -> "US 1"	[pos="e,2841.7,162 2770.3,306 2787.6,306 2806,306 2806,306 2806,306 2806,162 2806,162 2806,162 2830.2,162 2830.2,162"];
+		"US 8"	[height=0.5,
+			pos="2872,306",
+			width=0.82932];
+		"US 8" -> "US 1"	[pos="e,2872,180.09 2872,287.76 2872,287.76 2872,191.6 2872,191.6"];
+	}
+	subgraph main1 {
+		edge [arrowhead=none,
+			color=blue,
+			constraint=False,
+			style=dotted
+		];
+		"US 12"	[height=0.5,
+			pos="3008,306",
+			width=0.95727];
+		"US 500"	[height=0.5,
+			pos="3154,306",
+			width=1.0852];
+		"US 12" -> "US 500"	[pos="3042.6,306 3064.2,306 3092,306 3114.5,306"];
+		"US 300"	[height=0.5,
+			pos="3304,306",
+			width=1.0852];
+		"US 106"	[height=0.5,
+			pos="3454,306",
+			width=1.0852];
+		"US 300" -> "US 106"	[pos="3341.1,300 3364.2,300 3393.7,300 3416.8,300"];
+	}
+	subgraph main3 {
+		edge [arrowhead=diamond,
+			color=green,
+			style=bold
+		];
+		"US 106";
+		"US 5"	[height=0.5,
+			pos="3315,162",
+			width=0.82932];
+		"US 106" -> "US 5"	[pos="e,3345.2,162 3416.9,312 3398.4,312 3379.9,312 3379.9,312 3379.9,312 3379.9,162 3379.9,162 3379.9,162 3358.2,162 3358.2,162"];
+		"US 102"	[height=0.5,
+			pos="3923,306",
+			width=1.0852];
+		"US 6"	[height=0.5,
+			pos="3923,162",
+			width=0.82932];
+		"US 102" -> "US 6"	[pos="e,3923,180.09 3923,287.76 3923,287.76 3923,193.14 3923,193.14"];
+		"US 103"	[height=0.5,
+			pos="4073,306",
+			width=1.0852];
+		"US 19"	[height=0.5,
+			pos="4073,162",
+			width=0.95727];
+		"US 103" -> "US 19"	[pos="e,4073,180.09 4073,287.76 4073,287.76 4073,193.14 4073,193.14"];
+	}
+	subgraph main4 {
+		edge [arrowhead=odiamond,
+			color=purple,
+			style=bold
+		];
+		"US 106";
+		"US 800"	[height=0.5,
+			pos="3456,162",
+			width=1.0852];
+		"US 106" -> "US 800"	[pos="e,3455,180.09 3455,287.76 3455,287.76 3455,193.14 3455,193.14"];
+		"US 400"	[height=0.5,
+			pos="3609,162",
+			width=1.0852];
+		"US 106" -> "US 400"	[pos="e,3569.6,162 3493.4,306 3512,306 3530.2,306 3530.2,306 3530.2,306 3530.2,162 3530.2,162 3530.2,162 3556.5,162 3556.5,162"];
+		"US 104"	[height=0.5,
+			pos="4223,306",
+			width=1.0852];
+		"US 900"	[height=0.5,
+			pos="4223,162",
+			width=1.0852];
+		"US 104" -> "US 900"	[pos="e,4223,180.09 4223,287.76 4223,287.76 4223,193.14 4223,193.14"];
+		"US 402"	[height=0.5,
+			pos="4296,18",
+			width=1.0852];
+		"US 900" -> "US 402"	[pos="e,4298.3,36.238 4262.4,162 4280.6,162 4298.3,162 4298.3,162 4298.3,162 4298.3,49.29 4298.3,49.29"];
+		"US 29"	[height=0.5,
+			pos="4369,162",
+			width=0.95727];
+		"US 29" -> "US 402"	[pos="e,4335.2,18 4369.3,143.76 4369.3,105.01 4369.3,18 4369.3,18 4369.3,18 4348.3,18 4348.3,18"];
+		"US 4001"	[height=0.5,
+			pos="3609,306",
+			width=1.2132];
+		"US 4001" -> "US 400"	[pos="e,3609,180.09 3609,287.76 3609,287.76 3609,193.14 3609,193.14"];
+		"US 4002"	[height=0.5,
+			pos="3768,306",
+			width=1.2132];
+		"US 4002" -> "US 400"	[pos="e,3648.3,162 3768,287.76 3768,249.01 3768,162 3768,162 3768,162 3661.4,162 3661.4,162"];
+	}
+}

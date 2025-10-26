@@ -1,0 +1,2001 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d22" for="edge" attr.name="relation_label" attr.type="string" />
+  <key id="d21" for="edge" attr.name="stratigraphic_relation" attr.type="string" />
+  <key id="d20" for="edge" attr.name="label" attr.type="string" />
+  <key id="d19" for="edge" attr.name="edge_type" attr.type="string" />
+  <key id="d18" for="edge" attr.name="edge_id" attr.type="string" />
+  <key id="d17" for="node" attr.name="excavation_year" attr.type="string" />
+  <key id="d16" for="node" attr.name="interpretation" attr.type="string" />
+  <key id="d15" for="node" attr.name="phase" attr.type="string" />
+  <key id="d14" for="node" attr.name="period" attr.type="string" />
+  <key id="d13" for="node" attr.name="excavated" attr.type="string" />
+  <key id="d12" for="node" attr.name="description_interp" attr.type="string" />
+  <key id="d11" for="node" attr.name="description_strat" attr.type="string" />
+  <key id="d10" for="node" attr.name="unit_type" attr.type="string" />
+  <key id="d9" for="node" attr.name="area" attr.type="string" />
+  <key id="d8" for="node" attr.name="site" attr.type="string" />
+  <key id="d7" for="node" attr.name="us_number" attr.type="string" />
+  <key id="d6" for="node" attr.name="label" attr.type="string" />
+  <key id="d5" for="node" attr.name="node_type" attr.type="string" />
+  <key id="d4" for="node" attr.name="description" attr.type="string" />
+  <key id="d3" for="node" attr.name="name" attr.type="string" />
+  <key id="d2" for="graph" attr.name="graph_id" attr.type="string" />
+  <key id="d1" for="graph" attr.name="description" attr.type="string" />
+  <key id="d0" for="graph" attr.name="name" attr.type="string" />
+  <graph edgedefault="directed">
+    <node id="geo_Scavo archeologico_stratigraphy">
+      <data key="d3">geo_position</data>
+      <data key="d4" />
+      <data key="d5">geo_position</data>
+      <data key="d6">geo_position</data>
+    </node>
+    <node id="Scavo archeologico_1_1">
+      <data key="d3">US 1</data>
+      <data key="d4">Strato di macerie</data>
+      <data key="d5">Node</data>
+      <data key="d7">1</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di macerie</data>
+      <data key="d12">Fondazione in muratura</data>
+      <data key="d13">No</data>
+      <data key="d14">1</data>
+      <data key="d15">1</data>
+      <data key="d6">US 1</data>
+    </node>
+    <node id="Scavo archeologico_1_2">
+      <data key="d3">US 2</data>
+      <data key="d4">Strato di terra</data>
+      <data key="d5">Node</data>
+      <data key="d7">2</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di terra</data>
+      <data key="d12">Livellamento</data>
+      <data key="d16">Livellamenti di epoca moderna e contemporanei.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">1</data>
+      <data key="d15">2</data>
+      <data key="d6">US 2</data>
+    </node>
+    <node id="Scavo archeologico_1_3">
+      <data key="d3">US 3</data>
+      <data key="d4">Strato di terra</data>
+      <data key="d5">Node</data>
+      <data key="d7">3</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di terra</data>
+      <data key="d12">Abbandono</data>
+      <data key="d16">Interfaccia di ripulitura dell'abbandono degli edifici.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">1</data>
+      <data key="d6">US 3</data>
+    </node>
+    <node id="Scavo archeologico_1_4">
+      <data key="d3">US 4</data>
+      <data key="d4">Strato di sabbia e terra</data>
+      <data key="d5">Node</data>
+      <data key="d7">4</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di sabbia e terra</data>
+      <data key="d12">Pavimentazione in terra</data>
+      <data key="d16">Pavimentazione in terra dell'ED01, probabilmente di XVI-XVII secolo.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">2</data>
+      <data key="d6">US 4</data>
+    </node>
+    <node id="Scavo archeologico_1_5">
+      <data key="d3">US 5</data>
+      <data key="d4">Struttura in muratura</data>
+      <data key="d5">Node</data>
+      <data key="d7">5</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Struttura in muratura</data>
+      <data key="d12">Focolare</data>
+      <data key="d16">Possibile focolare domestico, con un punto di caricamento ed accensione frontale rappresentato dall'US30, e piani di cottura e lvorazione dei cibi verso ovest ed est dove era presente un condotto che permetteva il passaggio di aria calda, atto a riscaldare un eventule piano forato o lastra soprastante per la cottura dei cibi.
+Meno probabile per l'assenza di scarti di lavorazione, l'interpretazione come struttura artigianale.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 5</data>
+    </node>
+    <node id="Scavo archeologico_1_6">
+      <data key="d3">US 6</data>
+      <data key="d4">Struttura in muratura</data>
+      <data key="d5">Node</data>
+      <data key="d7">6</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">USM</data>
+      <data key="d11">Struttura in muratura</data>
+      <data key="d12">Muro</data>
+      <data key="d16">Perimetrale sud del possibile edificio ED01</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 6</data>
+    </node>
+    <node id="Scavo archeologico_1_7">
+      <data key="d3">US 7</data>
+      <data key="d4">Taglio</data>
+      <data key="d5">Node</data>
+      <data key="d7">7</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Taglio</data>
+      <data key="d12">Buca</data>
+      <data key="d16">Buca di epoca moderna dentro US2.</data>
+      <data key="d17">2012</data>
+      <data key="d13">No</data>
+      <data key="d14">1</data>
+      <data key="d15">2</data>
+      <data key="d6">US 7</data>
+    </node>
+    <node id="Scavo archeologico_1_8">
+      <data key="d3">US 8</data>
+      <data key="d4">Riempimento</data>
+      <data key="d5">Node</data>
+      <data key="d7">8</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Riempimento</data>
+      <data key="d12">Buca</data>
+      <data key="d16">Riempimento della buca US7.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">1</data>
+      <data key="d15">2</data>
+      <data key="d6">US 8</data>
+    </node>
+    <node id="Scavo archeologico_1_9">
+      <data key="d3">US 9</data>
+      <data key="d4">Strato di malta</data>
+      <data key="d5">Node</data>
+      <data key="d7">9</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di malta</data>
+      <data key="d12">Disfacimento</data>
+      <data key="d16">Probabile disfacimento dei muri dell'ED01 al momento dell'abbandono.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">1</data>
+      <data key="d6">US 9</data>
+    </node>
+    <node id="Scavo archeologico_1_10">
+      <data key="d3">US 10</data>
+      <data key="d4">Strato di malta</data>
+      <data key="d5">Node</data>
+      <data key="d7">10</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di malta</data>
+      <data key="d12">Disfacimento</data>
+      <data key="d16">Disfacimento legato all'abbandono dell'ED01.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">1</data>
+      <data key="d6">US 10</data>
+    </node>
+    <node id="Scavo archeologico_1_11">
+      <data key="d3">US 11</data>
+      <data key="d4">Strato di terra</data>
+      <data key="d5">Node</data>
+      <data key="d7">11</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di terra</data>
+      <data key="d12">Battuto</data>
+      <data key="d16">Possibile rifacimento del battuto dell'ED01.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">1</data>
+      <data key="d6">US 11</data>
+    </node>
+    <node id="Scavo archeologico_1_12">
+      <data key="d3">US 12</data>
+      <data key="d4">Struttura in muratura</data>
+      <data key="d5">Node</data>
+      <data key="d7">12</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">USM</data>
+      <data key="d11">Struttura in muratura</data>
+      <data key="d12">Muro</data>
+      <data key="d16">Muro riferibile ad una struttura che si trovava a sud dell'ED01.</data>
+      <data key="d17">2012</data>
+      <data key="d13">No</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 12</data>
+    </node>
+    <node id="Scavo archeologico_1_13">
+      <data key="d3">US 13</data>
+      <data key="d4">Taglio</data>
+      <data key="d5">Node</data>
+      <data key="d7">13</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Taglio</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Buca di palo riferibile al livello di vita US4, forse legato all focolare US5.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">2</data>
+      <data key="d6">US 13</data>
+    </node>
+    <node id="Scavo archeologico_1_14">
+      <data key="d3">US 14</data>
+      <data key="d4">Riempimento</data>
+      <data key="d5">Node</data>
+      <data key="d7">14</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Riempimento</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Riempimento della buca di palo riferibile al livello di vita US4, forse legato all focolare US5.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">1</data>
+      <data key="d6">US 14</data>
+    </node>
+    <node id="Scavo archeologico_1_15">
+      <data key="d3">US 15</data>
+      <data key="d4">Taglio</data>
+      <data key="d5">Node</data>
+      <data key="d7">15</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Taglio</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Buca di palo riferibile al livello di vita US4, forse legato all focolare US5.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">2</data>
+      <data key="d6">US 15</data>
+    </node>
+    <node id="Scavo archeologico_1_16">
+      <data key="d3">US 16</data>
+      <data key="d4">Riempimento</data>
+      <data key="d5">Node</data>
+      <data key="d7">16</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Riempimento</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Riempimento della buca di palo riferibile al livello di vita US4, forse legato all focolare US5.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">1</data>
+      <data key="d6">US 16</data>
+    </node>
+    <node id="Scavo archeologico_1_17">
+      <data key="d3">US 17</data>
+      <data key="d4">Strato di terra e carboni</data>
+      <data key="d5">Node</data>
+      <data key="d7">17</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di terra e carboni</data>
+      <data key="d12">Punto di fuoco</data>
+      <data key="d16">Punto di fuoco legato al focolare US5. Probabilmente veniva caricato sfruttando una apertura verso nord  indicata dalla presenza dello strato di sabbie concotte US30.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 17</data>
+    </node>
+    <node id="Scavo archeologico_1_18">
+      <data key="d3">US 18</data>
+      <data key="d4">Strato di sabbia e argilla</data>
+      <data key="d5">Node</data>
+      <data key="d7">18</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di sabbia e argilla</data>
+      <data key="d12">Pavimentazione in terra</data>
+      <data key="d16">Pavimentazione in terra relative alla fase dell'edificio 2 con il focolare US5. Sulla sua sua superficie sono presenti piccole buche di palo forse inerenti ad arredi in legno infissi nella pavimentazione.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 18</data>
+    </node>
+    <node id="Scavo archeologico_1_19">
+      <data key="d3">US 19</data>
+      <data key="d4">Struttura in muratura</data>
+      <data key="d5">Node</data>
+      <data key="d7">19</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">USM</data>
+      <data key="d11">Struttura in muratura</data>
+      <data key="d12">Muro</data>
+      <data key="d16">E' verosimile che si legasse ad US6.Divisorio in fase con il battuto US18 e il focolare US5. Ando' in disuso con la costruzione la stesura del battuto US4.</data>
+      <data key="d17">2012</data>
+      <data key="d13">No</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 19</data>
+    </node>
+    <node id="Scavo archeologico_1_20">
+      <data key="d3">US 20</data>
+      <data key="d4">Strato di carbone e cenere</data>
+      <data key="d5">Node</data>
+      <data key="d7">20</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di carbone e cenere</data>
+      <data key="d12">Punto di fuoco</data>
+      <data key="d16">Livello di difficile interpetazione per la poca superficie visibile. Puo' trattarsi di un punto di fuoco legato o disfacimenti incendi dell'edificio ripristinati con la stesura di US4, un focolare oppure attivita' di cantiere.</data>
+      <data key="d17">2012</data>
+      <data key="d13">No</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 20</data>
+    </node>
+    <node id="Scavo archeologico_1_21">
+      <data key="d3">US 21</data>
+      <data key="d4">Taglio</data>
+      <data key="d5">Node</data>
+      <data key="d7">21</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Taglio</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Possibile alloggio per palo forse riferibile con i tagli 22, 24 e 26 ad arredi in legno interni all'edificio.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 21</data>
+    </node>
+    <node id="Scavo archeologico_1_22">
+      <data key="d3">US 22</data>
+      <data key="d4">Taglio</data>
+      <data key="d5">Node</data>
+      <data key="d7">22</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Taglio</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Possibile alloggio per palo forse riferibile con i tagli 21, 24 e 26 ad arredi in legno interni all'edificio.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 22</data>
+    </node>
+    <node id="Scavo archeologico_1_23">
+      <data key="d3">US 23</data>
+      <data key="d4">Riempimento</data>
+      <data key="d5">Node</data>
+      <data key="d7">23</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Riempimento</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Riempimento del possibile alloggio per palo forse riferibile con i tagli 21, 24 e 26 ad arredi in legno interni all'edificio.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 23</data>
+    </node>
+    <node id="Scavo archeologico_1_24">
+      <data key="d3">US 24</data>
+      <data key="d4">Strato di legno carbonizzato</data>
+      <data key="d5">Node</data>
+      <data key="d7">24</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di legno carbonizzato</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Possibile alloggio per palo forse riferibile con i tagli 21, 22 e 26 ad arredi in legno interni all'edificio.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 24</data>
+    </node>
+    <node id="Scavo archeologico_1_25">
+      <data key="d3">US 25</data>
+      <data key="d4">Riempimento</data>
+      <data key="d5">Node</data>
+      <data key="d7">25</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Riempimento</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Riempimento del possibile alloggio per palo forse riferibile con i tagli 21, 22 e 26 ad arredi in legno interni all'edificio.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 25</data>
+    </node>
+    <node id="Scavo archeologico_1_26">
+      <data key="d3">US 26</data>
+      <data key="d4">Taglio</data>
+      <data key="d5">Node</data>
+      <data key="d7">26</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Taglio</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Possibile alloggio per palo forse riferibile con i tagli 21, 22 e 26 ad arredi in legno interni all'edificio.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 26</data>
+    </node>
+    <node id="Scavo archeologico_1_27">
+      <data key="d3">US 27</data>
+      <data key="d4">Riempimento</data>
+      <data key="d5">Node</data>
+      <data key="d7">27</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Riempimento</data>
+      <data key="d12">Palo</data>
+      <data key="d16">Riempimento del possibile alloggio per palo forse riferibile con i tagli 21, 22 e 24 ad arredi in legno interni all'edificio.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 27</data>
+    </node>
+    <node id="Scavo archeologico_1_28">
+      <data key="d3">US 28</data>
+      <data key="d4">Taglio</data>
+      <data key="d5">Node</data>
+      <data key="d7">28</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Taglio</data>
+      <data key="d12">Punto di fuoco</data>
+      <data key="d16">Si tratta del punto di fuoco principale del focolare US5 posto all'interno dell'edificio. E' possibile che venisse caricato e ripulito tramite una imboccatura verso nord testimoniata dal livello di sabbie concotte US30.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 28</data>
+    </node>
+    <node id="Scavo archeologico_1_29">
+      <data key="d3">US 29</data>
+      <data key="d4">Strato di malta e ciottoli</data>
+      <data key="d5">Node</data>
+      <data key="d7">29</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di malta e ciottoli</data>
+      <data key="d12">Preparazione</data>
+      <data key="d16">Preparazione per la stesura dell'US18. E' coperto anche da US32 sul quale poggia il focolare US5.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">4</data>
+      <data key="d6">US 29</data>
+    </node>
+    <node id="Scavo archeologico_1_30">
+      <data key="d3">US 30</data>
+      <data key="d4">Strato di sabbia concotta</data>
+      <data key="d5">Node</data>
+      <data key="d7">30</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di sabbia concotta</data>
+      <data key="d12">Punto di fuoco</data>
+      <data key="d16">Probabile bocca del focolare US5 da cui veniva caricato e svuotato il principale punto di fuoco.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 30</data>
+    </node>
+    <node id="Scavo archeologico_1_31">
+      <data key="d3">US 31</data>
+      <data key="d4">Strato di sabbia e argilla</data>
+      <data key="d5">Node</data>
+      <data key="d7">31</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di sabbia e argilla</data>
+      <data key="d12">Pavimentazione in terra</data>
+      <data key="d16">Probabile pavimentazione in terra relativa ad una prima fase di vita dell'edificio oppure inerente ad una precedente struttura di cui sarebbe il restauro del battuto, che e' andato a sostituire ed obliterare la struttura US36, forse un residuo di muratura.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">3</data>
+      <data key="d15">1</data>
+      <data key="d6">US 31</data>
+    </node>
+    <node id="Scavo archeologico_1_32">
+      <data key="d3">US 32</data>
+      <data key="d4">Strato di sabbia</data>
+      <data key="d5">Node</data>
+      <data key="d7">32</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di sabbia</data>
+      <data key="d12">Preparazione</data>
+      <data key="d16">Preparazione per la posa del focolare US5. Dalla tipologia di materiali di cui e' costituito, potrebbe anche trattarsi di un precedente focolare destrutturato e i cui calcinacci sono stati sfruttati come sottofondo.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">2</data>
+      <data key="d15">3</data>
+      <data key="d6">US 32</data>
+    </node>
+    <node id="Scavo archeologico_1_33">
+      <data key="d3">US 33</data>
+      <data key="d4">Strato di terra e carbone</data>
+      <data key="d5">Node</data>
+      <data key="d7">33</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di terra e carbone</data>
+      <data key="d12">Livellamento</data>
+      <data key="d16">Si tratta probabilmente di un livellamento inerente la costruzione dell'edificio indagato.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">3</data>
+      <data key="d15">2</data>
+      <data key="d6">US 33</data>
+    </node>
+    <node id="Scavo archeologico_1_34">
+      <data key="d3">US 34</data>
+      <data key="d4">Strato di carbone e cenere</data>
+      <data key="d5">Node</data>
+      <data key="d7">34</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di carbone e cenere</data>
+      <data key="d12">Disfacimento</data>
+      <data key="d16">Probabile disfacimento dell'edificio ED02.</data>
+      <data key="d17">2013</data>
+      <data key="d13">Si</data>
+      <data key="d14">3</data>
+      <data key="d15">2</data>
+      <data key="d6">US 34</data>
+    </node>
+    <node id="Scavo archeologico_1_35">
+      <data key="d3">US 35</data>
+      <data key="d4">Strato di sabbia</data>
+      <data key="d5">Node</data>
+      <data key="d7">35</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di sabbia</data>
+      <data key="d12">Pavimentazione in terra</data>
+      <data key="d16">Possibile pavimentazione in terra o residuo di disfacimento di muratura in terra.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">3</data>
+      <data key="d15">3</data>
+      <data key="d6">US 35</data>
+    </node>
+    <node id="Scavo archeologico_1_36">
+      <data key="d3">US 36</data>
+      <data key="d4">Struttura in muratura</data>
+      <data key="d5">Node</data>
+      <data key="d7">36</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Struttura in muratura</data>
+      <data key="d12">Pilastro</data>
+      <data key="d16">Probabile residuo di pilastro legato ad un edificio di cui non e' stato possibile determinarne le dimensioni.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">3</data>
+      <data key="d15">3</data>
+      <data key="d6">US 36</data>
+    </node>
+    <node id="Scavo archeologico_1_37">
+      <data key="d3">US 37</data>
+      <data key="d4">Taglio</data>
+      <data key="d5">Node</data>
+      <data key="d7">37</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Taglio</data>
+      <data key="d12">Fossa di spoliazione</data>
+      <data key="d16">E' possibile che si tratti della spoliazione di una muratura che partiva da US36 sviluppandosi verso sud e curvando poi verso ovest alla quale si appoggiava US35. E' possibile che sia stata realizzata al momento della demolizione del primo edificio sostituito ed obliterato a partire dal livellamento US33.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">3</data>
+      <data key="d15">3</data>
+      <data key="d6">US 37</data>
+    </node>
+    <node id="Scavo archeologico_1_38">
+      <data key="d3">US 38</data>
+      <data key="d4">Strato di sabbia</data>
+      <data key="d5">Node</data>
+      <data key="d7">38</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di sabbia</data>
+      <data key="d12">Livellamento</data>
+      <data key="d16">Livellamenti forse volti alla bonifica della zona prima della realizzazione dei nuovi edifici.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">4</data>
+      <data key="d15">1</data>
+      <data key="d6">US 38</data>
+    </node>
+    <node id="Scavo archeologico_1_39">
+      <data key="d3">US 39</data>
+      <data key="d4">Strato di terra</data>
+      <data key="d5">Node</data>
+      <data key="d7">39</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">US</data>
+      <data key="d11">Strato di terra</data>
+      <data key="d12">Livellamento</data>
+      <data key="d16">Livellamenti forse volti alla bonifica della zona prima della realizzazione dei nuovi edifici.</data>
+      <data key="d17">2012</data>
+      <data key="d13">Si</data>
+      <data key="d14">4</data>
+      <data key="d15">1</data>
+      <data key="d6">US 39</data>
+    </node>
+    <node id="Scavo archeologico_1_102">
+      <data key="d3">US 102</data>
+      <data key="d4">test</data>
+      <data key="d5">Node</data>
+      <data key="d7">102</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">USVA</data>
+      <data key="d12">test</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">2.1</data>
+      <data key="d6">US 102</data>
+    </node>
+    <node id="Scavo archeologico_1_103">
+      <data key="d3">US 103</data>
+      <data key="d4">bla bla bla</data>
+      <data key="d5">Node</data>
+      <data key="d7">103</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">USVA</data>
+      <data key="d12">bla bla bla</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">2.1</data>
+      <data key="d6">US 103</data>
+    </node>
+    <node id="Scavo archeologico_1_104">
+      <data key="d3">US 104</data>
+      <data key="d4">gggg</data>
+      <data key="d5">Node</data>
+      <data key="d7">104</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">USVB</data>
+      <data key="d12">gggg</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">3.1</data>
+      <data key="d6">US 104</data>
+    </node>
+    <node id="Scavo archeologico_1_106">
+      <data key="d3">US 106</data>
+      <data key="d4">USV 1</data>
+      <data key="d5">Node</data>
+      <data key="d7">106</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">USVA</data>
+      <data key="d12">USV 1</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">2.1</data>
+      <data key="d6">US 106</data>
+    </node>
+    <node id="Scavo archeologico_1_500">
+      <data key="d3">US 500</data>
+      <data key="d4">Continuity</data>
+      <data key="d5">Node</data>
+      <data key="d7">500</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">CON</data>
+      <data key="d11">Continuity</data>
+      <data key="d12">continuità con US 12</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">1</data>
+      <data key="d6">US 500</data>
+    </node>
+    <node id="Scavo archeologico_1_400">
+      <data key="d3">US 400</data>
+      <data key="d4">bla bla bla</data>
+      <data key="d5">Node</data>
+      <data key="d7">400</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">Extractor</data>
+      <data key="d12">bla bla bla</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">2.1</data>
+      <data key="d6">US 400</data>
+    </node>
+    <node id="Scavo archeologico_1_300">
+      <data key="d3">US 300</data>
+      <data key="d4">blabla bla</data>
+      <data key="d5">Node</data>
+      <data key="d7">300</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">SF</data>
+      <data key="d12">blabla bla</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">2.1</data>
+      <data key="d6">US 300</data>
+    </node>
+    <node id="Scavo archeologico_1_4002">
+      <data key="d3">US 4002</data>
+      <data key="d4">DosCo\Scavo archeologico_20220218_.xlsx</data>
+      <data key="d5">Node</data>
+      <data key="d7">4002</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">DOC</data>
+      <data key="d12">DosCo\Scavo archeologico_20220218_.xlsx</data>
+      <data key="d14">2</data>
+      <data key="d15">2.1</data>
+      <data key="d6">US 4002</data>
+    </node>
+    <node id="Scavo archeologico_1_800">
+      <data key="d3">US 800</data>
+      <data key="d4">Materiale pietra dura</data>
+      <data key="d5">Node</data>
+      <data key="d7">800</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">property</data>
+      <data key="d12">Materiale pietra dura</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">2.1</data>
+      <data key="d6">US 800</data>
+    </node>
+    <node id="Scavo archeologico_1_900">
+      <data key="d3">US 900</data>
+      <data key="d4">ggggg</data>
+      <data key="d5">Node</data>
+      <data key="d7">900</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">Combinar</data>
+      <data key="d12">ggggg</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">3.1</data>
+      <data key="d6">US 900</data>
+    </node>
+    <node id="Scavo archeologico_1_402">
+      <data key="d3">US 402</data>
+      <data key="d4">hhhh</data>
+      <data key="d5">Node</data>
+      <data key="d7">402</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">Extractor</data>
+      <data key="d12">hhhh</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">3.1</data>
+      <data key="d6">US 402</data>
+    </node>
+    <node id="Scavo archeologico_1_4001">
+      <data key="d3">US 4001</data>
+      <data key="d4">DosCo\test1_1.graphml</data>
+      <data key="d5">Node</data>
+      <data key="d7">4001</data>
+      <data key="d8">Scavo archeologico</data>
+      <data key="d9">1</data>
+      <data key="d10">DOC</data>
+      <data key="d12">DosCo\test1_1.graphml</data>
+      <data key="d17">2022</data>
+      <data key="d14">2</data>
+      <data key="d15">2.1</data>
+      <data key="d6">US 4001</data>
+    </node>
+    <edge source="Scavo archeologico_1_1" target="Scavo archeologico_1_2">
+      <data key="d18">edge_1_COVERS_Scavo archeologico_1_1_to_Scavo archeologico_1_2</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_1" target="Scavo archeologico_1_8">
+      <data key="d18">edge_2_COVERS_Scavo archeologico_1_1_to_Scavo archeologico_1_8</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_2" target="Scavo archeologico_1_1">
+      <data key="d18">edge_3_COVERED_BY_Scavo archeologico_1_2_to_Scavo archeologico_1_1</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_2" target="Scavo archeologico_1_3">
+      <data key="d18">edge_4_COVERS_Scavo archeologico_1_2_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_2" target="Scavo archeologico_1_7">
+      <data key="d18">edge_5_CUTS_Scavo archeologico_1_2_to_Scavo archeologico_1_7</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_2">
+      <data key="d18">edge_6_COVERED_BY_Scavo archeologico_1_3_to_Scavo archeologico_1_2</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_4">
+      <data key="d18">edge_7_COVERS_Scavo archeologico_1_3_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_5">
+      <data key="d18">edge_8_COVERS_Scavo archeologico_1_3_to_Scavo archeologico_1_5</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_6">
+      <data key="d18">edge_9_COVERS_Scavo archeologico_1_3_to_Scavo archeologico_1_6</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_9">
+      <data key="d18">edge_10_COVERS_Scavo archeologico_1_3_to_Scavo archeologico_1_9</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_10">
+      <data key="d18">edge_11_COVERS_Scavo archeologico_1_3_to_Scavo archeologico_1_10</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_11">
+      <data key="d18">edge_12_COVERS_Scavo archeologico_1_3_to_Scavo archeologico_1_11</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_12">
+      <data key="d18">edge_13_COVERS_Scavo archeologico_1_3_to_Scavo archeologico_1_12</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_14">
+      <data key="d18">edge_14_COVERS_Scavo archeologico_1_3_to_Scavo archeologico_1_14</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_3" target="Scavo archeologico_1_16">
+      <data key="d18">edge_15_COVERS_Scavo archeologico_1_3_to_Scavo archeologico_1_16</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_3">
+      <data key="d18">edge_16_COVERED_BY_Scavo archeologico_1_4_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_9">
+      <data key="d18">edge_17_COVERED_BY_Scavo archeologico_1_4_to_Scavo archeologico_1_9</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_11">
+      <data key="d18">edge_18_COVERED_BY_Scavo archeologico_1_4_to_Scavo archeologico_1_11</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_5">
+      <data key="d18">edge_19_COVERS_Scavo archeologico_1_4_to_Scavo archeologico_1_5</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_17">
+      <data key="d18">edge_20_COVERS_Scavo archeologico_1_4_to_Scavo archeologico_1_17</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_18">
+      <data key="d18">edge_21_COVERS_Scavo archeologico_1_4_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_19">
+      <data key="d18">edge_22_COVERS_Scavo archeologico_1_4_to_Scavo archeologico_1_19</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_20">
+      <data key="d18">edge_23_COVERS_Scavo archeologico_1_4_to_Scavo archeologico_1_20</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_23">
+      <data key="d18">edge_24_COVERS_Scavo archeologico_1_4_to_Scavo archeologico_1_23</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_25">
+      <data key="d18">edge_25_COVERS_Scavo archeologico_1_4_to_Scavo archeologico_1_25</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_27">
+      <data key="d18">edge_26_COVERS_Scavo archeologico_1_4_to_Scavo archeologico_1_27</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_21">
+      <data key="d18">edge_27_FILLS_Scavo archeologico_1_4_to_Scavo archeologico_1_21</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Fills</data>
+      <data key="d21">FILLS</data>
+      <data key="d22">Fills</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_6">
+      <data key="d18">edge_28_LEANS_AGAINST_Scavo archeologico_1_4_to_Scavo archeologico_1_6</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leans Against</data>
+      <data key="d21">LEANS_AGAINST</data>
+      <data key="d22">Leans Against</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_13">
+      <data key="d18">edge_29_CUTS_Scavo archeologico_1_4_to_Scavo archeologico_1_13</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_4" target="Scavo archeologico_1_15">
+      <data key="d18">edge_30_CUTS_Scavo archeologico_1_4_to_Scavo archeologico_1_15</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_5" target="Scavo archeologico_1_3">
+      <data key="d18">edge_31_COVERED_BY_Scavo archeologico_1_5_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_5" target="Scavo archeologico_1_4">
+      <data key="d18">edge_32_COVERED_BY_Scavo archeologico_1_5_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_5" target="Scavo archeologico_1_17">
+      <data key="d18">edge_33_COVERED_BY_Scavo archeologico_1_5_to_Scavo archeologico_1_17</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_5" target="Scavo archeologico_1_29">
+      <data key="d18">edge_34_COVERS_Scavo archeologico_1_5_to_Scavo archeologico_1_29</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_5" target="Scavo archeologico_1_32">
+      <data key="d18">edge_35_COVERS_Scavo archeologico_1_5_to_Scavo archeologico_1_32</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_5" target="Scavo archeologico_1_18">
+      <data key="d18">edge_36_LEANED_AGAINST_BY_Scavo archeologico_1_5_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leaned Against By</data>
+      <data key="d21">LEANED_AGAINST_BY</data>
+      <data key="d22">Leaned Against By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_5" target="Scavo archeologico_1_6">
+      <data key="d18">edge_37_LEANS_AGAINST_Scavo archeologico_1_5_to_Scavo archeologico_1_6</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leans Against</data>
+      <data key="d21">LEANS_AGAINST</data>
+      <data key="d22">Leans Against</data>
+    </edge>
+    <edge source="Scavo archeologico_1_5" target="Scavo archeologico_1_28">
+      <data key="d18">edge_38_CUTS_Scavo archeologico_1_5_to_Scavo archeologico_1_28</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_6" target="Scavo archeologico_1_3">
+      <data key="d18">edge_39_COVERED_BY_Scavo archeologico_1_6_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_6" target="Scavo archeologico_1_4">
+      <data key="d18">edge_40_LEANED_AGAINST_BY_Scavo archeologico_1_6_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leaned Against By</data>
+      <data key="d21">LEANED_AGAINST_BY</data>
+      <data key="d22">Leaned Against By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_6" target="Scavo archeologico_1_5">
+      <data key="d18">edge_41_LEANED_AGAINST_BY_Scavo archeologico_1_6_to_Scavo archeologico_1_5</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leaned Against By</data>
+      <data key="d21">LEANED_AGAINST_BY</data>
+      <data key="d22">Leaned Against By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_6" target="Scavo archeologico_1_12">
+      <data key="d18">edge_42_LEANED_AGAINST_BY_Scavo archeologico_1_6_to_Scavo archeologico_1_12</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leaned Against By</data>
+      <data key="d21">LEANED_AGAINST_BY</data>
+      <data key="d22">Leaned Against By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_6" target="Scavo archeologico_1_18">
+      <data key="d18">edge_43_LEANED_AGAINST_BY_Scavo archeologico_1_6_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leaned Against By</data>
+      <data key="d21">LEANED_AGAINST_BY</data>
+      <data key="d22">Leaned Against By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_6" target="Scavo archeologico_1_32">
+      <data key="d18">edge_44_LEANED_AGAINST_BY_Scavo archeologico_1_6_to_Scavo archeologico_1_32</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leaned Against By</data>
+      <data key="d21">LEANED_AGAINST_BY</data>
+      <data key="d22">Leaned Against By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_7" target="Scavo archeologico_1_8">
+      <data key="d18">edge_45_FILLED_BY_Scavo archeologico_1_7_to_Scavo archeologico_1_8</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Filled By</data>
+      <data key="d21">FILLED_BY</data>
+      <data key="d22">Filled By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_7" target="Scavo archeologico_1_2">
+      <data key="d18">edge_46_CUTS_Scavo archeologico_1_7_to_Scavo archeologico_1_2</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_8" target="Scavo archeologico_1_1">
+      <data key="d18">edge_47_COVERED_BY_Scavo archeologico_1_8_to_Scavo archeologico_1_1</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_8" target="Scavo archeologico_1_7">
+      <data key="d18">edge_48_FILLS_Scavo archeologico_1_8_to_Scavo archeologico_1_7</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Fills</data>
+      <data key="d21">FILLS</data>
+      <data key="d22">Fills</data>
+    </edge>
+    <edge source="Scavo archeologico_1_9" target="Scavo archeologico_1_3">
+      <data key="d18">edge_49_COVERED_BY_Scavo archeologico_1_9_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_9" target="Scavo archeologico_1_4">
+      <data key="d18">edge_50_COVERS_Scavo archeologico_1_9_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_10" target="Scavo archeologico_1_3">
+      <data key="d18">edge_51_COVERED_BY_Scavo archeologico_1_10_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_10" target="Scavo archeologico_1_11">
+      <data key="d18">edge_52_COVERS_Scavo archeologico_1_10_to_Scavo archeologico_1_11</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_11" target="Scavo archeologico_1_3">
+      <data key="d18">edge_53_COVERED_BY_Scavo archeologico_1_11_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_11" target="Scavo archeologico_1_10">
+      <data key="d18">edge_54_COVERED_BY_Scavo archeologico_1_11_to_Scavo archeologico_1_10</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_11" target="Scavo archeologico_1_4">
+      <data key="d18">edge_55_COVERS_Scavo archeologico_1_11_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_12" target="Scavo archeologico_1_3">
+      <data key="d18">edge_56_COVERED_BY_Scavo archeologico_1_12_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_12" target="Scavo archeologico_1_6">
+      <data key="d18">edge_57_LEANS_AGAINST_Scavo archeologico_1_12_to_Scavo archeologico_1_6</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leans Against</data>
+      <data key="d21">LEANS_AGAINST</data>
+      <data key="d22">Leans Against</data>
+    </edge>
+    <edge source="Scavo archeologico_1_13" target="Scavo archeologico_1_14">
+      <data key="d18">edge_58_FILLED_BY_Scavo archeologico_1_13_to_Scavo archeologico_1_14</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Filled By</data>
+      <data key="d21">FILLED_BY</data>
+      <data key="d22">Filled By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_13" target="Scavo archeologico_1_4">
+      <data key="d18">edge_59_CUTS_Scavo archeologico_1_13_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_13" target="Scavo archeologico_1_18">
+      <data key="d18">edge_60_CUTS_Scavo archeologico_1_13_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_14" target="Scavo archeologico_1_3">
+      <data key="d18">edge_61_COVERED_BY_Scavo archeologico_1_14_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_14" target="Scavo archeologico_1_13">
+      <data key="d18">edge_62_FILLS_Scavo archeologico_1_14_to_Scavo archeologico_1_13</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Fills</data>
+      <data key="d21">FILLS</data>
+      <data key="d22">Fills</data>
+    </edge>
+    <edge source="Scavo archeologico_1_15" target="Scavo archeologico_1_16">
+      <data key="d18">edge_63_FILLED_BY_Scavo archeologico_1_15_to_Scavo archeologico_1_16</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Filled By</data>
+      <data key="d21">FILLED_BY</data>
+      <data key="d22">Filled By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_15" target="Scavo archeologico_1_4">
+      <data key="d18">edge_64_CUTS_Scavo archeologico_1_15_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_16" target="Scavo archeologico_1_3">
+      <data key="d18">edge_65_COVERED_BY_Scavo archeologico_1_16_to_Scavo archeologico_1_3</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_16" target="Scavo archeologico_1_15">
+      <data key="d18">edge_66_FILLS_Scavo archeologico_1_16_to_Scavo archeologico_1_15</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Fills</data>
+      <data key="d21">FILLS</data>
+      <data key="d22">Fills</data>
+    </edge>
+    <edge source="Scavo archeologico_1_17" target="Scavo archeologico_1_4">
+      <data key="d18">edge_67_COVERED_BY_Scavo archeologico_1_17_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_17" target="Scavo archeologico_1_5">
+      <data key="d18">edge_68_COVERS_Scavo archeologico_1_17_to_Scavo archeologico_1_5</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_17" target="Scavo archeologico_1_30">
+      <data key="d18">edge_69_COVERS_Scavo archeologico_1_17_to_Scavo archeologico_1_30</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_17" target="Scavo archeologico_1_28">
+      <data key="d18">edge_70_FILLS_Scavo archeologico_1_17_to_Scavo archeologico_1_28</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Fills</data>
+      <data key="d21">FILLS</data>
+      <data key="d22">Fills</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_4">
+      <data key="d18">edge_71_COVERED_BY_Scavo archeologico_1_18_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_30">
+      <data key="d18">edge_72_COVERED_BY_Scavo archeologico_1_18_to_Scavo archeologico_1_30</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_29">
+      <data key="d18">edge_73_COVERS_Scavo archeologico_1_18_to_Scavo archeologico_1_29</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_31">
+      <data key="d18">edge_74_COVERS_Scavo archeologico_1_18_to_Scavo archeologico_1_31</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_5">
+      <data key="d18">edge_75_LEANS_AGAINST_Scavo archeologico_1_18_to_Scavo archeologico_1_5</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leans Against</data>
+      <data key="d21">LEANS_AGAINST</data>
+      <data key="d22">Leans Against</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_6">
+      <data key="d18">edge_76_LEANS_AGAINST_Scavo archeologico_1_18_to_Scavo archeologico_1_6</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leans Against</data>
+      <data key="d21">LEANS_AGAINST</data>
+      <data key="d22">Leans Against</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_19">
+      <data key="d18">edge_77_LEANS_AGAINST_Scavo archeologico_1_18_to_Scavo archeologico_1_19</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leans Against</data>
+      <data key="d21">LEANS_AGAINST</data>
+      <data key="d22">Leans Against</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_13">
+      <data key="d18">edge_78_CUTS_Scavo archeologico_1_18_to_Scavo archeologico_1_13</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_21">
+      <data key="d18">edge_79_CUTS_Scavo archeologico_1_18_to_Scavo archeologico_1_21</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_22">
+      <data key="d18">edge_80_CUTS_Scavo archeologico_1_18_to_Scavo archeologico_1_22</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_24">
+      <data key="d18">edge_81_CUTS_Scavo archeologico_1_18_to_Scavo archeologico_1_24</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_18" target="Scavo archeologico_1_26">
+      <data key="d18">edge_82_CUTS_Scavo archeologico_1_18_to_Scavo archeologico_1_26</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_19" target="Scavo archeologico_1_4">
+      <data key="d18">edge_83_COVERED_BY_Scavo archeologico_1_19_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_19" target="Scavo archeologico_1_18">
+      <data key="d18">edge_84_LEANED_AGAINST_BY_Scavo archeologico_1_19_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leaned Against By</data>
+      <data key="d21">LEANED_AGAINST_BY</data>
+      <data key="d22">Leaned Against By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_19" target="Scavo archeologico_1_20">
+      <data key="d18">edge_85_LEANED_AGAINST_BY_Scavo archeologico_1_19_to_Scavo archeologico_1_20</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leaned Against By</data>
+      <data key="d21">LEANED_AGAINST_BY</data>
+      <data key="d22">Leaned Against By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_20" target="Scavo archeologico_1_4">
+      <data key="d18">edge_86_COVERED_BY_Scavo archeologico_1_20_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_20" target="Scavo archeologico_1_19">
+      <data key="d18">edge_87_LEANS_AGAINST_Scavo archeologico_1_20_to_Scavo archeologico_1_19</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leans Against</data>
+      <data key="d21">LEANS_AGAINST</data>
+      <data key="d22">Leans Against</data>
+    </edge>
+    <edge source="Scavo archeologico_1_21" target="Scavo archeologico_1_4">
+      <data key="d18">edge_88_FILLED_BY_Scavo archeologico_1_21_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Filled By</data>
+      <data key="d21">FILLED_BY</data>
+      <data key="d22">Filled By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_21" target="Scavo archeologico_1_18">
+      <data key="d18">edge_89_CUTS_Scavo archeologico_1_21_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_22" target="Scavo archeologico_1_23">
+      <data key="d18">edge_90_FILLED_BY_Scavo archeologico_1_22_to_Scavo archeologico_1_23</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Filled By</data>
+      <data key="d21">FILLED_BY</data>
+      <data key="d22">Filled By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_22" target="Scavo archeologico_1_18">
+      <data key="d18">edge_91_CUTS_Scavo archeologico_1_22_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_23" target="Scavo archeologico_1_4">
+      <data key="d18">edge_92_COVERED_BY_Scavo archeologico_1_23_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_23" target="Scavo archeologico_1_22">
+      <data key="d18">edge_93_FILLS_Scavo archeologico_1_23_to_Scavo archeologico_1_22</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Fills</data>
+      <data key="d21">FILLS</data>
+      <data key="d22">Fills</data>
+    </edge>
+    <edge source="Scavo archeologico_1_24" target="Scavo archeologico_1_25">
+      <data key="d18">edge_94_FILLED_BY_Scavo archeologico_1_24_to_Scavo archeologico_1_25</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Filled By</data>
+      <data key="d21">FILLED_BY</data>
+      <data key="d22">Filled By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_24" target="Scavo archeologico_1_18">
+      <data key="d18">edge_95_CUTS_Scavo archeologico_1_24_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_25" target="Scavo archeologico_1_4">
+      <data key="d18">edge_96_COVERED_BY_Scavo archeologico_1_25_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_25" target="Scavo archeologico_1_24">
+      <data key="d18">edge_97_FILLS_Scavo archeologico_1_25_to_Scavo archeologico_1_24</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Fills</data>
+      <data key="d21">FILLS</data>
+      <data key="d22">Fills</data>
+    </edge>
+    <edge source="Scavo archeologico_1_26" target="Scavo archeologico_1_27">
+      <data key="d18">edge_98_FILLED_BY_Scavo archeologico_1_26_to_Scavo archeologico_1_27</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Filled By</data>
+      <data key="d21">FILLED_BY</data>
+      <data key="d22">Filled By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_26" target="Scavo archeologico_1_18">
+      <data key="d18">edge_99_CUTS_Scavo archeologico_1_26_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_27" target="Scavo archeologico_1_4">
+      <data key="d18">edge_100_COVERED_BY_Scavo archeologico_1_27_to_Scavo archeologico_1_4</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_27" target="Scavo archeologico_1_26">
+      <data key="d18">edge_101_FILLS_Scavo archeologico_1_27_to_Scavo archeologico_1_26</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Fills</data>
+      <data key="d21">FILLS</data>
+      <data key="d22">Fills</data>
+    </edge>
+    <edge source="Scavo archeologico_1_28" target="Scavo archeologico_1_17">
+      <data key="d18">edge_102_FILLED_BY_Scavo archeologico_1_28_to_Scavo archeologico_1_17</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Filled By</data>
+      <data key="d21">FILLED_BY</data>
+      <data key="d22">Filled By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_28" target="Scavo archeologico_1_5">
+      <data key="d18">edge_103_CUTS_Scavo archeologico_1_28_to_Scavo archeologico_1_5</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_28" target="Scavo archeologico_1_30">
+      <data key="d18">edge_104_CUTS_Scavo archeologico_1_28_to_Scavo archeologico_1_30</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_28" target="Scavo archeologico_1_32">
+      <data key="d18">edge_105_CUTS_Scavo archeologico_1_28_to_Scavo archeologico_1_32</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_29" target="Scavo archeologico_1_5">
+      <data key="d18">edge_106_COVERED_BY_Scavo archeologico_1_29_to_Scavo archeologico_1_5</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_29" target="Scavo archeologico_1_18">
+      <data key="d18">edge_107_COVERED_BY_Scavo archeologico_1_29_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_29" target="Scavo archeologico_1_32">
+      <data key="d18">edge_108_COVERED_BY_Scavo archeologico_1_29_to_Scavo archeologico_1_32</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_29" target="Scavo archeologico_1_31">
+      <data key="d18">edge_109_COVERS_Scavo archeologico_1_29_to_Scavo archeologico_1_31</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_29" target="Scavo archeologico_1_33">
+      <data key="d18">edge_110_COVERS_Scavo archeologico_1_29_to_Scavo archeologico_1_33</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_29" target="Scavo archeologico_1_34">
+      <data key="d18">edge_111_COVERS_Scavo archeologico_1_29_to_Scavo archeologico_1_34</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_30" target="Scavo archeologico_1_17">
+      <data key="d18">edge_112_COVERED_BY_Scavo archeologico_1_30_to_Scavo archeologico_1_17</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_30" target="Scavo archeologico_1_18">
+      <data key="d18">edge_113_COVERS_Scavo archeologico_1_30_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_30" target="Scavo archeologico_1_28">
+      <data key="d18">edge_114_CUTS_Scavo archeologico_1_30_to_Scavo archeologico_1_28</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_31" target="Scavo archeologico_1_18">
+      <data key="d18">edge_115_COVERED_BY_Scavo archeologico_1_31_to_Scavo archeologico_1_18</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_31" target="Scavo archeologico_1_29">
+      <data key="d18">edge_116_COVERED_BY_Scavo archeologico_1_31_to_Scavo archeologico_1_29</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_31" target="Scavo archeologico_1_33">
+      <data key="d18">edge_117_COVERS_Scavo archeologico_1_31_to_Scavo archeologico_1_33</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_31" target="Scavo archeologico_1_34">
+      <data key="d18">edge_118_COVERS_Scavo archeologico_1_31_to_Scavo archeologico_1_34</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_31" target="Scavo archeologico_1_35">
+      <data key="d18">edge_119_COVERS_Scavo archeologico_1_31_to_Scavo archeologico_1_35</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_31" target="Scavo archeologico_1_36">
+      <data key="d18">edge_120_COVERS_Scavo archeologico_1_31_to_Scavo archeologico_1_36</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_32" target="Scavo archeologico_1_5">
+      <data key="d18">edge_121_COVERED_BY_Scavo archeologico_1_32_to_Scavo archeologico_1_5</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_32" target="Scavo archeologico_1_29">
+      <data key="d18">edge_122_COVERS_Scavo archeologico_1_32_to_Scavo archeologico_1_29</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_32" target="Scavo archeologico_1_6">
+      <data key="d18">edge_123_LEANS_AGAINST_Scavo archeologico_1_32_to_Scavo archeologico_1_6</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leans Against</data>
+      <data key="d21">LEANS_AGAINST</data>
+      <data key="d22">Leans Against</data>
+    </edge>
+    <edge source="Scavo archeologico_1_32" target="Scavo archeologico_1_28">
+      <data key="d18">edge_124_CUTS_Scavo archeologico_1_32_to_Scavo archeologico_1_28</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_33" target="Scavo archeologico_1_29">
+      <data key="d18">edge_125_COVERED_BY_Scavo archeologico_1_33_to_Scavo archeologico_1_29</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_33" target="Scavo archeologico_1_31">
+      <data key="d18">edge_126_COVERED_BY_Scavo archeologico_1_33_to_Scavo archeologico_1_31</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_33" target="Scavo archeologico_1_34">
+      <data key="d18">edge_127_COVERED_BY_Scavo archeologico_1_33_to_Scavo archeologico_1_34</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_33" target="Scavo archeologico_1_35">
+      <data key="d18">edge_128_COVERS_Scavo archeologico_1_33_to_Scavo archeologico_1_35</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_33" target="Scavo archeologico_1_36">
+      <data key="d18">edge_129_COVERS_Scavo archeologico_1_33_to_Scavo archeologico_1_36</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_33" target="Scavo archeologico_1_38">
+      <data key="d18">edge_130_COVERS_Scavo archeologico_1_33_to_Scavo archeologico_1_38</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_33" target="Scavo archeologico_1_37">
+      <data key="d18">edge_131_FILLS_Scavo archeologico_1_33_to_Scavo archeologico_1_37</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Fills</data>
+      <data key="d21">FILLS</data>
+      <data key="d22">Fills</data>
+    </edge>
+    <edge source="Scavo archeologico_1_34" target="Scavo archeologico_1_29">
+      <data key="d18">edge_132_COVERED_BY_Scavo archeologico_1_34_to_Scavo archeologico_1_29</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_34" target="Scavo archeologico_1_31">
+      <data key="d18">edge_133_COVERED_BY_Scavo archeologico_1_34_to_Scavo archeologico_1_31</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_34" target="Scavo archeologico_1_33">
+      <data key="d18">edge_134_COVERS_Scavo archeologico_1_34_to_Scavo archeologico_1_33</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_34" target="Scavo archeologico_1_35">
+      <data key="d18">edge_135_COVERS_Scavo archeologico_1_34_to_Scavo archeologico_1_35</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_34" target="Scavo archeologico_1_36">
+      <data key="d18">edge_136_COVERS_Scavo archeologico_1_34_to_Scavo archeologico_1_36</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_35" target="Scavo archeologico_1_31">
+      <data key="d18">edge_137_COVERED_BY_Scavo archeologico_1_35_to_Scavo archeologico_1_31</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_35" target="Scavo archeologico_1_33">
+      <data key="d18">edge_138_COVERED_BY_Scavo archeologico_1_35_to_Scavo archeologico_1_33</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_35" target="Scavo archeologico_1_34">
+      <data key="d18">edge_139_COVERED_BY_Scavo archeologico_1_35_to_Scavo archeologico_1_34</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_35" target="Scavo archeologico_1_38">
+      <data key="d18">edge_140_COVERS_Scavo archeologico_1_35_to_Scavo archeologico_1_38</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_35" target="Scavo archeologico_1_36">
+      <data key="d18">edge_141_LEANS_AGAINST_Scavo archeologico_1_35_to_Scavo archeologico_1_36</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leans Against</data>
+      <data key="d21">LEANS_AGAINST</data>
+      <data key="d22">Leans Against</data>
+    </edge>
+    <edge source="Scavo archeologico_1_35" target="Scavo archeologico_1_37">
+      <data key="d18">edge_142_CUTS_Scavo archeologico_1_35_to_Scavo archeologico_1_37</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_36" target="Scavo archeologico_1_31">
+      <data key="d18">edge_143_COVERED_BY_Scavo archeologico_1_36_to_Scavo archeologico_1_31</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_36" target="Scavo archeologico_1_33">
+      <data key="d18">edge_144_COVERED_BY_Scavo archeologico_1_36_to_Scavo archeologico_1_33</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_36" target="Scavo archeologico_1_34">
+      <data key="d18">edge_145_COVERED_BY_Scavo archeologico_1_36_to_Scavo archeologico_1_34</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_36" target="Scavo archeologico_1_35">
+      <data key="d18">edge_146_LEANED_AGAINST_BY_Scavo archeologico_1_36_to_Scavo archeologico_1_35</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Leaned Against By</data>
+      <data key="d21">LEANED_AGAINST_BY</data>
+      <data key="d22">Leaned Against By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_36" target="Scavo archeologico_1_38">
+      <data key="d18">edge_147_CUTS_Scavo archeologico_1_36_to_Scavo archeologico_1_38</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_36" target="Scavo archeologico_1_39">
+      <data key="d18">edge_148_CUTS_Scavo archeologico_1_36_to_Scavo archeologico_1_39</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_36" target="Scavo archeologico_1_37">
+      <data key="d18">edge_149_CUTS_Scavo archeologico_1_36_to_Scavo archeologico_1_37</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_37" target="Scavo archeologico_1_33">
+      <data key="d18">edge_150_FILLED_BY_Scavo archeologico_1_37_to_Scavo archeologico_1_33</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Filled By</data>
+      <data key="d21">FILLED_BY</data>
+      <data key="d22">Filled By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_37" target="Scavo archeologico_1_35">
+      <data key="d18">edge_151_CUTS_Scavo archeologico_1_37_to_Scavo archeologico_1_35</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_37" target="Scavo archeologico_1_36">
+      <data key="d18">edge_152_CUTS_Scavo archeologico_1_37_to_Scavo archeologico_1_36</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_37" target="Scavo archeologico_1_38">
+      <data key="d18">edge_153_CUTS_Scavo archeologico_1_37_to_Scavo archeologico_1_38</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_37" target="Scavo archeologico_1_39">
+      <data key="d18">edge_154_CUTS_Scavo archeologico_1_37_to_Scavo archeologico_1_39</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_38" target="Scavo archeologico_1_33">
+      <data key="d18">edge_155_COVERED_BY_Scavo archeologico_1_38_to_Scavo archeologico_1_33</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_38" target="Scavo archeologico_1_35">
+      <data key="d18">edge_156_COVERED_BY_Scavo archeologico_1_38_to_Scavo archeologico_1_35</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_38" target="Scavo archeologico_1_39">
+      <data key="d18">edge_157_COVERED_BY_Scavo archeologico_1_38_to_Scavo archeologico_1_39</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covered By</data>
+      <data key="d21">COVERED_BY</data>
+      <data key="d22">Covered By</data>
+    </edge>
+    <edge source="Scavo archeologico_1_38" target="Scavo archeologico_1_36">
+      <data key="d18">edge_158_CUTS_Scavo archeologico_1_38_to_Scavo archeologico_1_36</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_38" target="Scavo archeologico_1_37">
+      <data key="d18">edge_159_CUTS_Scavo archeologico_1_38_to_Scavo archeologico_1_37</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_39" target="Scavo archeologico_1_38">
+      <data key="d18">edge_160_COVERS_Scavo archeologico_1_39_to_Scavo archeologico_1_38</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Covers</data>
+      <data key="d21">COVERS</data>
+      <data key="d22">Covers</data>
+    </edge>
+    <edge source="Scavo archeologico_1_39" target="Scavo archeologico_1_36">
+      <data key="d18">edge_161_CUTS_Scavo archeologico_1_39_to_Scavo archeologico_1_36</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <edge source="Scavo archeologico_1_39" target="Scavo archeologico_1_37">
+      <data key="d18">edge_162_CUTS_Scavo archeologico_1_39_to_Scavo archeologico_1_37</data>
+      <data key="d19">generic_connection</data>
+      <data key="d20">Cuts</data>
+      <data key="d21">CUTS</data>
+      <data key="d22">Cuts</data>
+    </edge>
+    <data key="d0">Scavo archeologico Stratigraphy</data>
+    <data key="d1">Stratigraphic graph exported from PyArchInit-Mini on 2025-10-24 11:37</data>
+    <data key="d2">Scavo archeologico_stratigraphy</data>
+  </graph>
+</graphml>

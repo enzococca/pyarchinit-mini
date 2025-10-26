@@ -1,0 +1,328 @@
+digraph {
+	graph [bb="0,0,3505,380.5",
+		compound=true,
+		dpi=150,
+		nodesep=1,
+		pad=0.5,
+		rankdir=TB,
+		ranksep=1.5,
+		splines=ortho
+	];
+	node [label="\N"];
+	subgraph cluster_datazione_1 {
+		graph [bb="8,152,232,228.5",
+			color=lightblue,
+			label="Età contemporanea",
+			lheight=0.23,
+			lp="120,216.25",
+			lwidth=1.46,
+			rank=same,
+			style=filled
+		];
+		"US1_Fondazione_in_muratura_1-1"	[fillcolor=white,
+			height=0.5,
+			label="US1_Fondazione_in_muratura_1-1",
+			pos="120,178",
+			shape=box,
+			style=filled,
+			width=2.8889];
+	}
+	subgraph cluster_datazione_2 {
+		graph [bb="62,296,394,372.5",
+			color=lightblue,
+			label="Età moderna",
+			lheight=0.23,
+			lp="228,360.25",
+			lwidth=0.97,
+			rank=same,
+			style=filled
+		];
+		"US2_Livellamento_1-2"	[fillcolor=white,
+			height=0.5,
+			label="US2_Livellamento_1-2",
+			pos="314,322",
+			shape=box,
+			style=filled,
+			width=2.0035];
+		"US8_Buca_1-2"	[fillcolor=white,
+			height=0.5,
+			label="US8_Buca_1-2",
+			pos="120,322",
+			shape=box,
+			style=filled,
+			width=1.3785];
+	}
+	subgraph cluster_datazione_3 {
+		graph [bb="288,152,731,228.5",
+			color=lightblue,
+			label="Fine XVI secolo - Inizi XVII secolo",
+			lheight=0.23,
+			lp="509.5,216.25",
+			lwidth=2.74,
+			rank=same,
+			style=filled
+		];
+		"US3_Abbandono_2-1"	[fillcolor=white,
+			height=0.5,
+			label="US3_Abbandono_2-1",
+			pos="363,178",
+			shape=box,
+			style=filled,
+			width=1.8681];
+		"CON500_continuità_con_US_12_2-1"	[fillcolor=white,
+			height=0.5,
+			label="CON500_continuità_con_US_12_2-1",
+			pos="613,178",
+			shape=box,
+			style=filled,
+			width=3.066];
+	}
+	subgraph cluster_datazione_4 {
+		graph [bb="739,152,2321,372.5",
+			color=lightblue,
+			label="XV sec rec",
+			lheight=0.23,
+			lp="1530,360.25",
+			lwidth=0.83,
+			rank=same,
+			style=filled
+		];
+		"USVA102_test_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="USVA102_test_2-2.1",
+			pos="1999,322",
+			shape=box,
+			style=filled,
+			width=1.8368];
+		"USVA103_bla_bla_bla_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="USVA103_bla_bla_bla_2-2.1",
+			pos="2225,322",
+			shape=box,
+			style=filled,
+			width=2.4514];
+		"USVA106_USV_1_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="USVA106_USV_1_2-2.1",
+			pos="1562,322",
+			shape=box,
+			style=filled,
+			width=2.1389];
+		"Extractor400_bla_bla_bla_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="Extractor400_bla_bla_bla_2-2.1",
+			pos="1236,178",
+			shape=box,
+			style=filled,
+			width=2.6597];
+		"USVA106_USV_1_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,1332,178 1484.7,322 1454.2,322 1426.4,322 1426.4,322 1426.4,322 1426.4,178 1426.4,178 1426.4,178 1345.1,178 1345.1,178",
+			style=bold];
+		"property800_Materiale_pietra_dura_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="property800_Materiale_pietra_dura_2-2.1",
+			pos="1562,178",
+			shape=box,
+			style=filled,
+			width=3.3993];
+		"USVA106_USV_1_2-2.1" -> "property800_Materiale_pietra_dura_2-2.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,1536.3,196.09 1536.3,303.76 1536.3,303.76 1536.3,209.14 1536.3,209.14",
+			style=bold];
+		"SF300_blabla_bla_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="SF300_blabla_bla_2-2.1",
+			pos="1786,322",
+			shape=box,
+			style=filled,
+			width=2.0764];
+		"SF300_blabla_bla_2-2.1" -> "USVA106_USV_1_2-2.1"	[arrowhead=none,
+			color=blue,
+			constraint=False,
+			pos="1710.8,322 1687.8,322 1662.4,322 1639.3,322",
+			style=dotted];
+		"DOC4001_DosCo\test1_1.graphml_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="DOC4001_DosCo\test1_1.graphml_2-2.1",
+			pos="867,322",
+			shape=box,
+			style=filled,
+			width=3.3264];
+		"DOC4001_DosCo\test1_1.graphml_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,1140,178 867,303.76 867,265.01 867,178 867,178 867,178 1127,178 1127,178",
+			style=bold];
+		"DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1",
+			pos="1236,322",
+			shape=box,
+			style=filled,
+			width=4.9201];
+		"DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,1236,196.09 1236,303.76 1236,303.76 1236,209.14 1236,209.14",
+			style=bold];
+	}
+	subgraph cluster_datazione_5 {
+		graph [bb="2329,152,3038,228.5",
+			color=lightblue,
+			label="XV secolo",
+			lheight=0.23,
+			lp="2683.5,216.25",
+			lwidth=0.79,
+			rank=same,
+			style=filled
+		];
+		"USM12_Muro_2-3"	[fillcolor=white,
+			height=0.5,
+			label="USM12_Muro_2-3",
+			pos="2398,178",
+			shape=box,
+			style=filled,
+			width=1.691];
+		"USM19_Muro_2-3"	[fillcolor=white,
+			height=0.5,
+			label="USM19_Muro_2-3",
+			pos="2969,178",
+			shape=box,
+			style=filled,
+			width=1.691];
+		"US5_Focolare_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US5_Focolare_2-3",
+			pos="2590,178",
+			shape=box,
+			style=filled,
+			width=1.6493];
+		"USM6_Muro_2-3"	[fillcolor=white,
+			height=0.5,
+			label="USM6_Muro_2-3",
+			pos="2779,178",
+			shape=box,
+			style=filled,
+			width=1.5972];
+	}
+	subgraph cluster_datazione_6 {
+		graph [bb="3094,8,3277,372.5",
+			color=lightblue,
+			label="Prima metà' del XV secolo rec",
+			lheight=0.23,
+			lp="3185.5,360.25",
+			lwidth=2.32,
+			rank=same,
+			style=filled
+		];
+		"USVB104_gggg_2-3.1"	[fillcolor=white,
+			height=0.5,
+			label="USVB104_gggg_2-3.1",
+			pos="3185,322",
+			shape=box,
+			style=filled,
+			width=1.9618];
+		"Combinar900_ggggg_2-3.1"	[fillcolor=white,
+			height=0.5,
+			label="Combinar900_ggggg_2-3.1",
+			pos="3185,178",
+			shape=box,
+			style=filled,
+			width=2.316];
+		"USVB104_gggg_2-3.1" -> "Combinar900_ggggg_2-3.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,3185,196.09 3185,303.76 3185,303.76 3185,209.14 3185,209.14",
+			style=bold];
+		"Extractor402_hhhh_2-3.1"	[fillcolor=white,
+			height=0.5,
+			label="Extractor402_hhhh_2-3.1",
+			pos="3188,34",
+			shape=box,
+			style=filled,
+			width=2.1597];
+		"Combinar900_ggggg_2-3.1" -> "Extractor402_hhhh_2-3.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,3188,52.09 3188,159.76 3188,159.76 3188,65.142 3188,65.142",
+			style=bold];
+	}
+	subgraph cluster_datazione_7 {
+		graph [bb="3333,152,3497,228.5",
+			color=lightblue,
+			label="Prima metà' del XV secolo",
+			lheight=0.23,
+			lp="3415,216.25",
+			lwidth=2.04,
+			rank=same,
+			style=filled
+		];
+		"US29_Preparazione_2-4"	[fillcolor=white,
+			height=0.5,
+			label="US29_Preparazione_2-4",
+			pos="3415,178",
+			shape=box,
+			style=filled,
+			width=2.066];
+	}
+	subgraph main {
+		edge [arrowhead=normal,
+			color=black,
+			style=solid
+		];
+		"US1_Fondazione_in_muratura_1-1";
+		"US2_Livellamento_1-2";
+		"US2_Livellamento_1-2" -> "US1_Fondazione_in_muratura_1-1"	[pos="e,224.16,178 268.81,303.76 268.81,265.01 268.81,178 268.81,178 268.81,178 235.68,178 235.68,178"];
+		"US3_Abbandono_2-1";
+		"US2_Livellamento_1-2" -> "US3_Abbandono_2-1"	[pos="e,340.94,196.09 340.94,303.76 340.94,303.76 340.94,207.6 340.94,207.6"];
+		"US8_Buca_1-2";
+		"US8_Buca_1-2" -> "US1_Fondazione_in_muratura_1-1"	[pos="e,120,196.09 120,303.76 120,303.76 120,207.6 120,207.6"];
+	}
+	subgraph main1 {
+		edge [arrowhead=none,
+			color=blue,
+			constraint=False,
+			style=dotted
+		];
+		"CON500_continuità_con_US_12_2-1";
+		"USVA106_USV_1_2-2.1";
+		"SF300_blabla_bla_2-2.1";
+		"SF300_blabla_bla_2-2.1" -> "USVA106_USV_1_2-2.1";
+		"USM12_Muro_2-3";
+		"USM12_Muro_2-3" -> "CON500_continuità_con_US_12_2-1"	[pos="2398,159.83 2398,138.5 2398,106 2398,106 2398,106 613,106 613,106 613,106 613,138.5 613,159.83"];
+	}
+	subgraph main3 {
+		edge [arrowhead=diamond,
+			color=green,
+			style=bold
+		];
+		"USVA102_test_2-2.1";
+		"USM6_Muro_2-3";
+		"USVA102_test_2-2.1" -> "USM6_Muro_2-3"	[pos="e,2779,196.21 1999,303.72 1999,288.05 1999,268 1999,268 1999,268 2779,268 2779,268 2779,268 2779,209.27 2779,209.27"];
+		"USVA103_bla_bla_bla_2-2.1";
+		"USM19_Muro_2-3";
+		"USVA103_bla_bla_bla_2-2.1" -> "USM19_Muro_2-3"	[pos="e,2969,196.24 2313.6,322 2510.9,322 2969,322 2969,322 2969,322 2969,209.29 2969,209.29"];
+		"USVA106_USV_1_2-2.1";
+		"US5_Focolare_2-3";
+		"USVA106_USV_1_2-2.1" -> "US5_Focolare_2-3"	[pos="e,2590,196.28 1587.7,303.79 1587.7,277.49 1587.7,232 1587.7,232 1587.7,232 2590,232 2590,232 2590,232 2590,209.33 2590,209.33"];
+	}
+	subgraph main4 {
+		edge [arrowhead=odiamond,
+			color=purple,
+			style=bold
+		];
+		"USVA106_USV_1_2-2.1";
+		"Extractor400_bla_bla_bla_2-2.1";
+		"USVA106_USV_1_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1";
+		"property800_Materiale_pietra_dura_2-2.1";
+		"USVA106_USV_1_2-2.1" -> "property800_Materiale_pietra_dura_2-2.1";
+		"DOC4001_DosCo\test1_1.graphml_2-2.1";
+		"DOC4001_DosCo\test1_1.graphml_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1";
+		"DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1";
+		"DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1";
+		"USVB104_gggg_2-3.1";
+		"Combinar900_ggggg_2-3.1";
+		"USVB104_gggg_2-3.1" -> "Combinar900_ggggg_2-3.1";
+		"Extractor402_hhhh_2-3.1";
+		"Combinar900_ggggg_2-3.1" -> "Extractor402_hhhh_2-3.1";
+		"US29_Preparazione_2-4";
+		"US29_Preparazione_2-4" -> "Extractor402_hhhh_2-3.1"	[pos="e,3266.1,34 3415,159.76 3415,121.01 3415,34 3415,34 3415,34 3279.2,34 3279.2,34"];
+	}
+}

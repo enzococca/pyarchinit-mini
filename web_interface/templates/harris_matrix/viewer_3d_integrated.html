@@ -415,8 +415,132 @@
 <script src="{{ url_for('static', filename='js/stratigraphic_layout.js') }}"></script>
 
 <script>
-// Graph data from server
-const graphData = {{ graph_json | safe }};
+// Graph data from server (s3Dgraphy JSON v1.5 format)
+const s3dData = {{ graph_json | safe }};
+
+// Transform s3Dgraphy JSON v1.5 to viewer format
+function transformS3DGraphData(s3dData) {
+    // Get first graph from graphs collection
+    const graphs = s3dData.graphs || {};
+    const graphId = Object.keys(graphs)[0];
+    if (!graphId) {
+        return { nodes: [], edges: [] };
+    }
+
+    const graph = graphs[graphId];
+
+    // Flatten all node categories into single array
+    const nodes = [];
+    const nodeCategories = graph.nodes || {};
+
+    // Helper function to extract US number from various sources
+    function extractUSNumber(nodeId, nodeData) {
+        // Try to get from us_number field
+        if (nodeData.us_number) return nodeData.us_number;
+
+        // Try to extract from node ID (e.g., "Site_Area_123" → "123")
+        const parts = nodeId.split('_');
+        const lastPart = parts[parts.length - 1];
+        if (!isNaN(lastPart)) return lastPart;
+
+        return null;
+    }
+
+    // Process stratigraphic nodes
+    if (nodeCategories.stratigraphic) {
+        const strat = nodeCategories.stratigraphic;
+
+        // US nodes
+        if (strat.US) {
+            for (const [nodeId, nodeData] of Object.entries(strat.US)) {
+                const usNumber = extractUSNumber(nodeId, nodeData);
+                nodes.push({
+                    id: nodeId,
+                    us_number: usNumber,
+                    unit_type: nodeData.unit_type || 'US',
+                    name: nodeData.name || `US ${usNumber}`,
+                    description: nodeData.description_interp || nodeData.description_strat || nodeData.description || '',
+                    site: nodeData.site,
+                    area: nodeData.area,
+                    period: nodeData.period,
+                    phase: nodeData.phase,
+                    ...nodeData
+                });
+            }
+        }
+
+        // USVs nodes
+        if (strat.USVs) {
+            for (const [nodeId, nodeData] of Object.entries(strat.USVs)) {
+                const usNumber = extractUSNumber(nodeId, nodeData);
+                nodes.push({
+                    id: nodeId,
+                    us_number: usNumber,
+                    unit_type: nodeData.unit_type || 'USV',
+                    name: nodeData.name || `${nodeData.unit_type || 'USV'} ${usNumber}`,
+                    description: nodeData.description_interp || nodeData.description || '',
+                    ...nodeData
+                });
+            }
+        }
+
+        // SF nodes
+        if (strat.SF) {
+            for (const [nodeId, nodeData] of Object.entries(strat.SF)) {
+                const usNumber = extractUSNumber(nodeId, nodeData);
+                nodes.push({
+                    id: nodeId,
+                    us_number: usNumber,
+                    unit_type: nodeData.unit_type || 'SF',
+                    name: nodeData.name || `${nodeData.unit_type || 'SF'} ${usNumber}`,
+                    description: nodeData.description || '',
+                    ...nodeData
+                });
+            }
+        }
+    }
+
+    // Process other node categories
+    const otherCategories = ['documents', 'extractors', 'combiners', 'properties', 'authors', 'epochs', 'groups', 'links', 'geo'];
+    for (const category of otherCategories) {
+        if (nodeCategories[category]) {
+            for (const [nodeId, nodeData] of Object.entries(nodeCategories[category])) {
+                nodes.push({
+                    id: nodeId,
+                    unit_type: category.toUpperCase(),
+                    name: nodeData.name || nodeId,
+                    ...nodeData
+                });
+            }
+        }
+    }
+
+    // Flatten all edge types into single array
+    const edges = [];
+    const edgeTypes = graph.edges || {};
+
+    for (const [edgeType, edgeList] of Object.entries(edgeTypes)) {
+        if (Array.isArray(edgeList)) {
+            for (const edge of edgeList) {
+                edges.push({
+                    source: edge.from,
+                    target: edge.to,
+                    edge_type: edgeType,
+                    stratigraphic_relation: edge.stratigraphic_relation || edgeType.toUpperCase().replace(/_/g, ' '),
+                    ...edge
+                });
+            }
+        }
+    }
+
+    console.log('Transformed nodes:', nodes.length, 'Sample:', nodes.slice(0, 3));
+    console.log('Transformed edges:', edges.length, 'Sample:', edges.slice(0, 3));
+
+    return { nodes, edges };
+}
+
+// Convert to viewer format
+const graphData = transformS3DGraphData(s3dData);
 
 // Extended Matrix color palette
 const EM_COLORS = {
@@ -522,16 +646,86 @@ async function renderHierarchical() {
     console.log('Container dimensions:', width, height);
     console.log('Nodes before layout:', graphData.nodes.length);
 
-    // Use StratigraphicLayout for proper level-based positioning
-    const layout = new StratigraphicLayout(graphData.nodes, graphData.edges);
+    // Create a simple hierarchical layout using D3 force simulation
+    // This is more reliable than StratigraphicLayout
 
-    // Use reduced edges from transitive reduction
-    graphData.edges = layout.edges;
+    // Build level-based positioning (stratigraphic layers)
+    const nodeMap = new Map(graphData.nodes.map(n => [n.id, n]));
 
-    // Calculate stratigraphic positions using GraphViz
-    await layout.calculatePositions([], width, height);
+    // Calculate levels (depth from top nodes)
+    function calculateLevels() {
+        const levels = new Map();
+        const visited = new Set();
 
-    console.log('Sample node positions:', graphData.nodes.slice(0, 3).map(n => ({id: n.id, x: n.x, y: n.y})));
+        // Find root nodes (no incoming edges)
+        const hasIncoming = new Set();
+        graphData.edges.forEach(e => hasIncoming.add(e.target));
+        const roots = graphData.nodes.filter(n => !hasIncoming.has(n.id));
+
+        console.log('Root nodes (most recent):', roots.length);
+
+        // BFS to assign levels (INVERTED: root = highest level)
+        const queue = roots.map(n => ({ node: n, level: 0 }));
+        let maxLevel = 0;
+
+        while (queue.length > 0) {
+            const { node, level } = queue.shift();
+
+            if (visited.has(node.id)) continue;
+            visited.add(node.id);
+
+            levels.set(node.id, level);
+            maxLevel = Math.max(maxLevel, level);
+
+            // Find children (nodes this covers/cuts/fills)
+            const children = graphData.edges
+                .filter(e => e.source === node.id)
+                .map(e => nodeMap.get(e.target))
+                .filter(n => n && !visited.has(n.id));
+
+            children.forEach(child => {
+                queue.push({ node: child, level: level + 1 });
+            });
+        }
+
+        // Assign level 0 to unconnected nodes
+        graphData.nodes.forEach(n => {
+            if (!levels.has(n.id)) {
+                levels.set(n.id, 0);
+            }
+        });
+
+        console.log('Max stratigraphic level:', maxLevel);
+        return { levels, maxLevel };
+    }
+
+    const { levels, maxLevel } = calculateLevels();
+
+    // Position nodes by level (INVERTED: level 0 at BOTTOM, max level at TOP)
+    const levelHeight = Math.max(100, height / (maxLevel + 2));
+    const nodesByLevel = new Map();
+
+    graphData.nodes.forEach(node => {
+        const level = levels.get(node.id) || 0;
+        if (!nodesByLevel.has(level)) {
+            nodesByLevel.set(level, []);
+        }
+        nodesByLevel.get(level).push(node);
+    });
+
+    // Assign positions
+    nodesByLevel.forEach((nodesAtLevel, level) => {
+        const levelWidth = width - 100;
+        const spacing = levelWidth / (nodesAtLevel.length + 1);
+
+        nodesAtLevel.forEach((node, i) => {
+            node.x = 50 + spacing * (i + 1);
+            // INVERTED: maxLevel - level puts oldest (highest level) at BOTTOM
+            node.y = height - 50 - (maxLevel - level) * levelHeight;
+        });
+    });
+
+    console.log('Sample node positions:', graphData.nodes.slice(0, 3).map(n => ({id: n.id, level: levels.get(n.id), x: n.x, y: n.y})));
 
     // No visual grouping boxes - keep matrix clean like GraphViz
 
@@ -587,7 +781,7 @@ async function renderHierarchical() {
 
     console.log('Nodes drawn:', nodes.size());
 
-    // Node labels
+    // Node labels (with unit type + number)
     g.append('g').selectAll('text')
         .data(graphData.nodes.filter(d => d.x && d.y))
         .enter().append('text')
@@ -598,7 +792,14 @@ async function renderHierarchical() {
         .style('font-weight', 'bold')
         .style('font-size', '12px')
         .style('pointer-events', 'none')
-        .text(d => d.us_number || d.name);
+        .text(d => {
+            // Show unit_type + us_number (e.g., "US12", "DOC4001")
+            if (d.unit_type && d.us_number) {
+                return `${d.unit_type}${d.us_number}`;
+            }
+            // Fallback to us_number or name
+            return d.us_number || d.name || d.id.split('_').pop();
+        });
 }
 
 

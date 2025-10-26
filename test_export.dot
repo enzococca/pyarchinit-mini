@@ -1,0 +1,12 @@
+digraph {
+	graph [bb="0,0,0,0",
+		compound=true,
+		dpi=150,
+		nodesep=1,
+		pad=0.5,
+		rankdir=TB,
+		ranksep=1.5,
+		splines=ortho
+	];
+	node [label="\N"];
+}

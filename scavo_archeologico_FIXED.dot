@@ -1,0 +1,886 @@
+digraph {
+	graph [bb="0,0,4822,3116.5",
+		compound=true,
+		dpi=150,
+		nodesep=1,
+		pad=0.5,
+		rankdir=TB,
+		ranksep=1.5,
+		splines=ortho
+	];
+	node [label="\N"];
+	subgraph cluster_datazione_1 {
+		graph [bb="2638,3032,2862,3108.5",
+			color=lightblue,
+			label="Età contemporanea",
+			lheight=0.23,
+			lp="2750,3096.2",
+			lwidth=1.46,
+			rank=same,
+			style=filled
+		];
+		"US1_Fondazione_in_muratura_1-1"	[fillcolor=white,
+			height=0.5,
+			label="US1_Fondazione_in_muratura_1-1",
+			pos="2750,3058",
+			shape=box,
+			style=filled,
+			width=2.8889];
+	}
+	subgraph cluster_datazione_2 {
+		graph [bb="2602,2600,2762,2964.5",
+			color=lightblue,
+			label="Età moderna",
+			lheight=0.23,
+			lp="2682,2952.2",
+			lwidth=0.97,
+			rank=same,
+			style=filled
+		];
+		"US2_Livellamento_1-2"	[fillcolor=white,
+			height=0.5,
+			label="US2_Livellamento_1-2",
+			pos="2682,2626",
+			shape=box,
+			style=filled,
+			width=2.0035];
+		"US7_Buca_1-2"	[fillcolor=white,
+			height=0.5,
+			label="US7_Buca_1-2",
+			pos="2671,2770",
+			shape=box,
+			style=filled,
+			width=1.3785];
+		"US7_Buca_1-2" -> "US2_Livellamento_1-2"	[arrowhead=normal,
+			color=red,
+			pos="e,2671,2644.1 2671,2751.8 2671,2751.8 2671,2655.6 2671,2655.6",
+			style=dashed];
+		"US8_Buca_1-2"	[fillcolor=white,
+			height=0.5,
+			label="US8_Buca_1-2",
+			pos="2671,2914",
+			shape=box,
+			style=filled,
+			width=1.3785];
+		"US8_Buca_1-2" -> "US7_Buca_1-2"	[arrowhead=normal,
+			color=black,
+			pos="e,2671,2788.1 2671,2895.8 2671,2895.8 2671,2799.6 2671,2799.6",
+			style=solid];
+	}
+	subgraph cluster_datazione_3 {
+		graph [bb="2243,2168,3050,2532.5",
+			color=lightblue,
+			label="Fine XVI secolo - Inizi XVII secolo",
+			lheight=0.23,
+			lp="2646.5,2520.2",
+			lwidth=2.74,
+			rank=same,
+			style=filled
+		];
+		"US10_Disfacimento_2-1"	[fillcolor=white,
+			height=0.5,
+			label="US10_Disfacimento_2-1",
+			pos="2892,2338",
+			shape=box,
+			style=filled,
+			width=2.1076];
+		"US11_Battuto_2-1"	[fillcolor=white,
+			height=0.5,
+			label="US11_Battuto_2-1",
+			pos="2892,2194",
+			shape=box,
+			style=filled,
+			width=1.6389];
+		"US10_Disfacimento_2-1" -> "US11_Battuto_2-1"	[arrowhead=normal,
+			color=black,
+			pos="e,2892,2212.1 2892,2319.8 2892,2319.8 2892,2223.6 2892,2223.6",
+			style=solid];
+		"US14_Palo_2-1"	[fillcolor=white,
+			height=0.5,
+			label="US14_Palo_2-1",
+			pos="2302,2338",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US16_Palo_2-1"	[fillcolor=white,
+			height=0.5,
+			label="US16_Palo_2-1",
+			pos="2476,2338",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US3_Abbandono_2-1"	[fillcolor=white,
+			height=0.5,
+			label="US3_Abbandono_2-1",
+			pos="2682,2482",
+			shape=box,
+			style=filled,
+			width=1.8681];
+		"US3_Abbandono_2-1" -> "US10_Disfacimento_2-1"	[arrowhead=normal,
+			color=black,
+			pos="e,2815.9,2338 2749.6,2488 2773.9,2488 2795.5,2488 2795.5,2488 2795.5,2488 2795.5,2338 2795.5,2338 2795.5,2338 2804.4,2338 2804.4,\
+2338",
+			style=solid];
+		"US3_Abbandono_2-1" -> "US11_Battuto_2-1"	[arrowhead=normal,
+			color=black,
+			pos="e,2832.7,2200 2749.4,2476 2763.8,2476 2774.8,2476 2774.8,2476 2774.8,2476 2774.8,2200 2774.8,2200 2774.8,2200 2821.2,2200 2821.2,\
+2200",
+			style=solid];
+		"US3_Abbandono_2-1" -> "US14_Palo_2-1"	[arrowhead=normal,
+			color=black,
+			pos="e,2302,2356.3 2614.5,2485 2505.3,2485 2302,2485 2302,2485 2302,2485 2302,2367.8 2302,2367.8",
+			style=solid];
+		"US3_Abbandono_2-1" -> "US16_Palo_2-1"	[arrowhead=normal,
+			color=black,
+			pos="e,2476,2356.5 2614.3,2469 2554.2,2469 2476,2469 2476,2469 2476,2469 2476,2368 2476,2368",
+			style=solid];
+		"US9_Disfacimento_2-1"	[fillcolor=white,
+			height=0.5,
+			label="US9_Disfacimento_2-1",
+			pos="2672,2338",
+			shape=box,
+			style=filled,
+			width=2.0139];
+		"US3_Abbandono_2-1" -> "US9_Disfacimento_2-1"	[arrowhead=normal,
+			color=black,
+			pos="e,2679.6,2356.1 2679.6,2463.8 2679.6,2463.8 2679.6,2367.6 2679.6,2367.6",
+			style=solid];
+		"CON500_continuità_con_US_12_2-1"	[fillcolor=white,
+			height=0.5,
+			label="CON500_continuità_con_US_12_2-1",
+			pos="2932,2482",
+			shape=box,
+			style=filled,
+			width=3.066];
+	}
+	subgraph cluster_datazione_4 {
+		graph [bb="1943,2024,2235,2244.5",
+			color=lightblue,
+			label="Prima metà del XVI secolo",
+			lheight=0.23,
+			lp="2089,2232.2",
+			lwidth=2.08,
+			rank=same,
+			style=filled
+		];
+		"US13_Palo_2-2"	[fillcolor=white,
+			height=0.5,
+			label="US13_Palo_2-2",
+			pos="2002,2194",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US4_Pavimentazione_in_terra_2-2"	[fillcolor=white,
+			height=0.5,
+			label="US4_Pavimentazione_in_terra_2-2",
+			pos="2055,2050",
+			shape=box,
+			style=filled,
+			width=2.8785];
+		"US13_Palo_2-2" -> "US4_Pavimentazione_in_terra_2-2"	[arrowhead=normal,
+			color=red,
+			pos="e,2002.2,2068.1 2002.2,2175.8 2002.2,2175.8 2002.2,2079.6 2002.2,2079.6",
+			style=dashed];
+		"US15_Palo_2-2"	[fillcolor=white,
+			height=0.5,
+			label="US15_Palo_2-2",
+			pos="2176,2194",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US15_Palo_2-2" -> "US4_Pavimentazione_in_terra_2-2"	[arrowhead=normal,
+			color=red,
+			pos="e,2141.8,2068.1 2141.8,2175.8 2141.8,2175.8 2141.8,2079.6 2141.8,2079.6",
+			style=dashed];
+	}
+	subgraph cluster_datazione_5 {
+		graph [bb="3544,1304,4814,1668.5",
+			color=lightblue,
+			label="XV sec rec",
+			lheight=0.23,
+			lp="4179,1656.2",
+			lwidth=0.83,
+			rank=same,
+			style=filled
+		];
+		"USVA102_test_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="USVA102_test_2-2.1",
+			pos="4314,1618",
+			shape=box,
+			style=filled,
+			width=1.8368];
+		"USVA103_bla_bla_bla_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="USVA103_bla_bla_bla_2-2.1",
+			pos="3866,1618",
+			shape=box,
+			style=filled,
+			width=2.4514];
+		"USVA106_USV_1_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="USVA106_USV_1_2-2.1",
+			pos="3629,1618",
+			shape=box,
+			style=filled,
+			width=2.1389];
+		"Extractor400_bla_bla_bla_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="Extractor400_bla_bla_bla_2-2.1",
+			pos="4389,1474",
+			shape=box,
+			style=filled,
+			width=2.6597];
+		"USVA106_USV_1_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,4293.1,1483 3629,1599.5 3629,1562.5 3629,1483 3629,1483 3629,1483 4280.1,1483 4280.1,1483",
+			style=bold];
+		"SF300_blabla_bla_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="SF300_blabla_bla_2-2.1",
+			pos="4101,1618",
+			shape=box,
+			style=filled,
+			width=2.0764];
+		"SF300_blabla_bla_2-2.1" -> "USVA106_USV_1_2-2.1"	[arrowhead=none,
+			color=blue,
+			constraint=False,
+			pos="4069.2,1599.8 4069.2,1578.5 4069.2,1546 4069.2,1546 4069.2,1546 3667.5,1546 3667.5,1546 3667.5,1546 3667.5,1578.5 3667.5,1599.8",
+			style=dotted];
+		"DOC4001_DosCo\test1_1.graphml_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="DOC4001_DosCo\test1_1.graphml_2-2.1",
+			pos="4232,1330",
+			shape=box,
+			style=filled,
+			width=3.3264];
+		"Extractor400_bla_bla_bla_2-2.1" -> "DOC4001_DosCo\test1_1.graphml_2-2.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,4322.5,1348.1 4322.5,1455.8 4322.5,1455.8 4322.5,1361.1 4322.5,1361.1",
+			style=bold];
+		"property800_Materiale_pietra_dura_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="property800_Materiale_pietra_dura_2-2.1",
+			pos="4546,1330",
+			shape=box,
+			style=filled,
+			width=3.3993];
+		"Extractor400_bla_bla_bla_2-2.1" -> "property800_Materiale_pietra_dura_2-2.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,4454.2,1348.1 4454.2,1455.8 4454.2,1455.8 4454.2,1361.1 4454.2,1361.1",
+			style=bold];
+		"DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1"	[fillcolor=white,
+			height=0.5,
+			label="DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1",
+			pos="4629,1618",
+			shape=box,
+			style=filled,
+			width=4.9201];
+		"DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,4468.3,1492.1 4468.3,1599.8 4468.3,1599.8 4468.3,1505.1 4468.3,1505.1",
+			style=bold];
+	}
+	subgraph cluster_datazione_6 {
+		graph [bb="837,1160,1935,2100.5",
+			color=lightblue,
+			label="XV secolo",
+			lheight=0.23,
+			lp="1386,2088.2",
+			lwidth=0.79,
+			rank=same,
+			style=filled
+		];
+		"USM12_Muro_2-3"	[fillcolor=white,
+			height=0.5,
+			label="USM12_Muro_2-3",
+			pos="1866,1330",
+			shape=box,
+			style=filled,
+			width=1.691];
+		"USM6_Muro_2-3"	[fillcolor=white,
+			height=0.5,
+			label="USM6_Muro_2-3",
+			pos="1866,1186",
+			shape=box,
+			style=filled,
+			width=1.5972];
+		"USM12_Muro_2-3" -> "USM6_Muro_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1866,1204.1 1866,1311.8 1866,1311.8 1866,1215.6 1866,1215.6",
+			style=solid];
+		"US17_Punto_di_fuoco_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US17_Punto_di_fuoco_2-3",
+			pos="1183,2050",
+			shape=box,
+			style=filled,
+			width=2.2847];
+		"US28_Punto_di_fuoco_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US28_Punto_di_fuoco_2-3",
+			pos="945,1906",
+			shape=box,
+			style=filled,
+			width=2.2847];
+		"US17_Punto_di_fuoco_2-3" -> "US28_Punto_di_fuoco_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1027.7,1912 1119.6,2031.7 1119.6,1994.1 1119.6,1912 1119.6,1912 1119.6,1912 1039.2,1912 1039.2,1912",
+			style=solid];
+		"US30_Punto_di_fuoco_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US30_Punto_di_fuoco_2-3",
+			pos="1075,1762",
+			shape=box,
+			style=filled,
+			width=2.2847];
+		"US17_Punto_di_fuoco_2-3" -> "US30_Punto_di_fuoco_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1138.4,1780.3 1138.4,2031.5 1138.4,2031.5 1138.4,1791.8 1138.4,1791.8",
+			style=solid];
+		"US5_Focolare_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US5_Focolare_2-3",
+			pos="1528,1474",
+			shape=box,
+			style=filled,
+			width=1.6493];
+		"US17_Punto_di_fuoco_2-3" -> "US5_Focolare_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1468.5,1483 1259.7,2031.8 1259.7,1934.7 1259.7,1483 1259.7,1483 1259.7,1483 1456.9,1483 1456.9,1483",
+			style=solid];
+		"US18_Pavimentazione_in_terra_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US18_Pavimentazione_in_terra_2-3",
+			pos="1528,1618",
+			shape=box,
+			style=filled,
+			width=2.9722];
+		"USM19_Muro_2-3"	[fillcolor=white,
+			height=0.5,
+			label="USM19_Muro_2-3",
+			pos="1856,1474",
+			shape=box,
+			style=filled,
+			width=1.691];
+		"US18_Pavimentazione_in_terra_2-3" -> "USM19_Muro_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1794.7,1465 1619.1,1599.5 1619.1,1558.9 1619.1,1465 1619.1,1465 1619.1,1465 1783.2,1465 1783.2,1465",
+			style=solid];
+		"US18_Pavimentazione_in_terra_2-3" -> "US5_Focolare_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1508.2,1492.1 1508.2,1599.8 1508.2,1599.8 1508.2,1503.6 1508.2,1503.6",
+			style=solid];
+		"US18_Pavimentazione_in_terra_2-3" -> "USM6_Muro_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1808,1183 1603.2,1599.6 1603.2,1516.8 1603.2,1183 1603.2,1183 1603.2,1183 1796.5,1183 1796.5,1183",
+			style=solid];
+		"US20_Punto_di_fuoco_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US20_Punto_di_fuoco_2-3",
+			pos="1845,1618",
+			shape=box,
+			style=filled,
+			width=2.2847];
+		"US20_Punto_di_fuoco_2-3" -> "USM19_Muro_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1856,1492.1 1856,1599.8 1856,1599.8 1856,1503.6 1856,1503.6",
+			style=solid];
+		"US21_Palo_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US21_Palo_2-3",
+			pos="1876,1762",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US21_Palo_2-3" -> "US18_Pavimentazione_in_terra_2-3"	[arrowhead=normal,
+			color=red,
+			pos="e,1635.2,1618 1824.6,1762 1792.7,1762 1757.9,1762 1757.9,1762 1757.9,1762 1757.9,1618 1757.9,1618 1757.9,1618 1646.7,1618 1646.7,\
+1618",
+			style=dashed];
+		"US22_Palo_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US22_Palo_2-3",
+			pos="1354,1762",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US22_Palo_2-3" -> "US18_Pavimentazione_in_terra_2-3"	[arrowhead=normal,
+			color=red,
+			pos="e,1420.5,1624 1401.2,1743.7 1401.2,1706.1 1401.2,1624 1401.2,1624 1401.2,1624 1409,1624 1409,1624",
+			style=dashed];
+		"US23_Palo_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US23_Palo_2-3",
+			pos="1356,1906",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US23_Palo_2-3" -> "US22_Palo_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1355,1780.1 1355,1887.8 1355,1887.8 1355,1791.6 1355,1791.6",
+			style=solid];
+		"US24_Palo_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US24_Palo_2-3",
+			pos="1528,1762",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US24_Palo_2-3" -> "US18_Pavimentazione_in_terra_2-3"	[arrowhead=normal,
+			color=red,
+			pos="e,1528,1636.1 1528,1743.8 1528,1743.8 1528,1647.6 1528,1647.6",
+			style=dashed];
+		"US25_Palo_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US25_Palo_2-3",
+			pos="1537,1906",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US25_Palo_2-3" -> "US24_Palo_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1532.5,1780.1 1532.5,1887.8 1532.5,1887.8 1532.5,1791.6 1532.5,1791.6",
+			style=solid];
+		"US26_Palo_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US26_Palo_2-3",
+			pos="1702,1762",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US26_Palo_2-3" -> "US18_Pavimentazione_in_terra_2-3"	[arrowhead=normal,
+			color=red,
+			pos="e,1623.3,1636.2 1650.8,1762 1635.8,1762 1623.3,1762 1623.3,1762 1623.3,1762 1623.3,1647.8 1623.3,1647.8",
+			style=dashed];
+		"US27_Palo_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US27_Palo_2-3",
+			pos="1714,1906",
+			shape=box,
+			style=filled,
+			width=1.4201];
+		"US27_Palo_2-3" -> "US26_Palo_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1708,1780.1 1708,1887.8 1708,1887.8 1708,1791.6 1708,1791.6",
+			style=solid];
+		"US28_Punto_di_fuoco_2-3" -> "US30_Punto_di_fuoco_2-3"	[arrowhead=normal,
+			color=red,
+			pos="e,1010,1780.1 1010,1887.8 1010,1887.8 1010,1791.6 1010,1791.6",
+			style=dashed];
+		"US32_Preparazione_2-3"	[fillcolor=white,
+			height=0.5,
+			label="US32_Preparazione_2-3",
+			pos="1323,1330",
+			shape=box,
+			style=filled,
+			width=2.066];
+		"US28_Punto_di_fuoco_2-3" -> "US32_Preparazione_2-3"	[arrowhead=normal,
+			color=red,
+			pos="e,1254.2,1348.3 1027.4,1900 1119,1900 1254.2,1900 1254.2,1900 1254.2,1900 1254.2,1359.8 1254.2,1359.8",
+			style=dashed];
+		"US28_Punto_di_fuoco_2-3" -> "US5_Focolare_2-3"	[arrowhead=normal,
+			color=red,
+			pos="e,1468.2,1474 932.75,1887.7 932.75,1805.5 932.75,1474 932.75,1474 932.75,1474 1456.7,1474 1456.7,1474",
+			style=dashed];
+		"US30_Punto_di_fuoco_2-3" -> "US18_Pavimentazione_in_terra_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1420.8,1612 1124.9,1743.6 1124.9,1703.6 1124.9,1612 1124.9,1612 1124.9,1612 1409.3,1612 1409.3,1612",
+			style=solid];
+		"US32_Preparazione_2-3" -> "USM6_Muro_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1808.1,1173 1347.8,1311.7 1347.8,1270.3 1347.8,1173 1347.8,1173 1347.8,1173 1796.5,1173 1796.5,1173",
+			style=solid];
+		"US5_Focolare_2-3" -> "US32_Preparazione_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1350.1,1348.5 1468.3,1465 1416.6,1465 1350.1,1465 1350.1,1465 1350.1,1465 1350.1,1360 1350.1,1360",
+			style=solid];
+		"US5_Focolare_2-3" -> "USM6_Muro_2-3"	[arrowhead=normal,
+			color=black,
+			pos="e,1808,1178 1547.8,1455.9 1547.8,1391.7 1547.8,1178 1547.8,1178 1547.8,1178 1796.5,1178 1796.5,1178",
+			style=solid];
+	}
+	subgraph cluster_datazione_7 {
+		graph [bb="8,1016,393,1236.5",
+			color=lightblue,
+			label="Prima metà' del XV secolo rec",
+			lheight=0.23,
+			lp="200.5,1224.2",
+			lwidth=2.32,
+			rank=same,
+			style=filled
+		];
+		"USVB104_gggg_2-3.1"	[fillcolor=white,
+			height=0.5,
+			label="USVB104_gggg_2-3.1",
+			pos="87,1042",
+			shape=box,
+			style=filled,
+			width=1.9618];
+		"Extractor402_hhhh_2-3.1"	[fillcolor=white,
+			height=0.5,
+			label="Extractor402_hhhh_2-3.1",
+			pos="307,1042",
+			shape=box,
+			style=filled,
+			width=2.1597];
+		"Combinar900_ggggg_2-3.1"	[fillcolor=white,
+			height=0.5,
+			label="Combinar900_ggggg_2-3.1",
+			pos="200,1186",
+			shape=box,
+			style=filled,
+			width=2.316];
+		"Combinar900_ggggg_2-3.1" -> "USVB104_gggg_2-3.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,137.12,1060.1 137.12,1167.8 137.12,1167.8 137.12,1073.1 137.12,1073.1",
+			style=bold];
+		"Combinar900_ggggg_2-3.1" -> "Extractor402_hhhh_2-3.1"	[arrowhead=odiamond,
+			color=purple,
+			pos="e,256.31,1060.1 256.31,1167.8 256.31,1167.8 256.31,1073.1 256.31,1073.1",
+			style=bold];
+	}
+	subgraph cluster_datazione_8 {
+		graph [bb="665,1160,829,1236.5",
+			color=lightblue,
+			label="Prima metà' del XV secolo",
+			lheight=0.23,
+			lp="747,1224.2",
+			lwidth=2.04,
+			rank=same,
+			style=filled
+		];
+		"US29_Preparazione_2-4"	[fillcolor=white,
+			height=0.5,
+			label="US29_Preparazione_2-4",
+			pos="747,1186",
+			shape=box,
+			style=filled,
+			width=2.066];
+	}
+	subgraph cluster_datazione_9 {
+		graph [bb="449,1016,679,1092.5",
+			color=lightblue,
+			label="Inizi XV secolo",
+			lheight=0.23,
+			lp="564,1080.2",
+			lwidth=1.19,
+			rank=same,
+			style=filled
+		];
+		"US31_Pavimentazione_in_terra_3-1"	[fillcolor=white,
+			height=0.5,
+			label="US31_Pavimentazione_in_terra_3-1",
+			pos="564,1042",
+			shape=box,
+			style=filled,
+			width=2.9722];
+	}
+	subgraph cluster_datazione_10 {
+		graph [bb="603,728,771,948.5",
+			color=lightblue,
+			label="Fine XIV secolo",
+			lheight=0.23,
+			lp="687,936.25",
+			lwidth=1.24,
+			rank=same,
+			style=filled
+		];
+		"US33_Livellamento_3-2"	[fillcolor=white,
+			height=0.5,
+			label="US33_Livellamento_3-2",
+			pos="687,754",
+			shape=box,
+			style=filled,
+			width=2.0972];
+		"US34_Disfacimento_3-2"	[fillcolor=white,
+			height=0.5,
+			label="US34_Disfacimento_3-2",
+			pos="687,898",
+			shape=box,
+			style=filled,
+			width=2.1076];
+		"US34_Disfacimento_3-2" -> "US33_Livellamento_3-2"	[arrowhead=normal,
+			color=black,
+			pos="e,687,772.09 687,879.76 687,879.76 687,783.6 687,783.6",
+			style=solid];
+	}
+	subgraph cluster_datazione_11 {
+		graph [bb="801,296,1105,660.5",
+			color=lightblue,
+			label="Seconda metà' del XIV secolo",
+			lheight=0.23,
+			lp="953,648.25",
+			lwidth=2.28,
+			rank=same,
+			style=filled
+		];
+		"US35_Pavimentazione_in_terra_3-3"	[fillcolor=white,
+			height=0.5,
+			label="US35_Pavimentazione_in_terra_3-3",
+			pos="916,466",
+			shape=box,
+			style=filled,
+			width=2.9722];
+		"US36_Pilastro_3-3"	[fillcolor=white,
+			height=0.5,
+			label="US36_Pilastro_3-3",
+			pos="892,322",
+			shape=box,
+			style=filled,
+			width=1.6597];
+		"US35_Pavimentazione_in_terra_3-3" -> "US36_Pilastro_3-3"	[arrowhead=normal,
+			color=black,
+			pos="e,892,340.09 892,447.76 892,447.76 892,351.6 892,351.6",
+			style=solid];
+		"US37_Fossa_di_spoliazione_3-3"	[fillcolor=white,
+			height=0.5,
+			label="US37_Fossa_di_spoliazione_3-3",
+			pos="1000,610",
+			shape=box,
+			style=filled,
+			width=2.7014];
+		"US37_Fossa_di_spoliazione_3-3" -> "US35_Pavimentazione_in_terra_3-3"	[arrowhead=normal,
+			color=red,
+			pos="e,962.88,484.09 962.88,591.76 962.88,591.76 962.88,495.6 962.88,495.6",
+			style=dashed];
+		"US37_Fossa_di_spoliazione_3-3" -> "US36_Pilastro_3-3"	[arrowhead=normal,
+			color=red,
+			pos="e,952.22,328 1047.8,591.93 1047.8,529.69 1047.8,328 1047.8,328 1047.8,328 963.73,328 963.73,328",
+			style=dashed];
+	}
+	subgraph cluster_datazione_12 {
+		graph [bb="993,8,1252,228.5",
+			color=lightblue,
+			label="Generico XIII secolo - Primi del XIV secolo",
+			lheight=0.23,
+			lp="1122.5,216.25",
+			lwidth=3.38,
+			rank=same,
+			style=filled
+		];
+		"US38_Livellamento_4-1"	[fillcolor=white,
+			height=0.5,
+			label="US38_Livellamento_4-1",
+			pos="1168,34",
+			shape=box,
+			style=filled,
+			width=2.0972];
+		"US39_Livellamento_4-1"	[fillcolor=white,
+			height=0.5,
+			label="US39_Livellamento_4-1",
+			pos="1077,178",
+			shape=box,
+			style=filled,
+			width=2.0972];
+		"US39_Livellamento_4-1" -> "US38_Livellamento_4-1"	[arrowhead=normal,
+			color=black,
+			pos="e,1122.5,52.09 1122.5,159.76 1122.5,159.76 1122.5,63.603 1122.5,63.603",
+			style=solid];
+	}
+	subgraph main {
+		edge [arrowhead=normal,
+			color=black,
+			style=solid
+		];
+		"US1_Fondazione_in_muratura_1-1";
+		"US2_Livellamento_1-2";
+		"US1_Fondazione_in_muratura_1-1" -> "US2_Livellamento_1-2"	[pos="e,2737.4,2644.1 2737.4,3039.7 2737.4,3039.7 2737.4,2655.6 2737.4,2655.6"];
+		"US8_Buca_1-2";
+		"US1_Fondazione_in_muratura_1-1" -> "US8_Buca_1-2"	[pos="e,2683.3,2932.1 2683.3,3039.8 2683.3,3039.8 2683.3,2943.6 2683.3,2943.6"];
+		"US3_Abbandono_2-1";
+		"US2_Livellamento_1-2" -> "US3_Abbandono_2-1"	[pos="e,2682,2500.1 2682,2607.8 2682,2607.8 2682,2511.6 2682,2511.6"];
+		"US7_Buca_1-2";
+		"US8_Buca_1-2" -> "US7_Buca_1-2";
+		"US10_Disfacimento_2-1";
+		"US11_Battuto_2-1";
+		"US10_Disfacimento_2-1" -> "US11_Battuto_2-1";
+		"US4_Pavimentazione_in_terra_2-2";
+		"US11_Battuto_2-1" -> "US4_Pavimentazione_in_terra_2-2"	[pos="e,2158.9,2044 2892,2175.6 2892,2135.6 2892,2044 2892,2044 2892,2044 2170.4,2044 2170.4,2044"];
+		"US14_Palo_2-1";
+		"US13_Palo_2-2";
+		"US14_Palo_2-1" -> "US13_Palo_2-2"	[pos="e,2002,2212.2 2250.4,2338 2164.7,2338 2002,2338 2002,2338 2002,2338 2002,2223.8 2002,2223.8"];
+		"US16_Palo_2-1";
+		"US15_Palo_2-2";
+		"US16_Palo_2-1" -> "US15_Palo_2-2"	[pos="e,2227.6,2188 2476,2319.6 2476,2279.6 2476,2188 2476,2188 2476,2188 2239.1,2188 2239.1,2188"];
+		"US3_Abbandono_2-1" -> "US10_Disfacimento_2-1";
+		"US3_Abbandono_2-1" -> "US11_Battuto_2-1";
+		"US3_Abbandono_2-1" -> "US14_Palo_2-1";
+		"US3_Abbandono_2-1" -> "US16_Palo_2-1";
+		"US9_Disfacimento_2-1";
+		"US3_Abbandono_2-1" -> "US9_Disfacimento_2-1";
+		"US3_Abbandono_2-1" -> "US4_Pavimentazione_in_terra_2-2"	[pos="e,2089,2068.3 2614.3,2490 2458.7,2490 2089,2490 2089,2490 2089,2490 2089,2079.9 2089,2079.9"];
+		"USM12_Muro_2-3";
+		"US3_Abbandono_2-1" -> "USM12_Muro_2-3"	[pos="e,1927.1,1336 2614.3,2479 2524.5,2479 2377,2479 2377,2479 2377,2479 2377,1336 2377,1336 2377,1336 1938.6,1336 1938.6,1336"];
+		"US5_Focolare_2-3";
+		"US3_Abbandono_2-1" -> "US5_Focolare_2-3"	[pos="e,1587.8,1483 2614.5,2495 2383.6,2495 1640.3,2495 1640.3,2495 1640.3,2495 1640.3,1483 1640.3,1483 1640.3,1483 1599.3,1483 1599.3,\
+1483"];
+		"USM6_Muro_2-3";
+		"US3_Abbandono_2-1" -> "USM6_Muro_2-3"	[pos="e,1923.8,1186 2614.3,2474 2531.2,2474 2401,2474 2401,2474 2401,2474 2401,1186 2401,1186 2401,1186 1935.3,1186 1935.3,1186"];
+		"US9_Disfacimento_2-1" -> "US4_Pavimentazione_in_terra_2-2"	[pos="e,2159,2056 2672,2319.9 2672,2257.7 2672,2056 2672,2056 2672,2056 2170.5,2056 2170.5,2056"];
+		"US17_Punto_di_fuoco_2-3";
+		"US4_Pavimentazione_in_terra_2-2" -> "US17_Punto_di_fuoco_2-3"	[pos="e,1265.5,2064 1951.1,2064 1951.1,2064 1277,2064 1277,2064"];
+		"US18_Pavimentazione_in_terra_2-3";
+		"US4_Pavimentazione_in_terra_2-2" -> "US18_Pavimentazione_in_terra_2-3"	[pos="e,1611.6,1636.3 1951,2050 1820,2050 1611.6,2050 1611.6,2050 1611.6,2050 1611.6,1647.8 1611.6,1647.8"];
+		"USM19_Muro_2-3";
+		"US4_Pavimentazione_in_terra_2-2" -> "USM19_Muro_2-3"	[pos="e,1917.3,1474 2055,2031.8 2055,1933.9 2055,1474 2055,1474 2055,1474 1928.8,1474 1928.8,1474"];
+		"US20_Punto_di_fuoco_2-3";
+		"US4_Pavimentazione_in_terra_2-2" -> "US20_Punto_di_fuoco_2-3"	[pos="e,1927.3,1618 2003.2,2031.7 2003.2,1949.5 2003.2,1618 2003.2,1618 2003.2,1618 1938.9,1618 1938.9,1618"];
+		"US21_Palo_2-3";
+		"US4_Pavimentazione_in_terra_2-2" -> "US21_Palo_2-3"	[pos="e,1876,1780.5 1951.1,2037 1911.7,2037 1876,2037 1876,2037 1876,2037 1876,1792 1876,1792"];
+		"US23_Palo_2-3";
+		"US4_Pavimentazione_in_terra_2-2" -> "US23_Palo_2-3"	[pos="e,1356,1924.5 1951.1,2059 1756.4,2059 1356,2059 1356,2059 1356,2059 1356,1936 1356,1936"];
+		"US25_Palo_2-3";
+		"US4_Pavimentazione_in_terra_2-2" -> "US25_Palo_2-3"	[pos="e,1537,1924.3 1951.1,2055 1799.9,2055 1537,2055 1537,2055 1537,2055 1537,1935.8 1537,1935.8"];
+		"US27_Palo_2-3";
+		"US4_Pavimentazione_in_terra_2-2" -> "US27_Palo_2-3"	[pos="e,1714,1924.5 1951.3,2041 1851,2041 1714,2041 1714,2041 1714,2041 1714,1936 1714,1936"];
+		"US4_Pavimentazione_in_terra_2-2" -> "US5_Focolare_2-3"	[pos="e,1587.8,1474 1950.9,2046 1829.6,2046 1645.6,2046 1645.6,2046 1645.6,2046 1645.6,1474 1645.6,1474 1645.6,1474 1599.3,1474 1599.3,\
+1474"];
+		"US4_Pavimentazione_in_terra_2-2" -> "USM6_Muro_2-3"	[pos="e,1924,1195 2106.8,2031.7 2106.8,1907.8 2106.8,1195 2106.8,1195 2106.8,1195 1935.5,1195 1935.5,1195"];
+		"USM12_Muro_2-3" -> "USM6_Muro_2-3";
+		"US28_Punto_di_fuoco_2-3";
+		"US17_Punto_di_fuoco_2-3" -> "US28_Punto_di_fuoco_2-3";
+		"US30_Punto_di_fuoco_2-3";
+		"US17_Punto_di_fuoco_2-3" -> "US30_Punto_di_fuoco_2-3";
+		"US17_Punto_di_fuoco_2-3" -> "US5_Focolare_2-3";
+		"US18_Pavimentazione_in_terra_2-3" -> "USM19_Muro_2-3";
+		"US18_Pavimentazione_in_terra_2-3" -> "US5_Focolare_2-3";
+		"US18_Pavimentazione_in_terra_2-3" -> "USM6_Muro_2-3";
+		"US29_Preparazione_2-4";
+		"US18_Pavimentazione_in_terra_2-3" -> "US29_Preparazione_2-4"	[pos="e,821.81,1194 1436.9,1599.5 1436.9,1517.9 1436.9,1194 1436.9,1194 1436.9,1194 833.33,1194 833.33,1194"];
+		"US31_Pavimentazione_in_terra_3-1";
+		"US18_Pavimentazione_in_terra_2-3" -> "US31_Pavimentazione_in_terra_3-1"	[pos="e,671.2,1042 1452.8,1599.8 1452.8,1501.9 1452.8,1042 1452.8,1042 1452.8,1042 682.72,1042 682.72,1042"];
+		"US20_Punto_di_fuoco_2-3" -> "USM19_Muro_2-3";
+		"US22_Palo_2-3";
+		"US23_Palo_2-3" -> "US22_Palo_2-3";
+		"US24_Palo_2-3";
+		"US25_Palo_2-3" -> "US24_Palo_2-3";
+		"US26_Palo_2-3";
+		"US27_Palo_2-3" -> "US26_Palo_2-3";
+		"US30_Punto_di_fuoco_2-3" -> "US18_Pavimentazione_in_terra_2-3";
+		"US32_Preparazione_2-3";
+		"US32_Preparazione_2-3" -> "USM6_Muro_2-3";
+		"US32_Preparazione_2-3" -> "US29_Preparazione_2-4"	[pos="e,821.63,1199 1298.2,1311.5 1298.2,1275.4 1298.2,1199 1298.2,1199 1298.2,1199 833.14,1199 833.14,1199"];
+		"US5_Focolare_2-3" -> "US32_Preparazione_2-3";
+		"US5_Focolare_2-3" -> "USM6_Muro_2-3";
+		"US5_Focolare_2-3" -> "US29_Preparazione_2-4"	[pos="e,821.72,1189 1508.2,1455.7 1508.2,1392.8 1508.2,1189 1508.2,1189 1508.2,1189 833.24,1189 833.24,1189"];
+		"US29_Preparazione_2-4" -> "US31_Pavimentazione_in_terra_3-1"	[pos="e,671.23,1051 702.71,1167.5 702.71,1130.5 702.71,1051 702.71,1051 702.71,1051 682.75,1051 682.75,1051"];
+		"US33_Livellamento_3-2";
+		"US29_Preparazione_2-4" -> "US33_Livellamento_3-2"	[pos="e,762.78,763 793.62,1167.6 793.62,1086.1 793.62,763 793.62,763 793.62,763 774.3,763 774.3,763"];
+		"US34_Disfacimento_3-2";
+		"US29_Preparazione_2-4" -> "US34_Disfacimento_3-2"	[pos="e,732.79,916.3 732.79,1167.5 732.79,1167.5 732.79,927.81 732.79,927.81"];
+		"US31_Pavimentazione_in_terra_3-1" -> "US33_Livellamento_3-2"	[pos="e,611.14,754 559.75,1023.5 559.75,959.98 559.75,754 559.75,754 559.75,754 599.63,754 599.63,754"];
+		"US31_Pavimentazione_in_terra_3-1" -> "US34_Disfacimento_3-2"	[pos="e,641.06,916.09 641.06,1023.8 641.06,1023.8 641.06,927.6 641.06,927.6"];
+		"US35_Pavimentazione_in_terra_3-3";
+		"US31_Pavimentazione_in_terra_3-1" -> "US35_Pavimentazione_in_terra_3-3"	[pos="e,818.28,484.22 671.47,1033 740.87,1033 818.28,1033 818.28,1033 818.28,1033 818.28,495.74 818.28,495.74"];
+		"US36_Pilastro_3-3";
+		"US31_Pavimentazione_in_terra_3-1" -> "US36_Pilastro_3-3"	[pos="e,832.06,313 508.38,1023.6 508.38,910.43 508.38,313 508.38,313 508.38,313 820.55,313 820.55,313"];
+		"US33_Livellamento_3-2" -> "US35_Pavimentazione_in_terra_3-3"	[pos="e,812.09,484.31 762.65,745 789,745 812.09,745 812.09,745 812.09,745 812.09,495.82 812.09,495.82"];
+		"US33_Livellamento_3-2" -> "US36_Pilastro_3-3"	[pos="e,831.87,322 712.17,735.71 712.17,653.49 712.17,322 712.17,322 712.17,322 820.35,322 820.35,322"];
+		"US37_Fossa_di_spoliazione_3-3";
+		"US33_Livellamento_3-2" -> "US37_Fossa_di_spoliazione_3-3"	[pos="e,962.75,628.24 762.71,754 844.35,754 962.75,754 962.75,754 962.75,754 962.75,639.75 962.75,639.75"];
+		"US38_Livellamento_4-1";
+		"US33_Livellamento_3-2" -> "US38_Livellamento_4-1"	[pos="e,1092.2,25 661.83,735.62 661.83,622.43 661.83,25 661.83,25 661.83,25 1080.7,25 1080.7,25"];
+		"US34_Disfacimento_3-2" -> "US33_Livellamento_3-2";
+		"US34_Disfacimento_3-2" -> "US35_Pavimentazione_in_terra_3-3"	[pos="e,815.19,484.3 763.05,892 790.65,892 815.19,892 815.19,892 815.19,892 815.19,495.82 815.19,495.82"];
+		"US34_Disfacimento_3-2" -> "US36_Pilastro_3-3"	[pos="e,831.79,331 763.18,904 772.18,904 778.25,904 778.25,904 778.25,904 778.25,331 778.25,331 778.25,331 820.28,331 820.28,331"];
+		"US35_Pavimentazione_in_terra_3-3" -> "US36_Pilastro_3-3";
+		"US35_Pavimentazione_in_terra_3-3" -> "US38_Livellamento_4-1"	[pos="e,1092.1,43 976.62,447.55 976.62,366.14 976.62,43 976.62,43 976.62,43 1080.6,43 1080.6,43"];
+		"US39_Livellamento_4-1";
+		"US39_Livellamento_4-1" -> "US38_Livellamento_4-1";
+	}
+	subgraph main2 {
+		edge [arrowhead=normal,
+			color=red,
+			style=dashed
+		];
+		"US2_Livellamento_1-2";
+		"US7_Buca_1-2";
+		"US7_Buca_1-2" -> "US2_Livellamento_1-2";
+		"US13_Palo_2-2";
+		"US4_Pavimentazione_in_terra_2-2";
+		"US13_Palo_2-2" -> "US4_Pavimentazione_in_terra_2-2";
+		"US18_Pavimentazione_in_terra_2-3";
+		"US13_Palo_2-2" -> "US18_Pavimentazione_in_terra_2-3"	[pos="e,1599.8,1636.2 1950.7,2194 1842.2,2194 1599.8,2194 1599.8,2194 1599.8,2194 1599.8,1647.7 1599.8,1647.7"];
+		"US15_Palo_2-2";
+		"US15_Palo_2-2" -> "US4_Pavimentazione_in_terra_2-2";
+		"US21_Palo_2-3";
+		"US21_Palo_2-3" -> "US18_Pavimentazione_in_terra_2-3";
+		"US22_Palo_2-3";
+		"US22_Palo_2-3" -> "US18_Pavimentazione_in_terra_2-3";
+		"US24_Palo_2-3";
+		"US24_Palo_2-3" -> "US18_Pavimentazione_in_terra_2-3";
+		"US26_Palo_2-3";
+		"US26_Palo_2-3" -> "US18_Pavimentazione_in_terra_2-3";
+		"US28_Punto_di_fuoco_2-3";
+		"US30_Punto_di_fuoco_2-3";
+		"US28_Punto_di_fuoco_2-3" -> "US30_Punto_di_fuoco_2-3";
+		"US32_Preparazione_2-3";
+		"US28_Punto_di_fuoco_2-3" -> "US32_Preparazione_2-3";
+		"US5_Focolare_2-3";
+		"US28_Punto_di_fuoco_2-3" -> "US5_Focolare_2-3";
+		"US35_Pavimentazione_in_terra_3-3";
+		"US36_Pilastro_3-3";
+		"US38_Livellamento_4-1";
+		"US36_Pilastro_3-3" -> "US38_Livellamento_4-1"	[pos="e,1092.2,34 892,303.55 892,239.98 892,34 892,34 892,34 1080.7,34 1080.7,34"];
+		"US39_Livellamento_4-1";
+		"US36_Pilastro_3-3" -> "US39_Livellamento_4-1"	[pos="e,1012.2,196.33 952.12,316 982.19,316 1012.2,316 1012.2,316 1012.2,316 1012.2,207.84 1012.2,207.84"];
+		"US37_Fossa_di_spoliazione_3-3";
+		"US37_Fossa_di_spoliazione_3-3" -> "US35_Pavimentazione_in_terra_3-3";
+		"US37_Fossa_di_spoliazione_3-3" -> "US36_Pilastro_3-3";
+		"US37_Fossa_di_spoliazione_3-3" -> "US38_Livellamento_4-1"	[pos="e,1200.4,52.19 1097.5,610 1148.5,610 1200.4,610 1200.4,610 1200.4,610 1200.4,63.703 1200.4,63.703"];
+		"US37_Fossa_di_spoliazione_3-3" -> "US39_Livellamento_4-1"	[pos="e,1072.5,196.05 1072.5,591.71 1072.5,591.71 1072.5,207.56 1072.5,207.56"];
+	}
+	subgraph main1 {
+		edge [arrowhead=none,
+			color=blue,
+			constraint=False,
+			style=dotted
+		];
+		"USVA106_USV_1_2-2.1";
+		"SF300_blabla_bla_2-2.1";
+		"SF300_blabla_bla_2-2.1" -> "USVA106_USV_1_2-2.1";
+	}
+	subgraph main3 {
+		edge [arrowhead=diamond,
+			color=green,
+			style=bold
+		];
+		"CON500_continuità_con_US_12_2-1";
+		"USM12_Muro_2-3";
+		"CON500_continuità_con_US_12_2-1" -> "USM12_Muro_2-3"	[pos="e,1927.2,1324 3005.1,2463.8 3005.1,2316.5 3005.1,1324 3005.1,1324 3005.1,1324 1940.3,1324 1940.3,1324"];
+		"USVA102_test_2-2.1";
+		"USM6_Muro_2-3";
+		"USVA102_test_2-2.1" -> "USM6_Muro_2-3"	[pos="e,1923.9,1177 4270.6,1599.8 4270.6,1571.3 4270.6,1519 4270.6,1519 4270.6,1519 3741.9,1519 3741.9,1519 3741.9,1519 3741.9,1177 3741.9,\
+1177 3741.9,1177 1937,1177 1937,1177"];
+		"USVA103_bla_bla_bla_2-2.1";
+		"USM19_Muro_2-3";
+		"USVA103_bla_bla_bla_2-2.1" -> "USM19_Muro_2-3"	[pos="e,1917.3,1465 3866,1599.5 3866,1558.9 3866,1465 3866,1465 3866,1465 1930.3,1465 1930.3,1465"];
+		"USVA106_USV_1_2-2.1";
+		"US5_Focolare_2-3";
+		"USVA106_USV_1_2-2.1" -> "US5_Focolare_2-3"	[pos="e,1547.8,1492.2 3590.5,1599.7 3590.5,1587.2 3590.5,1573 3590.5,1573 3590.5,1573 1547.8,1573 1547.8,1573 1547.8,1573 1547.8,1505.2 \
+1547.8,1505.2"];
+	}
+	subgraph main4 {
+		edge [arrowhead=odiamond,
+			color=purple,
+			style=bold
+		];
+		"USVA106_USV_1_2-2.1";
+		"Extractor400_bla_bla_bla_2-2.1";
+		"USVA106_USV_1_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1";
+		"DOC4001_DosCo\test1_1.graphml_2-2.1";
+		"Extractor400_bla_bla_bla_2-2.1" -> "DOC4001_DosCo\test1_1.graphml_2-2.1";
+		"property800_Materiale_pietra_dura_2-2.1";
+		"Extractor400_bla_bla_bla_2-2.1" -> "property800_Materiale_pietra_dura_2-2.1";
+		"DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1";
+		"DOC4002_DosCo\Scavo_archeologico_20220218_.xlsx_2-2.1" -> "Extractor400_bla_bla_bla_2-2.1";
+		"USVB104_gggg_2-3.1";
+		"Extractor402_hhhh_2-3.1";
+		"Combinar900_ggggg_2-3.1";
+		"Combinar900_ggggg_2-3.1" -> "USVB104_gggg_2-3.1";
+		"Combinar900_ggggg_2-3.1" -> "Extractor402_hhhh_2-3.1";
+		"US29_Preparazione_2-4";
+		"US29_Preparazione_2-4" -> "Extractor402_hhhh_2-3.1"	[pos="e,334.06,1060.2 672.22,1186 553.22,1186 334.06,1186 334.06,1186 334.06,1186 334.06,1073.3 334.06,1073.3"];
+	}
+}
