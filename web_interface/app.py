@@ -846,11 +846,11 @@ def create_app():
         
         return render_template('us/form.html', form=form, title='Nuova US')
 
-    @app.route('/us/<int:us_id>/edit', methods=['GET', 'POST'])
+    @app.route('/us/<us_id>/edit', methods=['GET', 'POST'])
     @login_required
     @write_permission_required
     def edit_us(us_id):
-        """Edit existing US"""
+        """Edit existing US - us_id is a composite string: sito__area__us_number"""
         form = USForm()
 
         # Populate site choices
