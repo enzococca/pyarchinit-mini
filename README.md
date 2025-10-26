@@ -728,17 +728,29 @@ These placeholders are ready for integration with actual 3D models uploaded thro
 
 ## 📊 Project Status
 
-### 🚀 Version 1.2.9 - Production Ready
+### 🚀 Version 1.5.0 - GraphML Periodization Fix
 
-PyArchInit-Mini is now **fully functional** and ready for production use. All installation issues have been resolved:
+PyArchInit-Mini continues to evolve with critical fixes and improvements. The latest release addresses a major issue in GraphML export:
 
-✅ **All Interfaces Working**: Web, Desktop GUI, CLI, and REST API fully operational  
-✅ **PyPI Package Fixed**: All console commands work correctly after `pip install`  
-✅ **Internationalization**: Complete Italian/English support with automatic migrations  
-✅ **3D Visualization**: s3Dgraphy integration for stratigraphic unit visualization  
-✅ **GraphML Export**: Harris Matrix export to yEd with EM_palette styling  
+✅ **All Interfaces Working**: Web, Desktop GUI, CLI, and REST API fully operational
+✅ **GraphML Periodization Fixed**: All archaeological periods now properly visible in yEd export (was showing only 3-4 instead of all 8 periods)
+✅ **Chronological Ordering**: Periods arranged in correct archaeological sequence based on periodo/fase
+✅ **Large Site Support**: Tested with Dom zu Lund (758 US nodes, 8 periods) - complete period display verified
+✅ **3D Visualization**: s3Dgraphy integration for stratigraphic unit visualization
+✅ **PyPI Package**: All console commands work correctly after `pip install`
 
-### 🔧 Recent Fixes (v1.2.5-1.2.8)
+### 🔧 What's New in v1.5.0 (2025-10-26)
+
+**GraphML Export - Periodization Display Fixed**
+- Fixed `parse_clusters()` to handle both quoted and unquoted label formats from Graphviz
+- Fixed period ordering to use chronological sequence (oldest → newest) instead of alphabetical
+- Fixed reverse epochs to properly invert chronological order (newest → oldest)
+- All 8 archaeological periods now visible in GraphML export for large sites
+- Maintains consistency with database periodization (periodo_iniziale, fase_iniziale)
+
+See the [CHANGELOG](CHANGELOG.md) for complete version history.
+
+### 🔧 Previous Fixes (v1.2.5-1.2.9)
 - Fixed missing email-validator dependency
 - Fixed desktop GUI language switching
 - Fixed web server Flask template/static path resolution  

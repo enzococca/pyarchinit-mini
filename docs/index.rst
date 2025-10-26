@@ -38,6 +38,24 @@ Key Features
 - **Real-Time Collaboration**: WebSocket support for team updates
 - **Analytics Dashboard**: Interactive charts and data visualization
 
+What's New in Version 1.5.0
+---------------------------
+
+.. versionadded:: 1.5.0
+   **GraphML Export - Periodization Display Fixed**
+
+   This release fixes a critical issue in GraphML export where only 3-4 archaeological periods were being displayed instead of all available periods:
+
+   - **Complete Period Display**: All archaeological periods now properly visible in GraphML export to yEd
+   - **Chronological Ordering**: Periods arranged in correct chronological sequence (oldest to newest) based on periodo_iniziale and fase_iniziale fields
+   - **Reverse Epochs Support**: Proper reverse chronological ordering (newest to oldest) when enabled
+   - **Large Site Support**: Tested and verified with Dom zu Lund site (758 US nodes, 8 periods)
+   - **Enhanced Parser**: Improved DOT file parsing to handle both quoted and unquoted label formats from Graphviz
+
+   **Impact**: Sites with complex periodization now display complete stratigraphic sequences in yEd Graph Editor, maintaining consistency with database periodization.
+
+   See :doc:`features/harris_matrix` for complete documentation.
+
 Getting Started
 ---------------
 

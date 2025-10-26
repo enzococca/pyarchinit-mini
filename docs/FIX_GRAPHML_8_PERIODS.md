@@ -1,7 +1,7 @@
 # Fix GraphML Export - Periodization Display (v1.5.0)
 
 **Status**: ✅ Fixed in version 1.5.0
-**Date**: 2025-01-26
+**Date**: 2025-10-26
 
 ## Problem Summary
 
