@@ -5,6 +5,24 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.2] - 2025-10-26
+
+### Fixed
+- **Web Dashboard Documentation Links**
+  - Changed documentation links to point to ReadTheDocs (always available)
+  - Previously pointed to localhost:8000/docs (requires FastAPI server running)
+  - Now points to https://pyarchinit-mini.readthedocs.io/en/latest/
+  - Affects both inline link in System Info section and Documentation button
+
+### Changed
+- Updated version display in web dashboard to v1.5.2
+- Documentation link label changed from "API REST" to "Documentation"
+
+### Technical
+- Files modified:
+  - `web_interface/templates/dashboard.html` (lines 169, 176)
+  - `pyproject.toml` (version 1.5.2)
+
 ## [1.5.1] - 2025-10-26
 
 ### Fixed
