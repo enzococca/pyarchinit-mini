@@ -6,13 +6,21 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{{ _('Stratigraphic Units') }}</h2>
-        <div>
+        <div class="btn-group">
             <a href="{{ url_for('export_us_pdf') }}" class="btn btn-danger">
                 <i class="fas fa-file-pdf"></i> {{ _('Export PDF') }}
                 {% if sito_filter or area_filter or unita_tipo_filter or anno_scavo_filter or us_number_filter %}
                 <span class="badge bg-light text-dark">{{ total }} {{ _('filtered') }}</span>
                 {% endif %}
             </a>
+            {% if sito_filter %}
+            <a href="{{ url_for('export_harris_matrix_filtered') }}" class="btn btn-success">
+                <i class="fas fa-project-diagram"></i> {{ _('Export Matrix') }}
+                {% if area_filter or unita_tipo_filter or anno_scavo_filter or us_number_filter %}
+                <span class="badge bg-light text-dark">{{ total }} {{ _('filtered') }}</span>
+                {% endif %}
+            </a>
+            {% endif %}
             <a href="{{ url_for('create_us') }}" class="btn btn-primary">{{ _('New US') }}</a>
         </div>
     </div>
