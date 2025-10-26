@@ -1262,10 +1262,10 @@ def parse_clusters(dot_content):
     Returns: dict mapping cluster_id -> {'label': datazione, 'nodes': [node_labels]}
     """
     import re
-    
+
     clusters = {}
-    
-    # Find all cluster_datazione subgraphs  
+
+    # Find all cluster_datazione subgraphs
     # Match nested structure with proper bracket counting
     lines = dot_content.split('\n')
     in_cluster = False
@@ -1273,7 +1273,7 @@ def parse_clusters(dot_content):
     cluster_label = None
     cluster_nodes = []
     bracket_count = 0
-    
+
     for line in lines:
         # Check for cluster start
         cluster_match = re.match(r'\s*subgraph cluster_datazione_(\d+)', line)
@@ -1281,35 +1281,51 @@ def parse_clusters(dot_content):
             cluster_id = cluster_match.group(1)
             in_cluster = True
             cluster_nodes = []
-            bracket_count = 0
+            cluster_label = None
+            # Count brackets on the same line as subgraph declaration
+            bracket_count = line.count('{') - line.count('}')
             continue
-        
+
         if in_cluster:
             # Count brackets
             bracket_count += line.count('{') - line.count('}')
-            
-            # Extract label
+
+            # Extract label (handle both quoted and unquoted values)
             if not cluster_label:
+                # Try quoted format first: label="value"
                 label_match = re.search(r'label="([^"]+)"', line)
                 if label_match:
                     cluster_label = label_match.group(1)
-            
-            # Extract node definitions (lines with node labels and attributes)
+                else:
+                    # Try unquoted format: label=value
+                    label_match = re.search(r'label=(\S+)', line)
+                    if label_match:
+                        cluster_label = label_match.group(1)
+
+            # Extract node definitions (handle both quoted and unquoted node labels)
+            # Try quoted format first: "NODE" [
             node_match = re.match(r'\s*"([^"]+)"\s*\[', line)
             if node_match:
                 node_label = node_match.group(1)
                 if not node_label.startswith('cluster'):
                     cluster_nodes.append(node_label)
-            
+            else:
+                # Try unquoted format: NODE [
+                node_match = re.match(r'\s*(\w+)\s*\[', line)
+                if node_match:
+                    node_label = node_match.group(1)
+                    if not node_label.startswith('cluster'):
+                        cluster_nodes.append(node_label)
+
             # Check if cluster ended
-            if bracket_count < 0:
-                if cluster_id and cluster_label:
-                    clusters[cluster_id] = {
-                        'label': cluster_label,
-                        'nodes': cluster_nodes
-                    }
+            if bracket_count == 0 and cluster_id and cluster_label:
+                # Cluster complete (brackets balanced)
+                clusters[cluster_id] = {
+                    'label': cluster_label,
+                    'nodes': cluster_nodes
+                }
                 in_cluster = False
                 cluster_id = None
                 cluster_label = None
-    
+
     return clusters
