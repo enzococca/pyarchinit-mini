@@ -61,9 +61,9 @@ Now, let’s say you want to quickly search for all sites from the “Imperial R
 
 Ready to dig deeper? Check out these resources:
 
-* `Full CLI User Guide <https://github.com/pyarchinit/pyarchinit-mini/wiki/CLI-Guide>`_
-* `Managing Stratigraphic Units <https://github.com/pyarchinit/pyarchinit-mini/wiki/Stratigraphic-Units>`_
-* `Material Inventory Tutorial <https://github.com/pyarchinit/pyarchinit-mini/wiki/Material-Inventory>`_
+* `Full CLI User Guide <https://github.com/enzococca/pyarchinit-mini/wiki/CLI-Guide>`_
+* `Managing Stratigraphic Units <https://github.com/enzococca/pyarchinit-mini/wiki/Stratigraphic-Units>`_
+* `Material Inventory Tutorial <https://github.com/enzococca/pyarchinit-mini/wiki/Material-Inventory>`_
 * `REST API Documentation (Swagger/OpenAPI) <http://localhost:8000/docs>`_
 
 Happy excavating! 🏺

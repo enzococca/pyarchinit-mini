@@ -1263,7 +1263,7 @@ Use the web interface:
 
 ### Run from Source
 ```bash
-git clone https://github.com/pyarchinit/pyarchinit-mini.git
+git clone https://github.com/enzococca/pyarchinit-mini.git
 cd pyarchinit-mini
 pip install -e '.[dev]'
 ```
@@ -1434,7 +1434,7 @@ Contributions are welcome! Please:
 
 ### Development Setup
 ```bash
-git clone https://github.com/pyarchinit/pyarchinit-mini.git
+git clone https://github.com/enzococca/pyarchinit-mini.git
 cd pyarchinit-mini
 pip install -e '.[dev]'
 pre-commit install  # Optional: install pre-commit hooks
@@ -1499,7 +1499,7 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 ## 💬 Support
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/pyarchinit/pyarchinit-mini/issues)
+- **Issues**: [GitHub Issues](https://github.com/enzococca/pyarchinit-mini/issues)
 - **Email**: enzo.ccc@gmail.com
 - **PyPI**: [pypi.org/project/pyarchinit-mini](https://pypi.org/project/pyarchinit-mini/)
 

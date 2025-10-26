@@ -243,8 +243,8 @@ pyarchinit-mini-setup
 
 Supporto:
 --------
-GitHub: https://github.com/pyarchinit/pyarchinit-mini
-Issues: https://github.com/pyarchinit/pyarchinit-mini/issues
+GitHub: https://github.com/enzococca/pyarchinit-mini
+Issues: https://github.com/enzococca/pyarchinit-mini/issues
 """
 
     readme_file.write_text(readme_content)

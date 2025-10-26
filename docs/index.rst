@@ -38,7 +38,7 @@ Key Features
 - **Real-Time Collaboration**: WebSocket support for team updates
 - **Analytics Dashboard**: Interactive charts and data visualization
 
-What's New in Version 1.5.0
+What's New in Version 1.5.3
 ---------------------------
 
 .. versionadded:: 1.5.0

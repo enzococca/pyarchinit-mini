@@ -332,7 +332,7 @@ sudo dnf install python3-tkinter
 ## Supporto
 
 - **Documentazione**: `docs/PYPI_PUBLICATION.md`
-- **Issues**: https://github.com/pyarchinit/pyarchinit-mini/issues
+- **Issues**: https://github.com/enzococca/pyarchinit-mini/issues
 - **Email**: enzo.ccc@gmail.com
 
 ## Licenza
