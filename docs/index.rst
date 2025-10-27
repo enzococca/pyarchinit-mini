@@ -38,6 +38,37 @@ Key Features
 - **Real-Time Collaboration**: WebSocket support for team updates
 - **Analytics Dashboard**: Interactive charts and data visualization
 
+What's New in Version 1.5.7
+---------------------------
+
+.. versionadded:: 1.5.7
+   **Web GUI Combobox Integration**
+
+   This release implements web interface integration with the chronological datazioni system:
+
+   - **Web GUI Combobox**: ``datazione`` field now uses SelectField with database-driven choices from ``datazioni_table``
+   - **Dynamic Choices Population**: Dropdown populated in both ``/us/create`` and ``/us/<us_id>/edit`` routes
+   - **Text Input Fields**: ``periodo_iniziale``, ``periodo_finale``, ``fase_iniziale``, ``fase_finale`` changed to StringField for flexible data entry
+   - **Removed Hardcoded Choices**: Eliminated 40+ hardcoded period options, replaced with open text fields
+   - **Italian Translation**: Complete Italian language support for chronology field labels
+   - **Service Integration**: ``DatazioneService`` initialized at app startup, ``get_datazioni_choices()`` provides formatted dropdown data
+   - **Bootstrap 5 Styling**: Proper ``form-select`` for dropdown, ``form-control`` for text inputs
+   - **Session Management**: Context managers ensure no detached instance errors
+
+   **User Experience**:
+   - Standardized dating selection via dropdown with 36 Italian archaeological periods
+   - Free-text entry for periodo/fase fields allows flexible chronological data
+   - Form displays "-- Seleziona Datazione --" as default option
+   - Field labels: "Periodo Iniziale", "Fase Iniziale", "Periodo Finale", "Fase Finale", "Datazione"
+
+   **Technical Implementation**:
+   - ``web_interface/app.py``: USForm field definitions updated, DatazioneService import added
+   - ``web_interface/templates/us/form.html``: Form rendering updated with correct CSS classes
+   - ``pyarchinit_mini/services/datazione_service.py``: Fixed dict access in ``get_datazioni_choices()``
+   - ``pyarchinit_mini/translations/it/LC_MESSAGES/messages.po``: Italian translations added
+
+   **Impact**: Users can now select standardized datazioni from dropdown in web interface, while maintaining flexibility for periodo/fase fields. Foundation completed for Desktop GUI integration in v1.6.0.
+
 What's New in Version 1.5.6
 ---------------------------
 
@@ -52,7 +83,6 @@ What's New in Version 1.5.6
    - **Multi-Database Support**: Compatible with both SQLite and PostgreSQL via SQLAlchemy ORM
    - **API Ready**: ``get_datazioni_choices()`` method returns formatted data for dropdown/combobox integration
    - **Session Management**: Context managers prevent detached instance errors
-   - **Foundation for v1.6.0**: GUI combobox integration planned for next release
 
    **Default Periods Included**: Paleolitico Inferiore, Paleolitico Medio, Paleolitico Superiore, Mesolitico, Neolitico (Antico/Medio/Recente/Finale), Eneolitico, Età del Bronzo (Antico/Medio/Recente/Finale), Età del Ferro (Prima/Seconda), Età Arcaica, Età Classica, Età Ellenistica, Età Repubblicana, Età Augustea, Età Giulio-Claudia, Età Flavia, Età Antonina, Età dei Severi, Crisi del III secolo, Tarda Età Imperiale, Alto Medioevo, Basso Medioevo, Età Longobarda, Età Carolingia, Età Comunale, Rinascimento, Età Moderna, Età Contemporanea, and generic periods.
 

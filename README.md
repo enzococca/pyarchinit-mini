@@ -733,7 +733,43 @@ These placeholders are ready for integration with actual 3D models uploaded thro
 
 ## 📊 Project Status
 
-### 🚀 Version 1.5.6 - Chronological Datazioni System (NEW)
+### 🚀 Version 1.5.7 - Web GUI Combobox Integration (NEW)
+
+PyArchInit-Mini v1.5.7 implements web interface integration with the chronological datazioni system:
+
+✅ **Web GUI Combobox**: Datazione field now uses SelectField with database-driven choices
+✅ **Dynamic Choices**: Dropdown populated from datazioni_table on both create and edit forms
+✅ **Italian Translation**: Complete Italian language support for chronology fields
+✅ **Text Input Fields**: Periodo/Fase fields changed to simple text input (no dropdowns)
+✅ **Form Consistency**: Same behavior on both US create and edit routes
+✅ **Bootstrap 5 Integration**: Proper form-select and form-control CSS classes
+
+### 🔧 What's New in v1.5.7 (2025-10-27)
+
+**Web Interface Updates**
+- `datazione` field: Changed from StringField to SelectField with database choices
+- `periodo_iniziale`, `periodo_finale`: Changed from SelectField to StringField (removed 40+ hardcoded choices)
+- `fase_iniziale`, `fase_finale`: Remain as StringField for flexible chronological data entry
+- Choices populated dynamically in both `/us/create` and `/us/<us_id>/edit` routes
+- Italian translations: "Periodo Iniziale", "Fase Iniziale", "Periodo Finale", "Fase Finale"
+
+**Service Integration**
+- `DatazioneService` initialized at app startup
+- `get_datazioni_choices()` provides formatted dropdown data: `[{'value': 'nome', 'label': 'Nome (Fascia)'}]`
+- Session management ensures no detached instance errors
+
+**User Experience**
+- Standardized dating selection via dropdown (36 Italian archaeological periods)
+- Free-text entry for periodo/fase fields for flexibility
+- Form displays: "-- Seleziona Datazione --" as default option
+- Full Italian language support in web interface
+
+**Next Steps (v1.6.0)**
+- Desktop GUI combobox integration
+- Parser synchronization with datazioni table
+- Import/export updates for datazioni support
+
+### 🚀 Version 1.5.6 - Chronological Datazioni System
 
 PyArchInit-Mini v1.5.6 introduces a comprehensive chronological dating system for standardized archaeological periodization:
 
@@ -742,7 +778,6 @@ PyArchInit-Mini v1.5.6 introduces a comprehensive chronological dating system fo
 ✅ **Service Layer**: Complete CRUD operations via DatazioneService
 ✅ **Default Initialization**: Auto-populate with standard Italian periods from Paleolitico to Età Contemporanea
 ✅ **API Ready**: Choices endpoint for dropdown/combobox integration
-✅ **Foundation for v1.6.0**: GUI combobox integration coming in next release
 
 ### 🔧 What's New in v1.5.6 (2025-10-27)
 
@@ -759,12 +794,6 @@ PyArchInit-Mini v1.5.6 introduces a comprehensive chronological dating system fo
 - Comprehensive test script (`test_datazioni_table.py`) with 7 test cases
 - 90%+ test coverage for core functionality
 - Validates table creation, CRUD operations, choices generation, and search
-
-**Next Steps (v1.6.0)**
-- Web GUI combobox for datazione field
-- Desktop GUI combobox integration
-- Parser synchronization with datazioni table
-- Import/export updates for datazioni support
 
 ### 🚀 Version 1.5.0 - GraphML Periodization Fix
 

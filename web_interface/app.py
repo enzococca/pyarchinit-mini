@@ -27,6 +27,8 @@ from pyarchinit_mini.services.inventario_service import InventarioService
 from pyarchinit_mini.services.thesaurus_service import ThesaurusService
 from pyarchinit_mini.services.user_service import UserService
 from pyarchinit_mini.services.analytics_service import AnalyticsService
+from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
+from pyarchinit_mini.services.datazione_service import DatazioneService
 from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
 from pyarchinit_mini.harris_matrix.matrix_visualizer import MatrixVisualizer
 from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
@@ -177,57 +179,11 @@ class USForm(FlaskForm):
     profondita_min = StringField('Profondità Min (cm)')
 
     # TAB 4: Cronologia
-    periodo_iniziale = SelectField('Periodo Iniziale', choices=[
-        ('', '-- Seleziona --'),
-        ('Paleolitico', 'Paleolitico'),
-        ('Mesolitico', 'Mesolitico'),
-        ('Neolitico', 'Neolitico'),
-        ('Eneolitico', 'Eneolitico'),
-        ('Bronzo Antico', 'Bronzo Antico'),
-        ('Bronzo Medio', 'Bronzo Medio'),
-        ('Bronzo Finale', 'Bronzo Finale'),
-        ('Ferro I', 'Ferro I'),
-        ('Ferro II', 'Ferro II'),
-        ('Orientalizzante', 'Orientalizzante'),
-        ('Arcaico', 'Arcaico'),
-        ('Classico', 'Classico'),
-        ('Ellenistico', 'Ellenistico'),
-        ('Romano Repubblicano', 'Romano Repubblicano'),
-        ('Romano Imperiale', 'Romano Imperiale'),
-        ('Tardo Antico', 'Tardo Antico'),
-        ('Altomedievale', 'Altomedievale'),
-        ('Medievale', 'Medievale'),
-        ('Postmedievale', 'Postmedievale'),
-        ('Moderno', 'Moderno'),
-        ('Contemporaneo', 'Contemporaneo')
-    ])
+    periodo_iniziale = StringField('Periodo Iniziale')
     fase_iniziale = StringField('Fase Iniziale')
-    periodo_finale = SelectField('Periodo Finale', choices=[
-        ('', '-- Seleziona --'),
-        ('Paleolitico', 'Paleolitico'),
-        ('Mesolitico', 'Mesolitico'),
-        ('Neolitico', 'Neolitico'),
-        ('Eneolitico', 'Eneolitico'),
-        ('Bronzo Antico', 'Bronzo Antico'),
-        ('Bronzo Medio', 'Bronzo Medio'),
-        ('Bronzo Finale', 'Bronzo Finale'),
-        ('Ferro I', 'Ferro I'),
-        ('Ferro II', 'Ferro II'),
-        ('Orientalizzante', 'Orientalizzante'),
-        ('Arcaico', 'Arcaico'),
-        ('Classico', 'Classico'),
-        ('Ellenistico', 'Ellenistico'),
-        ('Romano Repubblicano', 'Romano Repubblicano'),
-        ('Romano Imperiale', 'Romano Imperiale'),
-        ('Tardo Antico', 'Tardo Antico'),
-        ('Altomedievale', 'Altomedievale'),
-        ('Medievale', 'Medievale'),
-        ('Postmedievale', 'Postmedievale'),
-        ('Moderno', 'Moderno'),
-        ('Contemporaneo', 'Contemporaneo')
-    ])
+    periodo_finale = StringField('Periodo Finale')
     fase_finale = StringField('Fase Finale')
-    datazione = StringField('Datazione')
+    datazione = SelectField('Datazione', choices=[], coerce=str)
     affidabilita = SelectField('Affidabilità', choices=[
         ('', '-- Seleziona --'),
         ('Alta', 'Alta'),
@@ -429,6 +385,8 @@ def create_app():
     thesaurus_service = ThesaurusService(db_manager)
     user_service = UserService(db_manager)
     analytics_service = AnalyticsService(db_manager)
+    relationship_sync_service = RelationshipSyncService(db_manager)
+    datazione_service = DatazioneService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
     matrix_visualizer = MatrixVisualizer()
     graphviz_visualizer = PyArchInitMatrixVisualizer()  # Graphviz visualizer (desktop GUI style)
@@ -725,7 +683,11 @@ def create_app():
         # Populate site choices
         sites = site_service.get_all_sites(size=100)
         form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
-        
+
+        # Populate datazione choices
+        datazioni_choices = datazione_service.get_datazioni_choices()
+        form.datazione.choices = [('', '-- Seleziona Datazione --')] + [(d['value'], d['label']) for d in datazioni_choices]
+
         if form.validate_on_submit():
             try:
                 # Helper function to convert numeric fields
@@ -831,6 +793,18 @@ def create_app():
 
                 us = us_service.create_us(us_data)
 
+                # Synchronize rapporti field to us_relationships_table
+                try:
+                    with db_manager.connection.get_session() as session:
+                        relationship_sync_service.sync_rapporti_to_relationships_table(
+                            sito=us_data['sito'],
+                            us_number=int(us_data['us']),
+                            rapporti_text=us_data.get('rapporti', ''),
+                            session=session
+                        )
+                except Exception as sync_error:
+                    print(f"Warning: Failed to sync relationships: {sync_error}")
+
                 # Broadcast US creation (use data from form, not from detached instance)
                 broadcast_us_created(socketio, us_data['sito'], us_data['us'])
 
@@ -858,6 +832,10 @@ def create_app():
         # Populate site choices
         sites = site_service.get_all_sites(size=100)
         form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
+
+        # Populate datazione choices
+        datazioni_choices = datazione_service.get_datazioni_choices()
+        form.datazione.choices = [('', '-- Seleziona Datazione --')] + [(d['value'], d['label']) for d in datazioni_choices]
 
         # Get existing US
         us = us_service.get_us_dto_by_id(us_id)
@@ -1018,6 +996,18 @@ def create_app():
                         update_data['file_path'] = f"DoSC/{filename}"
 
                 us_service.update_us(us_id, update_data)
+
+                # Synchronize rapporti field to us_relationships_table
+                try:
+                    with db_manager.connection.get_session() as session:
+                        relationship_sync_service.sync_rapporti_to_relationships_table(
+                            sito=update_data['sito'],
+                            us_number=int(update_data['us']),
+                            rapporti_text=update_data.get('rapporti', ''),
+                            session=session
+                        )
+                except Exception as sync_error:
+                    print(f"Warning: Failed to sync relationships: {sync_error}")
 
                 flash(f'US {update_data["us"]} aggiornata con successo!', 'success')
                 return redirect(url_for('us_list'))
