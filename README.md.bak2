@@ -39,13 +39,6 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
   - Format: "Nome Datazione (Fascia Cronologica)" (e.g., "Età del Bronzo Antico (2.200-1.700 a.C.)")
   - Multi-database support (SQLite + PostgreSQL)
   - GUI combobox integration coming in v1.6.0
-- **Periodization & Thesaurus Management (v1.5.8+)**: Complete web GUI for configuration management
-  - **Periodization Interface**: CRUD operations for managing archaeological dating periods
-  - **Thesaurus ICCD Interface**: Manage controlled vocabularies with read-only ICCD standards protection
-  - **US Form Integration**: Dynamic dropdowns for definizione_stratigrafica, formazione, colore, consistenza
-  - **Visual Distinction**: Predefined ICCD values marked with badges, custom values fully editable
-  - **Two-Step Selection**: Intuitive table → field selection for thesaurus management
-  - **Full i18n Support**: English and Italian translations for all interfaces
 
 ### 🖥️ Multiple User Interfaces
 - **Web Interface (Flask)**: Modern Bootstrap 5 UI, responsive design

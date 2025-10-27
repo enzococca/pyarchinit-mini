@@ -6,28 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.5.8] - 2025-10-27
-## [1.5.9] - 2025-10-27
-
-### Fixed
-- **Italian Translation**: Corrected "Errore export PDF" → "Esporta PDF" for Export PDF button
-- **English Translations**: Added missing translations for Configuration menu and Thesaurus ICCD
-
-### Added
-- **README**: Updated with v1.5.8 features (Periodization & Thesaurus Management interfaces)
-
-### Technical
-- Files modified:
-  - `pyarchinit_mini/translations/it/LC_MESSAGES/messages.po` - Fixed PDF export button translation
-  - `pyarchinit_mini/translations/en/LC_MESSAGES/messages.po` - Added Configuration and Thesaurus ICCD translations
-  - `pyarchinit_mini/translations/*/LC_MESSAGES/messages.mo` - Recompiled translation catalogs
-  - `README.md` - Added Periodization & Thesaurus Management section
-  - `pyproject.toml` - Version 1.5.9
-
-### Impact
-- Correct button labels in Italian interface
-- Complete internationalization support for new features
-- Updated documentation reflects latest capabilities
-
 
 ### Added
 - **Periodizzazione Management Interface**
