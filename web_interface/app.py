@@ -146,12 +146,8 @@ class USForm(FlaskForm):
     osservazioni = TextAreaField(_l('Observations'))
 
     # TAB 3: Caratteristiche Fisiche
-    formazione = SelectField(_l('Formation'), choices=[
-        ('', _l('-- Select --')),
-        ('Naturale', _l('Natural')),
-        ('Artificiale', _l('Artificial')),
-        ('Mista', _l('Mixed'))
-    ])
+    definizione_stratigrafica = SelectField('Definizione Stratigrafica', choices=[], coerce=str)
+    formazione = SelectField(_l('Formation'), choices=[], coerce=str)
     stato_di_conservazione = SelectField(_l('Conservation State'), choices=[
         ('', _l('-- Select --')),
         ('Ottimo', _l('Excellent')),
@@ -159,13 +155,8 @@ class USForm(FlaskForm):
         ('Discreto', _l('Fair')),
         ('Cattivo', _l('Poor'))
     ])
-    colore = StringField(_l('Color'))
-    consistenza = SelectField('Consistenza', choices=[
-        ('', '-- Seleziona --'),
-        ('Compatta', 'Compatta'),
-        ('Semicompatta', 'Semicompatta'),
-        ('Sciolta', 'Sciolta')
-    ])
+    colore = SelectField(_l('Color'), choices=[], coerce=str)
+    consistenza = SelectField('Consistenza', choices=[], coerce=str)
     struttura = StringField('Struttura')
 
     # Misure
@@ -688,6 +679,27 @@ def create_app():
         datazioni_choices = datazione_service.get_datazioni_choices()
         form.datazione.choices = [('', '-- Seleziona Datazione --')] + [(d['value'], d['label']) for d in datazioni_choices]
 
+        # Populate thesaurus choices for US fields
+        try:
+            def_strat_values = thesaurus_service.get_field_values('us_table', 'definizione_stratigrafica')
+            form.definizione_stratigrafica.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in def_strat_values]
+
+            formazione_values = thesaurus_service.get_field_values('us_table', 'formazione')
+            form.formazione.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in formazione_values]
+
+            consistenza_values = thesaurus_service.get_field_values('us_table', 'consistenza')
+            form.consistenza.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in consistenza_values]
+
+            colore_values = thesaurus_service.get_field_values('us_table', 'colore')
+            form.colore.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in colore_values]
+        except Exception as e:
+            print(f"Error loading thesaurus values: {e}")
+            # Fallback to empty choices
+            form.definizione_stratigrafica.choices = [('', '-- Seleziona --')]
+            form.formazione.choices = [('', '-- Seleziona --')]
+            form.consistenza.choices = [('', '-- Seleziona --')]
+            form.colore.choices = [('', '-- Seleziona --')]
+
         if form.validate_on_submit():
             try:
                 # Helper function to convert numeric fields
@@ -836,6 +848,27 @@ def create_app():
         # Populate datazione choices
         datazioni_choices = datazione_service.get_datazioni_choices()
         form.datazione.choices = [('', '-- Seleziona Datazione --')] + [(d['value'], d['label']) for d in datazioni_choices]
+
+        # Populate thesaurus choices for US fields
+        try:
+            def_strat_values = thesaurus_service.get_field_values('us_table', 'definizione_stratigrafica')
+            form.definizione_stratigrafica.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in def_strat_values]
+
+            formazione_values = thesaurus_service.get_field_values('us_table', 'formazione')
+            form.formazione.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in formazione_values]
+
+            consistenza_values = thesaurus_service.get_field_values('us_table', 'consistenza')
+            form.consistenza.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in consistenza_values]
+
+            colore_values = thesaurus_service.get_field_values('us_table', 'colore')
+            form.colore.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in colore_values]
+        except Exception as e:
+            print(f"Error loading thesaurus values: {e}")
+            # Fallback to empty choices
+            form.definizione_stratigrafica.choices = [('', '-- Seleziona --')]
+            form.formazione.choices = [('', '-- Seleziona --')]
+            form.consistenza.choices = [('', '-- Seleziona --')]
+            form.colore.choices = [('', '-- Seleziona --')]
 
         # Get existing US
         us = us_service.get_us_dto_by_id(us_id)
@@ -2474,6 +2507,214 @@ def create_app():
         except Exception as e:
             flash(f'Errore import CSV: {str(e)}', 'error')
             return redirect(url_for('export_page'))
+
+    # ===== Periodizzazione (Datazioni) Routes =====
+    @app.route('/periodizzazione')
+    @login_required
+    def periodizzazione_list():
+        """List all datazioni"""
+        try:
+            datazioni = datazione_service.get_all_datazioni()
+            total = datazione_service.count_datazioni()
+
+            return render_template('periodizzazione/list.html',
+                                 datazioni=datazioni,
+                                 total=total)
+        except Exception as e:
+            flash(f'Errore caricamento datazioni: {str(e)}', 'error')
+            return render_template('periodizzazione/list.html',
+                                 datazioni=[],
+                                 total=0)
+
+    @app.route('/periodizzazione/create', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
+    def periodizzazione_create():
+        """Create new datazione"""
+        if request.method == 'POST':
+            try:
+                datazione_data = {
+                    'nome_datazione': request.form.get('nome_datazione'),
+                    'fascia_cronologica': request.form.get('fascia_cronologica'),
+                    'descrizione': request.form.get('descrizione')
+                }
+
+                datazione_service.create_datazione(datazione_data)
+                flash('Datazione creata con successo!', 'success')
+                return redirect(url_for('periodizzazione_list'))
+
+            except Exception as e:
+                flash(f'Errore creazione datazione: {str(e)}', 'error')
+
+        return render_template('periodizzazione/form.html',
+                             datazione=None,
+                             title='Nuova Datazione')
+
+    @app.route('/periodizzazione/<int:datazione_id>/edit', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
+    def periodizzazione_edit(datazione_id):
+        """Edit existing datazione"""
+        try:
+            datazione = datazione_service.get_datazione_by_id(datazione_id)
+            if not datazione:
+                flash('Datazione non trovata', 'error')
+                return redirect(url_for('periodizzazione_list'))
+
+            if request.method == 'POST':
+                update_data = {
+                    'nome_datazione': request.form.get('nome_datazione'),
+                    'fascia_cronologica': request.form.get('fascia_cronologica'),
+                    'descrizione': request.form.get('descrizione')
+                }
+
+                datazione_service.update_datazione(datazione_id, update_data)
+                flash('Datazione aggiornata con successo!', 'success')
+                return redirect(url_for('periodizzazione_list'))
+
+            return render_template('periodizzazione/form.html',
+                                 datazione=datazione,
+                                 title='Modifica Datazione')
+
+        except Exception as e:
+            flash(f'Errore modifica datazione: {str(e)}', 'error')
+            return redirect(url_for('periodizzazione_list'))
+
+    @app.route('/periodizzazione/<int:datazione_id>/delete', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def periodizzazione_delete(datazione_id):
+        """Delete datazione"""
+        try:
+            datazione_service.delete_datazione(datazione_id)
+            flash('Datazione eliminata con successo!', 'success')
+        except Exception as e:
+            flash(f'Errore eliminazione datazione: {str(e)}', 'error')
+
+        return redirect(url_for('periodizzazione_list'))
+
+    # ===== Thesaurus Routes =====
+    @app.route('/thesaurus')
+    @login_required
+    def thesaurus_list():
+        """List thesaurus by table and field"""
+        try:
+            # Get available tables from THESAURUS_MAPPINGS
+            from pyarchinit_mini.models.thesaurus import THESAURUS_MAPPINGS
+
+            tables = list(THESAURUS_MAPPINGS.keys())
+
+            # Get selected table and field from query params
+            selected_table = request.args.get('table', '')
+            selected_field = request.args.get('field', '')
+
+            # Get fields for selected table
+            fields = []
+            values = []
+            if selected_table:
+                fields = thesaurus_service.get_table_fields(selected_table)
+
+                # Get values for selected field
+                if selected_field:
+                    values = thesaurus_service.get_field_values(selected_table, selected_field)
+
+            return render_template('thesaurus/list.html',
+                                 tables=tables,
+                                 fields=fields,
+                                 values=values,
+                                 selected_table=selected_table,
+                                 selected_field=selected_field)
+
+        except Exception as e:
+            flash(f'Errore caricamento thesaurus: {str(e)}', 'error')
+            return render_template('thesaurus/list.html',
+                                 tables=[],
+                                 fields=[],
+                                 values=[],
+                                 selected_table='',
+                                 selected_field='')
+
+    @app.route('/thesaurus/create', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def thesaurus_create():
+        """Create new thesaurus value"""
+        try:
+            table_name = request.form.get('table_name')
+            field_name = request.form.get('field_name')
+            value = request.form.get('value')
+            label = request.form.get('label')
+            description = request.form.get('description')
+
+            thesaurus_service.add_field_value(
+                table_name=table_name,
+                field_name=field_name,
+                value=value,
+                label=label,
+                description=description
+            )
+
+            flash('Valore thesaurus creato con successo!', 'success')
+
+        except Exception as e:
+            flash(f'Errore creazione valore: {str(e)}', 'error')
+
+        return redirect(url_for('thesaurus_list',
+                               table=request.form.get('table_name'),
+                               field=request.form.get('field_name')))
+
+    @app.route('/thesaurus/<field_id>/edit', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def thesaurus_edit(field_id):
+        """Edit thesaurus value"""
+        try:
+            # Check if this is a predefined value (read-only)
+            if str(field_id).startswith('predefined_'):
+                flash('I valori predefiniti non possono essere modificati. Crea un nuovo valore personalizzato.', 'warning')
+            else:
+                value = request.form.get('value')
+                label = request.form.get('label')
+                description = request.form.get('description')
+
+                thesaurus_service.update_field_value(
+                    field_id=int(field_id),
+                    value=value,
+                    label=label,
+                    description=description
+                )
+
+                flash('Valore thesaurus aggiornato con successo!', 'success')
+
+        except Exception as e:
+            flash(f'Errore modifica valore: {str(e)}', 'error')
+
+        table_name = request.form.get('table_name')
+        field_name = request.form.get('field_name')
+        return redirect(url_for('thesaurus_list',
+                               table=table_name,
+                               field=field_name))
+
+    @app.route('/thesaurus/<field_id>/delete', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def thesaurus_delete(field_id):
+        """Delete thesaurus value"""
+        try:
+            # Check if this is a predefined value (read-only)
+            if str(field_id).startswith('predefined_'):
+                flash('I valori predefiniti non possono essere eliminati. Sono di sola lettura.', 'warning')
+            else:
+                thesaurus_service.delete_field_value(int(field_id))
+                flash('Valore thesaurus eliminato con successo!', 'success')
+        except Exception as e:
+            flash(f'Errore eliminazione valore: {str(e)}', 'error')
+
+        table_name = request.form.get('table_name')
+        field_name = request.form.get('field_name')
+        return redirect(url_for('thesaurus_list',
+                               table=table_name,
+                               field=field_name))
 
     # ===== 3D Model Viewer Routes (s3Dgraphy Integration) =====
     try:

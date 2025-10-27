@@ -3368,7 +3368,7 @@ msgstr "e.g. 20"
 
 #: web_interface/templates/us/form.html:316
 msgid "Periodization"
-msgstr "Periodization"
+msgstr "Periodizzazione"
 
 #: web_interface/templates/us/form.html:321
 msgid "Initial Period"
@@ -3479,6 +3479,16 @@ msgstr "Salva US"
 #: web_interface/templates/us/list.html:98
 msgid "No US found."
 msgstr "Nessuna US trovata."
+
+#: web_interface/templates/base.html:392
+#: web_interface/templates/base.html:511
+msgid "Configuration"
+msgstr "Configurazione"
+
+#: web_interface/templates/base.html:397
+#: web_interface/templates/base.html:521
+msgid "Thesaurus ICCD"
+msgstr "Thesaurus ICCD"
 
 #~ msgid "OK"
 #~ msgstr "OK"

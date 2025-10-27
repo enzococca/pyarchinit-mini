@@ -387,6 +387,15 @@
                             <li><a class="dropdown-item" href="{{ url_for('pyarchinit_import_export.index') }}">
                                 <i class="fas fa-exchange-alt"></i> {{ _('PyArchInit Import/Export') }}
                             </a></li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li><h6 class="dropdown-header">{{ _('Configuration') }}</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('periodizzazione_list') }}">
+                                <i class="fas fa-calendar-alt"></i> {{ _('Periodization') }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('thesaurus_list') }}">
+                                <i class="fas fa-book"></i> {{ _('Thesaurus ICCD') }}
+                            </a></li>
                         </ul>
                     </li>
 
@@ -494,6 +503,22 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('harris_creator.index') }}">
                                 <i class="fas fa-project-diagram"></i> {{ _('Harris Matrix Creator') }}
+                            </a>
+                        </li>
+                    </ul>
+
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>{{ _('Configuration') }}</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('periodizzazione_list') }}">
+                                <i class="fas fa-calendar-alt"></i> {{ _('Periodization') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('thesaurus_list') }}">
+                                <i class="fas fa-book"></i> {{ _('Thesaurus ICCD') }}
                             </a>
                         </li>
                     </ul>

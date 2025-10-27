@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Periodizzazione (Datazioni){% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-calendar-alt"></i> Periodizzazione (Datazioni)</h2>
+        <a href="{{ url_for('periodizzazione_create') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nuova Datazione
+        </a>
+    </div>
+
+    <!-- Statistics -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Totale datazioni: <strong>{{ total }}</strong>
+    </div>
+
+    <!-- Datazioni Table -->
+    {% if datazioni %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome Datazione</th>
+                    <th>Fascia Cronologica</th>
+                    <th>Descrizione</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dat in datazioni %}
+                <tr>
+                    <td>{{ dat.id_datazione }}</td>
+                    <td><strong>{{ dat.nome_datazione }}</strong></td>
+                    <td>{{ dat.fascia_cronologica or '-' }}</td>
+                    <td>{{ dat.descrizione[:50] + '...' if dat.descrizione and dat.descrizione|length > 50 else (dat.descrizione or '-') }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ url_for('periodizzazione_edit', datazione_id=dat.id_datazione) }}"
+                               class="btn btn-primary" title="Modifica">
+                                <i class="fas fa-edit"></i> Modifica
+                            </a>
+                            <form method="POST" action="{{ url_for('periodizzazione_delete', datazione_id=dat.id_datazione) }}"
+                                  style="display: inline;"
+                                  onsubmit="return confirm('Sei sicuro di voler eliminare questa datazione?');">
+                                <button type="submit" class="btn btn-danger btn-sm" title="Elimina">
+                                    <i class="fas fa-trash"></i> Elimina
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        Nessuna datazione trovata. <a href="{{ url_for('periodizzazione_create') }}">Crea la prima datazione</a>
+    </div>
+    {% endif %}
+
+    <!-- Help Text -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle"></i> Informazioni
+        </div>
+        <div class="card-body">
+            <p>La <strong>Periodizzazione</strong> permette di gestire le datazioni archeologiche standard utilizzate nel sistema.</p>
+            <ul>
+                <li><strong>Nome Datazione</strong>: Il nome della datazione (es. "Età del Bronzo Antico")</li>
+                <li><strong>Fascia Cronologica</strong>: Il periodo temporale (es. "2.200-1.700 a.C.")</li>
+                <li><strong>Descrizione</strong>: Descrizione dettagliata della datazione (opzionale)</li>
+            </ul>
+            <p class="mb-0">Queste datazioni vengono utilizzate nei campi "datazione" delle schede US per standardizzare la cronologia.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

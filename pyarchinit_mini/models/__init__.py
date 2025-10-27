@@ -7,6 +7,7 @@ from .site import Site
 from .us import US
 from .inventario_materiali import InventarioMateriali
 from .harris_matrix import HarrisMatrix, USRelationships, Period, Periodizzazione
+from .datazione import Datazione
 from .media import Media, MediaThumb, Documentation
 from .thesaurus import ThesaurusSigle, ThesaurusField, ThesaurusCategory
 from .user import User, UserRole
@@ -20,6 +21,7 @@ __all__ = [
     "USRelationships",
     "Period",
     "Periodizzazione",
+    "Datazione",
     "Media",
     "MediaThumb",
     "Documentation",

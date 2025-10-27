@@ -17,6 +17,9 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from desktop_gui.i18n import _, get_unit_types, translate_unit_type_from_original, translate_unit_type_to_original
 
+# Import relationship sync service
+from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
+
 class ExtendedUSDialog:
     """
     Extended US dialog with multiple tabs for complete archaeological recording
@@ -33,6 +36,9 @@ class ExtendedUSDialog:
         self.db_manager = db_manager
         self.us = us
         self.callback = callback
+
+        # Initialize relationship sync service
+        self.relationship_sync_service = RelationshipSyncService(db_manager)
 
         # Store US ID and number separately to avoid session issues
         self.us_id = us.id_us if us else None
@@ -1427,16 +1433,42 @@ class ExtendedUSDialog:
             if self.us_id:
                 # Update existing - use DTO method to avoid session issues
                 updated_us = self.us_service.update_us_dto(self.us_id, us_data)
+
+                # Synchronize rapporti field to us_relationships_table
+                try:
+                    with self.db_manager.connection.get_session() as session:
+                        self.relationship_sync_service.sync_rapporti_to_relationships_table(
+                            sito=us_data['sito'],
+                            us_number=int(us_data['us']),
+                            rapporti_text=us_data.get('rapporti', ''),
+                            session=session
+                        )
+                except Exception as sync_error:
+                    print(f"Warning: Failed to sync relationships: {sync_error}")
+
                 messagebox.showinfo("Successo", "US aggiornata con successo")
             else:
                 # Create new
                 new_us = self.us_service.create_us(us_data)
+
+                # Synchronize rapporti field to us_relationships_table
+                try:
+                    with self.db_manager.connection.get_session() as session:
+                        self.relationship_sync_service.sync_rapporti_to_relationships_table(
+                            sito=us_data['sito'],
+                            us_number=int(us_data['us']),
+                            rapporti_text=us_data.get('rapporti', ''),
+                            session=session
+                        )
+                except Exception as sync_error:
+                    print(f"Warning: Failed to sync relationships: {sync_error}")
+
                 messagebox.showinfo("Successo", "US creata con successo")
-            
+
             # Call callback
             if self.callback:
                 self.callback()
-            
+
             # Close dialog
             self.window.destroy()
             

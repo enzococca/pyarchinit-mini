@@ -1,0 +1,92 @@
+--- a/pyarchinit_mini/services/datazione_service.py
++++ b/pyarchinit_mini/services/datazione_service.py
+@@ -18,7 +18,7 @@ from ..utils.exceptions import ValidationError, RecordNotFoundError, DatabaseEr
+ class DatazioneService:
+     """Service class for Datazione operations"""
+ 
+-    def create_datazione(self, datazione_data: Dict[str, Any]) -> Datazione:
++    def create_datazione(self, datazione_data: Dict[str, Any]) -> Dict[str, Any]:
+         """
+         Create a new datazione
+ 
+@@ -26,7 +26,7 @@ class DatazioneService:
+             datazione_data: Dictionary with datazione fields
+ 
+         Returns:
+-            Created Datazione instance
++            Created Datazione dict
+ 
+         Raises:
+             ValidationError: If validation fails
+@@ -37,7 +37,11 @@ class DatazioneService:
+             raise ValidationError("Nome datazione is required", 'nome_datazione', None)
+ 
+         try:
+-            return self.db_manager.create(Datazione, datazione_data)
++            with self.db_manager.connection.get_session() as session:
++                datazione = Datazione(**datazione_data)
++                session.add(datazione)
++                session.flush()
++                return datazione.to_dict()
+         except IntegrityError as e:
+             if 'UNIQUE constraint' in str(e) or 'unique constraint' in str(e).lower():
+                 raise ValidationError(
+@@ -47,10 +51,14 @@ class DatazioneService:
+                 )
+             raise DatabaseError(f"Failed to create datazione: {e}")
+ 
+-    def get_datazione_by_id(self, datazione_id: int) -> Optional[Datazione]:
++    def get_datazione_by_id(self, datazione_id: int) -> Optional[Dict[str, Any]]:
+         """Get datazione by ID"""
+-        return self.db_manager.get_by_id(Datazione, datazione_id)
++        with self.db_manager.connection.get_session() as session:
++            datazione = session.query(Datazione).filter_by(id_datazione=datazione_id).first()
++            if datazione:
++                return datazione.to_dict()
++            return None
+ 
+-    def get_datazione_by_nome(self, nome: str) -> Optional[Datazione]:
++    def get_datazione_by_nome(self, nome: str) -> Optional[Dict[str, Any]]:
+         """Get datazione by nome"""
+         with self.db_manager.connection.get_session() as session:
+-            return session.query(Datazione).filter_by(nome_datazione=nome).first()
++            datazione = session.query(Datazione).filter_by(nome_datazione=nome).first()
++            if datazione:
++                return datazione.to_dict()
++            return None
+ 
+@@ -111,7 +127,7 @@ class DatazioneService:
+             ]
+         }
+ 
+-    def update_datazione(self, datazione_id: int, update_data: Dict[str, Any]) -> Datazione:
++    def update_datazione(self, datazione_id: int, update_data: Dict[str, Any]) -> Dict[str, Any]:
+         """
+         Update existing datazione
+ 
+@@ -120,7 +136,7 @@ class DatazioneService:
+             update_data: Dictionary with fields to update
+ 
+         Returns:
+-            Updated Datazione instance
++            Updated Datazione dict
+ 
+         Raises:
+             RecordNotFoundError: If datazione not found
+@@ -128,7 +144,15 @@ class DatazioneService:
+             DatabaseError: If database operation fails
+         """
+         try:
+-            return self.db_manager.update(Datazione, datazione_id, update_data)
++            with self.db_manager.connection.get_session() as session:
++                datazione = session.query(Datazione).filter_by(id_datazione=datazione_id).first()
++                if not datazione:
++                    raise RecordNotFoundError(f"Datazione {datazione_id} not found")
++                
++                for key, value in update_data.items():
++                    setattr(datazione, key, value)
++                session.flush()
++                return datazione.to_dict()
+         except IntegrityError as e:
+             if 'UNIQUE constraint' in str(e) or 'unique constraint' in str(e).lower():
+                 raise ValidationError(
