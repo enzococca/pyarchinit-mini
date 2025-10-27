@@ -5,6 +5,93 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.8] - 2025-10-27
+
+### Added
+- **Periodizzazione Management Interface**
+  - Complete CRUD web interface for managing archaeological dating periods
+  - List view displaying all datazioni with pagination support
+  - Create form with fields: nome_datazione, fascia_cronologica, descrizione
+  - Edit functionality for updating existing dating periods
+  - Delete functionality with confirmation dialog
+  - Integrated in navigation menu under "Configuration" section
+
+- **Thesaurus ICCD Management Interface**
+  - Complete CRUD web interface for ICCD controlled vocabularies
+  - Two-step selection: choose table, then field
+  - Dynamic field dropdown based on selected table
+  - Display predefined ICCD values (read-only) with "ICCD" badge
+  - Create, edit, and delete custom vocabulary values
+  - Inline editing with JavaScript for quick updates
+  - Visual distinction between predefined and custom values (gray background for ICCD)
+  - Help documentation explaining ICCD standard compliance
+
+- **US Form Thesaurus Integration**
+  - `definizione_stratigrafica`: NEW field added as SelectField with thesaurus values
+  - `formazione`: Converted from hardcoded to dynamic thesaurus-driven SelectField
+  - `colore`: Converted from StringField to SelectField with thesaurus values
+  - `consistenza`: Converted from hardcoded to dynamic thesaurus-driven SelectField
+  - All fields populated via `ThesaurusService.get_field_values()`
+  - Works in both `/us/create` and `/us/<us_id>/edit` routes
+
+- **Navigation Updates**
+  - New "Configuration" section in dropdown menu and sidebar
+  - Links to Periodizzazione and Thesaurus ICCD interfaces
+  - Italian translations: "Configurazione", "Periodizzazione", "Thesaurus ICCD"
+
+### Changed
+- **Thesaurus Routes**
+  - `/thesaurus/<field_id>/edit` and `/thesaurus/<field_id>/delete` now accept string IDs
+  - Protection for predefined ICCD values (cannot be modified or deleted)
+  - Warning messages when attempting to modify read-only values
+
+- **Template Improvements**
+  - Thesaurus list template with conditional rendering for read-only values
+  - Visual indicators (badges, locked icons) for ICCD predefined entries
+  - Help cards with usage instructions in all new interfaces
+
+### Fixed
+- **CSRF Protection**
+  - Added CSRF tokens to periodizzazione create/edit forms
+  - Added CSRF tokens to thesaurus create/edit/delete forms
+  - Fixed inline JavaScript edit function to include CSRF token
+
+- **Thesaurus State Management**
+  - Fixed table/field selection losing state on page reload
+  - Replaced `form.submit()` with JavaScript URL parameter management
+  - Maintains query parameters (?table=x&field=y) across interactions
+
+- **Predefined Values Handling**
+  - Fixed "invalid literal for int() with base 10: 'predefined_0'" error
+  - Proper handling of string IDs for predefined vocabulary entries
+  - Routes now check for 'predefined_' prefix before attempting integer conversion
+
+### Technical
+- Files modified:
+  - `web_interface/app.py` - Added periodizzazione routes (2478-2594), thesaurus routes (2596-2717), updated USForm with thesaurus fields
+  - `web_interface/templates/periodizzazione/list.html` - NEW: List interface for datazioni
+  - `web_interface/templates/periodizzazione/form.html` - NEW: Create/edit form for datazioni
+  - `web_interface/templates/thesaurus/list.html` - NEW: ICCD thesaurus management interface
+  - `web_interface/templates/us/form.html` - Updated definizione_stratigrafica, formazione, colore, consistenza fields
+  - `web_interface/templates/base.html` - Added Configuration section to navigation
+  - `pyarchinit_mini/translations/it/LC_MESSAGES/messages.po` - Added Italian translations
+  - `pyproject.toml` - Version 1.5.8
+
+### User Experience
+- Users can now manage archaeological dating periods via web interface
+- ICCD controlled vocabularies fully manageable with clear distinction between standard and custom values
+- US forms now use standardized thesaurus values for consistency
+- Read-only protection ensures ICCD standard compliance
+- Intuitive two-step selection (table → field) for thesaurus management
+- Visual feedback (badges, colors) for different value types
+
+### Impact
+- Complete web GUI for configuration management
+- ICCD standards compliance with user-friendly interface
+- Enhanced data quality through controlled vocabularies
+- Foundation for future thesaurus expansion to other forms
+- Consistent terminology across archaeological documentation
+
 ## [1.5.7] - 2025-10-27
 
 ### Added

@@ -22,6 +22,8 @@ import os
 import sys
 sys.path.append('..')
 
+from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
+
 # Create Blueprint
 harris_creator_bp = Blueprint('harris_creator', __name__, url_prefix='/harris-creator')
 
@@ -306,6 +308,34 @@ def save_matrix():
                     )
                     db.add(relationship)
                     relationships_created += 1
+
+            # Synchronize us_relationships_table to rapporti field for all affected US
+            try:
+                # Get list of all US numbers that have relationships
+                affected_us = set()
+                for rel in db.query(USRelationships).filter_by(sito=site_name).all():
+                    affected_us.add(rel.us_from)
+
+                # Update rapporti field for each US
+                from pyarchinit_mini.models.us import US
+                sync_service = RelationshipSyncService(current_app.db_manager)
+
+                for us_number in affected_us:
+                    rapporti_text = sync_service.sync_relationships_table_to_rapporti(
+                        sito=site_name,
+                        us_number=us_number,
+                        session=db
+                    )
+
+                    # Update the us_table.rapporti field
+                    us_record = db.query(US).filter_by(sito=site_name, us=us_number).first()
+                    if us_record:
+                        us_record.rapporti = rapporti_text
+
+                db.flush()
+
+            except Exception as sync_error:
+                print(f"Warning: Failed to sync relationships to rapporti field: {sync_error}")
 
             return jsonify({
                 'success': True,

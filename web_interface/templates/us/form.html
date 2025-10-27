@@ -276,6 +276,10 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-3 mb-3">
+                                <label class="form-label">Definizione Stratigrafica</label>
+                                {{ form.definizione_stratigrafica(class="form-select") }}
+                            </div>
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ _('Formation') }}</label>
                                 {{ form.formazione(class="form-select") }}
                             </div>
@@ -285,8 +289,10 @@
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ _('Color') }}</label>
-                                {{ form.colore(class="form-control") }}
+                                {{ form.colore(class="form-select") }}
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">{{ _('Consistency') }}</label>
                                 {{ form.consistenza(class="form-select") }}
