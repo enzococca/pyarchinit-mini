@@ -595,7 +595,7 @@ msgstr "Errore nell'aggiornamento del sito"
 #: web_interface/templates/sites/list.html:122
 #: web_interface/templates/us/list.html:11
 msgid "Export PDF"
-msgstr "Errore export PDF"
+msgstr "Esporta PDF"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1339
 msgid "Export Type:"
@@ -693,7 +693,7 @@ msgstr ""
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1529
 msgid "Error generating PDF"
-msgstr "Errore export PDF"
+msgstr "Esporta PDF"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1532
 #, python-brace-format
@@ -705,7 +705,7 @@ msgstr ""
 #: pyarchinit_mini/desktop_gui/dialogs.py:1537
 #, fuzzy, python-brace-format
 msgid "Error generating PDF: {}"
-msgstr "Errore export PDF"
+msgstr "Esporta PDF"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1544
 msgid "Database Configuration"
@@ -989,7 +989,7 @@ msgstr "File caricato con successo!"
 #: pyarchinit_mini/desktop_gui/dialogs.py:1917
 #, fuzzy, python-brace-format
 msgid "Error during upload: {}"
-msgstr "Errore export PDF"
+msgstr "Esporta PDF"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1923
 #: pyarchinit_mini/desktop_gui/main_window.py:178
@@ -2043,7 +2043,7 @@ msgstr "Errore applicazione fix"
 
 #: pyarchinit_mini/web_interface/app.py:1822
 msgid "Error exporting PDF"
-msgstr "Errore export PDF"
+msgstr "Esporta PDF"
 
 #: pyarchinit_mini/web_interface/app.py:1861
 msgid "Error exporting Harris Matrix PDF"

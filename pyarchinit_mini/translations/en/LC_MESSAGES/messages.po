@@ -4994,3 +4994,11 @@ msgstr "CSV Files"
 
 msgid "Text Files"
 msgstr "Text Files"
+
+# Configuration Menu Section
+msgid "Configuration"
+msgstr "Configuration"
+
+msgid "Thesaurus ICCD"
+msgstr "ICCD Thesaurus"
+
