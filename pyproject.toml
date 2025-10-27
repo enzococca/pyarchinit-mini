@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.5.4"
+version = "1.5.5"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, and Heriverse/ATON export integration"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -216,7 +216,7 @@ multi_line_output = 3
 line_length = 88
 
 [tool.mypy]
-python_version = "1.5.4"
+python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
