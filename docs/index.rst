@@ -38,6 +38,21 @@ Key Features
 - **Real-Time Collaboration**: WebSocket support for team updates
 - **Analytics Dashboard**: Interactive charts and data visualization
 
+What's New in Version 1.5.5
+---------------------------
+
+.. versionadded:: 1.5.5
+   **Documentation and Internationalization Improvements**
+
+   This release focuses on improving documentation quality and accessibility:
+
+   - **Complete English Translation**: All README content fully translated to English for international audience
+   - **ReadTheDocs Compatibility**: Documentation links updated to point to pyarchinit-mini.readthedocs.io
+   - **PyPI Package Description**: Clean, English-only package description on PyPI
+   - **Improved Installation Instructions**: Clearer Graphviz installation steps for Windows users
+
+   **Impact**: International users can now access complete documentation in English on both PyPI and ReadTheDocs.
+
 What's New in Version 1.5.4
 ---------------------------
 

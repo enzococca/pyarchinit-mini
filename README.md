@@ -771,7 +771,7 @@ The project is actively maintained with regular updates. Check the [CHANGELOG](C
 
 PyArchInit-Mini uses **Graphviz software** for Harris Matrix visualization and GraphML export. The Python module `graphviz` is installed automatically via pip, but requires the **native Graphviz software** to be installed on your system.
 
-**Installation per Sistema Operativo:**
+**Installation by Operating System:**
 
 #### Linux (Debian/Ubuntu)
 ```bash
@@ -795,49 +795,49 @@ sudo port install graphviz
 ```
 
 #### Windows
-1. **Option 1 - Chocolatey** (Recommended, aggiunge automaticamente al PATH):
+1. **Option 1 - Chocolatey** (Recommended, automatically adds to PATH):
    ```powershell
    choco install graphviz
    ```
 
-2. **Option 2 - Direct Download** (Richiede configurazione manuale PATH):
+2. **Option 2 - Direct Download** (Requires manual PATH configuration):
 
-   **Step 1: Download e Installazione**
-   - Download installer da: https://graphviz.org/download/
-   - Esegui il file `.msi` scaricato
-   - Durante l'installazione, **seleziona "Add Graphviz to the system PATH for all users"**
-   - Se non selezioni questa opzione, dovrai aggiungere manualmente al PATH
+   **Step 1: Download and Installation**
+   - Download installer from: https://graphviz.org/download/
+   - Run the downloaded `.msi` 
+   - During installation, **select "Add Graphviz to the system PATH for all users"**
+   - If you don't select this option, you'll need to add it manually to PATH
 
-   **Step 2: Aggiungi Manualmente al PATH (se necessario)**
+   **Step 2: Manually Add to PATH (if needed)**
 
-   Se Graphviz non è stato aggiunto automaticamente al PATH:
+   If Graphviz was not automatically added to PATH:
 
-   1. Trova il percorso di installazione (default: `C:\Program Files\Graphviz\bin`)
-   2. Apri Impostazioni Sistema:
+   1. Find the installation path (default: `C:\Program Files\Graphviz\bin`)
+   2. Open System Settings:
       - Windows 10/11: `Settings → System → About → Advanced system settings`
-      - Oppure: cerca "Variabili d'ambiente" nel menu Start
-   3. Click su "Environment Variables..." (Variabili d'ambiente)
-   4. Nella sezione "System variables" (Variabili di sistema), trova e seleziona "Path"
-   5. Click su "Edit..." (Modifica)
-   6. Click su "New" (Nuovo)
-   7. Incolla il percorso: `C:\Program Files\Graphviz\bin`
-   8. Click OK su tutte le finestre
-   9. **IMPORTANTE**: Riapri qualsiasi Command Prompt o PowerShell già aperto
+      - Or: search for "Environment Variables" in the Start menu
+   3. Click on "Environment Variables..."
+   4. In the "System variables" section, find and select "Path"
+   5. Click on "Edit..."
+   6. Click on "New"
+   7. Paste the path: `C:\Program Files\Graphviz\bin`
+   8. Click OK on all windows
+   9. **IMPORTANT**: Restart any Command Prompt or PowerShell windows that were already open
 
-   **Step 3: Verifica (IMPORTANTE)**
+   **Step 3: Verification (IMPORTANT)**
 
-   Apri un **nuovo** Command Prompt o PowerShell e verifica:
+   Open a **new** Command Prompt or PowerShell and verify:
    ```powershell
    dot -V
    tred -V
    ```
 
-   Se vedi "command not found" o "non riconosciuto":
-   - Hai chiuso e riaperto il terminale dopo aver modificato PATH?
-   - Il percorso `C:\Program Files\Graphviz\bin` contiene `dot.exe` e `tred.exe`?
-   - Controlla che il PATH sia stato aggiunto correttamente nelle variabili d'ambiente
+   If you see "command not found" or "not recognized":
+   - Did you close and reopen the terminal after modifying PATH?
+   - Does the path `C:\Program Files\Graphviz\bin` contain `dot.exe` and `tred.exe`?
+   - Check that PATH was added correctly in environment variables
 
-**Verifica Installazione:**
+**Installation Verification:**
 ```bash
 # Check if dot command is available
 dot -V
@@ -846,7 +846,7 @@ dot -V
 tred -V
 ```
 
-Output atteso:
+Expected output:
 ```
 dot - graphviz version X.X.X (XXXXXXXX.XXXX)
 ```
@@ -1414,11 +1414,19 @@ pyarchinit-api
 - [x] **Batch import from CSV** - With validation and duplicate handling
 - [x] **Multi-interface export/import** - Web UI, Desktop GUI, and CLI
 
+### Completed in v1.5.4 (2025-10-26)
+- [x] **Advanced Search System** - Multi-field filtering (site, area, unit type, year, US number)
+- [x] **Record Navigation** - Prev/Next buttons directly in edit forms with position counter
+- [x] **Filtered PDF Export** - Export only filtered results based on active search criteria
+- [x] **Filtered Harris Matrix Export** - GraphML export with subgraph containing only filtered nodes
+- [x] **Session-Based Filters** - Filter persistence across navigation for consistent workflow
+- [x] **Smart Export Buttons** - Context-aware buttons with filter badges showing filtered record count
+
 ### Upcoming Features
 - [ ] Docker containerization
 - [ ] Cloud deployment guides
-- [ ] Advanced search and filtering
 - [ ] Offline mode support
+- [ ] Advanced search for Inventory module (following US implementation pattern)
 
 ---
 
