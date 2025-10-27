@@ -5,6 +5,72 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.7] - 2025-10-27
+
+### Added
+- **Web GUI Combobox Integration for Datazioni**
+  - `datazione` field in US form now uses SelectField with database-driven choices
+  - Dynamic dropdown populated from `datazioni_table` via `DatazioneService`
+  - Choices displayed in format: "Nome Datazione (Fascia Cronologica)"
+  - Default option: "-- Seleziona Datazione --"
+  - Works in both `/us/create` and `/us/<us_id>/edit` routes
+
+- **Italian Translation for Chronology Fields**
+  - "Initial Period" → "Periodo Iniziale"
+  - "Initial Phase" → "Fase Iniziale"
+  - "Final Period" → "Periodo Finale"
+  - "Final Phase" → "Fase Finale"
+  - Translations added to `pyarchinit_mini/translations/it/LC_MESSAGES/messages.po`
+
+### Changed
+- **US Form Field Type Updates**
+  - `datazione`: Changed from StringField to SelectField (dropdown with 36 Italian periods)
+  - `periodo_iniziale`: Changed from SelectField to StringField (removed 40+ hardcoded choices)
+  - `periodo_finale`: Changed from SelectField to StringField (removed 40+ hardcoded choices)
+  - `fase_iniziale`: Remains StringField (flexible text entry)
+  - `fase_finale`: Remains StringField (flexible text entry)
+
+- **Service Integration**
+  - `DatazioneService` initialized at Flask app startup
+  - `get_datazioni_choices()` returns formatted list of dicts: `[{'value': 'nome', 'label': 'Nome (Fascia)'}]`
+  - Fixed dict access syntax in `get_datazioni_choices()` to use `d['nome_datazione']` instead of `d.nome_datazione`
+
+- **Bootstrap 5 CSS Classes**
+  - `datazione`: Uses `form-select` class for dropdown styling
+  - `periodo_iniziale`, `periodo_finale`, `fase_iniziale`, `fase_finale`: Use `form-control` class for text input styling
+
+### Fixed
+- **Session Management**
+  - Fixed AttributeError: 'dict' object has no attribute 'nome_datazione'
+  - All DatazioneService methods return dicts instead of ORM objects to prevent detached instance errors
+
+### Technical
+- Files modified:
+  - `web_interface/app.py` - Added DatazioneService import, updated USForm fields, populated choices in create/edit routes
+  - `web_interface/templates/us/form.html` - Updated field rendering with correct CSS classes
+  - `pyarchinit_mini/services/datazione_service.py` - Fixed dict access in get_datazioni_choices()
+  - `pyarchinit_mini/translations/it/LC_MESSAGES/messages.po` - Added Italian translations
+  - `README.md` - Added v1.5.7 release notes
+  - `docs/index.rst` - Added v1.5.7 version documentation
+  - `pyproject.toml` - Version 1.5.7
+
+### User Experience
+- Users can now select standardized datazioni from dropdown with 36 Italian archaeological periods
+- Free-text entry for periodo/fase fields maintains flexibility for chronological data
+- Full Italian language support in web interface
+- Consistent dropdown behavior on both create and edit forms
+
+### Next Steps (v1.6.0)
+- Desktop GUI combobox integration for datazione field
+- Parser synchronization with datazioni table
+- Import/export updates for datazioni support
+
+### Impact
+- Web interface now provides standardized chronological dating selection
+- Maintains flexibility with free-text periodo/fase fields
+- Foundation completed for Desktop GUI integration
+- Consistent user experience across create and edit workflows
+
 ## [1.5.6] - 2025-10-27
 
 ### Added

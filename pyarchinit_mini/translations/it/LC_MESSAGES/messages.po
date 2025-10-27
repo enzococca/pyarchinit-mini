@@ -3372,19 +3372,19 @@ msgstr "Periodization"
 
 #: web_interface/templates/us/form.html:321
 msgid "Initial Period"
-msgstr "Initial Period"
+msgstr "Periodo Iniziale"
 
 #: web_interface/templates/us/form.html:325
 msgid "Initial Phase"
-msgstr "Initial Phase"
+msgstr "Fase Iniziale"
 
 #: web_interface/templates/us/form.html:331
 msgid "Final Period"
-msgstr "Final Period"
+msgstr "Periodo Finale"
 
 #: web_interface/templates/us/form.html:335
 msgid "Final Phase"
-msgstr "Final Phase"
+msgstr "Fase Finale"
 
 #: web_interface/templates/us/form.html:341
 msgid "Dating"
