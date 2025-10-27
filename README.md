@@ -34,6 +34,11 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **PDF Export**: Desktop-style reports (Sites, US, Inventario, Harris Matrix embedded)
 - **Media Management**: Images, documents, videos with metadata
 - **Thesaurus ICCD**: 4 controlled vocabularies for standardized data entry
+- **Chronological Datazioni System**: Standardized archaeological dating periods table
+  - 36 pre-configured Italian archaeological periods (Paleolitico → Età Contemporanea)
+  - Format: "Nome Datazione (Fascia Cronologica)" (e.g., "Età del Bronzo Antico (2.200-1.700 a.C.)")
+  - Multi-database support (SQLite + PostgreSQL)
+  - GUI combobox integration coming in v1.6.0
 
 ### 🖥️ Multiple User Interfaces
 - **Web Interface (Flask)**: Modern Bootstrap 5 UI, responsive design
@@ -728,9 +733,42 @@ These placeholders are ready for integration with actual 3D models uploaded thro
 
 ## 📊 Project Status
 
+### 🚀 Version 1.5.6 - Chronological Datazioni System (NEW)
+
+PyArchInit-Mini v1.5.6 introduces a comprehensive chronological dating system for standardized archaeological periodization:
+
+✅ **Datazioni Table**: New `datazioni_table` with 36 pre-configured Italian archaeological periods
+✅ **Multi-Database Support**: Compatible with both SQLite and PostgreSQL
+✅ **Service Layer**: Complete CRUD operations via DatazioneService
+✅ **Default Initialization**: Auto-populate with standard Italian periods from Paleolitico to Età Contemporanea
+✅ **API Ready**: Choices endpoint for dropdown/combobox integration
+✅ **Foundation for v1.6.0**: GUI combobox integration coming in next release
+
+### 🔧 What's New in v1.5.6 (2025-10-27)
+
+**Chronological Datazioni System**
+- New `datazioni_table` model with fields: `nome_datazione`, `fascia_cronologica`, `descrizione`
+- 36 default Italian archaeological periods covering full chronological span
+- `DatazioneService` with complete CRUD operations and validation
+- Method `get_datazioni_choices()` returns formatted data for form comboboxes
+- Method `initialize_default_datazioni()` populates table with standard periods
+- Multi-database compatibility: SQLite and PostgreSQL via SQLAlchemy ORM
+- Session management with context managers to avoid detached instance errors
+
+**Testing and Quality**
+- Comprehensive test script (`test_datazioni_table.py`) with 7 test cases
+- 90%+ test coverage for core functionality
+- Validates table creation, CRUD operations, choices generation, and search
+
+**Next Steps (v1.6.0)**
+- Web GUI combobox for datazione field
+- Desktop GUI combobox integration
+- Parser synchronization with datazioni table
+- Import/export updates for datazioni support
+
 ### 🚀 Version 1.5.0 - GraphML Periodization Fix
 
-PyArchInit-Mini continues to evolve with critical fixes and improvements. The latest release addresses a major issue in GraphML export:
+Critical fixes and improvements for GraphML export:
 
 ✅ **All Interfaces Working**: Web, Desktop GUI, CLI, and REST API fully operational
 ✅ **GraphML Periodization Fixed**: All archaeological periods now properly visible in yEd export (was showing only 3-4 instead of all 8 periods)
