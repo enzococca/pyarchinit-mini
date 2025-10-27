@@ -5,6 +5,74 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.6] - 2025-10-27
+
+### Added
+- **Chronological Datazioni System**
+  - New `datazioni_table` model for standardized archaeological dating periods
+  - Fields: `id_datazione`, `nome_datazione`, `fascia_cronologica`, `descrizione`, `created_at`, `updated_at`
+  - 36 pre-configured Italian archaeological periods from Paleolitico to Età Contemporanea
+  - Multi-database support: SQLite and PostgreSQL via SQLAlchemy ORM
+  - Property `full_label` returns formatted "Nome Datazione (Fascia Cronologica)"
+  - Method `to_dict()` for JSON serialization
+
+- **DatazioneService - Complete CRUD Operations**
+  - `create_datazione(datazione_data)` - Create new dating period with validation
+  - `get_datazione_by_id(datazione_id)` - Retrieve by ID
+  - `get_datazione_by_nome(nome)` - Search by name
+  - `get_all_datazioni(page, size)` - Paginated list with ordering
+  - `get_datazioni_choices()` - Formatted choices for dropdown/combobox forms
+  - `update_datazione(datazione_id, update_data)` - Update existing period
+  - `delete_datazione(datazione_id)` - Delete period
+  - `count_datazioni()` - Count total periods
+  - `initialize_default_datazioni()` - Auto-populate with 36 standard Italian periods
+
+- **Testing Infrastructure**
+  - Comprehensive test script `test_datazioni_table.py` with 7 test cases
+  - Tests: table creation, default initialization, CRUD operations, choices generation, search
+  - 90%+ test coverage for core functionality
+  - Validates multi-database compatibility
+
+### Changed
+- Updated README with Chronological Datazioni System feature in Advanced Archaeological Tools section
+- Updated Project Status section with v1.5.6 release notes
+- Session management improvements with context managers to avoid detached instance errors
+
+### Technical
+- Files added:
+  - `pyarchinit_mini/models/datazione.py` - Datazione model
+  - `pyarchinit_mini/services/datazione_service.py` - Service layer
+  - `test_datazioni_table.py` - Test script
+- Files modified:
+  - `pyarchinit_mini/models/__init__.py` - Added Datazione import
+  - `README.md` - Added feature documentation and v1.5.6 release notes
+  - `pyproject.toml` - Version 1.5.6
+
+### Next Steps (v1.6.0)
+- Web GUI combobox integration for datazione field
+- Desktop GUI combobox integration
+- Parser synchronization with datazioni table
+- Import/export updates for datazioni support
+
+### Database Schema
+```sql
+CREATE TABLE datazioni_table (
+    id_datazione INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome_datazione VARCHAR(200) NOT NULL UNIQUE,
+    fascia_cronologica VARCHAR(200),
+    descrizione TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Impact
+- Foundation for standardized chronological dating across all US records
+- Replaces free-text datazione field with controlled vocabulary
+- Enables consistent periodization for Harris Matrix exports
+- Prepares GUI integration for dropdown/combobox in v1.6.0
+- Compatible with both SQLite (development) and PostgreSQL (production)
+
 ## [1.5.3] - 2025-10-26
 
 ### Added

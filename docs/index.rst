@@ -38,6 +38,28 @@ Key Features
 - **Real-Time Collaboration**: WebSocket support for team updates
 - **Analytics Dashboard**: Interactive charts and data visualization
 
+What's New in Version 1.5.6
+---------------------------
+
+.. versionadded:: 1.5.6
+   **Chronological Datazioni System**
+
+   This release introduces a comprehensive chronological dating system for standardized archaeological periodization:
+
+   - **New Datazioni Table**: ``datazioni_table`` model with fields for ``nome_datazione``, ``fascia_cronologica``, and ``descrizione``
+   - **36 Pre-configured Italian Periods**: Default Italian archaeological periods from Paleolitico to Età Contemporanea
+   - **DatazioneService**: Complete CRUD operations with validation, search, and choices generation
+   - **Multi-Database Support**: Compatible with both SQLite and PostgreSQL via SQLAlchemy ORM
+   - **API Ready**: ``get_datazioni_choices()`` method returns formatted data for dropdown/combobox integration
+   - **Session Management**: Context managers prevent detached instance errors
+   - **Foundation for v1.6.0**: GUI combobox integration planned for next release
+
+   **Default Periods Included**: Paleolitico Inferiore, Paleolitico Medio, Paleolitico Superiore, Mesolitico, Neolitico (Antico/Medio/Recente/Finale), Eneolitico, Età del Bronzo (Antico/Medio/Recente/Finale), Età del Ferro (Prima/Seconda), Età Arcaica, Età Classica, Età Ellenistica, Età Repubblicana, Età Augustea, Età Giulio-Claudia, Età Flavia, Età Antonina, Età dei Severi, Crisi del III secolo, Tarda Età Imperiale, Alto Medioevo, Basso Medioevo, Età Longobarda, Età Carolingia, Età Comunale, Rinascimento, Età Moderna, Età Contemporanea, and generic periods.
+
+   **Testing**: Comprehensive test suite (``test_datazioni_table.py``) with 90%+ coverage validates table creation, CRUD operations, and choices generation.
+
+   **Impact**: Standardized chronological dating replaces free-text datazione field with controlled vocabulary, enabling consistent periodization for Harris Matrix exports and future GUI integration.
+
 What's New in Version 1.5.5
 ---------------------------
 
