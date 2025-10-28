@@ -747,44 +747,30 @@ function clearAll() {
  * Implements transitive reduction: if A->B->C exists, A->C is redundant
  */
 function removeTransitiveEdges() {
-    const edges = cy.edges();
+    console.log('Starting transitive reduction...');
+    const edges = cy.edges().toArray();
     const edgesToRemove = [];
 
-    // For each edge, check if there's a path of length > 1 between source and target
+    // Build adjacency list for efficient path finding
+    const graph = {};
     edges.forEach(edge => {
-        const source = edge.source();
-        const target = edge.target();
+        const src = edge.source().id();
+        const tgt = edge.target().id();
+        if (!graph[src]) graph[src] = [];
+        graph[src].push({ target: tgt, edge: edge });
+    });
 
-        // Temporarily remove this edge to check for alternative paths
-        edge.remove();
+    // For each edge, check if there's an alternative path
+    edges.forEach(edge => {
+        const source = edge.source().id();
+        const target = edge.target().id();
 
-        // Use BFS to find if there's still a path from source to target
-        // without using this edge
-        const bfsResult = cy.elements().bfs({
-            root: source,
-            visit: function(v, e, u, i, depth) {
-                // If we reach target, there's an alternative path
-                if (v.id() === target.id()) {
-                    return true; // Stop BFS
-                }
-            },
-            directed: true
-        });
+        // Check if there's a path from source to target NOT using this edge
+        const hasAlternatePath = findPath(graph, source, target, edge.id());
 
-        // Check if we found the target (meaning alternative path exists)
-        let foundAlternatePath = false;
-        bfsResult.path.forEach(node => {
-            if (node.id() === target.id()) {
-                foundAlternatePath = true;
-            }
-        });
-
-        // Restore the edge
-        cy.add(edge);
-
-        // If alternative path exists, this edge is redundant
-        if (foundAlternatePath) {
+        if (hasAlternatePath) {
             edgesToRemove.push(edge);
+            console.log(`Redundant edge found: ${source} -> ${target}`);
         }
     });
 
@@ -796,6 +782,40 @@ function removeTransitiveEdges() {
     } else {
         console.log('No redundant edges found');
     }
+}
+
+/**
+ * Find if there's a path from source to target without using excludeEdge
+ * Uses BFS to find path of length > 1
+ */
+function findPath(graph, source, target, excludeEdgeId) {
+    const queue = [source];
+    const visited = new Set([source]);
+    const parent = {};
+
+    while (queue.length > 0) {
+        const current = queue.shift();
+
+        if (!graph[current]) continue;
+
+        for (const {target: next, edge} of graph[current]) {
+            // Skip the edge we're testing
+            if (edge.id() === excludeEdgeId) continue;
+
+            if (next === target) {
+                // Found path to target - check if it's indirect (length > 1)
+                return true;
+            }
+
+            if (!visited.has(next)) {
+                visited.add(next);
+                parent[next] = current;
+                queue.push(next);
+            }
+        }
+    }
+
+    return false;
 }
 
 /**
