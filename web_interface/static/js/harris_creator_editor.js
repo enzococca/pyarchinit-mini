@@ -492,7 +492,11 @@ function showEdgeProperties(edge) {
 
     document.getElementById('prop-from-us').value = sourceNode.data('us_number') || '';
     document.getElementById('prop-to-us').value = targetNode.data('us_number') || '';
-    document.getElementById('prop-relationship-type').value = edge.data('relationship') || '';
+
+    // Use relationshipType (English value) for the select field
+    // Fall back to relationship (Italian name) for backward compatibility
+    const relValue = edge.data('relationshipType') || edge.data('relationship') || '';
+    document.getElementById('prop-relationship-type').value = relValue;
 }
 
 /**
@@ -737,6 +741,50 @@ function clearAll() {
 }
 
 /**
+ * Remove redundant (transitive) edges from the graph
+ * If A->B->C and A->C exist, removes A->C as it's redundant
+ */
+function removeTransitiveEdges() {
+    const edges = cy.edges();
+    const edgesToRemove = [];
+
+    edges.forEach(edge => {
+        const source = edge.source();
+        const target = edge.target();
+
+        // Check if there's an alternative path from source to target
+        // that doesn't use this edge directly
+        const hasAlternatePath = cy.elements().aStar({
+            root: source,
+            goal: target,
+            // Don't use the current edge
+            directed: true,
+            heuristic: function(node) {
+                return 0;
+            },
+            weight: function(e) {
+                // Give infinite weight to the edge we're testing
+                // to force finding an alternate path
+                return e.id() === edge.id() ? 999999 : 1;
+            }
+        });
+
+        // If alternate path exists and is not just the direct edge,
+        // mark this edge as redundant
+        if (hasAlternatePath.found && hasAlternatePath.distance < 999999) {
+            edgesToRemove.push(edge);
+        }
+    });
+
+    // Remove redundant edges
+    if (edgesToRemove.length > 0) {
+        cy.remove(edgesToRemove);
+        console.log(`Removed ${edgesToRemove.length} redundant edges`);
+        showNotification(`Removed ${edgesToRemove.length} redundant edges`, 'info');
+    }
+}
+
+/**
  * Apply hierarchical layout
  */
 function applyLayout() {
@@ -745,27 +793,32 @@ function applyLayout() {
         return;
     }
 
+    // Remove transitive/redundant edges before layout
+    removeTransitiveEdges();
+
     // Use dagre layout for optimal hierarchical display of stratigraphic sequences
     cy.layout({
         name: 'dagre',
         // Direction: top to bottom (most recent layers at top, oldest at bottom)
         rankDir: 'TB',
-        // Alignment of nodes within ranks
+        // Alignment of nodes within ranks (UL = upper left for more compact layout)
         align: 'UL',
         // Spacing between nodes
-        nodeSep: 80,
-        edgeSep: 20,
-        rankSep: 100,
+        nodeSep: 100,
+        edgeSep: 30,
+        rankSep: 120,
         // Padding around the graph
-        padding: 30,
+        padding: 40,
         // Animation
         animate: true,
         animationDuration: 500,
         animationEasing: 'ease-out',
         // Fit to viewport
         fit: true,
-        // Less aggressive ranking for better visual hierarchy
-        ranker: 'network-simplex'
+        // Network-simplex ranker for better hierarchy
+        ranker: 'network-simplex',
+        // Acyclic edge routing for cleaner orthogonal-like appearance
+        acyclicer: 'greedy'
     }).run();
 
     showNotification('Layout applied', 'success');
