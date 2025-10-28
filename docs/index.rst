@@ -295,14 +295,11 @@ Features
    features/pyarchinit-import-export
    features/pyarchinit_import_export
    features/database_creation
-   AUTOMATIC_IMPORT_AND_BACKUP_GUIDE
    features/analytics
    features/authentication
    features/export_import
    features/media_management
    features/extended-matrix-framework
-   EXTENDED_MATRIX_FRAMEWORK
-   EXTENDED_MATRIX_EXPORT
    DOC_FILE_UPLOAD
 
 Data Management
