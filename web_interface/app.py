@@ -2834,6 +2834,63 @@ def create_app():
 
         return redirect(url_for('periodizzazione_list'))
 
+    # ===== Periodization Records Routes =====
+    @app.route('/periodization-records')
+    @login_required
+    def periodization_records_list():
+        """List all periodization records from periodizzazione_table"""
+        try:
+            from pyarchinit_mini.models.harris_matrix import Periodizzazione
+            from sqlalchemy import or_
+
+            # Get search parameters
+            search_site = request.args.get('search_site', '')
+            search_us = request.args.get('search_us', '')
+            search_period = request.args.get('search_period', '')
+            page = request.args.get('page', 1, type=int)
+            page_size = 50
+
+            with db_manager.connection.get_session() as session:
+                query = session.query(Periodizzazione)
+
+                # Apply filters
+                if search_site:
+                    query = query.filter(Periodizzazione.sito.contains(search_site))
+                if search_us:
+                    query = query.filter(Periodizzazione.us == int(search_us)) if search_us.isdigit() else query
+                if search_period:
+                    query = query.filter(or_(
+                        Periodizzazione.periodo_iniziale.contains(search_period),
+                        Periodizzazione.periodo_finale.contains(search_period),
+                        Periodizzazione.datazione_estesa.contains(search_period)
+                    ))
+
+                # Get total count
+                total = query.count()
+
+                # Apply pagination and ordering
+                records = query.order_by(Periodizzazione.sito, Periodizzazione.us)\
+                              .offset((page - 1) * page_size)\
+                              .limit(page_size)\
+                              .all()
+
+            return render_template('periodizzazione/list.html',
+                                 records=records,
+                                 total=total,
+                                 page=page,
+                                 page_size=page_size,
+                                 search_site=search_site,
+                                 search_us=search_us,
+                                 search_period=search_period)
+
+        except Exception as e:
+            flash(f'Error loading periodization records: {str(e)}', 'error')
+            return render_template('periodizzazione/list.html',
+                                 records=[],
+                                 total=0,
+                                 page=1,
+                                 page_size=50)
+
     # ===== Thesaurus Routes =====
     @app.route('/thesaurus')
     @login_required

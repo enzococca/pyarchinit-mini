@@ -1527,6 +1527,74 @@ class ImportExportService:
         finally:
             mini_session.close()
 
+    def sync_datazioni_from_us_values(self) -> Dict[str, Any]:
+        """
+        Synchronize datazioni_table from unique datazione values in us_table
+
+        This creates entries in datazioni_table for each unique datazione value
+        found in us_table, if they don't already exist. This ensures that all
+        datazione values from imported US records are available in the dropdown.
+
+        Returns:
+            Dictionary with sync statistics
+        """
+        stats = {'created': 0, 'skipped': 0, 'errors': []}
+
+        mini_session = self.mini_session_maker()
+
+        try:
+            # Get unique datazione values from us_table
+            result = mini_session.execute(text("""
+                SELECT DISTINCT datazione
+                FROM us_table
+                WHERE datazione IS NOT NULL AND datazione != ''
+                ORDER BY datazione
+            """))
+
+            unique_datazioni = result.fetchall()
+            logger.info(f"Found {len(unique_datazioni)} unique datazione values in us_table")
+
+            for datazione_row in unique_datazioni:
+                datazione_value = datazione_row[0]
+
+                try:
+                    # Check if datazione already exists
+                    existing = mini_session.execute(
+                        text("SELECT id_datazione FROM datazioni_table WHERE nome_datazione = :nome"),
+                        {'nome': datazione_value}
+                    ).fetchone()
+
+                    if not existing:
+                        # Insert new datazione
+                        mini_session.execute(text("""
+                            INSERT INTO datazioni_table (nome_datazione, descrizione, created_at, updated_at)
+                            VALUES (:nome, :descrizione, :created, :updated)
+                        """), {
+                            'nome': datazione_value,
+                            'descrizione': datazione_value,  # Use same value for description
+                            'created': datetime.now(),
+                            'updated': datetime.now()
+                        })
+                        mini_session.commit()
+                        stats['created'] += 1
+                        logger.info(f"Created datazione from US: {datazione_value}")
+                    else:
+                        stats['skipped'] += 1
+
+                except Exception as e:
+                    mini_session.rollback()
+                    error_msg = f"Error syncing datazione '{datazione_value}': {str(e)}"
+                    logger.error(error_msg)
+                    stats['errors'].append(error_msg)
+
+            return stats
+
+        except Exception as e:
+            logger.error(f"Sync datazioni from US failed: {str(e)}")
+            raise
+        finally:
+            mini_session.close()
+
     def update_us_datazione_from_periodizzazione(self, sito_filter: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Update datazione field in us_table based on periodizzazione_table data

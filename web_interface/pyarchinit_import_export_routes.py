@@ -290,6 +290,12 @@ def start_import():
             results['datazioni_sync'] = sync_stats
             logger.info(f"Datazioni sync: {sync_stats['created']} created, {sync_stats['skipped']} skipped")
 
+            # Automatically sync datazioni from US table values
+            logger.info("Syncing datazioni from US table values...")
+            us_sync_stats = service.sync_datazioni_from_us_values()
+            results['us_values_sync'] = us_sync_stats
+            logger.info(f"US values sync: {us_sync_stats['created']} created, {us_sync_stats['skipped']} skipped")
+
             # Automatically update US datazione field from periodizzazione
             logger.info("Updating US datazione from periodizzazione...")
             update_stats = service.update_us_datazione_from_periodizzazione(site_filter_list)
@@ -341,6 +347,11 @@ def sync_datazioni():
         sync_stats = service.sync_datazioni_from_periodizzazione()
         logger.info(f"Datazioni sync: {sync_stats['created']} created, {sync_stats['skipped']} skipped")
 
+        # Sync datazioni from US table values (ensures all US datazione values are available in dropdown)
+        logger.info("Syncing datazioni from US table values...")
+        us_sync_stats = service.sync_datazioni_from_us_values()
+        logger.info(f"US values sync: {us_sync_stats['created']} created, {us_sync_stats['skipped']} skipped")
+
         # Update US datazione field from periodizzazione
         logger.info("Updating US datazione from periodizzazione...")
         update_stats = service.update_us_datazione_from_periodizzazione(site_filter_list)
@@ -351,6 +362,7 @@ def sync_datazioni():
             'message': _('Datazioni synchronized successfully'),
             'results': {
                 'datazioni_sync': sync_stats,
+                'us_values_sync': us_sync_stats,
                 'us_datazione_update': update_stats
             }
         })
