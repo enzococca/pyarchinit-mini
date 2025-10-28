@@ -151,8 +151,6 @@ Harris Matrix & Visualization
    features/graphml_export
    features/graphml-export-technical
    features/s3dgraphy
-   PURE_NETWORKX_GRAPHML_EXPORT
-   EM_NODE_TYPE_MANAGEMENT
 
 Import/Export & Integration
 ----------------------------
@@ -163,7 +161,6 @@ Import/Export & Integration
    features/pyarchinit_import_export
    features/export_import
    features/media_management
-   DOC_FILE_UPLOAD
 
 User Management & Analytics
 ----------------------------
@@ -222,8 +219,7 @@ Contributing, testing, and development documentation.
 
    development/contributing
    development/testing
-   VERSION_1.6.0_IMPLEMENTATION_SUMMARY
-   DOCUMENTATION_VERIFICATION
+   development/changelog
 
 Indices and Search
 ==================
