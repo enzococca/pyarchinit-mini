@@ -546,7 +546,10 @@ function loadExistingData() {
             const targetNode = cy.nodes().filter(n => String(n.data('us_number')) === toUsStr).first();
 
             if (sourceNode.length && targetNode.length) {
-                const relType = relationshipTypes.find(r => r.value === relData.relationship) || relationshipTypes[0];
+                // Bilingual matching: support both Italian (symbol) and English (value) names
+                const relType = relationshipTypes.find(r =>
+                    r.symbol === relData.relationship || r.value === relData.relationship
+                ) || relationshipTypes[0];
 
                 cy.add({
                     group: 'edges',
@@ -556,10 +559,13 @@ function loadExistingData() {
                         target: targetNode.id(),
                         label: relType.symbol,
                         relationship: relData.relationship,
+                        relationshipType: relType.value,  // Store English value for saving
                         style: relType.style,
                         arrow: relType.arrow
                     }
                 });
+            } else {
+                console.warn('Could not find nodes for relationship:', relData);
             }
         });
 
