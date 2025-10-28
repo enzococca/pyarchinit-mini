@@ -192,7 +192,7 @@ function initCytoscape() {
         container: document.getElementById('cy'),
 
         style: [
-            // Node styles
+            // Node styles - base style with default shape
             {
                 selector: 'node',
                 style: {
@@ -206,6 +206,13 @@ function initCytoscape() {
                     'width': 'label',
                     'height': 'label',
                     'padding': '10px',
+                    'shape': 'rectangle'  // Default shape for all nodes
+                }
+            },
+            // Override shape for nodes that have shape data defined
+            {
+                selector: 'node[shape]',
+                style: {
                     'shape': 'data(shape)'
                 }
             },

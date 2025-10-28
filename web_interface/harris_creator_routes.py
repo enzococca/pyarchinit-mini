@@ -448,6 +448,27 @@ def get_node_types():
     Get list of Extended Matrix node types with descriptions
     Now dynamically loaded from YAML configuration
     """
+    # Map GraphML/yEd shapes to Cytoscape.js compatible shapes
+    SHAPE_MAP = {
+        'note': 'roundrectangle',      # Document shape -> rounded rectangle
+        'trapezium': 'triangle',        # Trapezoid -> triangle
+        'trapezium2': 'vee',            # Inverted trapezoid -> vee
+        'parallelogram': 'rhomboid',    # Parallelogram -> rhomboid
+        # Valid Cytoscape shapes pass through unchanged
+        'rectangle': 'rectangle',
+        'roundrectangle': 'roundrectangle',
+        'ellipse': 'ellipse',
+        'triangle': 'triangle',
+        'pentagon': 'pentagon',
+        'hexagon': 'hexagon',
+        'heptagon': 'heptagon',
+        'octagon': 'octagon',
+        'star': 'star',
+        'diamond': 'diamond',
+        'vee': 'vee',
+        'rhomboid': 'rhomboid'
+    }
+
     try:
         config_manager = get_config_manager()
         all_types = config_manager.get_all_node_types()
@@ -470,11 +491,15 @@ def get_node_types():
             if config.get('description'):
                 label += f" ({config.get('description')})"
 
+            # Get shape from config and map to Cytoscape-compatible shape
+            config_shape = visual.get('shape', 'rectangle')
+            cytoscape_shape = SHAPE_MAP.get(config_shape, 'rectangle')
+
             node_types.append({
                 'value': tipo_id,
                 'label': label,
                 'color': default_colors.get(tipo_id, '#B0BEC5'),  # Use default or gray
-                'shape': visual.get('shape', 'rectangle'),
+                'shape': cytoscape_shape,
                 'custom': config.get('custom', False)
             })
 

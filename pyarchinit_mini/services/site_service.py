@@ -137,18 +137,10 @@ class SiteService:
         Raises:
             RecordNotFoundError: If site does not exist
         """
-        # Get site to get the site name
-        site = self.get_site_by_id(site_id)
-        if not site:
-            raise RecordNotFoundError(f"Site with ID {site_id} not found")
-
-        site_name = site.sito
-
         # Track deletion counts
         deletion_stats = {
             'us_relationships': 0,
             'periodizzazione': 0,
-            'datazioni': 0,
             'inventario': 0,
             'us': 0,
             'site': 0
@@ -159,7 +151,13 @@ class SiteService:
                 from ..models.us import US
                 from ..models.inventario_materiali import InventarioMateriali
                 from ..models.harris_matrix import USRelationships, Periodizzazione
-                from ..models.datazione import Datazione
+
+                # Get site within the session
+                site = session.query(Site).filter(Site.id_sito == site_id).first()
+                if not site:
+                    raise RecordNotFoundError(f"Site with ID {site_id} not found")
+
+                site_name = site.sito
 
                 # Delete in order to respect foreign key constraints:
                 # 1. US Relationships (references US)
@@ -178,15 +176,7 @@ class SiteService:
                     session.delete(per)
                     deletion_stats['periodizzazione'] += 1
 
-                # 3. Datazioni (references Site and Periodizzazione)
-                datazioni = session.query(Datazione).filter(
-                    Datazione.sito == site_name
-                ).all()
-                for dat in datazioni:
-                    session.delete(dat)
-                    deletion_stats['datazioni'] += 1
-
-                # 4. Inventario Materiali (references Site and US)
+                # 3. Inventario Materiali (references Site and US)
                 inventario = session.query(InventarioMateriali).filter(
                     InventarioMateriali.sito == site_name
                 ).all()
@@ -194,13 +184,13 @@ class SiteService:
                     session.delete(inv)
                     deletion_stats['inventario'] += 1
 
-                # 5. US (references Site)
+                # 4. US (references Site)
                 us_records = session.query(US).filter(US.sito == site_name).all()
                 for us in us_records:
                     session.delete(us)
                     deletion_stats['us'] += 1
 
-                # 6. Finally, delete the site itself
+                # 5. Finally, delete the site itself
                 session.delete(site)
                 deletion_stats['site'] = 1
 

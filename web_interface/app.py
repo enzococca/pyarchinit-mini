@@ -619,8 +619,7 @@ def create_app():
             if deletion_stats['us'] > 0:
                 message += f" ({deletion_stats['us']} US, {deletion_stats['inventario']} inventario, "
                 message += f"{deletion_stats['us_relationships']} relazioni, "
-                message += f"{deletion_stats['periodizzazione']} periodizzazioni, "
-                message += f"{deletion_stats['datazioni']} datazioni eliminate)"
+                message += f"{deletion_stats['periodizzazione']} periodizzazioni eliminate)"
 
             return jsonify({
                 'success': True,
@@ -629,7 +628,7 @@ def create_app():
             })
 
         except Exception as e:
-            logger.error(f"Error deleting site {site_id}: {str(e)}")
+            # Flask will automatically log the exception traceback
             return jsonify({
                 'success': False,
                 'message': f'Errore durante l\'eliminazione del sito: {str(e)}'
@@ -1800,8 +1799,52 @@ def create_app():
                 if us_num:
                     us_map[(us_dict['sito'], us_dict['area'], us_num)] = getattr(us, 'id_us', None)
 
-            # Get validation report
-            report = validator.get_validation_report(us_list_dicts)
+            # Load periodization data for chronological validation
+            periodization_list = []
+            try:
+                from pyarchinit_mini.models.harris_matrix import Periodizzazione, Period
+                with db_manager.connection.get_session() as session:
+                    # Query periodization with period dates
+                    period_data = session.query(
+                        Periodizzazione,
+                        Period.start_date.label('period_start'),
+                        Period.end_date.label('period_end')
+                    ).outerjoin(
+                        Period,
+                        Periodizzazione.period_id_final == Period.id_period
+                    ).filter(
+                        Periodizzazione.sito == site_name
+                    ).all()
+
+                    for perio, period_start, period_end in period_data:
+                        # Fallback to initial period if final not available
+                        if period_end is None and perio.period_id_initial:
+                            initial_period = session.query(Period).filter(
+                                Period.id_period == perio.period_id_initial
+                            ).first()
+                            if initial_period:
+                                period_start = initial_period.start_date
+                                period_end = initial_period.end_date
+
+                        periodization_list.append({
+                            'sito': perio.sito,
+                            'area': perio.area or '',
+                            'us': perio.us,
+                            'periodo_iniziale': perio.periodo_iniziale,
+                            'fase_iniziale': perio.fase_iniziale,
+                            'periodo_finale': perio.periodo_finale,
+                            'fase_finale': perio.fase_finale,
+                            'datazione_estesa': perio.datazione_estesa,
+                            'start_date': period_start,
+                            'end_date': period_end
+                        })
+            except Exception as e:
+                # If periodization loading fails, continue without chronological validation
+                print(f"Warning: Could not load periodization data: {e}")
+                periodization_list = []
+
+            # Get validation report with chronological validation
+            report = validator.get_validation_report(us_list_dicts, periodization_list)
 
             # Extract cycles from errors
             cycles = []

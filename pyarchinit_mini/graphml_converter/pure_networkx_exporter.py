@@ -27,21 +27,21 @@ class PureNetworkXExporter:
         self.builder = GraphMLBuilder()
         self.db_manager = db_manager
 
-    def _load_period_datations(self, site_name: str) -> Dict[Tuple[str, str], str]:
+    def _load_period_datations(self, site_name: str) -> Dict[Tuple[str, str], Tuple[str, Optional[int], Optional[int]]]:
         """
-        Load period datations from periodizzazione_table
+        Load period datations from periodizzazione_table with chronological dates
 
         Args:
             site_name: Site name to query
 
         Returns:
-            Dictionary mapping (periodo_iniziale, fase_iniziale) to datazione_estesa
+            Dictionary mapping (periodo_iniziale, fase_iniziale) to (datazione_estesa, start_date, end_date)
         """
         if not self.db_manager:
             print("⚠️  No database manager provided - using numeric period labels")
             return {}
 
-        periodo_fase_to_datazione = {}
+        periodo_fase_to_info = {}
 
         try:
             from sqlalchemy import text
@@ -51,11 +51,20 @@ class PureNetworkXExporter:
             session = Session()
 
             try:
-                # Query periodizzazione_table to build lookup map
+                # Query periodizzazione_table JOIN period_table to get dates for chronological sorting
                 query = text("""
-                    SELECT periodo_iniziale, fase_iniziale, datazione_estesa
-                    FROM periodizzazione_table
-                    WHERE sito = :site
+                    SELECT DISTINCT
+                        p.periodo_iniziale,
+                        p.fase_iniziale,
+                        p.datazione_estesa,
+                        per.start_date,
+                        per.end_date
+                    FROM periodizzazione_table p
+                    LEFT JOIN period_table per ON (
+                        (p.period_id_final IS NOT NULL AND per.id_period = p.period_id_final) OR
+                        (p.period_id_final IS NULL AND per.id_period = p.period_id_initial)
+                    )
+                    WHERE p.sito = :site
                 """)
                 result = session.execute(query, {'site': site_name})
 
@@ -63,20 +72,24 @@ class PureNetworkXExporter:
                     periodo = str(row.periodo_iniziale) if row.periodo_iniziale else ''
                     fase = str(row.fase_iniziale) if row.fase_iniziale else ''
                     datazione = row.datazione_estesa or 'Non datato'
+                    start_date = row.start_date if hasattr(row, 'start_date') else None
+                    end_date = row.end_date if hasattr(row, 'end_date') else None
 
                     # Create key from periodo-fase
                     key = (periodo, fase)
-                    periodo_fase_to_datazione[key] = datazione
+                    periodo_fase_to_info[key] = (datazione, start_date, end_date)
 
-                print(f"✅ Loaded {len(periodo_fase_to_datazione)} period datations from database")
+                print(f"✅ Loaded {len(periodo_fase_to_info)} period datations with chronological dates")
 
             finally:
                 session.close()
 
         except Exception as e:
             print(f"⚠️  Could not load periodizzazione data: {e}")
+            import traceback
+            traceback.print_exc()
 
-        return periodo_fase_to_datazione
+        return periodo_fase_to_info
 
     def export(
         self,
@@ -233,22 +246,28 @@ class PureNetworkXExporter:
     def _group_nodes_by_period(
         self,
         graph: nx.DiGraph,
-        period_datations: Dict[Tuple[str, str], str] = None
-    ) -> Dict[str, Tuple[List[str], str, Tuple[str, str]]]:
+        period_datations: Dict[Tuple[str, str], Tuple[str, Optional[int], Optional[int]]] = None
+    ) -> Dict[str, Tuple[List[str], str, Tuple[str, str], Optional[int], Optional[int]]]:
         """
-        Group nodes by their period attribute and extract period labels
+        Group nodes by their period attribute and extract period labels with chronological dates
 
         Args:
             graph: Input graph
-            period_datations: Optional mapping of (periodo_initial, fase_initial) to datazione_estesa
+            period_datations: Optional mapping of (periodo_initial, fase_initial) to (datazione_estesa, start_date, end_date)
 
         Returns:
-            Dictionary mapping period codes to (node_list, period_label, (period_initial, phase_initial)) tuples
+            Dictionary mapping period codes to (node_list, period_label, (period_initial, phase_initial), start_date, end_date) tuples
         """
         if period_datations is None:
             period_datations = {}
 
-        period_groups = defaultdict(lambda: {'nodes': [], 'period_initial': None, 'phase_initial': None})
+        period_groups = defaultdict(lambda: {
+            'nodes': [],
+            'period_initial': None,
+            'phase_initial': None,
+            'start_date': None,
+            'end_date': None
+        })
 
         for node_id, node_data in graph.nodes(data=True):
             # Get period numeric values
@@ -259,10 +278,16 @@ class PureNetworkXExporter:
             periodo_str = str(period_initial) if period_initial else ''
             fase_str = str(phase_initial) if phase_initial else ''
 
-            # Look up datazione estesa from database mapping
+            # Look up datazione estesa and dates from database mapping
             lookup_key = (periodo_str, fase_str)
+            start_date = None
+            end_date = None
+
             if lookup_key in period_datations:
-                period_label = period_datations[lookup_key]
+                period_info = period_datations[lookup_key]
+                period_label = period_info[0]  # datazione_estesa
+                start_date = period_info[1] if len(period_info) > 1 else None
+                end_date = period_info[2] if len(period_info) > 2 else None
             else:
                 # Fallback: check node's period attribute (might already have extended date)
                 period_label = node_data.get('period', '')
@@ -278,19 +303,25 @@ class PureNetworkXExporter:
 
             # Use period_label as grouping key
             period_groups[period_label]['nodes'].append(node_id)
-            # Store numeric values for sorting
+            # Store numeric values and dates for sorting
             if periodo_str and period_groups[period_label]['period_initial'] is None:
                 period_groups[period_label]['period_initial'] = periodo_str
             if fase_str and period_groups[period_label]['phase_initial'] is None:
                 period_groups[period_label]['phase_initial'] = fase_str
+            if start_date and period_groups[period_label]['start_date'] is None:
+                period_groups[period_label]['start_date'] = start_date
+            if end_date and period_groups[period_label]['end_date'] is None:
+                period_groups[period_label]['end_date'] = end_date
 
-        # Convert to final format: {period: (node_list, label, (period_initial, phase_initial))}
+        # Convert to final format: {period: (node_list, label, (period_initial, phase_initial), start_date, end_date)}
         result = {}
         for period_label, data in period_groups.items():
             result[period_label] = (
                 data['nodes'],
                 period_label,
-                (data['period_initial'] or '', data['phase_initial'] or '')
+                (data['period_initial'] or '', data['phase_initial'] or ''),
+                data['start_date'],
+                data['end_date']
             )
 
         return result
@@ -298,15 +329,15 @@ class PureNetworkXExporter:
     def _add_period_clustering(
         self,
         site_name: str,
-        period_groups: Dict[str, Tuple[List[str], str, Tuple[str, str]]],
+        period_groups: Dict[str, Tuple[List[str], str, Tuple[str, str], Optional[int], Optional[int]]],
         reverse_epochs: bool = True
     ) -> Optional[Element]:
         """
-        Add TableNode structure with period rows
+        Add TableNode structure with period rows sorted chronologically
 
         Args:
             site_name: Site name for TableNode title
-            period_groups: Dictionary mapping period codes to (node_list, label, (period_initial, phase_initial)) tuples
+            period_groups: Dictionary mapping period codes to (node_list, label, (period_initial, phase_initial), start_date, end_date) tuples
             reverse_epochs: Reverse chronological order (newest first)
 
         Returns:
@@ -314,20 +345,37 @@ class PureNetworkXExporter:
         """
         print(f"ℹ️  Creating TableNode with {len(period_groups)} period rows...")
 
-        # Sort periods chronologically using numeric period_initial/phase_initial
+        # Sort periods CHRONOLOGICALLY using end_date from Period table
         # If reverse_epochs=True, invert to show newest periods first (at top)
-        sorted_periods = sorted(
-            period_groups.keys(),
-            key=lambda p: self._period_sort_key_numeric(period_groups[p][2])
-        )
+        def chronological_sort_key(period_code):
+            period_data = period_groups[period_code]
+            end_date = period_data[4] if len(period_data) > 4 else None
+            start_date = period_data[3] if len(period_data) > 3 else None
+            periodo_fase = period_data[2] if len(period_data) > 2 else ('', '')
+
+            # Primary sort: by end_date (use start_date as fallback)
+            # If no dates, fall back to numeric periodo/fase for backward compatibility
+            if end_date is not None:
+                return (end_date,)
+            elif start_date is not None:
+                return (start_date,)
+            else:
+                # Fallback to numeric sort if no dates available
+                return self._period_sort_key_numeric(periodo_fase)
+
+        sorted_periods = sorted(period_groups.keys(), key=chronological_sort_key)
+
         if reverse_epochs:
             sorted_periods = list(reversed(sorted_periods))
-            print(f"ℹ️  Reversed period order (newest first): {sorted_periods}")
+            print(f"ℹ️  Reversed chronological order (newest first): {sorted_periods}")
+        else:
+            print(f"ℹ️  Chronological order (oldest first): {sorted_periods}")
 
         # Prepare period rows: (period_id, period_label, node_ids)
         periods = []
         for period_code in sorted_periods:
-            node_ids, period_label, _ = period_groups[period_code]
+            node_ids = period_groups[period_code][0]
+            period_label = period_groups[period_code][1]
             period_id = self._sanitize_id(period_code)
             periods.append((period_id, period_label, node_ids))
 
@@ -339,7 +387,7 @@ class PureNetworkXExporter:
             row_height=940.0
         )
 
-        print(f"✅ Created TableNode with nested graph for {len(period_groups)} periods")
+        print(f"✅ Created TableNode with nested graph for {len(period_groups)} periods sorted chronologically")
         print(f"")
 
         return nested_graph
@@ -386,24 +434,39 @@ class PureNetworkXExporter:
         use_extended_labels: bool,
         nested_graph: Element,
         reverse_epochs: bool = True,
-        period_datations: Dict[Tuple[str, str], str] = None
+        period_datations: Dict[Tuple[str, str], Tuple[str, Optional[int], Optional[int]]] = None
     ):
         """
         Add nodes inside TableNode nested graph with prefixed IDs
-        Nodes are positioned in their period rows
+        Nodes are positioned in their period rows sorted chronologically
 
         Args:
             graph: Input graph
             use_extended_labels: Use Extended Matrix label format
             nested_graph: Parent graph element for nesting
             reverse_epochs: Reverse chronological order (newest first)
-            period_datations: Optional mapping of (periodo_initial, fase_initial) to datazione_estesa
+            period_datations: Optional mapping of (periodo_initial, fase_initial) to (datazione_estesa, start_date, end_date)
         """
         print(f"ℹ️  Adding {len(graph.nodes())} nodes to TableNode nested graph...")
 
         # Group nodes by period and create period->row_index mapping
         period_groups = self._group_nodes_by_period(graph, period_datations)
-        sorted_periods = sorted(period_groups.keys(), key=self._period_sort_key)
+
+        # Use chronological sorting (same logic as _add_period_clustering)
+        def chronological_sort_key(period_code):
+            period_data = period_groups[period_code]
+            end_date = period_data[4] if len(period_data) > 4 else None
+            start_date = period_data[3] if len(period_data) > 3 else None
+            periodo_fase = period_data[2] if len(period_data) > 2 else ('', '')
+
+            if end_date is not None:
+                return (end_date,)
+            elif start_date is not None:
+                return (start_date,)
+            else:
+                return self._period_sort_key_numeric(periodo_fase)
+
+        sorted_periods = sorted(period_groups.keys(), key=chronological_sort_key)
         if reverse_epochs:
             sorted_periods = list(reversed(sorted_periods))
 
@@ -439,7 +502,8 @@ class PureNetworkXExporter:
             # Look up datazione estesa from database mapping
             lookup_key = (periodo_str, fase_str)
             if period_datations and lookup_key in period_datations:
-                period = period_datations[lookup_key]
+                period_info = period_datations[lookup_key]
+                period = period_info[0]  # Extract datazione_estesa from tuple
             else:
                 # Fallback: check node's period attribute (might already have extended date)
                 period = node_data.get('period', '')
