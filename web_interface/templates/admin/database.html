@@ -185,6 +185,7 @@
                                             </button>
                                         {% else %}
                                             <form method="POST" action="{{ url_for('switch_database', connection_name=name) }}" style="display: inline;">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                                 <button type="submit" class="btn btn-sm btn-primary"
                                                         onclick="return confirm('Cambiare database a: {{ name }}?')">
                                                     <i class="fas fa-exchange-alt"></i> Cambia
