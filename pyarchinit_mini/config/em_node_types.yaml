@@ -72,7 +72,7 @@ node_types:
     category: "stratigraphic"
     symbol_type: "single_arrow"
     visual:
-      shape: "roundrectangle"
+      shape: "octagon"
       fill_color: "#FFFFFF"
       border_color: "#D8BD30"
       border_width: 3.0
