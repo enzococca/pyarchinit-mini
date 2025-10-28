@@ -51,15 +51,15 @@
             <tbody>
                 {% for record in records %}
                 <tr>
-                    <td>{{ record.sito }}</td>
-                    <td>{{ record.area or '-' }}</td>
-                    <td>{{ record.us }}</td>
-                    <td>{{ record.periodo_iniziale or '-' }}</td>
-                    <td>{{ record.fase_iniziale or '-' }}</td>
-                    <td>{{ record.periodo_finale or '-' }}</td>
-                    <td>{{ record.fase_finale or '-' }}</td>
-                    <td>{{ record.datazione_estesa or '-' }}</td>
-                    <td>{{ record.affidabilita or '-' }}</td>
+                    <td>{{ record['sito'] }}</td>
+                    <td>{{ record['area'] or '-' }}</td>
+                    <td>{{ record['us'] }}</td>
+                    <td>{{ record['periodo_iniziale'] or '-' }}</td>
+                    <td>{{ record['fase_iniziale'] or '-' }}</td>
+                    <td>{{ record['periodo_finale'] or '-' }}</td>
+                    <td>{{ record['fase_finale'] or '-' }}</td>
+                    <td>{{ record['datazione_estesa'] or '-' }}</td>
+                    <td>{{ record['affidabilita'] or '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

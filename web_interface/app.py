@@ -2869,10 +2869,23 @@ def create_app():
                 total = query.count()
 
                 # Apply pagination and ordering
-                records = query.order_by(Periodizzazione.sito, Periodizzazione.us)\
+                db_records = query.order_by(Periodizzazione.sito, Periodizzazione.us)\
                               .offset((page - 1) * page_size)\
                               .limit(page_size)\
                               .all()
+
+                # Convert to dicts to avoid detached instance errors
+                records = [{
+                    'sito': r.sito,
+                    'area': r.area,
+                    'us': r.us,
+                    'periodo_iniziale': r.periodo_iniziale,
+                    'fase_iniziale': r.fase_iniziale,
+                    'periodo_finale': r.periodo_finale,
+                    'fase_finale': r.fase_finale,
+                    'datazione_estesa': r.datazione_estesa,
+                    'affidabilita': r.affidabilita
+                } for r in db_records]
 
             return render_template('periodizzazione/periods.html',
                                  records=records,
