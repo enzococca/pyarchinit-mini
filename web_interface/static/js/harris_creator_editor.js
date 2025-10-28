@@ -744,36 +744,46 @@ function clearAll() {
 
 /**
  * Remove redundant (transitive) edges from the graph
- * If A->B->C and A->C exist, removes A->C as it's redundant
+ * Implements transitive reduction: if A->B->C exists, A->C is redundant
  */
 function removeTransitiveEdges() {
     const edges = cy.edges();
     const edgesToRemove = [];
 
+    // For each edge, check if there's a path of length > 1 between source and target
     edges.forEach(edge => {
         const source = edge.source();
         const target = edge.target();
 
-        // Check if there's an alternative path from source to target
-        // that doesn't use this edge directly
-        const hasAlternatePath = cy.elements().aStar({
+        // Temporarily remove this edge to check for alternative paths
+        edge.remove();
+
+        // Use BFS to find if there's still a path from source to target
+        // without using this edge
+        const bfsResult = cy.elements().bfs({
             root: source,
-            goal: target,
-            // Don't use the current edge
-            directed: true,
-            heuristic: function(node) {
-                return 0;
+            visit: function(v, e, u, i, depth) {
+                // If we reach target, there's an alternative path
+                if (v.id() === target.id()) {
+                    return true; // Stop BFS
+                }
             },
-            weight: function(e) {
-                // Give infinite weight to the edge we're testing
-                // to force finding an alternate path
-                return e.id() === edge.id() ? 999999 : 1;
+            directed: true
+        });
+
+        // Check if we found the target (meaning alternative path exists)
+        let foundAlternatePath = false;
+        bfsResult.path.forEach(node => {
+            if (node.id() === target.id()) {
+                foundAlternatePath = true;
             }
         });
 
-        // If alternate path exists and is not just the direct edge,
-        // mark this edge as redundant
-        if (hasAlternatePath.found && hasAlternatePath.distance < 999999) {
+        // Restore the edge
+        cy.add(edge);
+
+        // If alternative path exists, this edge is redundant
+        if (foundAlternatePath) {
             edgesToRemove.push(edge);
         }
     });
@@ -783,12 +793,14 @@ function removeTransitiveEdges() {
         cy.remove(edgesToRemove);
         console.log(`Removed ${edgesToRemove.length} redundant edges`);
         showNotification(`Removed ${edgesToRemove.length} redundant edges`, 'info');
+    } else {
+        console.log('No redundant edges found');
     }
 }
 
 /**
- * Apply hierarchical layout optimized for stratigraphic sequences
- * Uses dagre with custom ranking based on period/phase hierarchy
+ * Apply hierarchical layout with orthogonal edges
+ * Uses ELK (Eclipse Layout Kernel) for proper stratigraphic visualization
  */
 function applyLayout() {
     if (cy.nodes().length === 0) {
@@ -799,46 +811,45 @@ function applyLayout() {
     // Remove transitive/redundant edges before layout
     removeTransitiveEdges();
 
-    // Assign ranking based on period and phase for better stratigraphic ordering
-    cy.nodes().forEach(node => {
-        const period = parseInt(node.data('period')) || 999;
-        const phase = parseInt(node.data('phase')) || 999;
-
-        // Calculate rank: higher period/phase = lower rank (appears at top, more recent)
-        // Use formula: rank = -(period * 1000 + phase) so higher values appear first
-        const rank = -(period * 1000 + phase);
-        node.data('dagre_rank', rank);
-    });
-
-    // Use dagre layout with period/phase-based ranking
+    // Use ELK layout for hierarchical graphs with orthogonal edge routing
     cy.layout({
-        name: 'dagre',
-        // Direction: top to bottom (most recent/highest period at top)
-        rankDir: 'TB',
-        // Use custom ranking function based on period/phase
-        ranker: function(graph) {
-            // Use longest-path ranker as base, dagre will respect our dagre_rank hints
-            return 'longest-path';
+        name: 'elk',
+        // ELK-specific options
+        elk: {
+            // Use layered algorithm (similar to Sugiyama)
+            'algorithm': 'layered',
+            // Direction: DOWN = top to bottom (recent to ancient)
+            'elk.direction': 'DOWN',
+            // Orthogonal edge routing for Harris Matrix style
+            'elk.edgeRouting': 'ORTHOGONAL',
+            // Layer-based layout options
+            'elk.layered.spacing.nodeNodeBetweenLayers': '120',
+            'elk.layered.spacing.nodeNode': '80',
+            'elk.layered.spacing.edgeNodeBetweenLayers': '60',
+            'elk.layered.spacing.edgeEdgeBetweenLayers': '40',
+            // Consider edge direction for layering
+            'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
+            'elk.layered.cycleBreaking.strategy': 'GREEDY',
+            // Node placement strategy
+            'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
+            // Crossing minimization
+            'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
+            // Padding
+            'elk.padding': '[top=50,left=50,bottom=50,right=50]',
+            // Aspect ratio
+            'elk.aspectRatio': '1.5'
         },
-        // Alignment within ranks - distribute evenly
-        align: undefined,  // Let dagre decide best alignment
-        // Spacing - more generous for readability
-        nodeSep: 120,
-        edgeSep: 50,
-        rankSep: 150,
-        // Padding
-        padding: 50,
         // Animation
         animate: true,
         animationDuration: 600,
         animationEasing: 'ease-out',
-        // Fit viewport
+        // Fit to viewport
         fit: true,
-        // Edge routing for orthogonal appearance
-        acyclicer: 'greedy'
+        // Padding around graph
+        padding: 40
     }).run();
 
-    showNotification('Layout applied', 'success');
+    showNotification('Layout applied with orthogonal edges', 'success');
 }
 
 /**
