@@ -32,6 +32,32 @@ from pyarchinit_mini.models.site import Site
 from pyarchinit_mini.database.connection import DatabaseConnection
 
 
+def safe_int(value) -> Optional[int]:
+    """
+    Convert value to int or None if empty/invalid.
+    Handles pandas NaN, empty strings, and None.
+    """
+    if pd.isna(value) or value == '' or value is None:
+        return None
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return None
+
+
+def safe_float(value) -> Optional[float]:
+    """
+    Convert value to float or None if empty/invalid.
+    Handles pandas NaN, empty strings, and None.
+    """
+    if pd.isna(value) or value == '' or value is None:
+        return None
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return None
+
+
 class ExtendedMatrixExcelParser:
     """
     Parser for Extended Matrix Excel files.
@@ -279,6 +305,27 @@ class ExtendedMatrixExcelParser:
                             existing_us.fase_finale = fase  # Same as iniziale
                             existing_us.datazione = datazione_text
                             existing_us.descrizione = str(row.get('NOTES', ''))
+                            # Update INTEGER/FLOAT fields if provided
+                            if 'anno_scavo' in row:
+                                existing_us.anno_scavo = safe_int(row.get('anno_scavo'))
+                            if 'order_layer' in row:
+                                existing_us.order_layer = safe_int(row.get('order_layer'))
+                            if 'quota_relativa' in row:
+                                existing_us.quota_relativa = safe_float(row.get('quota_relativa'))
+                            if 'quota_abs' in row:
+                                existing_us.quota_abs = safe_float(row.get('quota_abs'))
+                            if 'lunghezza_max' in row:
+                                existing_us.lunghezza_max = safe_float(row.get('lunghezza_max'))
+                            if 'altezza_max' in row:
+                                existing_us.altezza_max = safe_float(row.get('altezza_max'))
+                            if 'altezza_min' in row:
+                                existing_us.altezza_min = safe_float(row.get('altezza_min'))
+                            if 'profondita_max' in row:
+                                existing_us.profondita_max = safe_float(row.get('profondita_max'))
+                            if 'profondita_min' in row:
+                                existing_us.profondita_min = safe_float(row.get('profondita_min'))
+                            if 'larghezza_media' in row:
+                                existing_us.larghezza_media = safe_float(row.get('larghezza_media'))
 
                             self.statistics['us_updated'] += 1
                             print(f"  ↻ Updated {unit_type} {us_number}")
@@ -301,6 +348,18 @@ class ExtendedMatrixExcelParser:
                                 fase_finale=fase,  # Same as iniziale
                                 datazione=datazione_text,
                                 descrizione=str(row.get('NOTES', '')),
+                                # INTEGER fields - explicitly set to None if not provided
+                                anno_scavo=safe_int(row.get('anno_scavo')),
+                                order_layer=safe_int(row.get('order_layer')),
+                                # FLOAT fields - explicitly set to None if not provided
+                                quota_relativa=safe_float(row.get('quota_relativa')),
+                                quota_abs=safe_float(row.get('quota_abs')),
+                                lunghezza_max=safe_float(row.get('lunghezza_max')),
+                                altezza_max=safe_float(row.get('altezza_max')),
+                                altezza_min=safe_float(row.get('altezza_min')),
+                                profondita_max=safe_float(row.get('profondita_max')),
+                                profondita_min=safe_float(row.get('profondita_min')),
+                                larghezza_media=safe_float(row.get('larghezza_media')),
                                 data_schedatura=datetime.now().date()
                             )
                             session.add(new_us)

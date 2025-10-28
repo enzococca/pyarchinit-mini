@@ -46,6 +46,9 @@ from pyarchinit_import_export_routes import pyarchinit_import_export_bp
 # Import Harris Matrix Creator routes
 from harris_creator_routes import harris_creator_bp
 
+# Import Excel Import routes
+from excel_import_routes import excel_import_bp
+
 # Import EM Node Configuration routes
 from em_node_config_routes import em_node_config_bp
 
@@ -403,12 +406,16 @@ def create_app():
     # Register Harris Matrix Creator blueprint
     app.register_blueprint(harris_creator_bp)
 
+    # Register Excel Import blueprint
+    app.register_blueprint(excel_import_bp, url_prefix='/excel-import')
+
     # Register EM Node Configuration blueprint
     app.register_blueprint(em_node_config_bp)
 
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
     csrf.exempt(pyarchinit_import_export_bp)
     csrf.exempt(harris_creator_bp)
+    csrf.exempt(excel_import_bp)
     csrf.exempt(em_node_config_bp)
 
     # Initialize Flask-SocketIO

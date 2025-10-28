@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Excel Import - Harris Matrix') }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2><i class="fas fa-file-excel"></i> {{ _('Excel Import - Harris Matrix') }}</h2>
+            <p class="text-muted">{{ _('Import stratigraphic data from Excel files and generate Extended Matrix') }}</p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Import Form -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-upload"></i> {{ _('Import Excel File') }}</h5>
+                </div>
+                <div class="card-body">
+                    <form id="excelImportForm" enctype="multipart/form-data">
+                        <!-- Format Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">{{ _('Excel Format') }}</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="format" id="formatHarrisTemplate"
+                                       value="harris_template" checked>
+                                <label class="form-check-label" for="formatHarrisTemplate">
+                                    <strong>{{ _('Harris Matrix Template') }}</strong>
+                                    <small class="text-muted">({{ _('Sheet-based: NODES + RELATIONSHIPS sheets') }})</small>
+                                </label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" name="format" id="formatExtendedMatrix"
+                                       value="extended_matrix">
+                                <label class="form-check-label" for="formatExtendedMatrix">
+                                    <strong>{{ _('Extended Matrix Parser') }}</strong>
+                                    <small class="text-muted">({{ _('Inline: Relationships in columns') }})</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="mb-3">
+                            <label for="excelFile" class="form-label">{{ _('Excel File') }} <span class="text-danger">*</span></label>
+                            <div class="upload-area" id="uploadArea">
+                                <input type="file" class="form-control" id="excelFile" name="file"
+                                       accept=".xlsx,.xls,.csv" required style="display: none;">
+                                <div class="text-center py-4">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <p class="mb-0">{{ _('Drag & drop file here or click to browse') }}</p>
+                                    <small class="text-muted">{{ _('Supported formats: .xlsx, .xls, .csv') }}</small>
+                                </div>
+                                <div id="selectedFileName" class="mt-2 d-none">
+                                    <span class="badge bg-success"><i class="fas fa-file-excel"></i> <span id="fileName"></span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Site Name -->
+                        <div class="mb-3">
+                            <label for="siteName" class="form-label">{{ _('Site Name') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="siteName" name="site_name"
+                                   placeholder="{{ _('Enter archaeological site name') }}" required>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="generateGraphML"
+                                       name="generate_graphml" checked>
+                                <label class="form-check-label" for="generateGraphML">
+                                    {{ _('Generate GraphML for Extended Matrix visualization') }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            <button type="submit" class="btn btn-primary" id="importBtn">
+                                <i class="fas fa-file-import"></i> {{ _('Import Excel') }}
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="downloadTemplateBtn">
+                                <i class="fas fa-download"></i> {{ _('Download Template') }}
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Progress -->
+                    <div id="progressArea" class="mt-4 d-none">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar" style="width: 100%">
+                                {{ _('Importing...') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="resultsArea" class="mt-4 d-none">
+                        <div id="successAlert" class="alert alert-success d-none">
+                            <h5 class="alert-heading"><i class="fas fa-check-circle"></i> {{ _('Import Successful!') }}</h5>
+                            <hr>
+                            <div id="successDetails"></div>
+                            <div id="graphmlDownload" class="mt-3 d-none">
+                                <a href="#" id="graphmlLink" class="btn btn-success btn-sm">
+                                    <i class="fas fa-download"></i> {{ _('Download GraphML') }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none">
+                            <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> {{ _('Import Failed') }}</h5>
+                            <hr>
+                            <div id="errorDetails"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> {{ _('Format Information') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="formatInfo">
+                        <!-- Harris Template Info (default) -->
+                        <div id="infoHarrisTemplate">
+                            <h6 class="fw-bold">{{ _('Harris Matrix Template') }}</h6>
+                            <p class="small">{{ _('Structured Excel format with separate sheets:') }}</p>
+                            <ul class="small">
+                                <li><strong>NODES</strong>: {{ _('Define stratigraphic units') }}
+                                    <br><code>us_number, unit_type, description, area, period, phase</code>
+                                </li>
+                                <li><strong>RELATIONSHIPS</strong>: {{ _('Define connections') }}
+                                    <br><code>from_us, to_us, relationship</code>
+                                </li>
+                            </ul>
+                            <p class="small text-muted">
+                                <i class="fas fa-lightbulb"></i>
+                                {{ _('Supports all Extended Matrix node types: US, USM, USVA, USVB, USVC, TU, USD, SF, VSF, CON, DOC, Extractor, Combiner, property') }}
+                            </p>
+                        </div>
+
+                        <!-- Extended Matrix Info -->
+                        <div id="infoExtendedMatrix" class="d-none">
+                            <h6 class="fw-bold">{{ _('Extended Matrix Parser') }}</h6>
+                            <p class="small">{{ _('Single sheet with inline relationships:') }}</p>
+                            <ul class="small">
+                                <li><code>ID</code>: {{ _('US identifier') }}</li>
+                                <li><code>DEFINITION</code>: {{ _('Short description') }}</li>
+                                <li><code>LONG_DESCRIPTION</code>: {{ _('Detailed description') }}</li>
+                                <li><code>PHASE</code>: {{ _('Archaeological phase') }}</li>
+                                <li>{{ _('Relationship columns:') }}
+                                    <br><code>is_before, covers, is_covered_by, cuts, is_cut_by, leans_on, equals, fills</code>
+                                </li>
+                                <li><code>NOTES</code>: {{ _('Additional notes') }}</li>
+                            </ul>
+                            <p class="small text-muted">
+                                <i class="fas fa-lightbulb"></i>
+                                {{ _('Relationships specified as comma-separated US numbers in each column') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h6 class="fw-bold">{{ _('Generated Output') }}</h6>
+                    <ul class="small">
+                        <li>{{ _('US records in database') }}</li>
+                        <li>{{ _('Stratigraphic relationships') }}</li>
+                        <li>{{ _('Periodization data') }}</li>
+                        <li>{{ _('GraphML file for visualization (optional)') }}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Example Files -->
+            <div class="card mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-file-alt"></i> {{ _('Example Files') }}</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small">{{ _('Test with example files:') }}</p>
+                    <ul class="small">
+                        <li><code>test_20us_complete.xlsx</code> - {{ _('Harris Template format') }}</li>
+                        <li><code>test_20us_em.xlsx</code> - {{ _('Extended Matrix format') }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+    border-color: #0d6efd;
+    background-color: #f8f9fa;
+}
+
+.upload-area.dragover {
+    border-color: #0d6efd;
+    background-color: #e7f3ff;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('excelImportForm');
+    const fileInput = document.getElementById('excelFile');
+    const uploadArea = document.getElementById('uploadArea');
+    const selectedFileName = document.getElementById('selectedFileName');
+    const fileName = document.getElementById('fileName');
+    const progressArea = document.getElementById('progressArea');
+    const resultsArea = document.getElementById('resultsArea');
+    const successAlert = document.getElementById('successAlert');
+    const errorAlert = document.getElementById('errorAlert');
+    const importBtn = document.getElementById('importBtn');
+
+    // Format selection
+    const formatRadios = document.querySelectorAll('input[name="format"]');
+    const infoHarrisTemplate = document.getElementById('infoHarrisTemplate');
+    const infoExtendedMatrix = document.getElementById('infoExtendedMatrix');
+
+    formatRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'harris_template') {
+                infoHarrisTemplate.classList.remove('d-none');
+                infoExtendedMatrix.classList.add('d-none');
+            } else {
+                infoHarrisTemplate.classList.add('d-none');
+                infoExtendedMatrix.classList.remove('d-none');
+            }
+        });
+    });
+
+    // File upload handling
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileName();
+        }
+    });
+
+    fileInput.addEventListener('change', updateFileName);
+
+    function updateFileName() {
+        if (fileInput.files.length) {
+            fileName.textContent = fileInput.files[0].name;
+            selectedFileName.classList.remove('d-none');
+        }
+    }
+
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Hide previous results
+        resultsArea.classList.add('d-none');
+        successAlert.classList.add('d-none');
+        errorAlert.classList.add('d-none');
+
+        // Show progress
+        progressArea.classList.remove('d-none');
+        importBtn.disabled = true;
+
+        // Prepare form data
+        const formData = new FormData(form);
+        const generateGraphML = document.getElementById('generateGraphML').checked;
+        formData.set('generate_graphml', generateGraphML);
+
+        try {
+            const response = await fetch('{{ url_for("excel_import.import_excel") }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            // Hide progress
+            progressArea.classList.add('d-none');
+            importBtn.disabled = false;
+            resultsArea.classList.remove('d-none');
+
+            if (result.success) {
+                // Show success
+                successAlert.classList.remove('d-none');
+
+                let details = '<ul>';
+                if (result.statistics) {
+                    if (result.statistics.us_count !== undefined) {
+                        details += `<li>{{ _('US records') }}: ${result.statistics.us_count}</li>`;
+                    }
+                    if (result.statistics.us_created !== undefined) {
+                        details += `<li>{{ _('US created') }}: ${result.statistics.us_created}</li>`;
+                    }
+                    if (result.statistics.us_updated !== undefined) {
+                        details += `<li>{{ _('US updated') }}: ${result.statistics.us_updated}</li>`;
+                    }
+                    if (result.statistics.relationships_count !== undefined) {
+                        details += `<li>{{ _('Relationships') }}: ${result.statistics.relationships_count}</li>`;
+                    }
+                    if (result.statistics.relationships_created !== undefined) {
+                        details += `<li>{{ _('Relationships created') }}: ${result.statistics.relationships_created}</li>`;
+                    }
+                }
+                details += '</ul>';
+                document.getElementById('successDetails').innerHTML = details;
+
+                // GraphML download link
+                if (result.graphml_available && result.graphml_file) {
+                    const graphmlDownload = document.getElementById('graphmlDownload');
+                    const graphmlLink = document.getElementById('graphmlLink');
+                    graphmlLink.href = `{{ url_for("excel_import.download_graphml", filename="") }}${result.graphml_file}`;
+                    graphmlDownload.classList.remove('d-none');
+                }
+
+            } else {
+                // Show error
+                errorAlert.classList.remove('d-none');
+                document.getElementById('errorDetails').innerHTML = `<pre>${result.message}</pre>`;
+            }
+
+        } catch (error) {
+            progressArea.classList.add('d-none');
+            importBtn.disabled = false;
+            resultsArea.classList.remove('d-none');
+            errorAlert.classList.remove('d-none');
+            document.getElementById('errorDetails').textContent = error.message;
+        }
+    });
+
+    // Download template button
+    document.getElementById('downloadTemplateBtn').addEventListener('click', async function() {
+        try {
+            const response = await fetch('{{ url_for("excel_import.generate_template") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    include_examples: true
+                })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'harris_matrix_template.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                alert('{{ _("Template download failed") }}');
+            }
+        } catch (error) {
+            alert('{{ _("Template download failed") }}: ' + error.message);
+        }
+    });
+});
+</script>
+{% endblock %}
