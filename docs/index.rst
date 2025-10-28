@@ -38,6 +38,55 @@ Key Features
 - **Real-Time Collaboration**: WebSocket support for team updates
 - **Analytics Dashboard**: Interactive charts and data visualization
 
+What's New in Version 1.7.0
+---------------------------
+
+.. versionadded:: 1.7.0
+   **Database Creation & Enhanced Chronological Management**
+
+   This major release introduces comprehensive database creation tools and enhanced chronological data management:
+
+   **Database Creation Features**:
+
+   - ✨ **Empty Database Creation**: Create new SQLite or PostgreSQL databases with complete PyArchInit-Mini schema (15 tables)
+   - ✨ **Multi-Interface Support**: Available via CLI, Python API, and Web GUI
+   - ✨ **Overwrite Protection**: Safe database creation with optional overwrite for replacements
+   - ✨ **Web UI**: Complete form-based interface for database creation in Import/Export page
+   - ✨ **API Endpoint**: REST API at ``/api/pyarchinit/create-database`` for programmatic access
+
+   **Chronological Management Enhancements**:
+
+   - ✨ **Automatic Dating Synchronization**: ``sync_datazioni_from_us_values()`` method automatically creates dating records from US values
+   - ✨ **Periodization Records Viewer**: Dedicated UI for viewing and searching chronological periodization assignments
+   - ✨ **Dual Menu System**: Separate navigation for Dating Periods (datazioni) vs Periodization Records
+   - ✨ **Advanced Search**: Filter periodization by site, US, or period with pagination (50 records/page)
+
+   **User Experience Improvements**:
+
+   - 🎨 Real-time feedback with loading indicators and status messages
+   - 🎨 Form validation for all database creation inputs
+   - 🎨 Color-coded success/error indicators
+   - 🎨 Comprehensive statistics display (tables created, database size)
+
+   **Technical Implementation**:
+
+   - New module: ``pyarchinit_mini/database/database_creator.py`` with unified database creation API
+   - New route: ``/api/pyarchinit/create-database`` (POST) for REST API access
+   - New method: ``ImportExportService.sync_datazioni_from_us_values()`` for dating synchronization
+   - Fixed: SQLAlchemy session issues in periodization viewer (detached instance errors)
+   - Fixed: Template confusion between dating periods and periodization records
+
+   **Documentation**:
+
+   - 📖 Complete Database Creation guide (800+ lines) at ``docs/features/database_creation.rst``
+   - 📖 CLI, Python API, and Web UI usage examples
+   - 📖 Troubleshooting section with common issues and solutions
+   - 📖 Best practices for database creation and chronological management
+
+   **Impact**: Users can now create empty databases for new projects without manual schema setup, and chronological data is automatically synchronized ensuring consistent dating dropdowns. Foundation for streamlined project initialization workflows.
+
+   See :doc:`features/database_creation` for complete documentation.
+
 What's New in Version 1.6.1
 ---------------------------
 
@@ -243,6 +292,7 @@ Features
    PURE_NETWORKX_GRAPHML_EXPORT
    EM_NODE_TYPE_MANAGEMENT
    features/pyarchinit_import_export
+   features/database_creation
    AUTOMATIC_IMPORT_AND_BACKUP_GUIDE
    features/analytics
    features/authentication
