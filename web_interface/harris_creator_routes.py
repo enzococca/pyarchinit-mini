@@ -23,6 +23,7 @@ import sys
 sys.path.append('..')
 
 from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
+from pyarchinit_mini.config.em_node_config_manager import get_config_manager
 
 # Create Blueprint
 harris_creator_bp = Blueprint('harris_creator', __name__, url_prefix='/harris-creator')
@@ -442,24 +443,47 @@ def export_matrix(format):
 
 @harris_creator_bp.route('/api/node-types')
 def get_node_types():
-    """Get list of Extended Matrix node types with descriptions"""
-    node_types = [
-        {'value': 'US', 'label': 'US - Standard Stratigraphic Unit', 'color': '#90CAF9', 'shape': 'rectangle'},
-        {'value': 'USM', 'label': 'USM - Mural Stratigraphic Unit', 'color': '#FFAB91', 'shape': 'rectangle'},
-        {'value': 'USVA', 'label': 'USVA - Virtual US Type A (negative features)', 'color': '#CE93D8', 'shape': 'rectangle'},
-        {'value': 'USVB', 'label': 'USVB - Virtual US Type B', 'color': '#E1BEE7', 'shape': 'rectangle'},
-        {'value': 'USVC', 'label': 'USVC - Virtual US Type C', 'color': '#F48FB1', 'shape': 'rectangle'},
-        {'value': 'TU', 'label': 'TU - Topographic Unit', 'color': '#80CBC4', 'shape': 'rectangle'},
-        {'value': 'USD', 'label': 'USD - Stratigraphic Unit (special)', 'color': '#A5D6A7', 'shape': 'rectangle'},
-        {'value': 'SF', 'label': 'SF - Special Finds', 'color': '#FFD54F', 'shape': 'ellipse'},
-        {'value': 'VSF', 'label': 'VSF - Virtual Special Finds', 'color': '#FFE082', 'shape': 'ellipse'},
-        {'value': 'CON', 'label': 'CON - Context', 'color': '#BCAAA4', 'shape': 'rectangle'},
-        {'value': 'DOC', 'label': 'DOC - Document (requires file_path)', 'color': '#B0BEC5', 'shape': 'diamond'},
-        {'value': 'Extractor', 'label': 'Extractor - Aggregation Node', 'color': '#EF9A9A', 'shape': 'hexagon'},
-        {'value': 'Combiner', 'label': 'Combiner - Combination Node', 'color': '#9FA8DA', 'shape': 'hexagon'},
-        {'value': 'property', 'label': 'Property - Property Node', 'color': '#CFD8DC', 'shape': 'ellipse'}
-    ]
-    return jsonify(node_types)
+    """
+    Get list of Extended Matrix node types with descriptions
+    Now dynamically loaded from YAML configuration
+    """
+    try:
+        config_manager = get_config_manager()
+        all_types = config_manager.get_all_node_types()
+
+        # Default colors for visual editor (can be customized in config)
+        default_colors = {
+            'US': '#90CAF9', 'USM': '#FFAB91', 'USVA': '#CE93D8',
+            'USVB': '#E1BEE7', 'USVC': '#F48FB1', 'TU': '#80CBC4',
+            'USD': '#A5D6A7', 'SF': '#FFD54F', 'VSF': '#FFE082',
+            'CON': '#BCAAA4', 'DOC': '#B0BEC5', 'Extractor': '#EF9A9A',
+            'Combinar': '#9FA8DA', 'property': '#CFD8DC'
+        }
+
+        node_types = []
+        for tipo_id, config in all_types.items():
+            visual = config.get('visual', {})
+
+            # Build label
+            label = f"{tipo_id} - {config.get('name', tipo_id)}"
+            if config.get('description'):
+                label += f" ({config.get('description')})"
+
+            node_types.append({
+                'value': tipo_id,
+                'label': label,
+                'color': default_colors.get(tipo_id, '#B0BEC5'),  # Use default or gray
+                'shape': visual.get('shape', 'rectangle'),
+                'custom': config.get('custom', False)
+            })
+
+        return jsonify(node_types)
+
+    except Exception as e:
+        # Fallback to minimal list if config fails
+        return jsonify([
+            {'value': 'US', 'label': 'US - Standard Stratigraphic Unit', 'color': '#90CAF9', 'shape': 'rectangle'}
+        ])
 
 
 @harris_creator_bp.route('/api/relationship-types')

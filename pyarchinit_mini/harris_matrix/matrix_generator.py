@@ -73,13 +73,13 @@ class HarrisMatrixGenerator:
             extended_label = f"{unita_tipo}{us_num}"
 
             # Build description and URL:
-            # - For DOC units: file_path goes to URL, description is empty or d_interpretativa
+            # - For DOC units: d_interpretativa goes to URL (file path), description is empty
             # - For other units: d_interpretativa goes to description, URL is empty
             file_path = getattr(us, 'file_path', None) or ""
 
             if unita_tipo == "DOC":
-                node_url = file_path
-                description = d_interpretativa  # DOC can have both file_path (URL) and d_interpretativa (description)
+                node_url = d_interpretativa  # For DOC, file path is stored in d_interpretativa
+                description = ""  # DOC nodes should have empty description
             else:
                 node_url = ""
                 description = d_interpretativa
@@ -775,9 +775,10 @@ class HarrisMatrixGenerator:
                          site_name: str = "",
                          include_periods: bool = True,
                          title: str = "",
-                         reverse_epochs: bool = False) -> str:
+                         reverse_epochs: bool = False,
+                         use_graphviz: bool = False) -> str:
         """
-        Export Harris Matrix graph to GraphML format using DOT intermediate format
+        Export Harris Matrix graph to GraphML format
         (PyArchInit compatible method)
 
         Args:
@@ -788,16 +789,41 @@ class HarrisMatrixGenerator:
             include_periods: Include period clustering in export
             title: Custom title for the diagram (defaults to site_name)
             reverse_epochs: Whether to reverse epoch ordering in GraphML
+            use_graphviz: If True, use Graphviz-based export; if False, use pure NetworkX (default)
 
         Returns:
             Path to the generated GraphML file
         """
+        # Use pure NetworkX exporter by default (no Graphviz required)
+        if not use_graphviz:
+            from pyarchinit_mini.graphml_converter.pure_networkx_exporter import export_harris_matrix_pure_python
+
+            print("")
+            print("📊 Exporting Harris Matrix with pure NetworkX (no Graphviz required)")
+            print("")
+
+            return export_harris_matrix_pure_python(
+                graph=graph,
+                output_path=output_path,
+                site_name=site_name,
+                title=title or site_name,
+                use_extended_labels=use_extended_labels,
+                include_periods=include_periods,
+                apply_transitive_reduction=True,
+                reverse_epochs=reverse_epochs,
+                db_manager=self.db_manager
+            )
+
+        # Graphviz-based export (requires Graphviz installation)
         try:
             from graphviz import Digraph
         except ImportError:
             print("❌ ERROR: Python graphviz module not installed")
             print("   Install with: pip install 'pyarchinit-mini[harris]'")
             print("   or: pip install graphviz")
+            print("")
+            print("💡 TIP: You can use pure NetworkX export (default) which doesn't require Graphviz:")
+            print("   generator.export_to_graphml(graph, output_path, use_graphviz=False)")
             return ""
 
         # Check if Graphviz software is installed
@@ -814,6 +840,9 @@ class HarrisMatrixGenerator:
             print("   - Or download from:      https://graphviz.org/download/")
             print("   ")
             print("   After installation, verify with: dot -V")
+            print("")
+            print("💡 TIP: You can use pure NetworkX export which doesn't require Graphviz:")
+            print("   generator.export_to_graphml(graph, output_path, use_graphviz=False)")
             return ""
 
         # Choose layout engine based on graph size
