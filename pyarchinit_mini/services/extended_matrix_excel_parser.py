@@ -77,7 +77,16 @@ class ExtendedMatrixExcelParser:
         'is_cut_by': 'Tagliato da',
         'leans_on': 'Si appoggia a',
         'equals': 'Uguale a',
-        'fills': 'Riempie'
+        'fills': 'Riempie',
+        # Also accept Italian variations (case-insensitive matching done in code)
+        'anteriore a': 'Anteriore a',
+        'copre': 'Copre',
+        'coperto da': 'Coperto da',
+        'taglia': 'Taglia',
+        'tagliato da': 'Tagliato da',
+        'si appoggia a': 'Si appoggia a',
+        'uguale a': 'Uguale a',
+        'riempie': 'Riempie'
     }
 
     def __init__(self, excel_path: str, site_name: str, db_connection: Optional[DatabaseConnection] = None):
@@ -355,7 +364,7 @@ class ExtendedMatrixExcelParser:
                                 profondita_max=safe_float(row.get('profondita_max')),
                                 profondita_min=safe_float(row.get('profondita_min')),
                                 larghezza_media=safe_float(row.get('larghezza_media')),
-                                data_schedatura=datetime.now().date().isoformat()
+                                data_schedatura=None  # Let SQLite handle default or set to None
                             )
                             session.add(new_us)
                             self.statistics['us_created'] += 1

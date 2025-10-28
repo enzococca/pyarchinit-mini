@@ -124,10 +124,16 @@ def import_harris_template_format(filepath: str, site_name: str, generate_graphm
     from pyarchinit_mini.database.manager import DatabaseManager
     from pyarchinit_mini.cli.harris_import import HarrisMatrixImporter
     from pyarchinit_mini.models.base import BaseModel
+    from flask import current_app
     import os
 
-    # Get database connection from app config
-    db_url = os.getenv("DATABASE_URL", "sqlite:///pyarchinit_mini.db")
+    # Use the SAME database as the main web interface
+    db_url = current_app.config.get('CURRENT_DATABASE_URL')
+    if not db_url:
+        # Fallback: use project root database (same as app.py default)
+        default_db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'pyarchinit_mini.db')
+        db_url = f"sqlite:///{default_db_path}"
+
     connection = DatabaseConnection.from_url(db_url)
     db_manager = DatabaseManager(connection)
 
@@ -194,10 +200,16 @@ def import_extended_matrix_format(filepath: str, site_name: str, generate_graphm
     from pyarchinit_mini.services.extended_matrix_excel_parser import import_extended_matrix_excel
     from pyarchinit_mini.database.connection import DatabaseConnection
     from pyarchinit_mini.models.base import BaseModel
+    from flask import current_app
     import os
 
-    # Get database connection and ensure schema is up to date
-    db_url = os.getenv("DATABASE_URL", "sqlite:///pyarchinit_mini.db")
+    # Use the SAME database as the main web interface
+    db_url = current_app.config.get('CURRENT_DATABASE_URL')
+    if not db_url:
+        # Fallback: use project root database (same as app.py default)
+        default_db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'pyarchinit_mini.db')
+        db_url = f"sqlite:///{default_db_path}"
+
     connection = DatabaseConnection.from_url(db_url)
 
     # Initialize database schema (create missing tables/columns)
