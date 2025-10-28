@@ -50,6 +50,7 @@ from .export_import_dialog import show_export_import_dialog
 from .analytics_dialog import show_analytics_dialog
 from .graphml_export_dialog import show_graphml_export_dialog
 from .pyarchinit_import_export_dialog import PyArchInitImportExportDialog
+from .excel_import_dialog import ExcelImportDialog
 
 class PyArchInitGUI:
     """Main GUI application for PyArchInit-Mini"""
@@ -173,6 +174,7 @@ class PyArchInitGUI:
         tools_menu.add_command(label=_("Harris Matrix"), command=self.show_harris_matrix_dialog)
         tools_menu.add_command(label=_("Export GraphML (yEd)"), command=self.show_graphml_export_dialog)
         tools_menu.add_separator()
+        tools_menu.add_command(label=_("Excel Import - Harris Matrix"), command=self.show_excel_import_dialog)
         tools_menu.add_command(label=_("PyArchInit Import/Export"), command=self.show_pyarchinit_import_export_dialog)
         tools_menu.add_separator()
         tools_menu.add_command(label=_("Thesaurus Management"), command=self.show_thesaurus_dialog)
@@ -1793,6 +1795,18 @@ SCORCIATOIE:
             self.refresh_data()
         except Exception as e:
             messagebox.showerror(_("Error"), f"{_('Error opening PyArchInit import/export')}: {str(e)}")
+
+    def show_excel_import_dialog(self):
+        """Show Excel Import dialog"""
+        try:
+            with self.db_manager.connection.get_session() as session:
+                dialog = ExcelImportDialog(self.root, session, self.db_manager)
+                # Wait for dialog to close
+                self.root.wait_window(dialog.dialog)
+            # Refresh data after dialog closes
+            self.refresh_data()
+        except Exception as e:
+            messagebox.showerror(_("Error"), f"{_('Error opening Excel import')}: {str(e)}")
 
     def refresh_current_tab(self):
         """Refresh the current tab (called by export/import dialog after import)"""
