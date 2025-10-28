@@ -55,6 +55,13 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 
 ### 📊 Data Export/Import
 - **Excel Export**: Export Sites, US, Inventario to .xlsx format
+- **Excel Import (NEW in v1.6.0)**: Import stratigraphic data from Excel with dual format support
+  - **Harris Matrix Template**: Sheet-based format (NODES + RELATIONSHIPS)
+  - **Extended Matrix Parser**: Inline format with relationship columns
+  - **Multi-Interface**: Available in Web GUI, Desktop GUI, and CLI
+  - **GraphML Generation**: Optional automatic GraphML export for visualization
+  - **Database Consistency**: Unified database path across all interfaces
+  - 📖 **Complete Guide**: [Excel Import Guide](docs/EXCEL_IMPORT_GUIDE.md)
 - **CSV Export**: Export to CSV with optional site filtering
 - **Batch Import**: Import data from CSV with validation and statistics
 - **Multi-Interface**: Available in Web UI, Desktop GUI, and CLI
