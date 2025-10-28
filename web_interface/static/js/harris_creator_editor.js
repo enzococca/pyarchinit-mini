@@ -748,25 +748,31 @@ function clearAll() {
  */
 function removeTransitiveEdges() {
     console.log('Starting transitive reduction...');
-    const edges = cy.edges().toArray();
+    const edges = cy.edges();
     const edgesToRemove = [];
 
     // Build adjacency list for efficient path finding
     const graph = {};
+    const edgeMap = {};
+
     edges.forEach(edge => {
         const src = edge.source().id();
         const tgt = edge.target().id();
+        const edgeId = edge.id();
+
         if (!graph[src]) graph[src] = [];
-        graph[src].push({ target: tgt, edge: edge });
+        graph[src].push({ target: tgt, edgeId: edgeId });
+        edgeMap[edgeId] = edge;
     });
 
     // For each edge, check if there's an alternative path
     edges.forEach(edge => {
         const source = edge.source().id();
         const target = edge.target().id();
+        const edgeId = edge.id();
 
         // Check if there's a path from source to target NOT using this edge
-        const hasAlternatePath = findPath(graph, source, target, edge.id());
+        const hasAlternatePath = findPath(graph, source, target, edgeId);
 
         if (hasAlternatePath) {
             edgesToRemove.push(edge);
@@ -791,25 +797,23 @@ function removeTransitiveEdges() {
 function findPath(graph, source, target, excludeEdgeId) {
     const queue = [source];
     const visited = new Set([source]);
-    const parent = {};
 
     while (queue.length > 0) {
         const current = queue.shift();
 
         if (!graph[current]) continue;
 
-        for (const {target: next, edge} of graph[current]) {
+        for (const {target: next, edgeId} of graph[current]) {
             // Skip the edge we're testing
-            if (edge.id() === excludeEdgeId) continue;
+            if (edgeId === excludeEdgeId) continue;
 
             if (next === target) {
-                // Found path to target - check if it's indirect (length > 1)
+                // Found path to target without using the excluded edge
                 return true;
             }
 
             if (!visited.has(next)) {
                 visited.add(next);
-                parent[next] = current;
                 queue.push(next);
             }
         }
