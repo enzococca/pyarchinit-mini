@@ -2758,12 +2758,12 @@ def create_app():
             datazioni = datazione_service.get_all_datazioni()
             total = datazione_service.count_datazioni()
 
-            return render_template('periodizzazione/list.html',
+            return render_template('datazioni/list.html',
                                  datazioni=datazioni,
                                  total=total)
         except Exception as e:
             flash(f'Errore caricamento datazioni: {str(e)}', 'error')
-            return render_template('periodizzazione/list.html',
+            return render_template('datazioni/list.html',
                                  datazioni=[],
                                  total=0)
 
@@ -2874,7 +2874,7 @@ def create_app():
                               .limit(page_size)\
                               .all()
 
-            return render_template('periodizzazione/list.html',
+            return render_template('periodizzazione/periods.html',
                                  records=records,
                                  total=total,
                                  page=page,
@@ -2885,7 +2885,7 @@ def create_app():
 
         except Exception as e:
             flash(f'Error loading periodization records: {str(e)}', 'error')
-            return render_template('periodizzazione/list.html',
+            return render_template('periodizzazione/periods.html',
                                  records=[],
                                  total=0,
                                  page=1,
