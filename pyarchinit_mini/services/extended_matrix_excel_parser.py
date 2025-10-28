@@ -330,13 +330,8 @@ class ExtendedMatrixExcelParser:
                             self.statistics['us_updated'] += 1
                             print(f"  ↻ Updated {unit_type} {us_number}")
                         else:
-                            # Create new US
-                            # Generate id_us in PyArchInit format: site__area__us_number
-                            area_str = ''  # No area specified in this Excel format
-                            id_us = f"{self.site_name}__{area_str}__{us_number}"
-
+                            # Create new US (id_us will be auto-generated)
                             new_us = US(
-                                id_us=id_us,
                                 sito=self.site_name,
                                 us=us_number,
                                 unita_tipo=unit_type,

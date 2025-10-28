@@ -331,10 +331,8 @@ class HarrisMatrixImporter:
             us.periodo_iniziale = period if period else None
             us.fase_iniziale = phase if phase else None
 
-            # Generate id_us for new records (VARCHAR format)
+            # Add new US to session (id_us will be auto-generated)
             if not us.id_us:
-                area_str = area if area else ''
-                us.id_us = f"{site_name}__{area_str}__{us_number}"
                 self.session.add(us)
 
             # DOC specific fields
