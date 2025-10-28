@@ -745,83 +745,68 @@ function clearAll() {
 /**
  * Remove redundant (transitive) edges from the graph
  * Implements transitive reduction: if A->B->C exists, A->C is redundant
+ * ONLY removes edges with a direct 2-hop path (A->B->C), not longer paths
  */
 function removeTransitiveEdges() {
     console.log('Starting transitive reduction...');
     const edges = cy.edges();
     const edgesToRemove = [];
 
-    // Build adjacency list for efficient path finding
-    const graph = {};
-    const edgeMap = {};
+    // Build adjacency list for quick lookups
+    const outgoing = new Map();  // Map of node -> Set of target nodes
 
     edges.forEach(edge => {
         const src = edge.source().id();
         const tgt = edge.target().id();
-        const edgeId = edge.id();
 
-        if (!graph[src]) graph[src] = [];
-        graph[src].push({ target: tgt, edgeId: edgeId });
-        edgeMap[edgeId] = edge;
+        if (!outgoing.has(src)) {
+            outgoing.set(src, new Set());
+        }
+        outgoing.get(src).add(tgt);
     });
 
-    // For each edge, check if there's an alternative path
+    // For each edge A->C, check if there exists a node B such that A->B and B->C
     edges.forEach(edge => {
         const source = edge.source().id();
         const target = edge.target().id();
-        const edgeId = edge.id();
 
-        // Check if there's a path from source to target NOT using this edge
-        const hasAlternatePath = findPath(graph, source, target, edgeId);
+        // Check if there's a 2-hop path: source -> intermediate -> target
+        const sourceTargets = outgoing.get(source);
+        if (!sourceTargets) return;
 
-        if (hasAlternatePath) {
+        let isRedundant = false;
+
+        // For each intermediate node that source points to
+        for (const intermediate of sourceTargets) {
+            // Skip if intermediate is the target itself (that's the edge we're checking)
+            if (intermediate === target) continue;
+
+            // Check if intermediate also points to target
+            const intermediateTargets = outgoing.get(intermediate);
+            if (intermediateTargets && intermediateTargets.has(target)) {
+                // Found a 2-hop path: source -> intermediate -> target
+                // This makes the direct edge source -> target redundant
+                isRedundant = true;
+                console.log(`Redundant edge: ${source} -> ${target} (via ${intermediate})`);
+                break;
+            }
+        }
+
+        if (isRedundant) {
             edgesToRemove.push(edge);
-            console.log(`Redundant edge found: ${source} -> ${target}`);
         }
     });
 
     // Remove redundant edges
     if (edgesToRemove.length > 0) {
-        // Create a Cytoscape collection from the array of edges
         const edgeCollection = cy.collection(edgesToRemove);
         edgeCollection.remove();
         console.log(`Removed ${edgesToRemove.length} redundant edges`);
-        showNotification(`Removed ${edgesToRemove.length} redundant edges`, 'info');
+        showNotification(`Rimossi ${edgesToRemove.length} archi ridondanti`, 'info');
     } else {
         console.log('No redundant edges found');
+        showNotification('Nessun arco ridondante trovato', 'info');
     }
-}
-
-/**
- * Find if there's a path from source to target without using excludeEdge
- * Uses BFS to find path of length > 1
- */
-function findPath(graph, source, target, excludeEdgeId) {
-    const queue = [source];
-    const visited = new Set([source]);
-
-    while (queue.length > 0) {
-        const current = queue.shift();
-
-        if (!graph[current]) continue;
-
-        for (const {target: next, edgeId} of graph[current]) {
-            // Skip the edge we're testing
-            if (edgeId === excludeEdgeId) continue;
-
-            if (next === target) {
-                // Found path to target without using the excluded edge
-                return true;
-            }
-
-            if (!visited.has(next)) {
-                visited.add(next);
-                queue.push(next);
-            }
-        }
-    }
-
-    return false;
 }
 
 /**
@@ -834,9 +819,8 @@ function applyLayout() {
         return;
     }
 
-    // Note: Transitive reduction temporarily disabled - needs refinement
-    // TODO: Fix algorithm to only remove truly redundant edges
-    // removeTransitiveEdges();
+    // Remove redundant transitive edges before layout
+    removeTransitiveEdges();
 
     // Use Dagre layout (more reliable than ELK)
     cy.layout({
