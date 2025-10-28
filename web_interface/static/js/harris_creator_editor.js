@@ -825,8 +825,8 @@ function findPath(graph, source, target, excludeEdgeId) {
 }
 
 /**
- * Apply hierarchical layout with orthogonal edges
- * Uses ELK (Eclipse Layout Kernel) for proper stratigraphic visualization
+ * Apply hierarchical layout for Harris Matrix
+ * Uses Dagre for reliable hierarchical visualization
  */
 function applyLayout() {
     if (cy.nodes().length === 0) {
@@ -834,48 +834,34 @@ function applyLayout() {
         return;
     }
 
-    // Remove transitive/redundant edges before layout
-    removeTransitiveEdges();
+    // Note: Transitive reduction temporarily disabled - needs refinement
+    // TODO: Fix algorithm to only remove truly redundant edges
+    // removeTransitiveEdges();
 
-    // Use ELK layout for hierarchical graphs with orthogonal edge routing
+    // Use Dagre layout (more reliable than ELK)
     cy.layout({
-        name: 'elk',
-        // ELK-specific options
-        elk: {
-            // Use layered algorithm (similar to Sugiyama)
-            'algorithm': 'layered',
-            // Direction: DOWN = top to bottom (recent to ancient)
-            'elk.direction': 'DOWN',
-            // Orthogonal edge routing for Harris Matrix style
-            'elk.edgeRouting': 'ORTHOGONAL',
-            // Layer-based layout options
-            'elk.layered.spacing.nodeNodeBetweenLayers': '120',
-            'elk.layered.spacing.nodeNode': '80',
-            'elk.layered.spacing.edgeNodeBetweenLayers': '60',
-            'elk.layered.spacing.edgeEdgeBetweenLayers': '40',
-            // Consider edge direction for layering
-            'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
-            'elk.layered.cycleBreaking.strategy': 'GREEDY',
-            // Node placement strategy
-            'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
-            // Crossing minimization
-            'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
-            // Padding
-            'elk.padding': '[top=50,left=50,bottom=50,right=50]',
-            // Aspect ratio
-            'elk.aspectRatio': '1.5'
-        },
+        name: 'dagre',
+        // Direction: top to bottom (most recent to oldest)
+        rankDir: 'TB',
+        // Alignment
+        align: 'UL',
+        // Spacing
+        nodeSep: 100,
+        edgeSep: 50,
+        rankSep: 120,
+        // Padding
+        padding: 40,
         // Animation
         animate: true,
         animationDuration: 600,
         animationEasing: 'ease-out',
         // Fit to viewport
         fit: true,
-        // Padding around graph
-        padding: 40
+        // Ranking algorithm
+        ranker: 'network-simplex'
     }).run();
 
-    showNotification('Layout applied with orthogonal edges', 'success');
+    showNotification('Layout applied', 'success');
 }
 
 /**
