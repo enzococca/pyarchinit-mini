@@ -375,7 +375,31 @@ def create_app():
     # Store current database info in app config
     app.config['CURRENT_DATABASE_URL'] = database_url
     app.config['DATABASE_CONNECTIONS'] = {}  # Store named connections
-    
+
+    # Add default database connections for easy switching
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    root_db_path = os.path.join(project_root, 'pyarchinit_mini.db')
+    package_db_path = os.path.join(os.path.dirname(__file__), '..', 'pyarchinit_mini', 'pyarchinit_mini.db')
+    package_db_path = os.path.abspath(package_db_path)
+
+    app.config['DATABASE_CONNECTIONS']['Database Root (Progetto)'] = {
+        'type': 'sqlite',
+        'path': root_db_path,
+        'url': f'sqlite:///{root_db_path}',
+        'description': 'Database nella cartella root del progetto (per sviluppo PyCharm)',
+        'uploaded': False,
+        'is_active': database_url == f'sqlite:///{root_db_path}'
+    }
+
+    app.config['DATABASE_CONNECTIONS']['Database Package'] = {
+        'type': 'sqlite',
+        'path': package_db_path,
+        'url': f'sqlite:///{package_db_path}',
+        'description': 'Database nella cartella del package pyarchinit_mini',
+        'uploaded': False,
+        'is_active': database_url == f'sqlite:///{package_db_path}'
+    }
+
     # Initialize services
     site_service = SiteService(db_manager)
     us_service = USService(db_manager)
@@ -2290,6 +2314,50 @@ def create_app():
         except Exception as e:
             flash(f'Errore recupero info database: {str(e)}', 'error')
             return redirect(url_for('admin_database'))
+
+    @app.route('/admin/database/switch/<connection_name>', methods=['POST'])
+    @login_required
+    def switch_database(connection_name):
+        """Switch active database to a saved connection"""
+        try:
+            connections = app.config.get('DATABASE_CONNECTIONS', {})
+
+            if connection_name not in connections:
+                flash(f'Connessione "{connection_name}" non trovata', 'error')
+                return redirect(url_for('admin_database'))
+
+            conn_info = connections[connection_name]
+            new_db_url = conn_info['url']
+
+            # Test connection before switching
+            try:
+                test_conn = DatabaseConnection.from_url(new_db_url)
+                with test_conn.get_session() as session:
+                    session.execute(text('SELECT 1'))
+            except Exception as e:
+                flash(f'Errore connessione al database: {str(e)}', 'error')
+                return redirect(url_for('admin_database'))
+
+            # Switch database
+            app.config['CURRENT_DATABASE_URL'] = new_db_url
+
+            # Reinitialize database connection
+            global db_conn, db_manager
+            db_conn = DatabaseConnection.from_url(new_db_url)
+            db_manager = DatabaseManager(db_conn)
+
+            # Reinitialize services
+            global site_service, us_service, inventario_service
+            site_service = SiteService(db_manager)
+            us_service = USService(db_manager)
+            inventario_service = InventarioService(db_manager)
+
+            flash(f'Database cambiato a: {connection_name}', 'success')
+
+        except Exception as e:
+            flash(f'Errore cambio database: {str(e)}', 'error')
+
+        return redirect(url_for('admin_database'))
 
     # API endpoints for AJAX
     @app.route('/api/sites')

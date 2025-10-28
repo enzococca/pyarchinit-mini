@@ -277,6 +277,60 @@ cp /Users/enzo/.pyarchinit_mini/data/pyarchinit_mini.db \
 
 ---
 
+## Database Switch GUI (New in v1.6.2)
+
+### Overview
+
+The web interface now includes a **Database Switch** feature that allows you to:
+- View all available database connections
+- See which database is currently active
+- Switch between databases with one click
+- No server restart required
+
+### Using the Database Switcher
+
+1. Go to **Admin → Database Management**
+2. Scroll to **Connessioni Salvate** section
+3. You'll see two default connections:
+   - **Database Root (Progetto)**: `/path/to/pyarchinit-mini-desk/pyarchinit_mini.db`
+   - **Database Package**: `/path/to/pyarchinit-mini-desk/pyarchinit_mini/pyarchinit_mini.db`
+4. Active database is highlighted in green with "Attivo" badge
+5. Click **Cambia** button to switch to another database
+
+### Features
+
+- **Visual Indicator**: Active database row is highlighted in green
+- **Safety Check**: Connection is tested before switching
+- **Confirmation Dialog**: Asks for confirmation before switching
+- **Automatic Reinitialization**: All services are reinitialized with new database
+- **Persistent Connections**: Database connections are saved in session
+
+### Adding Custom Connections
+
+You can add custom database connections:
+
+1. **Upload SQLite Database**: Use "Carica Database SQLite" button
+2. **Connect to PostgreSQL**: Use "Connetti Database" button
+3. All connections appear in the table and can be switched to
+
+### Technical Details
+
+**Route**: `POST /admin/database/switch/<connection_name>`
+
+**Process**:
+1. Validates connection exists
+2. Tests connection with `SELECT 1` query
+3. Updates `app.config['CURRENT_DATABASE_URL']`
+4. Reinitializes `DatabaseConnection` and `DatabaseManager`
+5. Reinitializes all services (SiteService, USService, etc.)
+6. Redirects back to database admin page
+
+**Default Connections**: Automatically created at app startup with paths:
+- Root database: `project_root/pyarchinit_mini.db`
+- Package database: `project_root/pyarchinit_mini/pyarchinit_mini.db`
+
+---
+
 ## Summary
 
 ✅ **Always configure DATABASE_URL in PyCharm** for consistent behavior
@@ -284,8 +338,11 @@ cp /Users/enzo/.pyarchinit_mini/data/pyarchinit_mini.db \
 ✅ **Use .env.development** file for team development
 ✅ **Separate databases** for development vs. production
 ✅ **v1.6.1 fixes** all SQLAlchemy text() errors
+✅ **v1.6.2 adds** Database Switch GUI for easy database switching
 
 **For PyCharm development**, set this environment variable:
 ```
 DATABASE_URL=sqlite:////Users/enzo/Documents/pyarchinit-mini-desk/pyarchinit_mini.db
 ```
+
+**Or use the GUI**: Go to Admin → Database Management and click "Cambia" on the desired database.
