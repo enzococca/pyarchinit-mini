@@ -1785,35 +1785,87 @@ def create_app():
 
             # Convert US list to dict format for validation
             us_list_dicts = []
+            us_map = {}  # Map to store US id by (site, area, us_number)
             for us in us_list:
+                us_num = getattr(us, 'us', None)
                 us_dict = {
+                    'id_us': getattr(us, 'id_us', None),
                     'sito': getattr(us, 'sito', ''),
                     'area': getattr(us, 'area', ''),
-                    'us': getattr(us, 'us', None),
-                    'rapporti': getattr(us, 'rapporti', '')
+                    'us': us_num,
+                    'rapporti': getattr(us, 'rapporti', ''),
+                    'd_interpretativa': getattr(us, 'd_interpretativa', '')
                 }
                 us_list_dicts.append(us_dict)
+                if us_num:
+                    us_map[(us_dict['sito'], us_dict['area'], us_num)] = getattr(us, 'id_us', None)
 
             # Get validation report
             report = validator.get_validation_report(us_list_dicts)
+
+            # Extract cycles from errors
+            cycles = []
+            non_cycle_errors = []
+            for error in report.get('errors', []):
+                if 'cycle' in error.lower() or 'ciclo' in error.lower():
+                    # Extract cycle from error message
+                    # Format: "Temporal paradox (cycle): 1 → 2 → 3 → 1"
+                    if '→' in error:
+                        cycle_part = error.split(':')[-1].strip()
+                        cycle_us = [us.strip() for us in cycle_part.split('→')]
+                        cycles.append(cycle_us[:-1])  # Remove duplicate last element
+                else:
+                    non_cycle_errors.append(error)
+
+            # Generate relationship fixes to find missing reciprocals
+            fixes = validator.generate_relationship_fixes(us_list_dicts)
+
+            # Convert fixes to display format
+            missing_reciprocals = []
+            for update in fixes.get('updates', []):
+                # Parse the update to extract relationship info
+                from_us = update['us']
+                reason = update.get('reason', '')
+
+                # Extract target US and relationship from reason
+                # Format: "Aggiunta relazione reciproca: US X copre Y"
+                if 'US' in reason:
+                    parts = reason.split(':')[-1].strip().split()
+                    if len(parts) >= 3:
+                        try:
+                            source_us = parts[1]  # US number after "US"
+                            rel_type = ' '.join(parts[2:-1])  # Relationship type
+                            target_us = parts[-1]  # Target US
+
+                            # Determine expected reciprocal
+                            inverse_rel = validator.INVERSE_RELATIONS.get(rel_type, '')
+
+                            missing_reciprocals.append({
+                                'from_us': source_us,
+                                'to_us': from_us,
+                                'relationship': rel_type,
+                                'expected_reciprocal': inverse_rel
+                            })
+                        except (IndexError, ValueError):
+                            pass
 
             # Get statistics
             stats = {
                 'total_us': len(us_list),
                 'total_relationships': report.get('relationships_found', 0),
-                'total_errors': report.get('error_count', 0),
-                'total_cycles': 0,  # Feature not implemented in validator
-                'missing_reciprocals': 0,  # Feature not implemented in validator
-                'is_valid': report.get('valid', False)
+                'total_errors': len(non_cycle_errors),
+                'total_cycles': len(cycles),
+                'missing_reciprocals': len(missing_reciprocals),
+                'is_valid': report.get('valid', False) and len(cycles) == 0 and len(missing_reciprocals) == 0
             }
 
-            # Return simplified report (cycles and missing_reciprocals not available)
+            # Return complete report
             return render_template('validation/report.html',
                                  site_name=site_name,
                                  stats=stats,
-                                 errors=report.get('errors', []),
-                                 cycles=[],  # Feature not implemented
-                                 missing_reciprocals=[])  # Feature not implemented
+                                 errors=non_cycle_errors,
+                                 cycles=cycles,
+                                 missing_reciprocals=missing_reciprocals)
 
         except Exception as e:
             import traceback
@@ -1853,14 +1905,22 @@ def create_app():
                 updates_count = 0
                 for update in fixes.get('updates', []):
                     us_num = update['us']
-                    new_rapporti = update['rapporti']
+                    new_rapporti = update['new_value']  # Fixed: was update['rapporti']
 
                     # Update US in database
-                    us_service.update_us(
-                        {'sito': site_name, 'us': us_num},
-                        {'rapporti': new_rapporti}
-                    )
-                    updates_count += 1
+                    # Find the US by site and us number
+                    us_to_update = None
+                    for us_obj in us_list:
+                        if getattr(us_obj, 'us', None) == us_num:
+                            us_to_update = us_obj
+                            break
+
+                    if us_to_update:
+                        us_service.update_us_by_id(
+                            getattr(us_to_update, 'id_us'),
+                            {'rapporti': new_rapporti}
+                        )
+                        updates_count += 1
 
                 # Create new US if needed
                 creates_count = len(fixes.get('creates', []))
