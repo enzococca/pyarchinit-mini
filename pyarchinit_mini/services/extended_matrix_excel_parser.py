@@ -360,7 +360,7 @@ class ExtendedMatrixExcelParser:
                                 profondita_max=safe_float(row.get('profondita_max')),
                                 profondita_min=safe_float(row.get('profondita_min')),
                                 larghezza_media=safe_float(row.get('larghezza_media')),
-                                data_schedatura=datetime.now().date()
+                                data_schedatura=datetime.now().date().isoformat()
                             )
                             session.add(new_us)
                             self.statistics['us_created'] += 1

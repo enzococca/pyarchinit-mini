@@ -123,12 +123,16 @@ def import_harris_template_format(filepath: str, site_name: str, generate_graphm
     from pyarchinit_mini.database.connection import DatabaseConnection
     from pyarchinit_mini.database.manager import DatabaseManager
     from pyarchinit_mini.cli.harris_import import HarrisMatrixImporter
+    from pyarchinit_mini.models.base import BaseModel
     import os
 
     # Get database connection from app config
     db_url = os.getenv("DATABASE_URL", "sqlite:///pyarchinit_mini.db")
     connection = DatabaseConnection.from_url(db_url)
     db_manager = DatabaseManager(connection)
+
+    # Initialize database schema (create missing tables/columns)
+    BaseModel.metadata.create_all(connection.engine)
 
     try:
         with db_manager.connection.get_session() as db_session:
@@ -188,13 +192,24 @@ def import_extended_matrix_format(filepath: str, site_name: str, generate_graphm
     Import using Extended Matrix Parser format (inline relationship columns)
     """
     from pyarchinit_mini.services.extended_matrix_excel_parser import import_extended_matrix_excel
+    from pyarchinit_mini.database.connection import DatabaseConnection
+    from pyarchinit_mini.models.base import BaseModel
+    import os
+
+    # Get database connection and ensure schema is up to date
+    db_url = os.getenv("DATABASE_URL", "sqlite:///pyarchinit_mini.db")
+    connection = DatabaseConnection.from_url(db_url)
+
+    # Initialize database schema (create missing tables/columns)
+    BaseModel.metadata.create_all(connection.engine)
 
     try:
-        # Perform import
+        # Perform import with the same database connection
         stats = import_extended_matrix_excel(
             excel_path=filepath,
             site_name=site_name,
-            generate_graphml=generate_graphml
+            generate_graphml=generate_graphml,
+            db_connection=connection
         )
 
         if stats.get('errors'):
