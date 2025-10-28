@@ -538,8 +538,12 @@ function loadExistingData() {
 
         // Add edges
         relationships.forEach(relData => {
-            const sourceNode = cy.nodes().filter(n => n.data('us_number') === relData.from_us).first();
-            const targetNode = cy.nodes().filter(n => n.data('us_number') === relData.to_us).first();
+            // Convert to strings for comparison (database may store as integers)
+            const fromUsStr = String(relData.from_us);
+            const toUsStr = String(relData.to_us);
+
+            const sourceNode = cy.nodes().filter(n => String(n.data('us_number')) === fromUsStr).first();
+            const targetNode = cy.nodes().filter(n => String(n.data('us_number')) === toUsStr).first();
 
             if (sourceNode.length && targetNode.length) {
                 const relType = relationshipTypes.find(r => r.value === relData.relationship) || relationshipTypes[0];
