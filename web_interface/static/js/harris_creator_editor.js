@@ -782,7 +782,9 @@ function removeTransitiveEdges() {
 
     // Remove redundant edges
     if (edgesToRemove.length > 0) {
-        cy.remove(edgesToRemove);
+        // Create a Cytoscape collection from the array of edges
+        const edgeCollection = cy.collection(edgesToRemove);
+        edgeCollection.remove();
         console.log(`Removed ${edgesToRemove.length} redundant edges`);
         showNotification(`Removed ${edgesToRemove.length} redundant edges`, 'info');
     } else {
