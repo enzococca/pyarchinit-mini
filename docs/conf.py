@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'PyArchInit-Mini'
 copyright = '2025, PyArchInit Team'
 author = 'PyArchInit Team'
-release = '1.6.0'
+release = '1.6.1'
 
 extensions = [
     'sphinx.ext.autodoc',

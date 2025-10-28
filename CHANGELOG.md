@@ -5,6 +5,59 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2025-10-28
+
+### Added
+- **Excel Import Web GUI**: Complete integration with dual format support
+  - Harris Matrix Template format (sheet-based: NODES + RELATIONSHIPS)
+  - Extended Matrix Parser format (inline with relationship columns)
+  - Radio button format selection
+  - Site name validation
+  - Optional GraphML generation
+  - Success/error messages with statistics
+- **Documentation**: Comprehensive Excel import guide (500+ lines)
+  - `docs/EXCEL_IMPORT_GUIDE.md` - User guide
+  - `docs/EXCEL_IMPORT_BUG_FIXES.md` - Technical bug fixes
+  - `docs/EXCEL_IMPORT_INTEGRATION_SUMMARY.md` - Session summary
+- **Italian Relationships**: Full support for lowercase Italian relationship names
+- **Database Consistency**: Unified database path across Web GUI, Desktop GUI, and CLI
+
+### Fixed
+- **CRITICAL: Database Schema**: Fixed `id_us` field type from `VARCHAR(100)` to `INTEGER AUTOINCREMENT`
+  - Old databases created with v1.6.0 or earlier may have incorrect schema
+  - Migration instructions provided in documentation
+- **Date Type Handling**: Fixed SQLite date field type errors (None instead of .isoformat())
+- **Desktop GUI**: Updated to use consistent database connection via `db_manager.connection`
+- **Italian Relationships**: Added lowercase variants ("anteriore a", "copre", "coperto da", etc.)
+
+### Changed
+- **Web GUI Routes**: Registered `excel_import_bp` blueprint with CSRF exemption
+- **Desktop GUI**: Modified `excel_import_dialog.py` to pass `db_connection` parameter
+
+### Testing
+- ✅ Harris Template: 20 US + 24 relationships imported successfully
+- ✅ Extended Matrix: 5 US + 6 relationships imported successfully
+- ✅ Metro C Real Data: 65 US + 658 relationships imported successfully
+- ✅ All data visible immediately in all interfaces
+
+### Migration Note
+**IMPORTANT**: Users upgrading from v1.6.0 or earlier must recreate or migrate their database due to schema changes. See `docs/EXCEL_IMPORT_BUG_FIXES.md` for detailed migration instructions.
+
+### Files Modified
+- `web_interface/excel_import_routes.py` - New file
+- `web_interface/templates/excel_import/index.html` - New file
+- `web_interface/app.py` - Blueprint registration
+- `web_interface/templates/base.html` - Menu link
+- `desktop_gui/excel_import_dialog.py` - Database consistency fix
+- `pyarchinit_mini/services/extended_matrix_excel_parser.py` - Bug fixes
+- `pyarchinit_mini/cli/harris_import.py` - Bug fixes
+- `README.md` - Feature documentation
+- `docs/index.rst` - What's New section
+- `pyproject.toml` - Version 1.6.1
+- `docs/conf.py` - Version 1.6.1
+
+---
+
 ## [1.5.8] - 2025-10-27
 ## [1.5.9] - 2025-10-27
 

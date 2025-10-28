@@ -256,11 +256,108 @@ if not db_url:
 
 ---
 
+## Critical Issue: Database Schema Mismatch (v1.6.1)
+
+**Date**: 2025-10-28
+**Discovered During**: Web GUI testing
+
+### Problem
+
+Existing databases created with older versions have **incorrect schema** for `id_us` field:
+
+```sql
+-- OLD SCHEMA (WRONG)
+id_us VARCHAR(100) NOT NULL
+```
+
+But the current SQLAlchemy model expects:
+
+```python
+# CURRENT MODEL (CORRECT)
+id_us = Column(Integer, primary_key=True, autoincrement=True)
+```
+
+### Error Encountered
+
+```
+sqlite3.IntegrityError: NOT NULL constraint failed: us_table.id_us
+[SQL: INSERT INTO us_table (...) RETURNING id_us, created_at, updated_at]
+```
+
+### Solution
+
+**Option 1: Recreate Database (Recommended for development)**
+```bash
+# Backup existing database
+cp pyarchinit_mini.db pyarchinit_mini.db.backup
+
+# Remove old database
+rm pyarchinit_mini.db
+
+# Python will recreate with correct schema on next run
+python -c "
+from pyarchinit_mini.database.connection import DatabaseConnection
+from pyarchinit_mini.models.base import BaseModel
+connection = DatabaseConnection.from_url('sqlite:////path/to/pyarchinit_mini.db')
+BaseModel.metadata.create_all(connection.engine)
+"
+```
+
+**Option 2: Migrate Existing Data (For production)**
+```sql
+-- Create new table with correct schema
+CREATE TABLE us_table_new (
+    id_us INTEGER PRIMARY KEY AUTOINCREMENT,
+    sito VARCHAR(350) NOT NULL,
+    -- ... other columns
+);
+
+-- Copy data (id_us will be auto-generated)
+INSERT INTO us_table_new (sito, area, us, ...)
+SELECT sito, area, us, ... FROM us_table;
+
+-- Backup and replace
+ALTER TABLE us_table RENAME TO us_table_old;
+ALTER TABLE us_table_new RENAME TO us_table;
+
+-- Verify and drop old table
+DROP TABLE us_table_old;
+```
+
+### Verification
+
+Check your database schema:
+```bash
+sqlite3 pyarchinit_mini.db "PRAGMA table_info(us_table);" | grep id_us
+```
+
+Expected output:
+```
+0|id_us|INTEGER|1||1
+```
+
+If you see `VARCHAR(100)`, your database needs migration.
+
+### Impact
+
+This issue affects:
+- ✅ **v1.6.1+**: Fixed - Uses INTEGER autoincrement
+- ❌ **v1.6.0 and earlier**: May have VARCHAR schema
+
+**Action Required**: If upgrading from v1.6.0 or earlier, recreate or migrate your database.
+
+---
+
 ## Summary of All Commits
 
 - **c90195e**: Initial fix for date conversion and schema initialization
 - **2b62ff9**: Added bug fix documentation
 - **7bc39f2**: Fixed id_us type mismatch (INTEGER vs STRING)
 - **d4462ed**: Fixed date field type, Italian mappings, and unified database path
+- **2bb1ddc**: Desktop GUI database consistency fix
+- **be0bc61**: Comprehensive documentation and README update
+- **4165f26**: Integration summary documentation
 
 🎉 **All Excel import functionality now working correctly!**
+
+**v1.6.1**: Includes database schema fix verification and documentation

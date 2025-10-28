@@ -38,6 +38,39 @@ Key Features
 - **Real-Time Collaboration**: WebSocket support for team updates
 - **Analytics Dashboard**: Interactive charts and data visualization
 
+What's New in Version 1.6.1
+---------------------------
+
+.. versionadded:: 1.6.1
+   **Excel Import Integration & Database Schema Fix**
+
+   This patch release completes Excel import integration and fixes critical database schema issues:
+
+   **Excel Import Features**:
+
+   - ✅ **Web GUI Integration**: Complete Excel import interface with dual format support
+   - ✅ **Harris Matrix Template**: Sheet-based format (NODES + RELATIONSHIPS)
+   - ✅ **Extended Matrix Parser**: Inline format with relationship columns
+   - ✅ **Database Consistency**: Unified database path across all interfaces
+   - ✅ **Metro C Testing**: Successfully tested with 65 US and 658 relationships
+   - ✅ **Italian Relationships**: Full support for Italian relationship names
+
+   **Critical Fixes**:
+
+   - 🐛 **Database Schema**: Fixed ``id_us`` field from ``VARCHAR(100)`` to ``INTEGER AUTOINCREMENT``
+   - 🐛 **Date Type Handling**: Fixed SQLite date field type errors
+   - 🐛 **Desktop GUI**: Updated to use consistent database connection
+
+   **Documentation**:
+
+   - 📖 Complete Excel Import Guide (500+ lines)
+   - 📖 Troubleshooting section with schema migration steps
+   - 📖 Testing procedures and test results
+
+   **Migration Note**: Users upgrading from v1.6.0 should recreate their database or migrate schema manually. See ``docs/EXCEL_IMPORT_BUG_FIXES.md`` for details.
+
+   **Files**: ``docs/EXCEL_IMPORT_GUIDE.md``, ``docs/EXCEL_IMPORT_BUG_FIXES.md``, ``docs/EXCEL_IMPORT_INTEGRATION_SUMMARY.md``
+
 What's New in Version 1.6.0
 ---------------------------
 

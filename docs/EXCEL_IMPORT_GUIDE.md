@@ -368,10 +368,30 @@ python app.py  # Will create new database
 
 ---
 
-### Error: "datatype mismatch"
-**Solution**: This was fixed in v1.6.0. Update to latest version:
+### Error: "datatype mismatch" or "NOT NULL constraint failed: us_table.id_us"
+**Root Cause**: Old database schema has `id_us VARCHAR(100)` instead of `INTEGER`
+
+**Solution**: Recreate database with correct schema (v1.6.1+):
 ```bash
-git pull origin main
+# Backup old database
+cp pyarchinit_mini.db pyarchinit_mini.db.backup
+
+# Remove old database
+rm pyarchinit_mini.db
+
+# Recreate with correct schema
+python -c "
+from pyarchinit_mini.database.connection import DatabaseConnection
+from pyarchinit_mini.models.base import BaseModel
+connection = DatabaseConnection.from_url('sqlite:////path/to/pyarchinit_mini.db')
+BaseModel.metadata.create_all(connection.engine)
+"
+```
+
+**Verify schema**:
+```bash
+sqlite3 pyarchinit_mini.db "PRAGMA table_info(us_table);" | grep id_us
+# Should show: 0|id_us|INTEGER|1||1
 ```
 
 ---
