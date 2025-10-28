@@ -38,6 +38,54 @@ Key Features
 - **Real-Time Collaboration**: WebSocket support for team updates
 - **Analytics Dashboard**: Interactive charts and data visualization
 
+What's New in Version 1.6.0
+---------------------------
+
+.. versionadded:: 1.6.0
+   **Extensible EM Node Type System & Pure NetworkX GraphML Export**
+
+   This major release introduces a flexible configuration system for Extended Matrix node types and pure-Python GraphML export:
+
+   **Extensible EM Node Type Configuration**
+
+   - **YAML-Based Configuration**: Node types defined in ``pyarchinit_mini/config/em_node_types.yaml`` with visual properties, relationships, and descriptions
+   - **Web Management Interface**: Complete CRUD interface at ``/em-node-config`` for creating, editing, and deleting custom node types
+   - **14 Built-in Node Types**: US, USM, USVA, USVB, USVC, TU, USD, SF, VSF, CON, DOC, Extractor, Combinar, property with full specifications
+   - **Hot Reload Capability**: Configuration changes reflected immediately without application restart
+   - **Harris Creator Integration**: Custom node types automatically available in Harris Matrix Creator dropdown
+   - **Python API**: ``EMNodeConfigManager`` class for programmatic access via ``get_config_manager()``
+   - **Automatic Validation**: Type checking for colors, shapes, and required fields
+   - **Menu Integration**: Accessible via Configuration menu in web GUI
+
+   **Pure NetworkX GraphML Export**
+
+   - **No Graphviz Dependency**: GraphML export now uses pure Python with NetworkX library
+   - **Consistent Node IDs**: Maintains compatibility with yEd and other graph editors
+   - **Full Relationship Support**: Exports all stratigraphic relationships (Taglia, Copre, Si appoggia a, Riempie, etc.)
+   - **Periodization Preservation**: Archaeological periods and phases preserved in node attributes
+   - **Layout Information**: Node positioning data embedded for visual consistency
+   - **Backward Compatible**: Existing DOT/Graphviz export still available
+   - **Improved Performance**: Faster export for large graphs (1000+ nodes)
+   - **Better Error Handling**: Clear error messages and validation
+
+   **User Experience Improvements**
+
+   - Color picker interface for visual node type customization
+   - Bootstrap 5 styled web interface with responsive design
+   - Comprehensive documentation in ``EM_NODE_TYPE_MANAGEMENT.md`` and ``PURE_NETWORKX_GRAPHML_EXPORT.md``
+   - Session summary documentation in ``VERSION_1.6.0_IMPLEMENTATION_SUMMARY.md``
+
+   **Technical Implementation**
+
+   - ``pyarchinit_mini/config/em_node_config_manager.py``: Configuration manager with singleton pattern
+   - ``web_interface/em_node_config_routes.py``: Flask blueprint for web interface
+   - ``pyarchinit_mini/graphml_converter/graphml_exporter.py``: NetworkX-based exporter
+   - ``web_interface/harris_creator_routes.py``: Dynamic node type loading from configuration
+
+   **Impact**: Users can now define custom node types for project-specific Extended Matrix needs, and export Harris Matrix to GraphML without requiring Graphviz installation. Foundation for extensible archaeological data modeling.
+
+   See :doc:`EM_NODE_TYPE_MANAGEMENT` and :doc:`PURE_NETWORKX_GRAPHML_EXPORT` for complete documentation.
+
 What's New in Version 1.5.7
 ---------------------------
 
@@ -159,6 +207,8 @@ Features
    features/stratigraphic_relationships
    features/s3dgraphy
    features/graphml_export
+   PURE_NETWORKX_GRAPHML_EXPORT
+   EM_NODE_TYPE_MANAGEMENT
    features/pyarchinit_import_export
    AUTOMATIC_IMPORT_AND_BACKUP_GUIDE
    features/analytics
@@ -194,6 +244,7 @@ Development
    development/contributing
    development/testing
    development/changelog
+   VERSION_1.6.0_IMPLEMENTATION_SUMMARY
    DOCUMENTATION_VERIFICATION
 
 Examples & Tutorials
