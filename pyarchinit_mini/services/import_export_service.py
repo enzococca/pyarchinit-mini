@@ -733,6 +733,25 @@ class ImportExportService:
             source_session.close()
             mini_session.close()
 
+    def _convert_rapporti_to_mini_format(self, rapporti_str: str) -> str:
+        """
+        Convert PyArchInit rapporti format to PyArchInit-Mini format
+
+        PyArchInit: [['Copre', '3', '1', 'Scavo archeologico'], ['Copre', '11', '1', 'Scavo archeologico']]
+        PyArchInit-Mini: Copre 3, Copre 11
+        """
+        if not rapporti_str or rapporti_str == '[]':
+            return ''
+
+        try:
+            relationships = self._parse_pyarchinit_rapporti(rapporti_str)
+            # Format as "Relationship US, Relationship US, ..."
+            formatted = ', '.join([f"{rel_type} {us_num}" for rel_type, us_num in relationships])
+            return formatted
+        except Exception as e:
+            logger.warning(f"Failed to convert rapporti format: {rapporti_str} - {str(e)}")
+            return rapporti_str  # Return original if conversion fails
+
     def _map_us_fields_import(self, source_data: Dict[str, Any]) -> Dict[str, Any]:
         """Map US fields from PyArchInit to PyArchInit-Mini format"""
 
@@ -787,7 +806,7 @@ class ImportExportService:
             # Text fields
             'inclusi': source_data.get('inclusi'),
             'campioni': source_data.get('campioni'),
-            'rapporti': source_data.get('rapporti'),  # Copy rapporti field for compatibility
+            'rapporti': self._convert_rapporti_to_mini_format(source_data.get('rapporti', '')),  # Convert to readable format
             'documentazione': source_data.get('documentazione'),
             'cont_per': source_data.get('cont_per'),
 
