@@ -1,0 +1,349 @@
+# Extended Matrix Node Types Configuration
+# This file defines all available node types for GraphML export
+# Users can add custom types by following the same structure
+
+# Version of this configuration format
+version: "1.0"
+
+# Node type definitions
+node_types:
+  # ==========================================
+  # STANDARD STRATIGRAPHIC UNITS
+  # Uses single arrow symbols (> / <)
+  # ==========================================
+
+  US:
+    name: "Stratigraphic Unit"
+    description: "Standard stratigraphic unit"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"  # Uses > / <
+    visual:
+      shape: "rectangle"
+      fill_color: "#FFFFFF"
+      border_color: "#9B3333"
+      border_width: 3.0
+      width: 90.0
+      height: 30.0
+      font_family: "DialogInput"
+      font_size: 24
+      font_style: "bold"
+      text_color: "#000000"
+    label_format: "US{number}"  # {number} replaced with US number
+
+  USM:
+    name: "Masonry Stratigraphic Unit"
+    description: "Stratigraphic unit - masonry"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"
+    visual:
+      shape: "rectangle"
+      fill_color: "#C0C0C0"
+      border_color: "#9B3333"
+      border_width: 3.0
+      width: 90.0
+      height: 30.0
+      font_family: "DialogInput"
+      font_size: 24
+      font_style: "bold"
+      text_color: "#000000"
+    label_format: "USM{number}"
+
+  VSF:
+    name: "Virtual Stratigraphic Face"
+    description: "Virtual stratigraphic face"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"
+    visual:
+      shape: "roundrectangle"
+      fill_color: "#FFFFFF"
+      border_color: "#D8BD30"
+      border_width: 3.0
+      width: 90.0
+      height: 30.0
+      font_family: "DialogInput"
+      font_size: 24
+      font_style: "bold"
+      text_color: "#000000"
+    label_format: "VSF{number}"
+
+  SF:
+    name: "Stratigraphic Face"
+    description: "Stratigraphic face"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"
+    visual:
+      shape: "roundrectangle"
+      fill_color: "#FFFFFF"
+      border_color: "#D8BD30"
+      border_width: 3.0
+      width: 90.0
+      height: 30.0
+      font_family: "DialogInput"
+      font_size: 24
+      font_style: "bold"
+      text_color: "#000000"
+    label_format: "SF{number}"
+
+  USD:
+    name: "Destructive Stratigraphic Unit"
+    description: "Destructive stratigraphic unit"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"
+    visual:
+      shape: "roundrectangle"
+      fill_color: "#FFFFFF"
+      border_color: "#D86400"
+      border_width: 3.0
+      width: 90.0
+      height: 30.0
+      font_family: "DialogInput"
+      font_size: 24
+      font_style: "bold"
+      text_color: "#000000"
+    label_format: "USD{number}"
+
+  USVA:
+    name: "Virtual Stratigraphic Unit A"
+    description: "Virtual stratigraphic unit type A"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"
+    visual:
+      shape: "parallelogram"
+      fill_color: "#000000"
+      border_color: "#248FE7"
+      border_width: 3.0
+      width: 90.0
+      height: 30.0
+      font_family: "Dialog"
+      font_size: 12
+      font_style: "plain"
+      text_color: "#FFFFFF"
+    label_format: "USVA{number}"
+
+  USVB:
+    name: "Virtual Stratigraphic Unit B"
+    description: "Virtual stratigraphic unit type B"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"
+    visual:
+      shape: "hexagon"
+      fill_color: "#000000"
+      border_color: "#31792D"
+      border_width: 3.0
+      width: 90.0
+      height: 30.0
+      font_family: "Dialog"
+      font_size: 12
+      font_style: "plain"
+      text_color: "#FFFFFF"
+    label_format: "USVB{number}"
+
+  USVC:
+    name: "Virtual Stratigraphic Unit C"
+    description: "Virtual stratigraphic unit type C"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"
+    visual:
+      shape: "hexagon"
+      fill_color: "#000000"
+      border_color: "#31792D"
+      border_width: 3.0
+      width: 90.0
+      height: 30.0
+      font_family: "Dialog"
+      font_size: 12
+      font_style: "plain"
+      text_color: "#FFFFFF"
+    label_format: "USVC{number}"
+
+  TU:
+    name: "Typological Unit"
+    description: "Typological unit"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"
+    visual:
+      shape: "rectangle"
+      fill_color: "#FFFFFF"
+      border_color: "#9B3333"
+      border_width: 3.0
+      width: 90.0
+      height: 30.0
+      font_family: "DialogInput"
+      font_size: 24
+      font_style: "bold"
+      text_color: "#000000"
+    label_format: "TU{number}"
+
+  # ==========================================
+  # SPECIAL STRATIGRAPHIC NODES
+  # ==========================================
+
+  CON:
+    name: "Connector"
+    description: "Connector / continuity node"
+    category: "stratigraphic"
+    symbol_type: "single_arrow"
+    visual:
+      shape: "svg"
+      svg_refid: 3  # Black diamond SVG
+      width: 25.0
+      height: 25.0
+    label_format: "CON{number}"
+
+  # ==========================================
+  # NON-STRATIGRAPHIC UNITS (BPMN NODES)
+  # Uses double arrow symbols (>> / <<)
+  # ==========================================
+
+  DOC:
+    name: "Document"
+    description: "Documentation node with file attachments"
+    category: "non_stratigraphic"
+    symbol_type: "double_arrow"  # Uses >> / <<
+    visual:
+      shape: "bpmn_artifact"
+      width: 60.0
+      height: 40.0
+    label_format: "D.{number}"
+    special_fields:
+      - "url"  # File path goes in URL field
+      - "tipo_documento"  # Document type
+
+  property:
+    name: "Property"
+    description: "Property or attribute node"
+    category: "non_stratigraphic"
+    symbol_type: "double_arrow"
+    visual:
+      shape: "bpmn_artifact"
+      width: 60.0
+      height: 40.0
+    label_format: "{first_word}"  # Extract first word from description
+    special_fields:
+      - "description"  # Material properties
+
+  Extractor:
+    name: "Extractor"
+    description: "Data extractor node"
+    category: "non_stratigraphic"
+    symbol_type: "double_arrow"
+    visual:
+      shape: "svg"
+      svg_refid: 1  # Extractor SVG (pipes)
+      width: 48.0
+      height: 48.0
+    label_format: "D.{number}"
+
+  Combinar:
+    name: "Combinar"
+    description: "Data combiner node"
+    category: "non_stratigraphic"
+    symbol_type: "double_arrow"
+    visual:
+      shape: "svg"
+      svg_refid: 2  # Combinar SVG (aggregation)
+      width: 48.0
+      height: 48.0
+    label_format: "C.{number}"
+
+# ==========================================
+# SHAPE DEFINITIONS
+# Maps shape names to yEd shape types
+# ==========================================
+shapes:
+  rectangle: "rectangle"
+  roundrectangle: "roundrectangle"
+  parallelogram: "parallelogram"
+  hexagon: "hexagon"
+  ellipse: "ellipse"
+  triangle: "triangle"
+  diamond: "diamond"
+  octagon: "octagon"
+  trapezoid: "trapezoid"
+  bpmn_artifact: "bpmn_artifact"  # Special BPMN shape
+  svg: "svg_node"  # Uses SVG resource
+
+# ==========================================
+# SYMBOL TYPE DEFINITIONS
+# Defines which arrow symbols to use
+# ==========================================
+symbol_types:
+  single_arrow:
+    above: ">"
+    below: "<"
+    description: "Standard stratigraphic relationships"
+  double_arrow:
+    above: ">>"
+    below: "<<"
+    description: "Non-stratigraphic relationships"
+
+# ==========================================
+# DEFAULT SETTINGS
+# ==========================================
+defaults:
+  # Default node type if unita_tipo not recognized
+  fallback_type: "US"
+
+  # Default visual style for unknown types
+  default_visual:
+    shape: "rectangle"
+    fill_color: "#FFFFFF"
+    border_color: "#000000"
+    border_width: 1.0
+    width: 90.0
+    height: 30.0
+    font_family: "DialogInput"
+    font_size: 12
+    font_style: "plain"
+    text_color: "#000000"
+
+  # Label format for unknown types
+  default_label_format: "US{number}"
+
+# ==========================================
+# VALIDATION RULES
+# ==========================================
+validation:
+  required_fields:
+    - name
+    - category
+    - symbol_type
+    - visual
+    - label_format
+
+  valid_categories:
+    - stratigraphic
+    - non_stratigraphic
+
+  valid_symbol_types:
+    - single_arrow
+    - double_arrow
+
+  valid_shapes:
+    - rectangle
+    - roundrectangle
+    - parallelogram
+    - hexagon
+    - ellipse
+    - triangle
+    - diamond
+    - octagon
+    - trapezoid
+    - bpmn_artifact
+    - svg
+
+  color_pattern: "^#[0-9A-Fa-f]{6}$"  # Hex color format
+
+  size_range:
+    width: [10.0, 500.0]
+    height: [10.0, 500.0]
+    border_width: [0.1, 10.0]
+
+# ==========================================
+# METADATA
+# ==========================================
+metadata:
+  last_modified: "2025-10-28"
+  author: "PyArchInit Development Team"
+  version_description: "Initial release with 14 EM node types"
+  user_customizable: true

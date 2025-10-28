@@ -270,6 +270,313 @@ python run_tipo_documento_migration.py downgrade
 - Period-based hierarchical structure
 - EM_palette colors and shapes applied automatically
 
+### 📊 Pure NetworkX GraphML Export (NEW in v1.5.8)
+
+**Graphviz-Free Export with Full Extended Matrix Support**
+
+PyArchInit-Mini now includes a pure Python GraphML exporter powered by NetworkX, eliminating the need for Graphviz software installation. This provides a streamlined, dependency-free way to generate yEd-compatible Harris Matrix exports.
+
+#### Key Features
+
+- **No Graphviz Required**: Pure Python implementation using NetworkX
+- **Full EM Palette Support**: All 14 Extended Matrix unit types with SVG symbols
+- **Period Clustering**: Automatic TableNode generation with chronological rows
+- **Transitive Reduction**: Built-in NetworkX algorithm for edge optimization
+- **Language-Aware Labels**: Smart label extraction based on node type
+- **Document Integration**: DOC nodes with file paths in URL fields
+- **Multi-Interface Support**: Available in CLI, Web, Desktop GUI, and REST API
+
+#### Extended Matrix Node Styles
+
+The pure NetworkX exporter includes authentic SVG symbols from the EM palette:
+
+**BPMN Nodes with SVG Resources**:
+- **Extractor** (refid=1): Complex SVG with pipes and circular elements
+- **Combinar** (refid=2): Aggregation symbol with geometric shapes
+- **CON** (refid=3): Black diamond for continuity relationships
+- **DOC**: BPMN Artifact shape with file path in URL field
+- **Property**: BPMN Artifact with language-aware labels ("Material" / "Materiale")
+
+**Standard Shapes**:
+- **US/USM**: White fill, red border (#9B3333), rectangle
+- **USVA/USVB/USVC**: Black fill, colored borders (blue/green), special shapes
+- **VSF/SF**: White fill, yellow border (#D8BD30), rounded rectangle
+- **USD**: White fill, orange border (#D86400), rounded rectangle
+
+#### Smart Label Formatting
+
+The exporter applies intelligent label formatting based on node type:
+
+```python
+# Property nodes - Extract first word from description
+"Materiale pietra dura" → Visual label: "Materiale"
+"Material hard stone" → Visual label: "Material"
+
+# DOC nodes - File path in URL field
+DOC4001:
+  URL: "DosCo\test1_1.graphml"
+  Description: "" (empty)
+  Visual Label: "D.4001"
+
+# Extractor/Combinar - Prefixed labels
+Extractor400 → Visual label: "D.400"
+Combinar500 → Visual label: "C.500"
+
+# Standard nodes - US prefix
+US1001 → Visual label: "US1001"
+```
+
+#### Period-Based TableNode Structure
+
+Automatic hierarchical organization by archaeological periods:
+
+```xml
+<y:TableNode>
+  <y:NodeLabel>Site Name</y:NodeLabel>
+  <y:Rows>
+    <y:Row id="Et_contemporanea">Età contemporanea</y:Row>
+    <y:Row id="Et_moderna">Età moderna</y:Row>
+    <y:Row id="XV_secolo">XV secolo</y:Row>
+    <!-- Nodes nested in period rows -->
+  </y:Rows>
+</y:TableNode>
+```
+
+- Chronological sorting using periodo_iniziale/fase_iniziale
+- Reversible order (newest→oldest or oldest→newest)
+- Color-coded period rows
+- Nested graph structure for proper yEd rendering
+
+#### Usage Examples
+
+**Python API**:
+```python
+from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
+from pyarchinit_mini.database.manager import DatabaseManager
+
+# Generate Harris Matrix
+generator = HarrisMatrixGenerator(db_manager, us_service)
+graph = generator.generate_matrix("Site Name")
+
+# Export to GraphML (Pure NetworkX)
+result = generator.export_to_graphml(
+    graph=graph,
+    output_path="harris_matrix.graphml",
+    site_name="Site Name",
+    title="Site Name Harris Matrix",
+    use_extended_labels=True,    # Extended Matrix labels
+    include_periods=True,         # Period clustering
+    apply_transitive_reduction=True,  # Remove redundant edges
+    reverse_epochs=False          # Chronological order (oldest→newest)
+)
+```
+
+**CLI Interface**:
+```bash
+# Start interactive CLI
+pyarchinit-mini
+
+# Navigate to: Harris Matrix → Export Matrix
+# Select site and options
+# GraphML file generated with all features
+```
+
+**Web Interface**:
+```bash
+# Start web server
+pyarchinit-mini-web
+
+# Navigate to: Harris Matrix → Export GraphML
+# Select site, configure options
+# Download .graphml file
+```
+
+**Desktop GUI**:
+```bash
+# Start desktop application
+pyarchinit-mini-gui
+
+# Menu → Tools → Export Harris Matrix (GraphML)
+# Configure export options
+# Save dialog appears
+```
+
+#### Technical Details
+
+**Architecture**:
+- `pure_networkx_exporter.py`: Main export logic with period grouping
+- `graphml_builder.py`: XML generation with yEd structures
+- `svg_resources.py`: EM palette SVG definitions (Extractor, Combinar, CON)
+- NetworkX transitive reduction for edge optimization
+- ElementTree for efficient XML generation
+
+**Advantages over Graphviz-based Export**:
+- No external software installation required
+- Faster export for large graphs
+- More consistent cross-platform behavior
+- Direct control over yEd-specific structures
+- Easier to maintain and extend
+
+**Compatibility**:
+- yEd Graph Editor v3.23+
+- All operating systems (Windows, Linux, macOS)
+- Python 3.8-3.14
+- Works with both SQLite and PostgreSQL databases
+
+**Performance**:
+- Handles 500+ nodes efficiently
+- Sub-second export for typical sites (50-100 nodes)
+- Memory-efficient streaming XML generation
+- Optimized period grouping algorithms
+
+#### Migration from Graphviz Export
+
+The pure NetworkX exporter is fully compatible with existing workflows:
+
+```python
+# Old way (requires Graphviz software)
+from pyarchinit_mini.graphml_converter import convert_dot_to_graphml
+convert_dot_to_graphml(dot_file, graphml_file)
+
+# New way (pure Python, no Graphviz needed)
+from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
+generator.export_to_graphml(graph, output_path, site_name)
+
+# Same result: yEd-compatible GraphML with full EM palette support
+```
+
+All interfaces (CLI, Web, Desktop GUI) automatically use the pure NetworkX exporter when calling `export_to_graphml()`.
+
+### 🎨 Extensible EM Node Type System (NEW in v1.6.0)
+
+**User-Friendly Configuration Management for Extended Matrix Node Types**
+
+PyArchInit-Mini now features a flexible, extensible system for managing Extended Matrix node types. Add custom node types without modifying code, using either YAML configuration files or a user-friendly web interface.
+
+#### Key Features
+
+✅ **14 Built-in Node Types** - US, USM, VSF, SF, USD, USVA, USVB, USVC, TU, CON, DOC, property, Extractor, Combinar
+✅ **Add Custom Types** - Create your own node types with custom styling
+✅ **Web Interface** - Intuitive GUI for managing types (CRUD operations)
+✅ **YAML Configuration** - Direct file editing for power users
+✅ **Validation** - Automatic validation of colors, sizes, shapes
+✅ **Hot Reload** - Changes take effect immediately
+
+#### Managing Node Types
+
+**Via Web Interface** (Recommended):
+```bash
+# Start web interface
+cd web_interface
+python app.py
+
+# Navigate to: http://localhost:5000/em-node-config
+```
+
+The web interface provides:
+- Visual cards for all node types (grouped by category)
+- Add/Edit/Delete operations for custom types
+- Color pickers for fill, border, and text colors
+- Shape, font, and style selectors
+- Real-time validation
+- Built-in/Custom badges
+
+**Via YAML Configuration** (Power Users):
+```yaml
+# File: pyarchinit_mini/config/em_node_types.yaml
+
+node_types:
+  SAMPLE:  # Custom type ID
+    name: "Sample Unit"
+    description: "Custom sample unit type"
+    category: "stratigraphic"  # or "non_stratigraphic"
+    symbol_type: "single_arrow"  # > / < (or "double_arrow" for >> / <<)
+    visual:
+      shape: "diamond"
+      fill_color: "#FFE6E6"  # Hex color
+      border_color: "#CC0000"
+      border_width: 2.5
+      width: 100.0
+      height: 40.0
+      font_family: "DialogInput"
+      font_size: 14
+      font_style: "bold"
+      text_color: "#000000"
+    label_format: "SAMPLE-{number}"  # {number} or {first_word}
+    custom: true
+```
+
+#### Python API
+
+```python
+from pyarchinit_mini.config.em_node_config_manager import get_config_manager
+
+# Get configuration manager
+config = get_config_manager()
+
+# Get all node types
+all_types = config.get_all_node_types()
+
+# Get visual style for a type
+visual = config.get_visual_style('US')
+
+# Format a label
+label = config.format_label('US', '123', '')  # → "US123"
+
+# Add custom type programmatically
+visual = {
+    'shape': 'hexagon',
+    'fill_color': '#CCFFCC',
+    'border_color': '#00AA00',
+    'border_width': 2.0,
+    'text_color': '#000000',
+    'font_family': 'DialogInput',
+    'font_size': 16,
+    'font_style': 'bold'
+}
+
+success = config.add_custom_node_type(
+    tipo_id='FIND',
+    name='Find Unit',
+    description='Archaeological find',
+    category='stratigraphic',
+    symbol_type='single_arrow',
+    visual=visual,
+    label_format='FIND{number}'
+)
+
+if success:
+    config.save_config()
+```
+
+#### Label Format Placeholders
+
+- `{number}` - Replaced with US number (e.g., "US{number}" → "US1", "US2")
+- `{first_word}` - First word from description (e.g., "Materiale", "Material")
+
+#### Configuration
+
+All node types are defined in `pyarchinit_mini/config/em_node_types.yaml`:
+
+**Node Categories**:
+- **Stratigraphic** - Use single arrows (`>` / `<`) for relationships
+- **Non-Stratigraphic** - Use double arrows (`>>` / `<<`) for relationships
+
+**Visual Properties**:
+- **Shapes**: rectangle, roundrectangle, hexagon, diamond, parallelogram, octagon, triangle, ellipse, trapezoid, bpmn_artifact, svg
+- **Colors**: Hex format `#RRGGBB` (e.g., `#FFFFFF`, `#9B3333`)
+- **Sizes**: Width/Height (10-500), Border Width (0.1-10)
+- **Fonts**: DialogInput, Dialog, Arial, Helvetica
+- **Styles**: plain, bold, italic, bolditalic
+
+**Validation**: Automatic validation ensures:
+- Valid hex colors
+- Size ranges
+- Required fields
+- Valid categories and symbol types
+
+For complete documentation, see: [`docs/EM_NODE_TYPE_MANAGEMENT.md`](docs/EM_NODE_TYPE_MANAGEMENT.md)
+
 ### 🎨 s3Dgraphy - 3D Stratigraphic Visualization (NEW in v1.6.0)
 
 **Interactive 3D Harris Matrix with Extended Matrix (EM) Palette Integration**
