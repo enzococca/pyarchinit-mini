@@ -745,13 +745,23 @@ function applyLayout() {
         return;
     }
 
+    // Find root nodes (nodes with no incoming edges - most recent layers)
+    const roots = cy.nodes().filter(node => node.indegree() === 0);
+
     cy.layout({
         name: 'breadthfirst',
         directed: true,
-        spacingFactor: 1.5,
+        roots: roots.length > 0 ? roots : undefined,
+        padding: 30,
+        spacingFactor: 1.75,
         avoidOverlap: true,
+        nodeDimensionsIncludeLabels: true,
         animate: true,
-        animationDuration: 500
+        animationDuration: 500,
+        fit: true,
+        // Position nodes from top (most recent) to bottom (oldest)
+        // This is the natural direction for stratigraphic sequences
+        maximal: false
     }).run();
 
     showNotification('Layout applied', 'success');
