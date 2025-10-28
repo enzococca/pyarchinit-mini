@@ -745,23 +745,27 @@ function applyLayout() {
         return;
     }
 
-    // Find root nodes (nodes with no incoming edges - most recent layers)
-    const roots = cy.nodes().filter(node => node.indegree() === 0);
-
+    // Use dagre layout for optimal hierarchical display of stratigraphic sequences
     cy.layout({
-        name: 'breadthfirst',
-        directed: true,
-        roots: roots.length > 0 ? roots : undefined,
+        name: 'dagre',
+        // Direction: top to bottom (most recent layers at top, oldest at bottom)
+        rankDir: 'TB',
+        // Alignment of nodes within ranks
+        align: 'UL',
+        // Spacing between nodes
+        nodeSep: 80,
+        edgeSep: 20,
+        rankSep: 100,
+        // Padding around the graph
         padding: 30,
-        spacingFactor: 1.75,
-        avoidOverlap: true,
-        nodeDimensionsIncludeLabels: true,
+        // Animation
         animate: true,
         animationDuration: 500,
+        animationEasing: 'ease-out',
+        // Fit to viewport
         fit: true,
-        // Position nodes from top (most recent) to bottom (oldest)
-        // This is the natural direction for stratigraphic sequences
-        maximal: false
+        // Less aggressive ranking for better visual hierarchy
+        ranker: 'network-simplex'
     }).run();
 
     showNotification('Layout applied', 'success');
