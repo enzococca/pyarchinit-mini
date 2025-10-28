@@ -124,10 +124,94 @@ class SiteService:
             from ..utils.exceptions import DatabaseError
             raise DatabaseError(f"Failed to update Site: {e}")
     
-    def delete_site(self, site_id: int) -> bool:
-        """Delete site"""
-        # TODO: Check for related records (US, Inventario) before deletion
-        return self.db_manager.delete(Site, site_id)
+    def delete_site(self, site_id: int) -> Dict[str, int]:
+        """
+        Delete site and all related records (cascade deletion)
+
+        Args:
+            site_id: ID of the site to delete
+
+        Returns:
+            Dictionary with counts of deleted records by table
+
+        Raises:
+            RecordNotFoundError: If site does not exist
+        """
+        # Get site to get the site name
+        site = self.get_site_by_id(site_id)
+        if not site:
+            raise RecordNotFoundError(f"Site with ID {site_id} not found")
+
+        site_name = site.sito
+
+        # Track deletion counts
+        deletion_stats = {
+            'us_relationships': 0,
+            'periodizzazione': 0,
+            'datazioni': 0,
+            'inventario': 0,
+            'us': 0,
+            'site': 0
+        }
+
+        try:
+            with self.db_manager.connection.get_session() as session:
+                from ..models.us import US
+                from ..models.inventario_materiali import InventarioMateriali
+                from ..models.harris_matrix import USRelationships, Periodizzazione
+                from ..models.datazione import Datazione
+
+                # Delete in order to respect foreign key constraints:
+                # 1. US Relationships (references US)
+                relationships = session.query(USRelationships).filter(
+                    USRelationships.sito == site_name
+                ).all()
+                for rel in relationships:
+                    session.delete(rel)
+                    deletion_stats['us_relationships'] += 1
+
+                # 2. Periodizzazione (references US and Site)
+                periodizzazioni = session.query(Periodizzazione).filter(
+                    Periodizzazione.sito == site_name
+                ).all()
+                for per in periodizzazioni:
+                    session.delete(per)
+                    deletion_stats['periodizzazione'] += 1
+
+                # 3. Datazioni (references Site and Periodizzazione)
+                datazioni = session.query(Datazione).filter(
+                    Datazione.sito == site_name
+                ).all()
+                for dat in datazioni:
+                    session.delete(dat)
+                    deletion_stats['datazioni'] += 1
+
+                # 4. Inventario Materiali (references Site and US)
+                inventario = session.query(InventarioMateriali).filter(
+                    InventarioMateriali.sito == site_name
+                ).all()
+                for inv in inventario:
+                    session.delete(inv)
+                    deletion_stats['inventario'] += 1
+
+                # 5. US (references Site)
+                us_records = session.query(US).filter(US.sito == site_name).all()
+                for us in us_records:
+                    session.delete(us)
+                    deletion_stats['us'] += 1
+
+                # 6. Finally, delete the site itself
+                session.delete(site)
+                deletion_stats['site'] = 1
+
+                # Commit the transaction
+                session.commit()
+
+                return deletion_stats
+
+        except Exception as e:
+            from ..utils.exceptions import DatabaseError
+            raise DatabaseError(f"Failed to delete site and related records: {e}")
     
     def count_sites(self, filters: Optional[Dict[str, Any]] = None) -> int:
         """Count sites with optional filters"""

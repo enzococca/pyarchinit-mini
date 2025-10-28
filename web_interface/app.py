@@ -598,6 +598,43 @@ def create_app():
 
         return render_template('sites/form.html', form=form, title='Modifica Sito', edit_mode=True)
 
+    @app.route('/sites/<int:site_id>/delete', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def delete_site(site_id):
+        """Delete site and all related records (cascade deletion)"""
+        try:
+            # Get site name before deletion for flash message
+            site = site_service.get_site_dto_by_id(site_id)
+            if not site:
+                return jsonify({'success': False, 'message': 'Sito non trovato'}), 404
+
+            site_name = site.sito
+
+            # Perform cascade deletion
+            deletion_stats = site_service.delete_site(site_id)
+
+            # Build success message
+            message = f'Sito "{site_name}" eliminato con successo!'
+            if deletion_stats['us'] > 0:
+                message += f" ({deletion_stats['us']} US, {deletion_stats['inventario']} inventario, "
+                message += f"{deletion_stats['us_relationships']} relazioni, "
+                message += f"{deletion_stats['periodizzazione']} periodizzazioni, "
+                message += f"{deletion_stats['datazioni']} datazioni eliminate)"
+
+            return jsonify({
+                'success': True,
+                'message': message,
+                'stats': deletion_stats
+            })
+
+        except Exception as e:
+            logger.error(f"Error deleting site {site_id}: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'Errore durante l\'eliminazione del sito: {str(e)}'
+            }), 500
+
     @app.route('/sites/<int:site_id>')
     @login_required
     def view_site(site_id):

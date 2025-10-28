@@ -78,6 +78,12 @@
                                     </a></li>
                                 </ul>
                             </div>
+                            <button class="btn btn-danger btn-sm delete-site-btn"
+                                    data-site-id="{{ site.id_sito }}"
+                                    data-site-name="{{ site.sito }}"
+                                    title="{{ _('Delete Site') }}">
+                                <i class="fas fa-trash"></i> <span class="d-none d-lg-inline">{{ _('Delete') }}</span>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -121,6 +127,11 @@
                 <a href="{{ url_for('export_site_pdf', site_id=site.id_sito) }}" class="btn btn-secondary btn-sm">
                     <i class="fas fa-file-pdf"></i> {{ _('Export PDF') }}
                 </a>
+                <button class="btn btn-danger btn-sm delete-site-btn"
+                        data-site-id="{{ site.id_sito }}"
+                        data-site-name="{{ site.sito }}">
+                    <i class="fas fa-trash"></i> {{ _('Delete Site') }}
+                </button>
             </div>
         </div>
         {% endfor %}
@@ -136,4 +147,128 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteSiteModal" tabindex="-1" aria-labelledby="deleteSiteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteSiteModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> {{ _('Confirm Deletion') }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">
+                    <strong>{{ _('Are you sure you want to delete this site?') }}</strong>
+                </p>
+                <p class="text-danger">
+                    <i class="fas fa-exclamation-circle"></i> {{ _('This action will permanently delete:') }}
+                </p>
+                <ul>
+                    <li>{{ _('The site') }}: <strong id="modal-site-name"></strong></li>
+                    <li>{{ _('All stratigraphic units (US)') }}</li>
+                    <li>{{ _('All inventory records') }}</li>
+                    <li>{{ _('All stratigraphic relationships') }}</li>
+                    <li>{{ _('All periodization data') }}</li>
+                    <li>{{ _('All dating records') }}</li>
+                </ul>
+                <p class="text-danger fw-bold">
+                    <i class="fas fa-warning"></i> {{ _('This action cannot be undone!') }}
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> {{ _('Cancel') }}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">
+                    <i class="fas fa-trash"></i> {{ _('Delete Site') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteSiteModal = new bootstrap.Modal(document.getElementById('deleteSiteModal'));
+    let siteIdToDelete = null;
+
+    // Handle delete button clicks
+    document.querySelectorAll('.delete-site-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            siteIdToDelete = this.dataset.siteId;
+            const siteName = this.dataset.siteName;
+
+            // Update modal with site name
+            document.getElementById('modal-site-name').textContent = siteName;
+
+            // Show modal
+            deleteSiteModal.show();
+        });
+    });
+
+    // Handle confirm delete
+    document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
+        if (!siteIdToDelete) return;
+
+        const deleteBtn = this;
+        const originalText = deleteBtn.innerHTML;
+
+        // Disable button and show loading
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ _("Deleting...") }}';
+
+        try {
+            const response = await fetch(`/sites/${siteIdToDelete}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Show success message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <i class="fas fa-check-circle"></i> ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.d-flex'));
+
+                // Close modal
+                deleteSiteModal.hide();
+
+                // Reload page after short delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                // Show error message
+                alert(`{{ _('Error') }}: ${data.message}`);
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = originalText;
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert(`{{ _('Error deleting site') }}: ${error.message}`);
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = originalText;
+        }
+    });
+
+    // Reset state when modal is hidden
+    document.getElementById('deleteSiteModal').addEventListener('hidden.bs.modal', function() {
+        siteIdToDelete = null;
+        document.getElementById('confirm-delete-btn').disabled = false;
+        document.getElementById('confirm-delete-btn').innerHTML = '<i class="fas fa-trash"></i> {{ _("Delete Site") }}';
+    });
+});
+</script>
 {% endblock %}
