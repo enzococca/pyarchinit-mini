@@ -326,10 +326,12 @@ Single sheet with inline relationships:
         """Import using Extended Matrix Parser format"""
         from pyarchinit_mini.services.extended_matrix_excel_parser import import_extended_matrix_excel
 
+        # Use the same database connection as the desktop app
         stats = import_extended_matrix_excel(
             excel_path=filepath,
             site_name=site_name,
-            generate_graphml=generate_graphml
+            generate_graphml=generate_graphml,
+            db_connection=self.db_manager.connection
         )
 
         if stats.get('errors'):
