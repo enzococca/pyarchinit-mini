@@ -289,8 +289,10 @@ Features
    features/stratigraphic_relationships
    features/s3dgraphy
    features/graphml_export
+   features/graphml-export-technical
    PURE_NETWORKX_GRAPHML_EXPORT
    EM_NODE_TYPE_MANAGEMENT
+   features/pyarchinit-import-export
    features/pyarchinit_import_export
    features/database_creation
    AUTOMATIC_IMPORT_AND_BACKUP_GUIDE
@@ -298,6 +300,7 @@ Features
    features/authentication
    features/export_import
    features/media_management
+   features/extended-matrix-framework
    EXTENDED_MATRIX_FRAMEWORK
    EXTENDED_MATRIX_EXPORT
    DOC_FILE_UPLOAD
@@ -314,6 +317,15 @@ Data Management
    data/inventory
    data/database_management
    data/migrations
+
+Python API Reference
+--------------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Python API Documentation:
+
+   python-api/overview
 
 Development
 -----------
