@@ -98,6 +98,7 @@ def editor():
                     'area': us.area or '',
                     'period': us.periodo_iniziale or '',
                     'phase': us.fase_iniziale or '',
+                    'datazione': us.datazione or '',  # datazione_estesa from periodizzazione
                     'file_path': us.file_path or ''
                 })
 

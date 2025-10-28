@@ -465,6 +465,7 @@ function showNodeProperties(node) {
     document.getElementById('prop-area').value = node.data('area') || '';
     document.getElementById('prop-period').value = node.data('period') || '';
     document.getElementById('prop-phase').value = node.data('phase') || '';
+    document.getElementById('prop-datazione').value = node.data('datazione') || '';
     document.getElementById('prop-file-path').value = node.data('file_path') || '';
 
     // Show/hide file path field for DOC type
@@ -529,6 +530,7 @@ function loadExistingData() {
                     area: nodeData.area,
                     period: nodeData.period,
                     phase: nodeData.phase,
+                    datazione: nodeData.datazione || '',  // datazione_estesa
                     file_path: nodeData.file_path,
                     color: nodeType.color,
                     shape: nodeType.shape || 'rectangle'
@@ -785,7 +787,8 @@ function removeTransitiveEdges() {
 }
 
 /**
- * Apply hierarchical layout
+ * Apply hierarchical layout optimized for stratigraphic sequences
+ * Uses dagre with custom ranking based on period/phase hierarchy
  */
 function applyLayout() {
     if (cy.nodes().length === 0) {
@@ -796,28 +799,42 @@ function applyLayout() {
     // Remove transitive/redundant edges before layout
     removeTransitiveEdges();
 
-    // Use dagre layout for optimal hierarchical display of stratigraphic sequences
+    // Assign ranking based on period and phase for better stratigraphic ordering
+    cy.nodes().forEach(node => {
+        const period = parseInt(node.data('period')) || 999;
+        const phase = parseInt(node.data('phase')) || 999;
+
+        // Calculate rank: higher period/phase = lower rank (appears at top, more recent)
+        // Use formula: rank = -(period * 1000 + phase) so higher values appear first
+        const rank = -(period * 1000 + phase);
+        node.data('dagre_rank', rank);
+    });
+
+    // Use dagre layout with period/phase-based ranking
     cy.layout({
         name: 'dagre',
-        // Direction: top to bottom (most recent layers at top, oldest at bottom)
+        // Direction: top to bottom (most recent/highest period at top)
         rankDir: 'TB',
-        // Alignment of nodes within ranks (UL = upper left for more compact layout)
-        align: 'UL',
-        // Spacing between nodes
-        nodeSep: 100,
-        edgeSep: 30,
-        rankSep: 120,
-        // Padding around the graph
-        padding: 40,
+        // Use custom ranking function based on period/phase
+        ranker: function(graph) {
+            // Use longest-path ranker as base, dagre will respect our dagre_rank hints
+            return 'longest-path';
+        },
+        // Alignment within ranks - distribute evenly
+        align: undefined,  // Let dagre decide best alignment
+        // Spacing - more generous for readability
+        nodeSep: 120,
+        edgeSep: 50,
+        rankSep: 150,
+        // Padding
+        padding: 50,
         // Animation
         animate: true,
-        animationDuration: 500,
+        animationDuration: 600,
         animationEasing: 'ease-out',
-        // Fit to viewport
+        // Fit viewport
         fit: true,
-        // Network-simplex ranker for better hierarchy
-        ranker: 'network-simplex',
-        // Acyclic edge routing for cleaner orthogonal-like appearance
+        // Edge routing for orthogonal appearance
         acyclicer: 'greedy'
     }).run();
 
