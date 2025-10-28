@@ -15,6 +15,7 @@ from wtforms.validators import DataRequired, Optional
 from werkzeug.utils import secure_filename
 import tempfile
 import base64
+from sqlalchemy import text
 
 # PyArchInit-Mini imports
 from pyarchinit_mini.database.connection import DatabaseConnection
@@ -2104,7 +2105,7 @@ def create_app():
                     test_conn = DatabaseConnection.from_url(f'sqlite:///{db_path}')
                     # Try to query tables to validate
                     with test_conn.get_session() as session:
-                        session.execute('SELECT name FROM sqlite_master WHERE type="table"')
+                        session.execute(text('SELECT name FROM sqlite_master WHERE type="table"'))
                 except Exception as e:
                     os.remove(db_path)
                     flash(f'File non valido: {str(e)}', 'error')
@@ -2164,7 +2165,7 @@ def create_app():
                     test_conn = DatabaseConnection.from_url(connection_url)
                     with test_conn.get_session() as session:
                         # Try a simple query
-                        session.execute('SELECT 1')
+                        session.execute(text('SELECT 1'))
                 except Exception as e:
                     flash(f'{_("Connection error")}: {str(e)}', 'error')
                     return render_template('admin/database_connect.html', form=form)
@@ -2193,10 +2194,10 @@ def create_app():
             # Get table list
             with db_conn.get_session() as session:
                 if app.config['CURRENT_DATABASE_URL'].startswith('sqlite'):
-                    result = session.execute('SELECT name FROM sqlite_master WHERE type="table" ORDER BY name')
+                    result = session.execute(text('SELECT name FROM sqlite_master WHERE type="table" ORDER BY name'))
                     tables = [row[0] for row in result]
                 else:
-                    result = session.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename")
+                    result = session.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename"))
                     tables = [row[0] for row in result]
 
             # Get row counts for main tables
@@ -2204,7 +2205,7 @@ def create_app():
             for table in ['site_table', 'us_table', 'inventario_materiali_table']:
                 try:
                     with db_conn.get_session() as session:
-                        result = session.execute(f'SELECT COUNT(*) FROM {table}')
+                        result = session.execute(text(f'SELECT COUNT(*) FROM {table}'))
                         table_counts[table] = result.scalar()
                 except Exception:
                     table_counts[table] = 0
