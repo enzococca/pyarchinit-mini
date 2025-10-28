@@ -301,8 +301,8 @@ class HarrisMatrixGenerator:
                         u_to.periodo_iniziale as target_periodo_iniziale,
                         u_to.fase_iniziale as target_fase_iniziale
                     FROM us_relationships_table r
-                    INNER JOIN us_table u_from ON r.sito = u_from.sito AND r.us_from = CAST(u_from.us AS INTEGER)
-                    INNER JOIN us_table u_to ON r.sito = u_to.sito AND r.us_to = CAST(u_to.us AS INTEGER)
+                    INNER JOIN us_table u_from ON r.sito = u_from.sito AND CAST(r.us_from AS TEXT) = CAST(u_from.us AS TEXT)
+                    INNER JOIN us_table u_to ON r.sito = u_to.sito AND CAST(r.us_to AS TEXT) = CAST(u_to.us AS TEXT)
                     WHERE r.sito = :site
                 """)
 
@@ -318,8 +318,8 @@ class HarrisMatrixGenerator:
                             u_to.periodo_iniziale as target_periodo_iniziale,
                             u_to.fase_iniziale as target_fase_iniziale
                         FROM us_relationships_table r
-                        INNER JOIN us_table u_from ON r.sito = u_from.sito AND r.us_from = CAST(u_from.us AS INTEGER)
-                        INNER JOIN us_table u_to ON r.sito = u_to.sito AND r.us_to = CAST(u_to.us AS INTEGER)
+                        INNER JOIN us_table u_from ON r.sito = u_from.sito AND CAST(r.us_from AS TEXT) = CAST(u_from.us AS TEXT)
+                        INNER JOIN us_table u_to ON r.sito = u_to.sito AND CAST(r.us_to AS TEXT) = CAST(u_to.us AS TEXT)
                         WHERE r.sito = :site AND (u_from.area = :area OR u_to.area = :area)
                     """)
                     params['area'] = area
