@@ -453,3 +453,70 @@ def start_export():
             'success': False,
             'message': str(e)
         }), 500
+
+
+@pyarchinit_import_export_bp.route('/api/pyarchinit/create-database', methods=['POST'])
+def create_database():
+    """Create empty PyArchInit database with full schema"""
+    try:
+        data = request.get_json()
+        db_type = data.get('db_type', 'sqlite')
+        overwrite = data.get('overwrite', False)
+
+        from pyarchinit_mini.database.database_creator import create_empty_database
+
+        if db_type == 'sqlite':
+            db_path = data.get('db_path')
+            if not db_path:
+                return jsonify({'success': False, 'message': _('Please provide database path')}), 400
+
+            # Expand user home directory and convert to absolute path
+            db_path = os.path.abspath(os.path.expanduser(db_path))
+
+            logger.info(f"Creating empty SQLite database at: {db_path}")
+            result = create_empty_database('sqlite', db_path, overwrite=overwrite)
+
+        else:  # PostgreSQL
+            host = data.get('pg_host', 'localhost')
+            port = data.get('pg_port', '5432')
+            database = data.get('pg_database')
+            user = data.get('pg_user')
+            password = data.get('pg_password')
+
+            if not all([host, port, database, user]):
+                return jsonify({'success': False, 'message': _('Missing PostgreSQL connection details')}), 400
+
+            config = {
+                'host': host,
+                'port': int(port),
+                'database': database,
+                'username': user,
+                'password': password or ''
+            }
+
+            logger.info(f"Creating empty PostgreSQL database: {database} on {host}:{port}")
+            result = create_empty_database('postgresql', config, overwrite=overwrite)
+
+        return jsonify({
+            'success': True,
+            'message': result['message'],
+            'tables_created': result['tables_created'],
+            'db_type': result['db_type']
+        })
+
+    except FileExistsError as e:
+        return jsonify({
+            'success': False,
+            'message': _('Database already exists. Enable overwrite to replace it.')
+        }), 400
+    except ValueError as e:
+        return jsonify({
+            'success': False,
+            'message': _('Database already exists. Enable overwrite to replace it.')
+        }), 400
+    except Exception as e:
+        logger.error(f"Database creation failed: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
