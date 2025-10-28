@@ -2346,11 +2346,29 @@ def create_app():
             db_conn = DatabaseConnection.from_url(new_db_url)
             db_manager = DatabaseManager(db_conn)
 
-            # Reinitialize services
-            global site_service, us_service, inventario_service
+            # Reinitialize ALL services with new database manager
+            global site_service, us_service, inventario_service, thesaurus_service
+            global user_service, analytics_service, relationship_sync_service, datazione_service
+            global matrix_generator, export_import_service
+
             site_service = SiteService(db_manager)
             us_service = USService(db_manager)
             inventario_service = InventarioService(db_manager)
+            thesaurus_service = ThesaurusService(db_manager)
+            user_service = UserService(db_manager)
+            analytics_service = AnalyticsService(db_manager)
+            relationship_sync_service = RelationshipSyncService(db_manager)
+            datazione_service = DatazioneService(db_manager)
+            matrix_generator = HarrisMatrixGenerator(db_manager, us_service)
+            export_import_service = ExportImportService(db_manager)
+
+            # Update app stored services
+            app.user_service = user_service
+            app.db_manager = db_manager
+
+            # Log the switch for debugging
+            print(f"[DATABASE SWITCH] Changed to: {new_db_url}")
+            print(f"[DATABASE SWITCH] Connection name: {connection_name}")
 
             flash(f'Database cambiato a: {connection_name}', 'success')
 
