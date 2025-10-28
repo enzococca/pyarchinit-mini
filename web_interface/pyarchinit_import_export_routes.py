@@ -169,7 +169,10 @@ def test_connection():
         # Test connection
         from pyarchinit_mini.services.import_export_service import ImportExportService
 
-        mini_db_url = current_app.config.get('DATABASE_URL', 'sqlite:///./pyarchinit_mini.db')
+        # Use CURRENT_DATABASE_URL to respect database switching
+        mini_db_url = current_app.config.get('CURRENT_DATABASE_URL')
+        if not mini_db_url:
+            mini_db_url = current_app.config.get('DATABASE_URL', 'sqlite:///./pyarchinit_mini.db')
         service = ImportExportService(mini_db_url)
 
         if not service.validate_database_connection(conn_string):
@@ -243,7 +246,12 @@ def start_import():
         # Initialize service
         from pyarchinit_mini.services.import_export_service import ImportExportService
 
-        mini_db_url = current_app.config.get('DATABASE_URL', 'sqlite:///./pyarchinit_mini.db')
+        # Use CURRENT_DATABASE_URL to respect database switching
+        mini_db_url = current_app.config.get('CURRENT_DATABASE_URL')
+        if not mini_db_url:
+            mini_db_url = current_app.config.get('DATABASE_URL', 'sqlite:///./pyarchinit_mini.db')
+
+        logger.info(f"Importing to database: {mini_db_url}")
         service = ImportExportService(mini_db_url, conn_string)
 
         # Prepare site filter
@@ -336,7 +344,12 @@ def start_export():
         # Initialize service
         from pyarchinit_mini.services.import_export_service import ImportExportService
 
-        mini_db_url = current_app.config.get('DATABASE_URL', 'sqlite:///./pyarchinit_mini.db')
+        # Use CURRENT_DATABASE_URL to respect database switching
+        mini_db_url = current_app.config.get('CURRENT_DATABASE_URL')
+        if not mini_db_url:
+            mini_db_url = current_app.config.get('DATABASE_URL', 'sqlite:///./pyarchinit_mini.db')
+
+        logger.info(f"Exporting from database: {mini_db_url}")
         service = ImportExportService(mini_db_url)
 
         # Prepare site filter
