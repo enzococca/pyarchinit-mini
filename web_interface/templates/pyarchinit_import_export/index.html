@@ -224,6 +224,23 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Manual Datazione Sync -->
+                    <div class="card mt-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>{{ _('Datazione Sync') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                {{ _('If you already imported periodizzazione data, use this button to manually synchronize datazioni table and US datazione fields.') }}
+                            </p>
+                            <button type="button" class="btn btn-sm btn-outline-primary w-100" id="sync_datazioni_btn">
+                                <i class="fas fa-sync-alt me-2"></i>{{ _('Sync Datazioni from Periodizzazione') }}
+                            </button>
+                            <div id="sync_status" class="mt-2" style="display: none;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -863,6 +880,48 @@ document.getElementById('fileBrowserConfirm').addEventListener('click', function
         fileBrowserTargetInput.value = selectedFilePath;
         bootstrap.Modal.getInstance(document.getElementById('fileBrowserModal')).hide();
     }
+});
+
+// Manual Datazione Sync
+document.getElementById('sync_datazioni_btn').addEventListener('click', function() {
+    if (!confirm('{{ _("Synchronize datazioni from periodizzazione data? This will update datazioni_table and us_table.datazione fields.") }}')) {
+        return;
+    }
+
+    const statusEl = document.getElementById('sync_status');
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = '<div class="alert alert-info mb-0"><i class="fas fa-spinner fa-spin me-2"></i>{{ _("Synchronizing...") }}</div>';
+
+    fetch('/pyarchinit-import-export/api/pyarchinit/sync-datazioni', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            let resultsHTML = '<div class="alert alert-success mb-0">';
+            resultsHTML += '<i class="fas fa-check-circle me-2"></i>' + result.message + '<br>';
+
+            if (result.results.datazioni_sync) {
+                resultsHTML += '<small>Datazioni: ' + result.results.datazioni_sync.created + ' {{ _("created") }}, ';
+                resultsHTML += result.results.datazioni_sync.skipped + ' {{ _("skipped") }}</small><br>';
+            }
+
+            if (result.results.us_datazione_update) {
+                resultsHTML += '<small>US Updated: ' + result.results.us_datazione_update.updated + ' {{ _("updated") }}, ';
+                resultsHTML += result.results.us_datazione_update.skipped + ' {{ _("skipped") }}</small>';
+            }
+
+            resultsHTML += '</div>';
+            statusEl.innerHTML = resultsHTML;
+        } else {
+            statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-2"></i>{{ _("Error") }}: ' + result.message + '</div>';
+        }
+    })
+    .catch(error => {
+        statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-2"></i>{{ _("Error") }}: ' + error.message + '</div>';
+    });
 });
 </script>
 {% endblock %}

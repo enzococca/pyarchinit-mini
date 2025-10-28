@@ -316,6 +316,53 @@ def start_import():
         }), 500
 
 
+@pyarchinit_import_export_bp.route('/api/pyarchinit/sync-datazioni', methods=['POST'])
+def sync_datazioni():
+    """Manually synchronize datazioni from periodizzazione data"""
+    try:
+        # Initialize service
+        from pyarchinit_mini.services.import_export_service import ImportExportService
+
+        # Use CURRENT_DATABASE_URL to respect database switching
+        mini_db_url = current_app.config.get('CURRENT_DATABASE_URL')
+        if not mini_db_url:
+            mini_db_url = current_app.config.get('DATABASE_URL', 'sqlite:///./pyarchinit_mini.db')
+
+        logger.info(f"Syncing datazioni for database: {mini_db_url}")
+        service = ImportExportService(mini_db_url)
+
+        # Get optional site filter
+        data = request.get_json() or {}
+        site_filter = data.get('site_filter', [])
+        site_filter_list = site_filter if site_filter else None
+
+        # Sync datazioni from periodizzazione
+        logger.info("Syncing datazioni from periodizzazione...")
+        sync_stats = service.sync_datazioni_from_periodizzazione()
+        logger.info(f"Datazioni sync: {sync_stats['created']} created, {sync_stats['skipped']} skipped")
+
+        # Update US datazione field from periodizzazione
+        logger.info("Updating US datazione from periodizzazione...")
+        update_stats = service.update_us_datazione_from_periodizzazione(site_filter_list)
+        logger.info(f"US datazione update: {update_stats['updated']} updated, {update_stats['skipped']} skipped")
+
+        return jsonify({
+            'success': True,
+            'message': _('Datazioni synchronized successfully'),
+            'results': {
+                'datazioni_sync': sync_stats,
+                'us_datazione_update': update_stats
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Datazioni sync failed: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+
 @pyarchinit_import_export_bp.route('/api/pyarchinit/export', methods=['POST'])
 def start_export():
     """Start export to PyArchInit database"""
