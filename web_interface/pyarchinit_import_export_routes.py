@@ -284,6 +284,18 @@ def start_import():
             stats = service.import_periodizzazione(site_filter_list)
             results['periodizzazione'] = stats
 
+            # Automatically sync datazioni from periodizzazione
+            logger.info("Syncing datazioni from periodizzazione...")
+            sync_stats = service.sync_datazioni_from_periodizzazione()
+            results['datazioni_sync'] = sync_stats
+            logger.info(f"Datazioni sync: {sync_stats['created']} created, {sync_stats['skipped']} skipped")
+
+            # Automatically update US datazione field from periodizzazione
+            logger.info("Updating US datazione from periodizzazione...")
+            update_stats = service.update_us_datazione_from_periodizzazione(site_filter_list)
+            results['us_datazione_update'] = update_stats
+            logger.info(f"US datazione update: {update_stats['updated']} updated, {update_stats['skipped']} skipped")
+
         # Import thesaurus
         if import_thesaurus:
             logger.info("Importing thesaurus...")

@@ -1439,3 +1439,149 @@ class ImportExportService:
         except Exception as e:
             logger.error(f"Database validation failed: {str(e)}")
             return False
+
+    def sync_datazioni_from_periodizzazione(self) -> Dict[str, Any]:
+        """
+        Synchronize datazioni_table from unique periodo values in periodizzazione_table
+
+        This creates entries in datazioni_table for each unique periodo found in
+        periodizzazione, if they don't already exist.
+
+        Returns:
+            Dictionary with sync statistics
+        """
+        stats = {'created': 0, 'skipped': 0, 'errors': []}
+
+        mini_session = self.mini_session_maker()
+
+        try:
+            # Get unique periodo values from periodizzazione_table
+            result = mini_session.execute(text("""
+                SELECT DISTINCT periodo_iniziale, datazione_estesa
+                FROM periodizzazione_table
+                WHERE periodo_iniziale IS NOT NULL AND periodo_iniziale != ''
+                ORDER BY periodo_iniziale
+            """))
+
+            unique_periodi = result.fetchall()
+            logger.info(f"Found {len(unique_periodi)} unique periodi in periodizzazione")
+
+            for periodo_row in unique_periodi:
+                periodo_nome = periodo_row[0]
+                datazione_estesa = periodo_row[1] or ''
+
+                try:
+                    # Check if datazione already exists
+                    existing = mini_session.execute(
+                        text("SELECT id_datazione FROM datazioni_table WHERE nome_datazione = :nome"),
+                        {'nome': periodo_nome}
+                    ).fetchone()
+
+                    if not existing:
+                        # Insert new datazione
+                        mini_session.execute(text("""
+                            INSERT INTO datazioni_table (nome_datazione, descrizione, created_at, updated_at)
+                            VALUES (:nome, :descrizione, :created, :updated)
+                        """), {
+                            'nome': periodo_nome,
+                            'descrizione': datazione_estesa,
+                            'created': datetime.now(),
+                            'updated': datetime.now()
+                        })
+                        mini_session.commit()
+                        stats['created'] += 1
+                        logger.info(f"Created datazione: {periodo_nome}")
+                    else:
+                        stats['skipped'] += 1
+
+                except Exception as e:
+                    mini_session.rollback()
+                    error_msg = f"Error syncing datazione '{periodo_nome}': {str(e)}"
+                    logger.error(error_msg)
+                    stats['errors'].append(error_msg)
+
+            return stats
+
+        except Exception as e:
+            logger.error(f"Sync datazioni failed: {str(e)}")
+            raise
+        finally:
+            mini_session.close()
+
+    def update_us_datazione_from_periodizzazione(self, sito_filter: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Update datazione field in us_table based on periodizzazione_table data
+
+        For each US, finds the corresponding periodo_iniziale from periodizzazione
+        and sets it as the datazione field in us_table.
+
+        Args:
+            sito_filter: List of site names to update (None = update all)
+
+        Returns:
+            Dictionary with update statistics
+        """
+        stats = {'updated': 0, 'skipped': 0, 'errors': []}
+
+        mini_session = self.mini_session_maker()
+
+        try:
+            # Build query for US with sito filter
+            us_query = "SELECT sito, us FROM us_table"
+            if sito_filter:
+                placeholders = ','.join([f"'{s}'" for s in sito_filter])
+                us_query += f" WHERE sito IN ({placeholders})"
+
+            result = mini_session.execute(text(us_query))
+            us_list = result.fetchall()
+
+            logger.info(f"Updating datazione for {len(us_list)} US from periodizzazione")
+
+            for us_row in us_list:
+                sito = us_row[0]
+                us_num = us_row[1]
+
+                try:
+                    # Get periodo_iniziale from periodizzazione for this US
+                    periodo_result = mini_session.execute(text("""
+                        SELECT periodo_iniziale
+                        FROM periodizzazione_table
+                        WHERE sito = :sito AND us = :us
+                        LIMIT 1
+                    """), {'sito': sito, 'us': us_num})
+
+                    periodo_row = periodo_result.fetchone()
+
+                    if periodo_row and periodo_row[0]:
+                        periodo_iniziale = periodo_row[0]
+
+                        # Update us_table datazione field
+                        mini_session.execute(text("""
+                            UPDATE us_table
+                            SET datazione = :datazione, updated_at = :updated
+                            WHERE sito = :sito AND us = :us
+                        """), {
+                            'datazione': periodo_iniziale,
+                            'updated': datetime.now(),
+                            'sito': sito,
+                            'us': us_num
+                        })
+                        mini_session.commit()
+                        stats['updated'] += 1
+                    else:
+                        stats['skipped'] += 1
+
+                except Exception as e:
+                    mini_session.rollback()
+                    error_msg = f"Error updating US {sito}/{us_num}: {str(e)}"
+                    logger.error(error_msg)
+                    stats['errors'].append(error_msg)
+
+            logger.info(f"Updated {stats['updated']} US with datazione from periodizzazione")
+            return stats
+
+        except Exception as e:
+            logger.error(f"Update US datazione failed: {str(e)}")
+            raise
+        finally:
+            mini_session.close()
