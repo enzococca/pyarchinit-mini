@@ -594,111 +594,89 @@ Tab 8: Documentation
 .. note::
    Use this tab to document technical analysis, parallels, and scholarly references that support artifact interpretation.
 
-Harris Matrix
-=============
+Upload Media
+============
 
-The Harris Matrix visualization tool generates and displays stratigraphic relationships automatically.
+The Media Upload tool allows you to attach photos, drawings, and documents to archaeological records.
 
-Harris Matrix View
-------------------
-
-.. figure:: ../_static/images/webapp/046_harris_creator_interface.png
-   :alt: Harris Matrix View
+.. figure:: ../_static/images/webapp/044_media_upload_page.png
+   :alt: Upload Media Interface
    :align: center
    :width: 100%
 
-   **Harris Matrix** - Automatic generation from US relationships
+   **Upload Media** - File upload for Sites, US, and Inventory items
 
-Features:
+**Upload Interface:**
 
-* Automatic generation from US relationships
-* Topological sorting (chronological sequence)
-* Directed Acyclic Graph (DAG) visualization
-* Level-based layout
-* Node grouping by depth
+* Entity Type selection (Site, US, Inventory)
+* Entity ID association
+* File upload with drag-and-drop support
+* Description and metadata fields
+* Author/Photographer attribution
 
-**Statistics:**
+**Supported File Types:**
 
-* Total nodes (US count)
-* Total relationships/edges
-* Matrix depth (levels)
-* Isolated nodes
-* Top-level nodes
-* Bottom-level nodes
+* Images: JPG, PNG, TIFF, RAW
+* Documents: PDF, DOC, DOCX
+* Drawings: DWG, DXF, SVG
+* 3D Models: OBJ, PLY, STL
 
-**Visualization Options:**
+**Features:**
 
-* Matplotlib rendering
-* PNG export
-* Zoom and pan controls
-* Print-friendly format
+* Multiple file upload
+* Automatic thumbnail generation
+* Image EXIF data extraction
+* File size validation
+* Organized by entity and type
 
-GraphML Export
---------------
-
-.. figure:: ../_static/images/webapp/047_harris_creator_editor.png
-   :alt: GraphML Export
-   :align: center
-   :width: 100%
-
-   **GraphML Export** - yEd Graph Editor compatible format
-
-**Export Features:**
-
-* GraphML format for yEd Graph Editor
-* Preserves all relationships
-* Node attributes included
-* Edge styling compatible with yEd
-* Downloadable file
-
-**Use Cases:**
-
-* Import into yEd for advanced editing
-* Publish in research papers
-* Archive with project data
-* Share with collaborators
+.. tip::
+   Photos and drawings can be linked to specific stratigraphic units or inventory items for complete documentation.
 
 Harris Matrix Creator
 =====================
 
-Interactive graphical editor for creating and editing Harris matrices.
+Interactive visual editor for creating and editing Harris Matrix diagrams.
 
-.. figure:: ../_static/images/webapp/046_harris_creator_interface.png
-   :alt: Harris Matrix Creator
+.. figure:: ../_static/images/webapp/047_harris_creator_editor.png
+   :alt: Harris Matrix Creator Interface
    :align: center
    :width: 100%
 
-   **Harris Matrix Creator** - Interactive graphical editor
+   **Harris Matrix Creator** - Interactive graphical editor with Extended Matrix support
 
-Features:
+**Visual Editor Features:**
 
 * Drag-and-drop node creation
-* Visual relationship drawing
-* Node editing inline
-* Auto-layout options
-* Real-time validation
+* Interactive relationship connections
+* Real-time visual preview
+* Zoom and pan navigation
+* Auto-layout algorithms
 
-**Tools:**
+**Extended Matrix Support:**
 
-* Add Node button
-* Connect Nodes tool
-* Delete Node/Edge
-* Auto-arrange layout
-* Zoom controls
+* 14 different node types (US, USM, USVA, DOC, Extractor, etc.)
+* 14 relationship types (Covers, Cuts, Continuity, etc.)
+* Period and area grouping
+* Custom node descriptions
+* Color-coded node types
 
-**Validation:**
+**Database Integration:**
 
-* Cycle detection
-* DAG enforcement
-* Duplicate prevention
-* Orphan node warning
+* Save directly to database
+* Edit existing matrices
+* Automatic validation
+* Relationship consistency checks
 
 **Export Options:**
 
-* Save to database
-* Export to GraphML
-* Generate PDF
-* Create PNG image
+* Export to GraphML (yEd compatible)
+* Export to DOT (Graphviz)
+* High-resolution PDF rendering
+* Share with colleagues
+
+**Alternative: CSV/Excel Import:**
+
+For users who prefer working with spreadsheets, Harris Matrices can also be created by importing CSV or Excel files using the command-line tool (see Excel Import section below).
 
 Data Import/Export
 ==================
@@ -740,27 +718,66 @@ PyArchInit Import/Export
 -------------------------
 
 .. figure:: ../_static/images/webapp/051_pyarchinit_ie_main.png
-   :alt: PyArchInit Import/Export
+   :alt: PyArchInit Import/Export Main Interface
    :align: center
    :width: 100%
 
-   **PyArchInit Import/Export** - Data exchange with PyArchInit
+   **PyArchInit Import/Export** - Data exchange with PyArchInit QGIS plugin
+
+Import from PyArchInit
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/052_pyarchinit_import_section.png
+   :alt: PyArchInit Import Section
+   :align: center
+   :width: 100%
+
+   **Import Section** - Import data from PyArchInit databases
 
 **Import Features:**
 
 * Import from PyArchInit SQLite databases
 * Table selection (Sites, US, Inventario, Media)
-* Field mapping
-* Data transformation
-* Conflict resolution
+* Field mapping and transformation
+* Data validation before import
+* Conflict resolution options
+* Preview import results
+
+Export to PyArchInit
+~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/053_pyarchinit_export_section.png
+   :alt: PyArchInit Export Section
+   :align: center
+   :width: 100%
+
+   **Export Section** - Export data to PyArchInit format
 
 **Export Features:**
 
-* Export to PyArchInit format
-* Full database export
-* Selective table export
-* Maintains relationships
+* Export to PyArchInit SQLite format
+* Full database export or selective tables
+* Maintains all relationships
 * Compatible with PyArchInit QGIS plugin
+* Preserves spatial data
+
+Create New Database
+~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/054_pyarchinit_create_db.png
+   :alt: PyArchInit Create Database
+   :align: center
+   :width: 100%
+
+   **Create Database** - Initialize new PyArchInit database
+
+**Database Creation:**
+
+* Create new empty PyArchInit database
+* Initialize all required tables
+* Set up proper schema and relationships
+* Choose database location
+* Configure connection settings
 
 Extended Matrix Configuration
 ==============================
@@ -799,6 +816,127 @@ The Extended Matrix (EM) Node Configuration allows customization of node types a
 * Set group colors
 * Configure group hierarchy
 * Group-based filtering
+
+Dating Periods
+==============
+
+Manage chronological periods and dating systems for your archaeological project.
+
+Dating Periods List
+-------------------
+
+.. figure:: ../_static/images/webapp/058_dating_periods_list.png
+   :alt: Dating Periods List
+   :align: center
+   :width: 100%
+
+   **Dating Periods List** - Chronological period management
+
+**Period Management:**
+
+* View all defined chronological periods
+* Search and filter by period name
+* Edit existing periods
+* Delete unused periods
+* Quick access to period forms
+
+Creating a Dating Period
+-------------------------
+
+.. figure:: ../_static/images/webapp/060_dating_periods_form.png
+   :alt: Dating Period Form
+   :align: center
+   :width: 100%
+
+   **Dating Period Form** - Define chronological periods
+
+**Period Fields:**
+
+* **Period Name** - Name of the chronological period (e.g., "Bronze Age", "Medieval")
+* **Start Date** - Beginning of the period (calendar year)
+* **End Date** - End of the period (calendar year)
+* **Description** - Detailed description of the period
+* **Cultural Context** - Associated archaeological culture
+* **Geographic Area** - Region where the period applies
+* **Bibliography** - References for period dating
+
+.. tip::
+   Dating periods can be used in US and Inventory forms for chronological attribution.
+
+Periodization Records
+=====================
+
+Advanced chronological management linking stratigraphic units to dating periods.
+
+.. figure:: ../_static/images/webapp/062_periodization_records_list.png
+   :alt: Periodization Records List
+   :align: center
+   :width: 100%
+
+   **Periodization Records** - Link US to chronological periods
+
+**Periodization Features:**
+
+* Associate specific US with dating periods
+* Multiple period assignments per US
+* Confidence levels for dating
+* Relative vs absolute dating
+* Stratigraphic sequence correlation
+
+**Use Cases:**
+
+* Assign chronological periods to excavation layers
+* Track dating evidence and sources
+* Build site chronology
+* Export period-based reports
+
+ICCD Thesaurus
+==============
+
+Manage controlled vocabulary terms following Italian ICCD (Istituto Centrale per il Catalogo e la Documentazione) standards.
+
+Thesaurus List
+--------------
+
+.. figure:: ../_static/images/webapp/064_thesaurus_list.png
+   :alt: ICCD Thesaurus List
+   :align: center
+   :width: 100%
+
+   **ICCD Thesaurus** - Controlled vocabulary management
+
+**Thesaurus Categories:**
+
+* **Artifact Types** (Tipo Reperto) - Ceramic, Metal, Stone, Bone, Glass, etc.
+* **Conservation States** (Stato Conservazione) - Excellent, Good, Fair, Poor, Fragmentary
+* **Ceramic Bodies** (Corpo Ceramico) - Fabric classifications
+* **Coatings** (Rivestimento) - Surface treatments and glazes
+* **Diagnostic Elements** - Typologically significant artifact parts
+
+Thesaurus Management
+--------------------
+
+.. figure:: ../_static/images/webapp/065_thesaurus_management.png
+   :alt: Thesaurus Management Interface
+   :align: center
+   :width: 100%
+
+   **Thesaurus Management** - Add and edit vocabulary terms
+
+**Management Features:**
+
+* Add new controlled vocabulary terms
+* Edit existing terms and definitions
+* Organize terms in hierarchies
+* Import/export thesaurus lists
+* Multilingual support (IT/EN)
+
+**Integration:**
+
+* Used in Inventory forms (Artifact Type, Conservation State, etc.)
+* Used in US forms (Formation types, etc.)
+* Ensures data consistency across the project
+* Compatible with ICCD cataloging standards
 
 Analytics
 =========
