@@ -21,28 +21,21 @@ OUTPUT_DIR = Path("docs/images/webapp")
 USERNAME = "admin"
 PASSWORD = "admin"
 
-# CSS for highlighting elements (injected into page)
+# CSS for highlighting elements with yellow circle overlay
 HIGHLIGHT_CSS = """
-.pyarchinit-highlight {
-    outline: 3px solid #FF6B6B !important;
-    outline-offset: 2px !important;
-    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5) !important;
-    position: relative !important;
-    z-index: 9999 !important;
+.pyarchinit-highlight-overlay {
+    position: fixed !important;
+    border: 4px solid #FFD700 !important;
+    border-radius: 50% !important;
+    background: rgba(255, 215, 0, 0.3) !important;
+    pointer-events: none !important;
+    z-index: 999999 !important;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.5) !important;
+    animation: pulse 1s infinite !important;
 }
-.pyarchinit-highlight::before {
-    content: '👆 Cliccato' !important;
-    position: absolute !important;
-    top: -25px !important;
-    left: 0 !important;
-    background: #FF6B6B !important;
-    color: white !important;
-    padding: 2px 8px !important;
-    border-radius: 3px !important;
-    font-size: 12px !important;
-    font-weight: bold !important;
-    white-space: nowrap !important;
-    z-index: 10000 !important;
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 0.9; }
 }
 """
 
@@ -68,7 +61,7 @@ class WebAppExplorer:
         )
         self.context = self.browser.new_context(
             viewport={'width': 1920, 'height': 1080},
-            locale='it-IT'
+            locale='en-US'  # English locale for international documentation
         )
         self.page = self.context.new_page()
 
@@ -90,31 +83,67 @@ class WebAppExplorer:
         time.sleep(0.5)
 
     def highlight_and_click(self, selector, description=""):
-        """Evidenzia elemento e poi clicca"""
+        """Evidenzia elemento con cerchio giallo e poi clicca"""
         try:
-            # Add highlight class
+            # Scroll element into view first
             self.page.evaluate(f"""
                 const el = document.querySelector('{selector}');
                 if (el) {{
-                    el.classList.add('pyarchinit-highlight');
                     el.scrollIntoView({{behavior: 'smooth', block: 'center'}});
+                }}
+            """)
+            time.sleep(1.5)  # Wait for scroll to complete
+
+            # Add thick yellow border and glow directly to element
+            self.page.evaluate(f"""
+                const el = document.querySelector('{selector}');
+                if (el) {{
+                    // Store original styles
+                    el.setAttribute('data-original-outline', el.style.outline || '');
+                    el.setAttribute('data-original-box-shadow', el.style.boxShadow || '');
+                    el.setAttribute('data-original-border-radius', el.style.borderRadius || '');
+
+                    // Apply yellow glow effect
+                    el.style.outline = '8px solid #FFD700';
+                    el.style.outlineOffset = '8px';
+                    el.style.boxShadow = '0 0 30px 10px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.3)';
+                    el.style.borderRadius = '50%';
+                    el.style.transition = 'all 0.3s ease';
+                }}
+            """)
+
+            # Wait for effect to be visible
+            time.sleep(2)
+
+            # Screenshot with highlight
+            if description:
+                self.save_screenshot(f"click_{description.replace(' ', '_')}", f"Click: {description}")
+
+            # Restore original styles
+            self.page.evaluate(f"""
+                const el = document.querySelector('{selector}');
+                if (el) {{
+                    el.style.outline = el.getAttribute('data-original-outline') || '';
+                    el.style.boxShadow = el.getAttribute('data-original-box-shadow') || '';
+                    el.style.borderRadius = el.getAttribute('data-original-border-radius') || '';
+                    el.style.outlineOffset = '';
+                    el.removeAttribute('data-original-outline');
+                    el.removeAttribute('data-original-box-shadow');
+                    el.removeAttribute('data-original-border-radius');
                 }}
             """)
             time.sleep(0.5)
 
-            # Screenshot with highlight
-            if description:
-                self.save_screenshot(f"click_{description}", f"Click: {description}")
+            # Click - use direct navigation for links
+            try:
+                self.page.click(selector, timeout=5000)
+            except:
+                # If click fails, try getting href and navigate
+                href = self.page.evaluate(f"document.querySelector('{selector}')?.getAttribute('href')")
+                if href:
+                    self.page.goto(f"{BASE_URL}{href}")
 
-            # Click
-            self.page.click(selector)
-            time.sleep(1)
-
-            # Remove highlight
-            self.page.evaluate(f"""
-                const el = document.querySelector('{selector}');
-                if (el) el.classList.remove('pyarchinit-highlight');
-            """)
+            time.sleep(2)  # Wait for page to load
 
         except Exception as e:
             print(f"    ⚠️  Errore highlight/click {selector}: {e}")
@@ -122,23 +151,53 @@ class WebAppExplorer:
     def highlight_element(self, selector, description=""):
         """Evidenzia elemento senza cliccare"""
         try:
+            # Scroll element into view first
             self.page.evaluate(f"""
                 const el = document.querySelector('{selector}');
                 if (el) {{
-                    el.classList.add('pyarchinit-highlight');
                     el.scrollIntoView({{behavior: 'smooth', block: 'center'}});
                 }}
             """)
-            time.sleep(0.5)
+            time.sleep(1.5)  # Wait for scroll
 
-            if description:
-                self.save_screenshot(f"highlight_{description}", f"Elemento: {description}")
-
-            # Remove highlight
+            # Add thick yellow border and glow directly to element
             self.page.evaluate(f"""
                 const el = document.querySelector('{selector}');
-                if (el) el.classList.remove('pyarchinit-highlight');
+                if (el) {{
+                    // Store original styles
+                    el.setAttribute('data-original-outline', el.style.outline || '');
+                    el.setAttribute('data-original-box-shadow', el.style.boxShadow || '');
+                    el.setAttribute('data-original-border-radius', el.style.borderRadius || '');
+
+                    // Apply yellow glow effect
+                    el.style.outline = '8px solid #FFD700';
+                    el.style.outlineOffset = '8px';
+                    el.style.boxShadow = '0 0 30px 10px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.3)';
+                    el.style.borderRadius = '50%';
+                    el.style.transition = 'all 0.3s ease';
+                }}
             """)
+
+            # Wait for effect to be visible
+            time.sleep(2)
+
+            if description:
+                self.save_screenshot(f"highlight_{description.replace(' ', '_')}", f"Highlight: {description}")
+
+            # Restore original styles
+            self.page.evaluate(f"""
+                const el = document.querySelector('{selector}');
+                if (el) {{
+                    el.style.outline = el.getAttribute('data-original-outline') || '';
+                    el.style.boxShadow = el.getAttribute('data-original-box-shadow') || '';
+                    el.style.borderRadius = el.getAttribute('data-original-border-radius') || '';
+                    el.style.outlineOffset = '';
+                    el.removeAttribute('data-original-outline');
+                    el.removeAttribute('data-original-box-shadow');
+                    el.removeAttribute('data-original-border-radius');
+                }}
+            """)
+            time.sleep(0.5)
 
         except Exception as e:
             print(f"    ⚠️  Errore highlight {selector}: {e}")
@@ -150,24 +209,30 @@ class WebAppExplorer:
         time.sleep(1)
 
         # Screenshot pagina login
-        self.save_screenshot("login_page", "Pagina di Login")
+        self.save_screenshot("login_page", "Login Page")
 
         # Evidenzia e compila username
-        self.highlight_element('input[name="username"]', "Campo Username")
+        self.highlight_element('input[name="username"]', "Username Field")
         self.page.fill('input[name="username"]', USERNAME)
 
         # Evidenzia e compila password
-        self.highlight_element('input[name="password"]', "Campo Password")
+        self.highlight_element('input[name="password"]', "Password Field")
         self.page.fill('input[name="password"]', PASSWORD)
 
         # Evidenzia e clicca login button
-        self.highlight_and_click('button[type="submit"]', "Bottone Login")
+        self.highlight_and_click('button[type="submit"]', "Login Button")
 
         # Wait for dashboard
         self.page.wait_for_url(f"{BASE_URL}/")
         time.sleep(1)
 
         print("  ✓ Login effettuato")
+
+        # IMPORTANT: Set language to English for international documentation
+        print("  🌍 Setting language to English...")
+        self.page.goto(f"{BASE_URL}/?lang=en")
+        time.sleep(1)
+        print("  ✓ Language set to English")
 
     def explore_dashboard(self):
         """Esplora dashboard"""
