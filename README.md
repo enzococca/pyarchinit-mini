@@ -61,7 +61,7 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
   - **Multi-Interface**: Available in Web GUI, Desktop GUI, and CLI
   - **GraphML Generation**: Optional automatic GraphML export for visualization
   - **Database Consistency**: Unified database path across all interfaces
-  - 📖 **Complete Guide**: [Excel Import Guide](docs/EXCEL_IMPORT_GUIDE.md)
+  - 📖 **Complete Guide**: [Excel Import Guide](https://pyarchinit-mini.readthedocs.io/en/latest/features/harris_matrix_import.html)
 - **CSV Export**: Export to CSV with optional site filtering
 - **Batch Import**: Import data from CSV with validation and statistics
 - **Multi-Interface**: Available in Web UI, Desktop GUI, and CLI
@@ -99,7 +99,7 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 ### 🔄 Extended Matrix Framework & GraphML Export (v1.3.0+)
 Complete implementation of Extended Matrix Framework with GraphML export for yEd Graph Editor, including PyArchInit-compatible edge styling and DOT-based workflow.
 
-> 📖 **Full Documentation**: [Extended Matrix Export Technical Guide](docs/EXTENDED_MATRIX_EXPORT.md)
+> 📖 **Full Documentation**: [Extended Matrix Export Technical Guide](https://pyarchinit-mini.readthedocs.io/en/latest/features/graphml-export-technical.html)
 
 **Extended Matrix Framework**:
 PyArchInit-Mini supports the full Extended Matrix specification with **14 unit types** and **dual relationship symbols**.
@@ -169,7 +169,7 @@ us_data = {
 3. Click "Browse..." / "Choose File" to select file
 4. Save → File uploaded to `DoSC/SITE_US_TIMESTAMP_filename.ext`
 
-> 📖 **Full Guide**: [DOC File Upload Documentation](docs/DOC_FILE_UPLOAD.md)
+> 📖 **Full Guide**: [DOC File Upload Documentation](https://pyarchinit-mini.readthedocs.io/en/latest/features/media_management.html)
 
 #### GraphML Export Features:
 
@@ -582,7 +582,7 @@ All node types are defined in `pyarchinit_mini/config/em_node_types.yaml`:
 - Required fields
 - Valid categories and symbol types
 
-For complete documentation, see: [`docs/EM_NODE_TYPE_MANAGEMENT.md`](docs/EM_NODE_TYPE_MANAGEMENT.md)
+For complete documentation, see: [Extended Matrix Framework Documentation](https://pyarchinit-mini.readthedocs.io/en/latest/features/extended-matrix-framework.html)
 
 ### 🎨 s3Dgraphy - 3D Stratigraphic Visualization (NEW in v1.6.0)
 
@@ -1136,7 +1136,7 @@ Critical fixes and improvements for GraphML export:
 - All 8 archaeological periods now visible in GraphML export for large sites
 - Maintains consistency with database periodization (periodo_iniziale, fase_iniziale)
 
-See the [CHANGELOG](CHANGELOG.md) for complete version history.
+See the [CHANGELOG](https://pyarchinit-mini.readthedocs.io/en/latest/development/changelog.html) for complete version history.
 
 ### 🔧 Previous Fixes (v1.2.5-1.2.9)
 - Fixed missing email-validator dependency
@@ -1146,7 +1146,7 @@ See the [CHANGELOG](CHANGELOG.md) for complete version history.
 - All module imports now use absolute paths for installed packages
 
 ### 📈 Active Development
-The project is actively maintained with regular updates. Check the [CHANGELOG](CHANGELOG.md) for detailed version history.
+The project is actively maintained with regular updates. Check the [CHANGELOG](https://pyarchinit-mini.readthedocs.io/en/latest/development/changelog.html) for detailed version history.
 
 ---
 
@@ -1675,9 +1675,9 @@ mypy pyarchinit_mini/
 ## 📖 Documentation
 
 - **API Docs**: http://localhost:8000/docs (after starting API server)
-- **User Guide**: See `docs/` directory
-- **CHANGELOG**: See `CHANGELOG.md`
-- **Quick Start**: See `QUICK_START.md`
+- **User Guide**: https://pyarchinit-mini.readthedocs.io
+- **CHANGELOG**: https://pyarchinit-mini.readthedocs.io/en/latest/development/changelog.html
+- **Quick Start**: https://pyarchinit-mini.readthedocs.io/en/latest/installation/quickstart.html
 
 ---
 
@@ -1880,7 +1880,7 @@ python -m build
 twine upload dist/*
 ```
 
-**Documentation:** See [docs/DOCUMENTATION_VERIFICATION.md](docs/DOCUMENTATION_VERIFICATION.md) for complete guide.
+**Documentation:** See [Contributing Guide](https://pyarchinit-mini.readthedocs.io/en/latest/development/contributing.html) for complete guide.
 
 **CI/CD:** GitHub Actions automatically runs verification on every push and pull request.
 

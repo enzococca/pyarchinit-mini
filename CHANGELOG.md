@@ -5,6 +5,24 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2025-10-29
+
+### Changed
+- **Documentation Links**: Updated all README documentation links to point to ReadTheDocs
+  - Excel Import Guide → https://pyarchinit-mini.readthedocs.io/en/latest/features/harris_matrix_import.html
+  - Extended Matrix Export → https://pyarchinit-mini.readthedocs.io/en/latest/features/graphml-export-technical.html
+  - DOC File Upload → https://pyarchinit-mini.readthedocs.io/en/latest/features/media_management.html
+  - EM Node Type Management → https://pyarchinit-mini.readthedocs.io/en/latest/features/extended-matrix-framework.html
+  - CHANGELOG → https://pyarchinit-mini.readthedocs.io/en/latest/development/changelog.html
+  - Quick Start → https://pyarchinit-mini.readthedocs.io/en/latest/installation/quickstart.html
+  - Contributing Guide → https://pyarchinit-mini.readthedocs.io/en/latest/development/contributing.html
+- Removed broken links to non-existent documentation files
+- Improved documentation accessibility for PyPI users
+
+### Fixed
+- Removed invalid documentation file references
+- Updated documentation section with centralized ReadTheDocs links
+
 ## [1.6.1] - 2025-10-28
 
 ### Added
