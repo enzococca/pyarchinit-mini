@@ -1,5 +1,0 @@
-digraph {
-	graph [dpi=150 nodesep=1 pad=0.5 ranksep=1.5 splines=ortho]
-	rankdir=TB
-	compound=true
-}

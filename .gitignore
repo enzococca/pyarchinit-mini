@@ -163,3 +163,6 @@ test_*.db
 *.test.db
 /ttl
 .claude/
+
+# Archive directory (local development files not for git)
+archive/
