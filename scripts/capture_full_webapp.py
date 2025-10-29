@@ -286,18 +286,26 @@ class WebAppExplorer:
 
         # New artifact button
         self.highlight_and_click('a[href="/inventario/create"]', "New_Artifact_Button")
-        self.save_screenshot("inventario_form_tab1", "Inventory Form - Tab 1")
+        self.save_screenshot("inventario_form_tab1_identification", "Inventory Form - Tab 1: Identification")
 
-        # Navigate all inventory tabs (usually 8 tabs)
-        for i in range(2, 9):
+        # Navigate all 8 inventory tabs with CORRECT Bootstrap 5 selectors
+        tabs = [
+            ("button#classification-tab", "inventario_form_tab2_classification", "Tab 2: Classification"),
+            ("button#context-tab", "inventario_form_tab3_context", "Tab 3: Context"),
+            ("button#physical-tab", "inventario_form_tab4_physical", "Tab 4: Physical"),
+            ("button#conservation-tab", "inventario_form_tab5_conservation", "Tab 5: Conservation"),
+            ("button#ceramic-tab", "inventario_form_tab6_ceramic", "Tab 6: Ceramic"),
+            ("button#measurements-tab", "inventario_form_tab7_measurements", "Tab 7: Measurements"),
+            ("button#documentation-tab", "inventario_form_tab8_documentation", "Tab 8: Documentation"),
+        ]
+
+        for selector, filename, description in tabs:
             try:
-                # Inventory uses different tab IDs - check the template
-                self.page.click(f'.nav-tabs .nav-link:nth-child({i})', timeout=3000)
+                self.highlight_and_click(selector, f"Inventario_{description.replace(' ', '_').replace(':', '')}")
                 time.sleep(2)
-                self.save_screenshot(f"inventario_form_tab{i}", f"Inventory Form - Tab {i}")
-            except:
-                print(f"    ℹ️  Inventory Tab {i} not found")
-                break
+                self.save_screenshot(filename, f"Inventory Form - {description}")
+            except Exception as e:
+                print(f"    ⚠️  {description} not accessible: {e}")
 
         self.page.go_back()
         time.sleep(2)
