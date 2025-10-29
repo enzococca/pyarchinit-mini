@@ -14,12 +14,11 @@ build:
 sphinx:
   configuration: docs/conf.py
   
-# If using Sphinx, optionally build your docs in additional formats such as PDF
-# Temporarily disabled PDF due to build issues
-# formats:
-#   - pdf
-#   - epub
-#   - htmlzip
+# Build documentation in multiple formats
+formats:
+  - pdf
+  - epub
+  - htmlzip
 
 # Optionally declare the Python requirements required to build your docs
 python:

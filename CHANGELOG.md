@@ -5,6 +5,23 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.3] - 2025-10-29
+
+### Added
+- **ReadTheDocs Multiple Formats**: Enabled PDF, EPUB, and HTMLZip generation on ReadTheDocs
+  - PDF output with optimized LaTeX configuration
+  - EPUB output with metadata and cover image
+  - HTMLZip for offline documentation access
+  - Updated `.readthedocs.yaml` to enable all formats
+  - Added EPUB configuration in `docs/conf.py`
+
+### Documentation
+- Documentation now available in 4 formats on ReadTheDocs:
+  - HTML (online reading)
+  - PDF (printable/offline)
+  - EPUB (e-readers)
+  - HTMLZip (offline archive)
+
 ## [1.7.2] - 2025-10-29
 
 ### Changed

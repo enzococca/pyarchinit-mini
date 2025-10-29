@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'PyArchInit-Mini'
 copyright = '2025, PyArchInit Team'
 author = 'PyArchInit Team'
-release = '1.7.2'
+release = '1.7.3'
 
 extensions = [
     'sphinx.ext.autodoc',
@@ -76,3 +76,22 @@ latex_documents = [
 
 # Ensure single PDF output
 latex_additional_files = []
+
+# -- EPUB output configuration -----------------------------------------------
+
+epub_title = project
+epub_author = author
+epub_publisher = author
+epub_copyright = copyright
+epub_exclude_files = ['search.html']
+
+# EPUB settings
+epub_show_urls = 'footnote'
+epub_use_index = True
+epub_description = 'Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, and Extended Matrix support'
+epub_contributor = 'PyArchInit Team'
+
+# -- PDF/EPUB cover settings -------------------------------------------------
+
+# Use logo as cover for EPUB
+epub_cover = ('_static/images/pyarchinit-mini-logo.png', '')
