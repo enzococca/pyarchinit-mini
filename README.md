@@ -1155,9 +1155,16 @@ The project is actively maintained with regular updates. Check the [CHANGELOG](h
 ### Python
 - **Python 3.8-3.14** (Python 3.10+ recommended)
 
-### Graphviz (Required for Harris Matrix / GraphML Export)
+### Graphviz (Optional - Only for DOT File Generation)
 
-PyArchInit-Mini uses **Graphviz software** for Harris Matrix visualization and GraphML export. The Python module `graphviz` is installed automatically via pip, but requires the **native Graphviz software** to be installed on your system.
+**By default, PyArchInit-Mini uses Pure NetworkX for GraphML export (no Graphviz required).**
+
+Graphviz software is **optional** and only needed if you want to:
+- Generate DOT files for custom workflows
+- Use the legacy Graphviz-based export pipeline
+- Apply transitive reduction via the `tred` command
+
+The Python module `graphviz` is installed automatically via pip, but the native Graphviz software requires manual installation if you need it.
 
 **Installation by Operating System:**
 

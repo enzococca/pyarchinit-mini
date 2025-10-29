@@ -5,6 +5,26 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.2] - 2025-10-29
+
+### Changed
+- **Documentation: GraphML Export Clarification** - Complete rewrite of technical documentation
+  - Clarified that **Pure NetworkX is the DEFAULT export method** (no Graphviz required)
+  - Graphviz is now correctly documented as **OPTIONAL** (only for DOT file generation)
+  - Added clear comparison table between Pure NetworkX vs Graphviz export methods
+  - Updated all code examples to show both export approaches
+  - Removed misleading statements that suggested Graphviz was required
+  - Added troubleshooting section for both export methods
+  - Updated README.md to reflect that Graphviz is optional
+  - Technical guide now at: `docs/features/graphml-export-technical.rst`
+
+### Documentation Improvements
+- Restructured GraphML export documentation for clarity
+- Added "When to Use" sections for each export method
+- Improved CLI and API usage examples
+- Added comprehensive comparison table
+- Enhanced troubleshooting guide with clear solutions
+
 ## [1.7.1] - 2025-10-29
 
 ### Changed
