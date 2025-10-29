@@ -5,6 +5,35 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.9] - 2025-10-29
+
+### Fixed - CRITICAL
+- **Web Interface**: Restored missing features from external development version
+  - **RESTORED 4 Missing Route Files**:
+    - `pyarchinit_import_export_routes.py` - PyArchInit legacy format import/export
+    - `harris_creator_routes.py` - Interactive Harris Matrix creator interface
+    - `excel_import_routes.py` - Excel batch import functionality
+    - `em_node_config_routes.py` - Extended Matrix node configuration
+  - **Enhanced US Form** with additional fields:
+    - `tipo_documento` field with file type selection
+    - `documento_file` field for file upload
+    - Extended `unita_tipo` choices (VSF, SF, CON, USD, USVA, USVB, USVC, DOC, TU, property, Combiner, Extractor)
+    - Changed `us` field from IntegerField to StringField for alphanumeric support
+  - **Additional Service Imports**:
+    - `RelationshipSyncService` for stratigraphic relationship management
+    - `DatazioneService` for chronological data handling
+
+### Impact - CRITICAL FIX
+- Version 1.7.8 was published with incomplete web_interface code
+- This release restores all missing functionality that was in active development
+- Users upgrading from 1.7.7 or earlier now get the complete feature set
+- Fixes missing routes that would cause 404 errors for PyArchInit import, Harris Creator, Excel Import
+
+### Note
+- The external `/web_interface` directory contained the actively developed code
+- Version 1.7.8 mistakenly used the older package version
+- This release properly integrates the external development code into the package
+
 ## [1.7.8] - 2025-10-29
 
 ### Fixed

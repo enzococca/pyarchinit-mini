@@ -9,7 +9,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from flask_login import login_required, current_user
 from flask_socketio import SocketIO
-from flask_babel import lazy_gettext as _l
+from flask_babel import lazy_gettext as _l, gettext as _
 from wtforms import StringField, TextAreaField, IntegerField, SelectField, FileField, BooleanField
 from wtforms.validators import DataRequired, Optional
 from werkzeug.utils import secure_filename
@@ -27,8 +27,6 @@ from pyarchinit_mini.services.inventario_service import InventarioService
 from pyarchinit_mini.services.thesaurus_service import ThesaurusService
 from pyarchinit_mini.services.user_service import UserService
 from pyarchinit_mini.services.analytics_service import AnalyticsService
-from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
-from pyarchinit_mini.services.datazione_service import DatazioneService
 from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
 from pyarchinit_mini.harris_matrix.matrix_visualizer import MatrixVisualizer
 from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
@@ -39,18 +37,6 @@ from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
 
 # Import authentication routes
 from pyarchinit_mini.web_interface.auth_routes import auth_bp, init_login_manager, write_permission_required
-
-# Import PyArchInit import/export routes
-from pyarchinit_mini.web_interface.pyarchinit_import_export_routes import pyarchinit_import_export_bp
-
-# Import Harris Matrix Creator routes
-from pyarchinit_mini.web_interface.harris_creator_routes import harris_creator_bp
-
-# Import Excel Import routes
-from pyarchinit_mini.web_interface.excel_import_routes import excel_import_bp
-
-# Import EM Node Configuration routes
-from pyarchinit_mini.web_interface.em_node_config_routes import em_node_config_bp
 
 # Import WebSocket events
 from pyarchinit_mini.web_interface.socketio_events import (
@@ -80,35 +66,15 @@ class USForm(FlaskForm):
     # TAB 1: Informazioni Base
     # Identificazione
     sito = SelectField(_l('Site'), validators=[DataRequired()], coerce=str)
-    area = StringField(_l('Area'))  # Already a StringField
-    us = StringField(_l('US Number'), validators=[DataRequired()])  # Changed from IntegerField to StringField
+    area = StringField(_l('Area'))
+    us = IntegerField(_l('US Number'), validators=[DataRequired()])
     unita_tipo = SelectField(_l('Unit Type'), choices=[
         ('', _l('-- Select --')),
-        ('US', _l('US')),
-        ('USM', _l('USM')),
-        ('VSF', _l('VSF')),
-        ('SF', _l('SF')),
-        ('CON', _l('CON')),
-        ('USD', _l('USD')),
-        ('USVA', _l('USVA')),
-        ('USVB', _l('USVB')),
-        ('USVC', _l('USVC')),
-        ('DOC', _l('DOC')),
-        ('TU', _l('TU')),
-        ('property', _l('property')),
-        ('Combiner', _l('Combiner')),
-        ('Extractor', _l('Extractor'))
+        ('US', 'US'),
+        ('USM', 'USM'),
+        ('USV', 'USV'),
+        ('USR', 'USR')
     ])
-    tipo_documento = SelectField(_l('Document Type'), choices=[
-        ('', _l('-- Select --')),
-        ('image', _l('Image')),
-        ('PDF', _l('PDF')),
-        ('DOCX', _l('DOCX')),
-        ('CSV', _l('CSV')),
-        ('Excel', _l('Excel')),
-        ('TXT', _l('TXT'))
-    ])
-    documento_file = FileField(_l('Upload Document File'))
 
     # Dati di Scavo
     anno_scavo = IntegerField(_l('Excavation Year'), validators=[Optional()])
@@ -152,8 +118,12 @@ class USForm(FlaskForm):
     osservazioni = TextAreaField(_l('Observations'))
 
     # TAB 3: Caratteristiche Fisiche
-    definizione_stratigrafica = SelectField('Definizione Stratigrafica', choices=[], coerce=str)
-    formazione = SelectField(_l('Formation'), choices=[], coerce=str)
+    formazione = SelectField(_l('Formation'), choices=[
+        ('', _l('-- Select --')),
+        ('Naturale', _l('Natural')),
+        ('Artificiale', _l('Artificial')),
+        ('Mista', _l('Mixed'))
+    ])
     stato_di_conservazione = SelectField(_l('Conservation State'), choices=[
         ('', _l('-- Select --')),
         ('Ottimo', _l('Excellent')),
@@ -161,8 +131,13 @@ class USForm(FlaskForm):
         ('Discreto', _l('Fair')),
         ('Cattivo', _l('Poor'))
     ])
-    colore = SelectField(_l('Color'), choices=[], coerce=str)
-    consistenza = SelectField('Consistenza', choices=[], coerce=str)
+    colore = StringField(_l('Color'))
+    consistenza = SelectField('Consistenza', choices=[
+        ('', '-- Seleziona --'),
+        ('Compatta', 'Compatta'),
+        ('Semicompatta', 'Semicompatta'),
+        ('Sciolta', 'Sciolta')
+    ])
     struttura = StringField('Struttura')
 
     # Misure
@@ -176,11 +151,57 @@ class USForm(FlaskForm):
     profondita_min = StringField('Profondità Min (cm)')
 
     # TAB 4: Cronologia
-    periodo_iniziale = StringField('Periodo Iniziale')
+    periodo_iniziale = SelectField('Periodo Iniziale', choices=[
+        ('', '-- Seleziona --'),
+        ('Paleolitico', 'Paleolitico'),
+        ('Mesolitico', 'Mesolitico'),
+        ('Neolitico', 'Neolitico'),
+        ('Eneolitico', 'Eneolitico'),
+        ('Bronzo Antico', 'Bronzo Antico'),
+        ('Bronzo Medio', 'Bronzo Medio'),
+        ('Bronzo Finale', 'Bronzo Finale'),
+        ('Ferro I', 'Ferro I'),
+        ('Ferro II', 'Ferro II'),
+        ('Orientalizzante', 'Orientalizzante'),
+        ('Arcaico', 'Arcaico'),
+        ('Classico', 'Classico'),
+        ('Ellenistico', 'Ellenistico'),
+        ('Romano Repubblicano', 'Romano Repubblicano'),
+        ('Romano Imperiale', 'Romano Imperiale'),
+        ('Tardo Antico', 'Tardo Antico'),
+        ('Altomedievale', 'Altomedievale'),
+        ('Medievale', 'Medievale'),
+        ('Postmedievale', 'Postmedievale'),
+        ('Moderno', 'Moderno'),
+        ('Contemporaneo', 'Contemporaneo')
+    ])
     fase_iniziale = StringField('Fase Iniziale')
-    periodo_finale = StringField('Periodo Finale')
+    periodo_finale = SelectField('Periodo Finale', choices=[
+        ('', '-- Seleziona --'),
+        ('Paleolitico', 'Paleolitico'),
+        ('Mesolitico', 'Mesolitico'),
+        ('Neolitico', 'Neolitico'),
+        ('Eneolitico', 'Eneolitico'),
+        ('Bronzo Antico', 'Bronzo Antico'),
+        ('Bronzo Medio', 'Bronzo Medio'),
+        ('Bronzo Finale', 'Bronzo Finale'),
+        ('Ferro I', 'Ferro I'),
+        ('Ferro II', 'Ferro II'),
+        ('Orientalizzante', 'Orientalizzante'),
+        ('Arcaico', 'Arcaico'),
+        ('Classico', 'Classico'),
+        ('Ellenistico', 'Ellenistico'),
+        ('Romano Repubblicano', 'Romano Repubblicano'),
+        ('Romano Imperiale', 'Romano Imperiale'),
+        ('Tardo Antico', 'Tardo Antico'),
+        ('Altomedievale', 'Altomedievale'),
+        ('Medievale', 'Medievale'),
+        ('Postmedievale', 'Postmedievale'),
+        ('Moderno', 'Moderno'),
+        ('Contemporaneo', 'Contemporaneo')
+    ])
     fase_finale = StringField('Fase Finale')
-    datazione = SelectField('Datazione', choices=[], coerce=str)
+    datazione = StringField('Datazione')
     affidabilita = SelectField('Affidabilità', choices=[
         ('', '-- Seleziona --'),
         ('Alta', 'Alta'),
@@ -330,9 +351,22 @@ class GraphMLExportForm(FlaskForm):
 
 # Flask App Setup
 def create_app():
-    app = Flask(__name__)
+    # Find the package directory
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    template_folder = os.path.join(package_dir, 'templates')
+    static_folder = os.path.join(package_dir, 'static')
+    
+    # Check if folders exist, otherwise try current directory
+    if not os.path.exists(template_folder):
+        template_folder = 'templates'
+    if not os.path.exists(static_folder):
+        static_folder = 'static'
+    
+    app = Flask(__name__, 
+                template_folder=template_folder,
+                static_folder=static_folder)
     app.config['SECRET_KEY'] = 'your-secret-key-here'
-    app.config['UPLOAD_FOLDER'] = 'web_interface/static/uploads'
+    app.config['UPLOAD_FOLDER'] = os.path.join(package_dir, 'static/uploads')
     app.config['DATABASE_FOLDER'] = 'databases'  # Folder for uploaded databases
 
     # Initialize CSRF protection
@@ -340,13 +374,12 @@ def create_app():
 
     # Initialize Flask-Babel for i18n
     from pyarchinit_mini.i18n import init_babel, get_locale
-    from flask_babel import gettext as _
     babel = init_babel(app)
 
-    # Make get_locale and gettext available in all templates
+    # Make get_locale and version available in all templates
     @app.context_processor
     def inject_locale():
-        return dict(get_locale=get_locale, _=_, version=__version__)
+        return dict(get_locale=get_locale, version=__version__)
 
     # Create necessary folders
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -374,31 +407,7 @@ def create_app():
     # Store current database info in app config
     app.config['CURRENT_DATABASE_URL'] = database_url
     app.config['DATABASE_CONNECTIONS'] = {}  # Store named connections
-
-    # Add default database connections for easy switching
-    project_root = os.path.dirname(os.path.dirname(__file__))
-    root_db_path = os.path.join(project_root, 'pyarchinit_mini.db')
-    package_db_path = os.path.join(os.path.dirname(__file__), '..', 'pyarchinit_mini', 'pyarchinit_mini.db')
-    package_db_path = os.path.abspath(package_db_path)
-
-    app.config['DATABASE_CONNECTIONS']['Database Root (Progetto)'] = {
-        'type': 'sqlite',
-        'path': root_db_path,
-        'url': f'sqlite:///{root_db_path}',
-        'description': 'Database nella cartella root del progetto (per sviluppo PyCharm)',
-        'uploaded': False,
-        'is_active': database_url == f'sqlite:///{root_db_path}'
-    }
-
-    app.config['DATABASE_CONNECTIONS']['Database Package'] = {
-        'type': 'sqlite',
-        'path': package_db_path,
-        'url': f'sqlite:///{package_db_path}',
-        'description': 'Database nella cartella del package pyarchinit_mini',
-        'uploaded': False,
-        'is_active': database_url == f'sqlite:///{package_db_path}'
-    }
-
+    
     # Initialize services
     site_service = SiteService(db_manager)
     us_service = USService(db_manager)
@@ -406,41 +415,20 @@ def create_app():
     thesaurus_service = ThesaurusService(db_manager)
     user_service = UserService(db_manager)
     analytics_service = AnalyticsService(db_manager)
-    relationship_sync_service = RelationshipSyncService(db_manager)
-    datazione_service = DatazioneService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
     matrix_visualizer = MatrixVisualizer()
     graphviz_visualizer = PyArchInitMatrixVisualizer()  # Graphviz visualizer (desktop GUI style)
     pdf_generator = PDFGenerator()
     media_handler = MediaHandler()
 
-    # Store services in app for access in routes
+    # Store user service in app for authentication
     app.user_service = user_service
-    app.db_manager = db_manager
 
     # Initialize Flask-Login
     init_login_manager(app, user_service)
 
     # Register authentication blueprint
     app.register_blueprint(auth_bp)
-
-    # Register PyArchInit import/export blueprint
-    app.register_blueprint(pyarchinit_import_export_bp, url_prefix='/pyarchinit-import-export')
-
-    # Register Harris Matrix Creator blueprint
-    app.register_blueprint(harris_creator_bp)
-
-    # Register Excel Import blueprint
-    app.register_blueprint(excel_import_bp, url_prefix='/excel-import')
-
-    # Register EM Node Configuration blueprint
-    app.register_blueprint(em_node_config_bp)
-
-    # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
-    csrf.exempt(pyarchinit_import_export_bp)
-    csrf.exempt(harris_creator_bp)
-    csrf.exempt(excel_import_bp)
-    csrf.exempt(em_node_config_bp)
 
     # Initialize Flask-SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*")
@@ -482,7 +470,7 @@ def create_app():
             
             return render_template('dashboard.html', stats=stats)
         except Exception as e:
-            flash(f'Errore caricamento dashboard: {str(e)}', 'error')
+            flash(f'{_("Error loading dashboard")}: {str(e)}', 'error')
             return render_template('dashboard.html', stats={})
 
     @app.route('/analytics')
@@ -495,7 +483,7 @@ def create_app():
 
             return render_template('analytics/dashboard.html', data=analytics_data)
         except Exception as e:
-            flash(f'Errore caricamento analytics: {str(e)}', 'error')
+            flash(f'{_("Error loading analytics")}: {str(e)}', 'error')
             return redirect(url_for('index'))
 
     # Sites routes
@@ -544,11 +532,11 @@ def create_app():
                 # Broadcast site creation
                 broadcast_site_created(socketio, site_data['sito'], site_id)
 
-                flash(f'Sito "{site_data["sito"]}" creato con successo!', 'success')
+                flash(f'{_("Site")} "{site_data["sito"]}" {_("created successfully")}!', 'success')
                 return redirect(url_for('sites_list'))
                 
             except Exception as e:
-                flash(f'Errore nella creazione del sito: {str(e)}', 'error')
+                flash(f'{_("Error creating site")}: {str(e)}', 'error')
         
         return render_template('sites/form.html', form=form, title='Nuovo Sito')
 
@@ -579,11 +567,11 @@ def create_app():
 
                 updated_site = site_service.update_site(site_id, update_data)
 
-                flash(f'Sito "{update_data["sito"]}" aggiornato con successo!', 'success')
+                flash(f'{_("Site")} "{update_data["sito"]}" {_("updated successfully")}!', 'success')
                 return redirect(url_for('sites_list'))
 
             except Exception as e:
-                flash(f'Errore nell\'aggiornamento del sito: {str(e)}', 'error')
+                flash(f'{_("Error updating site")}: {str(e)}', 'error')
 
         # Pre-populate form with existing data
         elif request.method == 'GET':
@@ -596,42 +584,6 @@ def create_app():
             form.descrizione.data = site.descrizione
 
         return render_template('sites/form.html', form=form, title='Modifica Sito', edit_mode=True)
-
-    @app.route('/sites/<int:site_id>/delete', methods=['POST'])
-    @login_required
-    @write_permission_required
-    def delete_site(site_id):
-        """Delete site and all related records (cascade deletion)"""
-        try:
-            # Get site name before deletion for flash message
-            site = site_service.get_site_dto_by_id(site_id)
-            if not site:
-                return jsonify({'success': False, 'message': 'Sito non trovato'}), 404
-
-            site_name = site.sito
-
-            # Perform cascade deletion
-            deletion_stats = site_service.delete_site(site_id)
-
-            # Build success message
-            message = f'Sito "{site_name}" eliminato con successo!'
-            if deletion_stats['us'] > 0:
-                message += f" ({deletion_stats['us']} US, {deletion_stats['inventario']} inventario, "
-                message += f"{deletion_stats['us_relationships']} relazioni, "
-                message += f"{deletion_stats['periodizzazione']} periodizzazioni eliminate)"
-
-            return jsonify({
-                'success': True,
-                'message': message,
-                'stats': deletion_stats
-            })
-
-        except Exception as e:
-            # Flask will automatically log the exception traceback
-            return jsonify({
-                'success': False,
-                'message': f'Errore durante l\'eliminazione del sito: {str(e)}'
-            }), 500
 
     @app.route('/sites/<int:site_id>')
     @login_required
@@ -667,77 +619,21 @@ def create_app():
     @app.route('/us')
     @login_required
     def us_list():
-        from flask import session
-
         page = request.args.get('page', 1, type=int)
-
-        # Advanced filters
         sito_filter = request.args.get('sito', '')
-        area_filter = request.args.get('area', '')
-        unita_tipo_filter = request.args.get('unita_tipo', '')
-        anno_scavo_filter = request.args.get('anno_scavo', '')
-        periodo_filter = request.args.get('periodo', '')
-        fase_filter = request.args.get('fase', '')
-        us_number_filter = request.args.get('us_number', '')
-
-        # Build filters dictionary
+        
         filters = {}
         if sito_filter:
             filters['sito'] = sito_filter
-        if area_filter:
-            filters['area'] = area_filter
-        if unita_tipo_filter:
-            filters['unita_tipo'] = unita_tipo_filter
-        if anno_scavo_filter:
-            filters['anno_scavo'] = int(anno_scavo_filter)
-        if us_number_filter:
-            filters['us'] = us_number_filter
-
-        # Save filters in session for navigation and PDF export
-        session['us_filters'] = {
-            'sito': sito_filter,
-            'area': area_filter,
-            'unita_tipo': unita_tipo_filter,
-            'anno_scavo': anno_scavo_filter,
-            'periodo': periodo_filter,
-            'fase': fase_filter,
-            'us_number': us_number_filter
-        }
-
+        
         us_list = us_service.get_all_us(page=page, size=20, filters=filters)
         total = us_service.count_us(filters=filters)
-
+        
         # Get sites for filter
         sites = site_service.get_all_sites(size=100)
-
-        # Get distinct values for filters
-        with db_manager.connection.get_session() as db_session:
-            from pyarchinit_mini.models.us import US as USModel
-            from sqlalchemy import distinct
-
-            areas = db_session.query(distinct(USModel.area)).filter(USModel.area.isnot(None), USModel.area != '').all()
-            areas = sorted([a[0] for a in areas if a[0]])
-
-            unit_types = ['US', 'USM', 'VSF', 'SF', 'CON', 'USD', 'USVA', 'USVB', 'USVC', 'DOC', 'TU', 'property', 'Combiner', 'Extractor']
-
-            years = db_session.query(distinct(USModel.anno_scavo)).filter(USModel.anno_scavo.isnot(None)).all()
-            years = sorted([y[0] for y in years if y[0]], reverse=True)
-
-        return render_template('us/list.html',
-                             us_list=us_list,
-                             sites=sites,
-                             areas=areas,
-                             unit_types=unit_types,
-                             years=years,
-                             total=total,
-                             page=page,
-                             sito_filter=sito_filter,
-                             area_filter=area_filter,
-                             unita_tipo_filter=unita_tipo_filter,
-                             anno_scavo_filter=anno_scavo_filter,
-                             periodo_filter=periodo_filter,
-                             fase_filter=fase_filter,
-                             us_number_filter=us_number_filter)
+        
+        return render_template('us/list.html', us_list=us_list, sites=sites,
+                             total=total, page=page, sito_filter=sito_filter)
     
     @app.route('/us/create', methods=['GET', 'POST'])
     @login_required
@@ -748,32 +644,7 @@ def create_app():
         # Populate site choices
         sites = site_service.get_all_sites(size=100)
         form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
-
-        # Populate datazione choices
-        datazioni_choices = datazione_service.get_datazioni_choices()
-        form.datazione.choices = [('', '-- Seleziona Datazione --')] + [(d['value'], d['label']) for d in datazioni_choices]
-
-        # Populate thesaurus choices for US fields
-        try:
-            def_strat_values = thesaurus_service.get_field_values('us_table', 'definizione_stratigrafica')
-            form.definizione_stratigrafica.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in def_strat_values]
-
-            formazione_values = thesaurus_service.get_field_values('us_table', 'formazione')
-            form.formazione.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in formazione_values]
-
-            consistenza_values = thesaurus_service.get_field_values('us_table', 'consistenza')
-            form.consistenza.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in consistenza_values]
-
-            colore_values = thesaurus_service.get_field_values('us_table', 'colore')
-            form.colore.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in colore_values]
-        except Exception as e:
-            print(f"Error loading thesaurus values: {e}")
-            # Fallback to empty choices
-            form.definizione_stratigrafica.choices = [('', '-- Seleziona --')]
-            form.formazione.choices = [('', '-- Seleziona --')]
-            form.consistenza.choices = [('', '-- Seleziona --')]
-            form.colore.choices = [('', '-- Seleziona --')]
-
+        
         if form.validate_on_submit():
             try:
                 # Helper function to convert numeric fields
@@ -791,7 +662,6 @@ def create_app():
                     'area': form.area.data,
                     'us': form.us.data,
                     'unita_tipo': form.unita_tipo.data,
-                    'tipo_documento': form.tipo_documento.data if form.unita_tipo.data == 'DOC' else None,
                     'anno_scavo': form.anno_scavo.data,
                     'scavato': form.scavato.data,
                     'schedatore': form.schedatore.data,
@@ -853,151 +723,39 @@ def create_app():
                     'setacciatura': form.setacciatura.data,
                 }
 
-                # Handle file upload for DOC units
-                if form.unita_tipo.data == 'DOC' and form.documento_file.data:
-                    file = form.documento_file.data
-                    if file and file.filename:
-                        import os
-                        from werkzeug.utils import secure_filename
-                        import datetime
-
-                        # Create DoSC directory if it doesn't exist
-                        dosc_dir = os.path.join(os.getcwd(), 'DoSC')
-                        os.makedirs(dosc_dir, exist_ok=True)
-
-                        # Generate filename: SITE_US_timestamp_originalname
-                        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                        original_name = secure_filename(file.filename)
-                        filename = f"{us_data['sito']}_{us_data['us']}_{timestamp}_{original_name}"
-
-                        # Save file
-                        file_path = os.path.join(dosc_dir, filename)
-                        file.save(file_path)
-
-                        # Store relative path in database
-                        us_data['file_path'] = f"DoSC/{filename}"
-
                 us = us_service.create_us(us_data)
-
-                # Synchronize rapporti field to us_relationships_table
-                try:
-                    with db_manager.connection.get_session() as session:
-                        relationship_sync_service.sync_rapporti_to_relationships_table(
-                            sito=us_data['sito'],
-                            us_number=int(us_data['us']),
-                            rapporti_text=us_data.get('rapporti', ''),
-                            session=session
-                        )
-                except Exception as sync_error:
-                    print(f"Warning: Failed to sync relationships: {sync_error}")
 
                 # Broadcast US creation (use data from form, not from detached instance)
                 broadcast_us_created(socketio, us_data['sito'], us_data['us'])
 
-                flash(f'US {us_data["us"]} creata con successo!', 'success')
+                flash(f'US {us_data["us"]} {_("created successfully")}!', 'success')
                 return redirect(url_for('us_list'))
 
             except Exception as e:
-                flash(f'Errore nella creazione US: {str(e)}', 'error')
+                flash(f'{_("Error creating US")}: {str(e)}', 'error')
         elif request.method == 'POST':
             # Form validation failed - show errors
-            flash('Errore nella validazione del form. Controlla i campi obbligatori.', 'error')
+            flash(_("Form validation error. Check required fields."), 'error')
             print(f"Form validation errors: {form.errors}")
         
         return render_template('us/form.html', form=form, title='Nuova US')
 
-    @app.route('/us/<us_id>/edit', methods=['GET', 'POST'])
+    @app.route('/us/<int:us_id>/edit', methods=['GET', 'POST'])
     @login_required
     @write_permission_required
     def edit_us(us_id):
-        """Edit existing US - us_id is a composite string: sito__area__us_number"""
-        from flask import session
-
+        """Edit existing US"""
         form = USForm()
 
         # Populate site choices
         sites = site_service.get_all_sites(size=100)
         form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
 
-        # Populate datazione choices
-        datazioni_choices = datazione_service.get_datazioni_choices()
-        form.datazione.choices = [('', '-- Seleziona Datazione --')] + [(d['value'], d['label']) for d in datazioni_choices]
-
-        # Populate thesaurus choices for US fields
-        try:
-            def_strat_values = thesaurus_service.get_field_values('us_table', 'definizione_stratigrafica')
-            form.definizione_stratigrafica.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in def_strat_values]
-
-            formazione_values = thesaurus_service.get_field_values('us_table', 'formazione')
-            form.formazione.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in formazione_values]
-
-            consistenza_values = thesaurus_service.get_field_values('us_table', 'consistenza')
-            form.consistenza.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in consistenza_values]
-
-            colore_values = thesaurus_service.get_field_values('us_table', 'colore')
-            form.colore.choices = [('', '-- Seleziona --')] + [(v['value'], v['value']) for v in colore_values]
-        except Exception as e:
-            print(f"Error loading thesaurus values: {e}")
-            # Fallback to empty choices
-            form.definizione_stratigrafica.choices = [('', '-- Seleziona --')]
-            form.formazione.choices = [('', '-- Seleziona --')]
-            form.consistenza.choices = [('', '-- Seleziona --')]
-            form.colore.choices = [('', '-- Seleziona --')]
-
         # Get existing US
         us = us_service.get_us_dto_by_id(us_id)
         if not us:
             flash('US non trovata', 'error')
             return redirect(url_for('us_list'))
-
-        # Calculate prev/next navigation based on filters
-        prev_id = None
-        next_id = None
-        current_position = 0
-        total_records = 0
-
-        try:
-            # Get filters from session
-            filters = session.get('us_filters', {})
-
-            # Build query filters
-            query_filters = {}
-            if filters.get('sito'):
-                query_filters['sito'] = filters['sito']
-            if filters.get('area'):
-                query_filters['area'] = filters['area']
-            if filters.get('unita_tipo'):
-                query_filters['unita_tipo'] = filters['unita_tipo']
-            if filters.get('anno_scavo'):
-                try:
-                    query_filters['anno_scavo'] = int(filters['anno_scavo'])
-                except (ValueError, TypeError):
-                    pass
-            if filters.get('us_number'):
-                query_filters['us'] = filters['us_number']
-
-            # Get full list of filtered US IDs
-            all_us = us_service.get_all_us(size=10000, filters=query_filters)
-            us_ids = [u.id_us for u in all_us]
-            total_records = len(us_ids)
-
-            # Find current position
-            try:
-                current_position = us_ids.index(us_id) + 1  # 1-based for display
-                current_index = current_position - 1  # 0-based for array
-
-                # Calculate prev/next
-                if current_index > 0:
-                    prev_id = us_ids[current_index - 1]
-                if current_index < len(us_ids) - 1:
-                    next_id = us_ids[current_index + 1]
-            except ValueError:
-                # Current US not in filtered list - this is ok, just no navigation
-                pass
-        except Exception as e:
-            # If navigation calculation fails, just continue without it
-            print(f"Navigation calculation error: {e}")
-            pass
 
         if form.validate_on_submit():
             try:
@@ -1016,7 +774,6 @@ def create_app():
                     'area': form.area.data,
                     'us': form.us.data,
                     'unita_tipo': form.unita_tipo.data,
-                    'tipo_documento': form.tipo_documento.data if form.unita_tipo.data == 'DOC' else None,
                     'anno_scavo': form.anno_scavo.data,
                     'scavato': form.scavato.data,
                     'schedatore': form.schedatore.data,
@@ -1078,49 +835,13 @@ def create_app():
                     'setacciatura': form.setacciatura.data,
                 }
 
-                # Handle file upload for DOC units
-                if form.unita_tipo.data == 'DOC' and form.documento_file.data:
-                    file = form.documento_file.data
-                    if file and file.filename:
-                        import os
-                        from werkzeug.utils import secure_filename
-                        import datetime
-
-                        # Create DoSC directory if it doesn't exist
-                        dosc_dir = os.path.join(os.getcwd(), 'DoSC')
-                        os.makedirs(dosc_dir, exist_ok=True)
-
-                        # Generate filename: SITE_US_timestamp_originalname
-                        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                        original_name = secure_filename(file.filename)
-                        filename = f"{update_data['sito']}_{update_data['us']}_{timestamp}_{original_name}"
-
-                        # Save file
-                        file_path = os.path.join(dosc_dir, filename)
-                        file.save(file_path)
-
-                        # Store relative path in database
-                        update_data['file_path'] = f"DoSC/{filename}"
-
                 us_service.update_us(us_id, update_data)
 
-                # Synchronize rapporti field to us_relationships_table
-                try:
-                    with db_manager.connection.get_session() as session:
-                        relationship_sync_service.sync_rapporti_to_relationships_table(
-                            sito=update_data['sito'],
-                            us_number=int(update_data['us']),
-                            rapporti_text=update_data.get('rapporti', ''),
-                            session=session
-                        )
-                except Exception as sync_error:
-                    print(f"Warning: Failed to sync relationships: {sync_error}")
-
-                flash(f'US {update_data["us"]} aggiornata con successo!', 'success')
+                flash(f'US {update_data["us"]} {_("updated successfully")}!', 'success')
                 return redirect(url_for('us_list'))
 
             except Exception as e:
-                flash(f'Errore nell\'aggiornamento US: {str(e)}', 'error')
+                flash(f'{_("Error updating US")}: {str(e)}', 'error')
 
         # Pre-populate form with existing data
         elif request.method == 'GET':
@@ -1176,14 +897,7 @@ def create_app():
             form.flottazione.data = us.flottazione
             form.setacciatura.data = us.setacciatura
 
-        return render_template('us/form.html',
-                             form=form,
-                             title='Modifica US',
-                             edit_mode=True,
-                             prev_id=prev_id,
-                             next_id=next_id,
-                             current_position=current_position,
-                             total_records=total_records)
+        return render_template('us/form.html', form=form, title='Modifica US', edit_mode=True)
 
     # Inventory routes
     @app.route('/inventario')
@@ -1304,14 +1018,14 @@ def create_app():
                 # Broadcast inventario creation (use data from form, not from detached instance)
                 broadcast_inventario_created(socketio, inv_data['numero_inventario'], inv_data['sito'])
 
-                flash(f'Reperto {inv_data["numero_inventario"]} creato con successo!', 'success')
+                flash(f'{_("Artifact")} {inv_data["numero_inventario"]} {_("created successfully")}!', 'success')
                 return redirect(url_for('inventario_list'))
 
             except Exception as e:
-                flash(f'Errore nella creazione reperto: {str(e)}', 'error')
+                flash(f'{_("Error creating artifact")}: {str(e)}', 'error')
         elif request.method == 'POST':
             # Form validation failed - show errors
-            flash('Errore nella validazione del form. Controlla i campi obbligatori.', 'error')
+            flash(_("Form validation error. Check required fields."), 'error')
             print(f"Form validation errors: {form.errors}")
 
         return render_template('inventario/form.html', form=form, title='Nuovo Reperto')
@@ -1458,60 +1172,36 @@ def create_app():
 
                 inventario_service.update_inventario(inv_id, update_data)
 
-                flash(f'Reperto {update_data["numero_inventario"]} aggiornato con successo!', 'success')
+                flash(f'{_("Artifact")} {update_data["numero_inventario"]} {_("updated successfully")}!', 'success')
                 return redirect(url_for('inventario_list'))
 
             except Exception as e:
-                flash(f'Errore nell\'aggiornamento reperto: {str(e)}', 'error')
+                flash(f'{_("Error updating artifact")}: {str(e)}', 'error')
 
         return render_template('inventario/form.html', form=form, title='Modifica Reperto', edit_mode=True)
 
     # Harris Matrix routes
     @app.route('/harris_matrix/<site_name>')
     def harris_matrix(site_name):
-        """Harris Matrix - auto-selects best visualizer based on graph size"""
+        """Harris Matrix with matplotlib visualizer (default)"""
         try:
-            print(f"🔵 [DEBUG] Starting harris_matrix for site: {site_name}")
             # Generate matrix
             graph = matrix_generator.generate_matrix(site_name)
-            print(f"🔵 [DEBUG] Graph generated with {len(graph.nodes())} nodes")
-            print(f"🔵 [DEBUG] Getting matrix levels...")
             levels = matrix_generator.get_matrix_levels(graph)
-            print(f"🔵 [DEBUG] Getting matrix statistics...")
             stats = matrix_generator.get_matrix_statistics(graph)
-            print(f"🔵 [DEBUG] Stats retrieved, preparing to render...")
 
-            num_nodes = len(graph.nodes())
-            print(f"🔵 [DEBUG] Checking graph size: {num_nodes} nodes")
+            # Generate visualization
+            matrix_image = matrix_visualizer.render_matplotlib(graph, levels)
 
-            # For large graphs (> 500 nodes), direct rendering is too complex
-            # Suggest using GraphML export instead (which works perfectly for large graphs)
-            if num_nodes > 500:
-                print(f"ℹ️  Large graph ({num_nodes} nodes) - too large for web rendering")
-                print(f"   Please use GraphML export instead (works perfectly for large graphs)")
-
-                # Show message to user to use GraphML export
-                flash(f'This Harris Matrix has {num_nodes} nodes - too large for web rendering. ' +
-                      'Please use GraphML export (available in the Export section) for best results with large graphs.',
-                      'warning')
-
-                return render_template('harris_matrix/large_graph_message.html',
-                                     site_name=site_name,
-                                     stats=stats,
-                                     num_nodes=num_nodes)
-            else:
-                # Use matplotlib for small graphs
-                matrix_image = matrix_visualizer.render_matplotlib(graph, levels)
-
-                return render_template('harris_matrix/view.html',
-                                     site_name=site_name,
-                                     matrix_image=matrix_image,
-                                     stats=stats,
-                                     levels=levels,
-                                     visualizer='matplotlib')
+            return render_template('harris_matrix/view.html',
+                                 site_name=site_name,
+                                 matrix_image=matrix_image,
+                                 stats=stats,
+                                 levels=levels,
+                                 visualizer='matplotlib')
 
         except Exception as e:
-            flash(f'Errore generazione Harris Matrix: {str(e)}', 'error')
+            flash(f'{_("Error generating Harris Matrix")}: {str(e)}', 'error')
             return redirect(url_for('sites_list'))
 
     @app.route('/harris_matrix/<site_name>/graphviz')
@@ -1555,7 +1245,7 @@ def create_app():
         except Exception as e:
             import traceback
             traceback.print_exc()
-            flash(f'Errore generazione Harris Matrix Graphviz: {str(e)}', 'error')
+            flash(f'{_("Error generating Harris Matrix Graphviz")}: {str(e)}', 'error')
             return redirect(url_for('sites_list'))
 
     # GraphML Export routes
@@ -1576,30 +1266,369 @@ def create_app():
                 grouping = form.grouping.data
                 reverse_epochs = form.reverse_epochs.data
 
-                # Use the new export_to_graphml method which:
-                # 1. Generates Harris Matrix graph with transitive reduction
-                # 2. Queries periodizzazione_table for datazione_estesa
-                # 3. Creates DOT with cluster_datazione subgraphs
-                # 4. Converts to GraphML with proper TableNode Rows
-
-                # First generate the Harris Matrix graph
+                # Generate Harris Matrix graph (with transitive reduction already applied)
                 graph = matrix_generator.generate_matrix(site_name)
 
-                import tempfile
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.graphml', delete=False) as f:
-                    temp_path = f.name
+                # Generate DOT manually with GraphML-compatible node ID format
+                # GraphML converter requires: US_number_description_epoch
+                # This allows it to extract epoch and create y:Row elements for period grouping
 
-                result_path = matrix_generator.export_to_graphml(
-                    graph=graph,
-                    output_path=temp_path,
-                    site_name=site_name,
+                # Get all relevant US
+                us_rilevanti = set()
+                for source, target in graph.edges():
+                    us_rilevanti.add(source)
+                    us_rilevanti.add(target)
+
+                # Start DOT
+                dot_lines = []
+                dot_lines.append('digraph {')
+                dot_lines.append('\trankdir=BT')
+
+                # Extract unique periods for y:Row generation
+                periodi_unici = set()
+                for node in us_rilevanti:
+                    if node in graph.nodes:
+                        periodo = graph.nodes[node].get('period_initial', graph.nodes[node].get('periodo_iniziale', 'Sconosciuto'))
+                        periodi_unici.add(periodo.replace(' ', '-'))  # Use dash
+
+                # Add period label nodes (required by GraphML converter to create y:Row elements)
+                for periodo in sorted(periodi_unici):
+                    dot_lines.append(f'\t"Periodo : {periodo}" [shape=plaintext]')
+
+                # EM_palette node styles mapping based on unita_tipo
+                # From Extended Matrix palette v.1.4
+                US_STYLES = {
+                    'US': {  # Stratigraphic Unit (strato, riempimento, etc.)
+                        'shape': 'box',
+                        'fillcolor': '#FFFFFF',
+                        'color': '#9B3333',  # red border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'USM': {  # Unità Stratigrafica Muraria (masonry)
+                        'shape': 'box',
+                        'fillcolor': '#FFFFFF',
+                        'color': '#9B3333',  # red border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'TSU': {  # Test Stratigraphic Unit
+                        'shape': 'box',
+                        'fillcolor': '#FFFFFF',
+                        'color': '#9B3333',  # red border
+                        'penwidth': '4.0',
+                        'style': 'rounded,filled,dashed'  # DASHED border
+                    },
+                    'USD': {  # Documentary US
+                        'shape': 'box',
+                        'fillcolor': '#FFFFFF',
+                        'color': '#D86400',  # orange border
+                        'penwidth': '4.0',
+                        'style': 'rounded,filled'
+                    },
+                    'USV': {  # Virtual US negative
+                        'shape': 'hexagon',
+                        'fillcolor': '#000000',
+                        'color': '#31792D',  # green border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'USV/s': {  # Virtual US structural
+                        'shape': 'trapezium',  # closest to parallelogram
+                        'fillcolor': '#000000',
+                        'color': '#248FE7',  # blue border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'Series US': {  # Series of Stratigraphic Units
+                        'shape': 'ellipse',
+                        'fillcolor': '#FFFFFF',
+                        'color': '#9B3333',  # red border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'Series USV': {  # Series of Virtual US
+                        'shape': 'ellipse',
+                        'fillcolor': '#000000',
+                        'color': '#31792D',  # green border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'SF': {  # Special Find
+                        'shape': 'octagon',
+                        'fillcolor': '#FFFFFF',
+                        'color': '#D8BD30',  # yellow border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'VSF': {  # Virtual Special Find
+                        'shape': 'octagon',
+                        'fillcolor': '#000000',
+                        'color': '#B19F61',  # brown border
+                        'penwidth': '4.0',
+                        'style': 'filled'
+                    },
+                    'default': {  # Fallback for unknown types
+                        'shape': 'box',
+                        'fillcolor': '#CCCCFF',
+                        'color': '#000000',
+                        'penwidth': '2.0',
+                        'style': 'filled'
+                    }
+                }
+
+                # Create nodes with GraphML-compatible format + EM_palette styles
+                # Node ID: US_1001_Description_Period
+                # Node label: US1001_Period (period included for get_y() to work)
+                for node in sorted(us_rilevanti):
+                    if node not in graph.nodes:
+                        continue
+
+                    node_data = graph.nodes[node]
+                    periodo = node_data.get('period_initial', node_data.get('periodo_iniziale', 'Sconosciuto'))
+                    d_stratigrafica = node_data.get('d_stratigrafica', node_data.get('description', ''))
+                    d_interpretativa = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
+                    unita_tipo = node_data.get('unita_tipo', 'US')  # Extract unit type
+
+                    # Build node tooltip/description: d_stratigrafica + d_interpretativa
+                    node_description_parts = []
+                    if d_stratigrafica:
+                        node_description_parts.append(d_stratigrafica)
+                    if d_interpretativa:
+                        node_description_parts.append(d_interpretativa)
+                    node_description = ' - '.join(node_description_parts) if node_description_parts else ''
+
+                    # Clean description and period (remove spaces and special chars)
+                    desc_clean = d_stratigrafica.replace(' ', '_').replace(',', '').replace('"', '')
+                    if len(desc_clean) > 30:
+                        desc_clean = desc_clean[:30]
+
+                    # Clean period: replace spaces with dash (not underscore)
+                    # This allows rsplit('_', 1) to extract the full period name
+                    periodo_clean = periodo.replace(' ', '-')  # Romano Imperiale → Romano-Imperiale
+
+                    # Node ID format: US_numero_descrizione_periodo
+                    # rsplit('_', 1) will extract "Romano-Imperiale" correctly
+                    node_id = f"US_{node}_{desc_clean}_{periodo_clean}"
+
+                    # Label: Include period for get_y() to work
+                    # Format: US1001_Romano-Imperiale (so get_y can find the period in LabelText)
+                    label = f"US{node}_{periodo_clean}"
+
+                    # Get style for this node based on unita_tipo
+                    style_dict = US_STYLES.get(unita_tipo, US_STYLES['default'])
+
+                    # Build node attributes
+                    attrs = [
+                        f'label="{label}"',
+                        f'fillcolor="{style_dict["fillcolor"]}"',
+                        f'color="{style_dict["color"]}"',
+                        f'shape={style_dict["shape"]}',
+                        f'penwidth={style_dict["penwidth"]}',
+                        f'style={style_dict["style"]}'
+                    ]
+
+                    # Add tooltip with node description (d_stratigrafica + d_interpretativa)
+                    if node_description:
+                        # Clean description for DOT format (escape quotes)
+                        desc_escaped = node_description.replace('"', '\\"').replace('\n', '\\n')
+                        attrs.append(f'tooltip="{desc_escaped}"')
+
+                    # Add node with EM_palette styling
+                    dot_lines.append(f'\t"{node_id}" [{", ".join(attrs)}]')
+
+                # Add edges with EM_palette styling based on relationship type
+                for source, target in graph.edges():
+                    if source not in graph.nodes or target not in graph.nodes:
+                        continue
+
+                    edge_data = graph.get_edge_data(source, target)
+                    rel_type = edge_data.get('relationship', edge_data.get('type', 'sopra'))
+
+                    source_data = graph.nodes[source]
+                    target_data = graph.nodes[target]
+
+                    source_periodo = source_data.get('period_initial', source_data.get('periodo_iniziale', 'Sconosciuto'))
+                    target_periodo = target_data.get('period_initial', target_data.get('periodo_iniziale', 'Sconosciuto'))
+
+                    source_desc = source_data.get('d_stratigrafica', source_data.get('description', ''))
+                    target_desc = target_data.get('d_stratigrafica', target_data.get('description', ''))
+
+                    desc_source_clean = source_desc.replace(' ', '_').replace(',', '').replace('"', '')[:30]
+                    desc_target_clean = target_desc.replace(' ', '_').replace(',', '').replace('"', '')[:30]
+
+                    # Clean periods (use dash, not underscore)
+                    source_periodo_clean = source_periodo.replace(' ', '-')
+                    target_periodo_clean = target_periodo.replace(' ', '-')
+
+                    source_id = f"US_{source}_{desc_source_clean}_{source_periodo_clean}"
+                    target_id = f"US_{target}_{desc_target_clean}_{target_periodo_clean}"
+
+                    # Determine edge attributes based on relationship type
+                    # Following PyArchInit convention for EM_palette
+                    rel_lower = rel_type.lower()
+                    edge_attrs = []
+
+                    # Contemporary relationships (uguale a, si lega a): NO arrow (arrowhead=none)
+                    if 'uguale' in rel_lower or 'lega' in rel_lower or 'same' in rel_lower or 'connected' in rel_lower:
+                        edge_attrs.append('dir=none')  # No arrowhead in either direction
+                    # Negative relationships (taglia): dashed line with arrow
+                    elif 'taglia' in rel_lower or 'tagli' in rel_lower or 'cut' in rel_lower:
+                        edge_attrs.append('style=dashed')
+                        edge_attrs.append('arrowhead=normal')
+                    # Virtual or uncertain relationships: dashed line
+                    elif 'virtuale' in rel_lower or 'dubbio' in rel_lower or 'virtual' in rel_lower or 'uncertain' in rel_lower:
+                        edge_attrs.append('style=dashed')
+                        edge_attrs.append('arrowhead=normal')
+                    # Normal stratigraphic relationships (copre, sotto, etc.): solid line with arrow
+                    else:
+                        edge_attrs.append('arrowhead=normal')
+
+                    # Build edge with styling (NO label - as per user request)
+                    # Optionally add relationship type as tooltip
+                    if rel_type:
+                        edge_attrs.append(f'tooltip="{rel_type}"')
+
+                    edge_attr_str = ', '.join(edge_attrs) if edge_attrs else ''
+                    if edge_attr_str:
+                        dot_lines.append(f'\t"{source_id}" -> "{target_id}" [{edge_attr_str}]')
+                    else:
+                        dot_lines.append(f'\t"{source_id}" -> "{target_id}"')
+
+                dot_lines.append('}')
+                dot_content = '\n'.join(dot_lines)
+
+                # Convert to GraphML
+                graphml_content = convert_dot_content_to_graphml(
+                    dot_content,
                     title=title,
                     reverse_epochs=reverse_epochs
                 )
 
-                if not result_path:
-                    flash('Errore durante l\'export GraphML', 'error')
+                # Post-process GraphML to clean node labels (remove period from label)
+                # Change "US1001_Medievale" to "US1001"
+                if graphml_content:
+                    import re
+                    # Pattern: <y:NodeLabel...>US1234_Period-Name</y:NodeLabel>
+                    # Replace with: <y:NodeLabel...>US1234</y:NodeLabel>
+                    graphml_content = re.sub(
+                        r'(>US\d+)_[^<]+(<\/y:NodeLabel>)',
+                        r'\1\2',
+                        graphml_content
+                    )
+
+                    # Apply EM_palette colors to nodes based on unita_tipo
+                    # AND add node descriptions (d_stratigrafica + d_interpretativa)
+                    try:
+                        import xml.dom.minidom as minidom
+
+                        # Build unita_tipo map and description map from graph
+                        unita_tipo_map = {}
+                        description_map = {}
+                        for node in us_rilevanti:
+                            if node in graph.nodes:
+                                node_data = graph.nodes[node]
+                                unita_tipo_map[node] = node_data.get('unita_tipo', 'US')
+
+                                # Build description: d_stratigrafica + d_interpretativa
+                                d_strat = node_data.get('d_stratigrafica', node_data.get('description', ''))
+                                d_interp = node_data.get('d_interpretativa', node_data.get('interpretation', ''))
+                                desc_parts = []
+                                if d_strat:
+                                    desc_parts.append(d_strat)
+                                if d_interp:
+                                    desc_parts.append(d_interp)
+                                if desc_parts:
+                                    description_map[node] = ' - '.join(desc_parts)
+
+                        # Parse and modify GraphML
+                        dom = minidom.parseString(graphml_content)
+                        nodes_modified = 0
+                        descriptions_added = 0
+
+                        # Find all ShapeNode elements (US nodes)
+                        for shape_node in dom.getElementsByTagName('y:ShapeNode'):
+                            # Find the label
+                            labels = shape_node.getElementsByTagName('y:NodeLabel')
+                            if not labels or not labels[0].firstChild:
+                                continue
+
+                            label_text = labels[0].firstChild.nodeValue
+                            match = re.match(r'US(\d+)', label_text)
+                            if not match:
+                                continue
+
+                            us_number = int(match.group(1))
+                            unita_tipo = unita_tipo_map.get(us_number, 'US')
+
+                            # Get colors from US_STYLES
+                            style = US_STYLES.get(unita_tipo, US_STYLES['default'])
+
+                            # Update Fill color
+                            fill_nodes = shape_node.getElementsByTagName('y:Fill')
+                            if fill_nodes:
+                                fill_nodes[0].setAttribute('color', style['fillcolor'])
+                                nodes_modified += 1
+
+                            # Update BorderStyle color and width
+                            border_nodes = shape_node.getElementsByTagName('y:BorderStyle')
+                            if border_nodes:
+                                border_nodes[0].setAttribute('color', style['color'])
+                                border_nodes[0].setAttribute('width', style['penwidth'])
+
+                            # Add description (d_stratigrafica + d_interpretativa) to node
+                            if us_number in description_map:
+                                # Navigate to parent <node> element
+                                # Structure: <node> -> <data key="d6"> -> <y:ShapeNode>
+                                # Note: In the GraphML generated, d5 = description, d6 = nodegraphics
+                                data_element = shape_node.parentNode
+                                node_element = data_element.parentNode
+
+                                # Check if <data key="d5"> already exists (description field)
+                                existing_desc = None
+                                for child in node_element.childNodes:
+                                    if child.nodeType == child.ELEMENT_NODE and child.tagName == 'data':
+                                        if child.getAttribute('key') == 'd5':
+                                            existing_desc = child
+                                            break
+
+                                # Create or update description element
+                                description_text = description_map[us_number]
+                                if existing_desc:
+                                    # Update existing (usually empty)
+                                    if existing_desc.firstChild:
+                                        existing_desc.firstChild.nodeValue = description_text
+                                    else:
+                                        # Create text node if missing
+                                        text_node = dom.createTextNode(description_text)
+                                        existing_desc.appendChild(text_node)
+                                    descriptions_added += 1
+                                else:
+                                    # Create new <data key="d5"> element
+                                    desc_element = dom.createElement('data')
+                                    desc_element.setAttribute('key', 'd5')
+                                    desc_element.setAttribute('xml:space', 'preserve')
+                                    desc_text_node = dom.createTextNode(description_text)
+                                    desc_element.appendChild(desc_text_node)
+                                    # Insert before <data key="d6"> (graphics data)
+                                    node_element.insertBefore(desc_element, data_element)
+                                    descriptions_added += 1
+
+                        graphml_content = dom.toxml()
+                        flash(f'Stili EM_palette applicati a {nodes_modified} nodi, {descriptions_added} descrizioni aggiunte', 'success')
+                    except Exception as style_error:
+                        # Non-fatal: continue even if styling fails
+                        flash(f'Avviso: impossibile applicare stili EM_palette: {str(style_error)}', 'warning')
+
+                if graphml_content is None:
+                    flash(_("Error during GraphML conversion"), 'error')
                     return render_template('harris_matrix/graphml_export.html', form=form)
+
+                # Create temporary file for download
+                import tempfile
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.graphml', delete=False) as f:
+                    f.write(graphml_content)
+                    temp_path = f.name
 
                 # Send file
                 filename = f"{site_name}_harris_matrix.graphml"
@@ -1623,133 +1652,10 @@ def create_app():
             except Exception as e:
                 import traceback
                 traceback.print_exc()
-                flash(f'Errore durante l\'export GraphML: {str(e)}', 'error')
+                flash(f'{_("Error during GraphML export")}: {str(e)}', 'error')
                 return render_template('harris_matrix/graphml_export.html', form=form)
 
         return render_template('harris_matrix/graphml_export.html', form=form)
-
-    @app.route('/export/harris_matrix_filtered')
-    @login_required
-    def export_harris_matrix_filtered():
-        """Export Harris Matrix GraphML with active filters from search"""
-        from flask import session
-        import networkx as nx
-
-        try:
-            # Get filters from session (set by us_list view)
-            filters = session.get('us_filters', {})
-
-            site_name = filters.get('sito')
-            if not site_name:
-                flash('Seleziona un sito per generare il Harris Matrix', 'warning')
-                return redirect(url_for('us_list'))
-
-            # Generate matrix for the site
-            graph = matrix_generator.generate_matrix(site_name)
-
-            # If filters are active (beyond site), filter the graph nodes
-            if any([filters.get('area'), filters.get('unita_tipo'), filters.get('anno_scavo'), filters.get('us_number')]):
-                # Get filtered US list
-                with db_manager.connection.get_session() as db_session:
-                    from pyarchinit_mini.models.us import US as USModel
-
-                    query = db_session.query(USModel).filter(USModel.sito == site_name)
-
-                    if filters.get('area'):
-                        query = query.filter(USModel.area == filters['area'])
-                    if filters.get('unita_tipo'):
-                        query = query.filter(USModel.unita_tipo == filters['unita_tipo'])
-                    if filters.get('anno_scavo'):
-                        try:
-                            query = query.filter(USModel.anno_scavo == int(filters['anno_scavo']))
-                        except (ValueError, TypeError):
-                            pass
-                    if filters.get('us_number'):
-                        query = query.filter(USModel.us == filters['us_number'])
-
-                    filtered_us = query.all()
-                    filtered_us_numbers = set([str(us.us) for us in filtered_us])
-
-                # Create subgraph with only filtered nodes and their relationships
-                filtered_graph = nx.DiGraph()
-
-                # Add filtered nodes with their attributes
-                for node in graph.nodes():
-                    node_us = str(node)
-                    if node_us in filtered_us_numbers:
-                        filtered_graph.add_node(node, **graph.nodes[node])
-
-                # Add edges only between filtered nodes
-                for u, v in graph.edges():
-                    if str(u) in filtered_us_numbers and str(v) in filtered_us_numbers:
-                        filtered_graph.add_edge(u, v, **graph.edges[u, v])
-
-                graph = filtered_graph
-
-            if len(graph.nodes()) == 0:
-                flash('Nessuna US trovata con i filtri attuali per generare il Harris Matrix', 'warning')
-                return redirect(url_for('us_list'))
-
-            # Export to GraphML
-            import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.graphml', delete=False) as f:
-                temp_path = f.name
-
-            # Generate descriptive title based on filters
-            title_parts = [site_name]
-            if filters.get('area'):
-                title_parts.append(f"Area {filters['area']}")
-            if filters.get('unita_tipo'):
-                title_parts.append(filters['unita_tipo'])
-            if filters.get('anno_scavo'):
-                title_parts.append(str(filters['anno_scavo']))
-            title = ' - '.join(title_parts) + ' (Filtered)'
-
-            result_path = matrix_generator.export_to_graphml(
-                graph=graph,
-                output_path=temp_path,
-                site_name=site_name,
-                title=title,
-                reverse_epochs=False
-            )
-
-            if not result_path:
-                flash('Errore durante l\'export GraphML', 'error')
-                return redirect(url_for('us_list'))
-
-            # Generate filename with filter indicators
-            filename_parts = [site_name]
-            if filters.get('area'):
-                filename_parts.append(f"area_{filters['area']}")
-            if filters.get('unita_tipo'):
-                filename_parts.append(filters['unita_tipo'])
-            if filters.get('anno_scavo'):
-                filename_parts.append(str(filters['anno_scavo']))
-            filename = '_'.join(filename_parts) + '_harris_matrix_filtered.graphml'
-
-            # Send file
-            response = send_file(
-                temp_path,
-                mimetype='application/xml',
-                as_attachment=True,
-                download_name=filename
-            )
-
-            # Clean up temp file after sending
-            @response.call_on_close
-            def cleanup():
-                try:
-                    os.remove(temp_path)
-                except:
-                    pass
-
-            return response
-
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            flash(f'Errore durante l\'export GraphML: {str(e)}', 'error')
-            return redirect(url_for('us_list'))
 
     # Stratigraphic Validation routes
     @app.route('/validate/<site_name>')
@@ -1783,136 +1689,40 @@ def create_app():
 
             # Convert US list to dict format for validation
             us_list_dicts = []
-            us_map = {}  # Map to store US id by (site, area, us_number)
             for us in us_list:
-                us_num = getattr(us, 'us', None)
                 us_dict = {
-                    'id_us': getattr(us, 'id_us', None),
                     'sito': getattr(us, 'sito', ''),
                     'area': getattr(us, 'area', ''),
-                    'us': us_num,
-                    'rapporti': getattr(us, 'rapporti', ''),
-                    'd_interpretativa': getattr(us, 'd_interpretativa', '')
+                    'us': getattr(us, 'us', None),
+                    'rapporti': getattr(us, 'rapporti', '')
                 }
                 us_list_dicts.append(us_dict)
-                if us_num:
-                    us_map[(us_dict['sito'], us_dict['area'], us_num)] = getattr(us, 'id_us', None)
 
-            # Load periodization data for chronological validation
-            periodization_list = []
-            try:
-                from pyarchinit_mini.models.harris_matrix import Periodizzazione, Period
-                with db_manager.connection.get_session() as session:
-                    # Query periodization with period dates
-                    period_data = session.query(
-                        Periodizzazione,
-                        Period.start_date.label('period_start'),
-                        Period.end_date.label('period_end')
-                    ).outerjoin(
-                        Period,
-                        Periodizzazione.period_id_final == Period.id_period
-                    ).filter(
-                        Periodizzazione.sito == site_name
-                    ).all()
-
-                    for perio, period_start, period_end in period_data:
-                        # Fallback to initial period if final not available
-                        if period_end is None and perio.period_id_initial:
-                            initial_period = session.query(Period).filter(
-                                Period.id_period == perio.period_id_initial
-                            ).first()
-                            if initial_period:
-                                period_start = initial_period.start_date
-                                period_end = initial_period.end_date
-
-                        periodization_list.append({
-                            'sito': perio.sito,
-                            'area': perio.area or '',
-                            'us': perio.us,
-                            'periodo_iniziale': perio.periodo_iniziale,
-                            'fase_iniziale': perio.fase_iniziale,
-                            'periodo_finale': perio.periodo_finale,
-                            'fase_finale': perio.fase_finale,
-                            'datazione_estesa': perio.datazione_estesa,
-                            'start_date': period_start,
-                            'end_date': period_end
-                        })
-            except Exception as e:
-                # If periodization loading fails, continue without chronological validation
-                print(f"Warning: Could not load periodization data: {e}")
-                periodization_list = []
-
-            # Get validation report with chronological validation
-            report = validator.get_validation_report(us_list_dicts, periodization_list)
-
-            # Extract cycles from errors
-            cycles = []
-            non_cycle_errors = []
-            for error in report.get('errors', []):
-                if 'cycle' in error.lower() or 'ciclo' in error.lower():
-                    # Extract cycle from error message
-                    # Format: "Temporal paradox (cycle): 1 → 2 → 3 → 1"
-                    if '→' in error:
-                        cycle_part = error.split(':')[-1].strip()
-                        cycle_us = [us.strip() for us in cycle_part.split('→')]
-                        cycles.append(cycle_us[:-1])  # Remove duplicate last element
-                else:
-                    non_cycle_errors.append(error)
-
-            # Generate relationship fixes to find missing reciprocals
-            fixes = validator.generate_relationship_fixes(us_list_dicts)
-
-            # Convert fixes to display format
-            missing_reciprocals = []
-            for update in fixes.get('updates', []):
-                # Parse the update to extract relationship info
-                from_us = update['us']
-                reason = update.get('reason', '')
-
-                # Extract target US and relationship from reason
-                # Format: "Aggiunta relazione reciproca: US X copre Y"
-                if 'US' in reason:
-                    parts = reason.split(':')[-1].strip().split()
-                    if len(parts) >= 3:
-                        try:
-                            source_us = parts[1]  # US number after "US"
-                            rel_type = ' '.join(parts[2:-1])  # Relationship type
-                            target_us = parts[-1]  # Target US
-
-                            # Determine expected reciprocal
-                            inverse_rel = validator.INVERSE_RELATIONS.get(rel_type, '')
-
-                            missing_reciprocals.append({
-                                'from_us': source_us,
-                                'to_us': from_us,
-                                'relationship': rel_type,
-                                'expected_reciprocal': inverse_rel
-                            })
-                        except (IndexError, ValueError):
-                            pass
+            # Get validation report
+            report = validator.get_validation_report(us_list_dicts)
 
             # Get statistics
             stats = {
                 'total_us': len(us_list),
                 'total_relationships': report.get('relationships_found', 0),
-                'total_errors': len(non_cycle_errors),
-                'total_cycles': len(cycles),
-                'missing_reciprocals': len(missing_reciprocals),
-                'is_valid': report.get('valid', False) and len(cycles) == 0 and len(missing_reciprocals) == 0
+                'total_errors': report.get('error_count', 0),
+                'total_cycles': 0,  # Feature not implemented in validator
+                'missing_reciprocals': 0,  # Feature not implemented in validator
+                'is_valid': report.get('valid', False)
             }
 
-            # Return complete report
+            # Return simplified report (cycles and missing_reciprocals not available)
             return render_template('validation/report.html',
                                  site_name=site_name,
                                  stats=stats,
-                                 errors=non_cycle_errors,
-                                 cycles=cycles,
-                                 missing_reciprocals=missing_reciprocals)
+                                 errors=report.get('errors', []),
+                                 cycles=[],  # Feature not implemented
+                                 missing_reciprocals=[])  # Feature not implemented
 
         except Exception as e:
             import traceback
             traceback.print_exc()
-            flash(f'Errore validazione: {str(e)}', 'error')
+            flash(f'{_("Validation error")}: {str(e)}', 'error')
             return redirect(url_for('sites_list'))
 
     @app.route('/validate/<site_name>/fix', methods=['POST'])
@@ -1947,22 +1757,14 @@ def create_app():
                 updates_count = 0
                 for update in fixes.get('updates', []):
                     us_num = update['us']
-                    new_rapporti = update['new_value']  # Fixed: was update['rapporti']
+                    new_rapporti = update['rapporti']
 
                     # Update US in database
-                    # Find the US by site and us number
-                    us_to_update = None
-                    for us_obj in us_list:
-                        if getattr(us_obj, 'us', None) == us_num:
-                            us_to_update = us_obj
-                            break
-
-                    if us_to_update:
-                        us_service.update_us_by_id(
-                            getattr(us_to_update, 'id_us'),
-                            {'rapporti': new_rapporti}
-                        )
-                        updates_count += 1
+                    us_service.update_us(
+                        {'sito': site_name, 'us': us_num},
+                        {'rapporti': new_rapporti}
+                    )
+                    updates_count += 1
 
                 # Create new US if needed
                 creates_count = len(fixes.get('creates', []))
@@ -1974,7 +1776,7 @@ def create_app():
         except Exception as e:
             import traceback
             traceback.print_exc()
-            flash(f'Errore applicazione fix: {str(e)}', 'error')
+            flash(f'{_("Error applying fix")}: {str(e)}', 'error')
             return redirect(url_for('validate_stratigraphic', site_name=site_name))
 
     # Export routes
@@ -2019,7 +1821,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF: {str(e)}', 'error')
+            flash(f'{_("Error exporting PDF")}: {str(e)}', 'error')
             return redirect(url_for('view_site', site_id=site_id))
 
     @app.route('/export/site_pdf_with_matrix/<site_name>')
@@ -2058,68 +1860,32 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF Harris Matrix: {str(e)}', 'error')
+            flash(f'{_("Error exporting Harris Matrix PDF")}: {str(e)}', 'error')
             return redirect(url_for('harris_matrix', site_name=site_name))
 
     @app.route('/export/us_pdf')
     def export_us_pdf():
-        """Export US list PDF with active filters"""
-        from flask import session
-
+        """Export US list PDF"""
         try:
-            # Get filters from session (set by us_list view)
-            filters = session.get('us_filters', {})
-
-            # Build query filters
-            query_filters = {}
-            if filters.get('sito'):
-                query_filters['sito'] = filters['sito']
-            if filters.get('area'):
-                query_filters['area'] = filters['area']
-            if filters.get('unita_tipo'):
-                query_filters['unita_tipo'] = filters['unita_tipo']
-            if filters.get('anno_scavo'):
-                try:
-                    query_filters['anno_scavo'] = int(filters['anno_scavo'])
-                except (ValueError, TypeError):
-                    pass
-            if filters.get('us_number'):
-                query_filters['us'] = filters['us_number']
+            site_name = request.args.get('sito')
 
             # Get US data within session
-            with db_manager.connection.get_session() as db_session:
+            with db_manager.connection.get_session() as session:
                 from pyarchinit_mini.models.us import US as USModel
 
-                query = db_session.query(USModel)
-
-                # Apply all filters
-                if query_filters.get('sito'):
-                    query = query.filter(USModel.sito == query_filters['sito'])
-                if query_filters.get('area'):
-                    query = query.filter(USModel.area == query_filters['area'])
-                if query_filters.get('unita_tipo'):
-                    query = query.filter(USModel.unita_tipo == query_filters['unita_tipo'])
-                if query_filters.get('anno_scavo'):
-                    query = query.filter(USModel.anno_scavo == query_filters['anno_scavo'])
-                if query_filters.get('us'):
-                    query = query.filter(USModel.us == query_filters['us'])
+                query = session.query(USModel)
+                if site_name:
+                    query = query.filter(USModel.sito == site_name)
 
                 us_records = query.limit(500).all()
                 us_list = [us.to_dict() for us in us_records]
 
             if not us_list:
-                flash('Nessuna US trovata con i filtri attuali', 'warning')
+                flash('Nessuna US trovata', 'warning')
                 return redirect(url_for('us_list'))
 
-            # Generate PDF filename based on filters
-            site_name_clean = filters.get('sito', 'Filtered_Results')
-            filter_suffix = ''
-            if filters.get('area'):
-                filter_suffix += f'_area_{filters["area"]}'
-            if filters.get('unita_tipo'):
-                filter_suffix += f'_{filters["unita_tipo"]}'
-            if filters.get('anno_scavo'):
-                filter_suffix += f'_{filters["anno_scavo"]}'
+            # Generate PDF
+            site_name_clean = site_name if site_name else 'Tutti_i_siti'
 
             # Create temporary file for PDF output
             with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
@@ -2129,11 +1895,11 @@ def create_app():
             pdf_generator.generate_us_pdf(site_name_clean, us_list, output_path)
 
             return send_file(output_path, as_attachment=True,
-                           download_name=f"us_{site_name_clean}{filter_suffix}.pdf",
+                           download_name=f"us_{site_name_clean}.pdf",
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF US: {str(e)}', 'error')
+            flash(f'{_("Error exporting US PDF")}: {str(e)}', 'error')
             return redirect(url_for('us_list'))
 
     @app.route('/export/us_single_pdf/<sito>/<int:us_number>')
@@ -2167,7 +1933,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF US: {str(e)}', 'error')
+            flash(f'{_("Error exporting US PDF")}: {str(e)}', 'error')
             return redirect(url_for('us_list'))
 
     @app.route('/export/inventario_pdf')
@@ -2206,7 +1972,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF Inventario: {str(e)}', 'error')
+            flash(f'{_("Error exporting Inventory PDF")}: {str(e)}', 'error')
             return redirect(url_for('inventario_list'))
 
     @app.route('/export/inventario_single_pdf/<int:inv_id>')
@@ -2238,7 +2004,7 @@ def create_app():
                            mimetype='application/pdf')
 
         except Exception as e:
-            flash(f'Errore export PDF Inventario: {str(e)}', 'error')
+            flash(f'{_("Error exporting Inventory PDF")}: {str(e)}', 'error')
             return redirect(url_for('inventario_list'))
 
     # Media routes
@@ -2270,11 +2036,11 @@ def create_app():
                     # Clean up temp file
                     os.remove(temp_path)
                     
-                    flash('File caricato con successo!', 'success')
+                    flash(_("File uploaded successfully!"), 'success')
                     return redirect(url_for('upload_media'))
                     
             except Exception as e:
-                flash(f'Errore caricamento file: {str(e)}', 'error')
+                flash(f'{_("Error uploading file")}: {str(e)}', 'error')
         
         return render_template('media/upload.html', form=form)
 
@@ -2357,11 +2123,11 @@ def create_app():
                 }
                 app.config['DATABASE_CONNECTIONS'] = connections
 
-                flash(f'Database "{db_name}" caricato con successo!', 'success')
+                flash(f'{_("Database")} "{db_name}" {_("loaded successfully")}!', 'success')
                 return redirect(url_for('admin_database'))
 
             except Exception as e:
-                flash(f'Errore caricamento database: {str(e)}', 'error')
+                flash(f'{_("Error loading database")}: {str(e)}', 'error')
 
         return render_template('admin/database_upload.html', form=form)
 
@@ -2402,7 +2168,7 @@ def create_app():
                         # Try a simple query
                         session.execute(text('SELECT 1'))
                 except Exception as e:
-                    flash(f'Errore connessione: {str(e)}', 'error')
+                    flash(f'{_("Connection error")}: {str(e)}', 'error')
                     return render_template('admin/database_connect.html', form=form)
 
                 # Store connection
@@ -2414,11 +2180,11 @@ def create_app():
                 }
                 app.config['DATABASE_CONNECTIONS'] = connections
 
-                flash(f'Connessione "{conn_name}" aggiunta con successo!', 'success')
+                flash(f'{_("Connection")} "{conn_name}" {_("added successfully")}!', 'success')
                 return redirect(url_for('admin_database'))
 
             except Exception as e:
-                flash(f'Errore: {str(e)}', 'error')
+                flash(f'{_("Error")}: {str(e)}', 'error')
 
         return render_template('admin/database_connect.html', form=form)
 
@@ -2451,70 +2217,8 @@ def create_app():
                                  current_url=app.config['CURRENT_DATABASE_URL'])
 
         except Exception as e:
-            flash(f'Errore recupero info database: {str(e)}', 'error')
+            flash(f'{_("Error retrieving database info")}: {str(e)}', 'error')
             return redirect(url_for('admin_database'))
-
-    @app.route('/admin/database/switch/<connection_name>', methods=['POST'])
-    @login_required
-    def switch_database(connection_name):
-        """Switch active database to a saved connection"""
-        try:
-            connections = app.config.get('DATABASE_CONNECTIONS', {})
-
-            if connection_name not in connections:
-                flash(f'Connessione "{connection_name}" non trovata', 'error')
-                return redirect(url_for('admin_database'))
-
-            conn_info = connections[connection_name]
-            new_db_url = conn_info['url']
-
-            # Test connection before switching
-            try:
-                test_conn = DatabaseConnection.from_url(new_db_url)
-                with test_conn.get_session() as session:
-                    session.execute(text('SELECT 1'))
-            except Exception as e:
-                flash(f'Errore connessione al database: {str(e)}', 'error')
-                return redirect(url_for('admin_database'))
-
-            # Switch database
-            app.config['CURRENT_DATABASE_URL'] = new_db_url
-
-            # Reinitialize database connection
-            global db_conn, db_manager
-            db_conn = DatabaseConnection.from_url(new_db_url)
-            db_manager = DatabaseManager(db_conn)
-
-            # Reinitialize ALL services with new database manager
-            global site_service, us_service, inventario_service, thesaurus_service
-            global user_service, analytics_service, relationship_sync_service, datazione_service
-            global matrix_generator, export_import_service
-
-            site_service = SiteService(db_manager)
-            us_service = USService(db_manager)
-            inventario_service = InventarioService(db_manager)
-            thesaurus_service = ThesaurusService(db_manager)
-            user_service = UserService(db_manager)
-            analytics_service = AnalyticsService(db_manager)
-            relationship_sync_service = RelationshipSyncService(db_manager)
-            datazione_service = DatazioneService(db_manager)
-            matrix_generator = HarrisMatrixGenerator(db_manager, us_service)
-            export_import_service = ExportImportService(db_manager)
-
-            # Update app stored services
-            app.user_service = user_service
-            app.db_manager = db_manager
-
-            # Log the switch for debugging
-            print(f"[DATABASE SWITCH] Changed to: {new_db_url}")
-            print(f"[DATABASE SWITCH] Connection name: {connection_name}")
-
-            flash(f'Database cambiato a: {connection_name}', 'success')
-
-        except Exception as e:
-            flash(f'Errore cambio database: {str(e)}', 'error')
-
-        return redirect(url_for('admin_database'))
 
     # API endpoints for AJAX
     @app.route('/api/sites')
@@ -2544,7 +2248,7 @@ def create_app():
                            download_name='sites_export.xlsx',
                            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         except Exception as e:
-            flash(f'Errore export Excel: {str(e)}', 'error')
+            flash(f'{_("Error exporting Excel")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/export/us/excel')
@@ -2559,7 +2263,7 @@ def create_app():
                            download_name=filename,
                            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         except Exception as e:
-            flash(f'Errore export Excel: {str(e)}', 'error')
+            flash(f'{_("Error exporting Excel")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/export/inventario/excel')
@@ -2574,7 +2278,7 @@ def create_app():
                            download_name=filename,
                            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         except Exception as e:
-            flash(f'Errore export Excel: {str(e)}', 'error')
+            flash(f'{_("Error exporting Excel")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     # CSV Export Routes
@@ -2588,7 +2292,7 @@ def create_app():
                            download_name='sites_export.csv',
                            mimetype='text/csv')
         except Exception as e:
-            flash(f'Errore export CSV: {str(e)}', 'error')
+            flash(f'{_("Error exporting CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/export/us/csv')
@@ -2603,7 +2307,7 @@ def create_app():
                            download_name=filename,
                            mimetype='text/csv')
         except Exception as e:
-            flash(f'Errore export CSV: {str(e)}', 'error')
+            flash(f'{_("Error exporting CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/export/inventario/csv')
@@ -2618,7 +2322,7 @@ def create_app():
                            download_name=filename,
                            mimetype='text/csv')
         except Exception as e:
-            flash(f'Errore export CSV: {str(e)}', 'error')
+            flash(f'{_("Error exporting CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     # CSV Import Routes
@@ -2656,12 +2360,12 @@ def create_app():
 
             if result['errors']:
                 for err in result['errors'][:5]:  # Show first 5 errors
-                    flash(f'Errore: {err["error"]}', 'warning')
+                    flash(f'{_("Error")}: {err["error"]}', 'warning')
 
             return redirect(url_for('export_page'))
 
         except Exception as e:
-            flash(f'Errore import CSV: {str(e)}', 'error')
+            flash(f'{_("Error importing CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/import/us/csv', methods=['POST'])
@@ -2698,12 +2402,12 @@ def create_app():
 
             if result['errors']:
                 for err in result['errors'][:5]:
-                    flash(f'Errore: {err["error"]}', 'warning')
+                    flash(f'{_("Error")}: {err["error"]}', 'warning')
 
             return redirect(url_for('export_page'))
 
         except Exception as e:
-            flash(f'Errore import CSV: {str(e)}', 'error')
+            flash(f'{_("Error importing CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
 
     @app.route('/import/inventario/csv', methods=['POST'])
@@ -2740,295 +2444,17 @@ def create_app():
 
             if result['errors']:
                 for err in result['errors'][:5]:
-                    flash(f'Errore: {err["error"]}', 'warning')
+                    flash(f'{_("Error")}: {err["error"]}', 'warning')
 
             return redirect(url_for('export_page'))
 
         except Exception as e:
-            flash(f'Errore import CSV: {str(e)}', 'error')
+            flash(f'{_("Error importing CSV")}: {str(e)}', 'error')
             return redirect(url_for('export_page'))
-
-    # ===== Periodizzazione (Datazioni) Routes =====
-    @app.route('/periodizzazione')
-    @login_required
-    def periodizzazione_list():
-        """List all datazioni"""
-        try:
-            datazioni = datazione_service.get_all_datazioni()
-            total = datazione_service.count_datazioni()
-
-            return render_template('datazioni/list.html',
-                                 datazioni=datazioni,
-                                 total=total)
-        except Exception as e:
-            flash(f'Errore caricamento datazioni: {str(e)}', 'error')
-            return render_template('datazioni/list.html',
-                                 datazioni=[],
-                                 total=0)
-
-    @app.route('/periodizzazione/create', methods=['GET', 'POST'])
-    @login_required
-    @write_permission_required
-    def periodizzazione_create():
-        """Create new datazione"""
-        if request.method == 'POST':
-            try:
-                datazione_data = {
-                    'nome_datazione': request.form.get('nome_datazione'),
-                    'fascia_cronologica': request.form.get('fascia_cronologica'),
-                    'descrizione': request.form.get('descrizione')
-                }
-
-                datazione_service.create_datazione(datazione_data)
-                flash('Datazione creata con successo!', 'success')
-                return redirect(url_for('periodizzazione_list'))
-
-            except Exception as e:
-                flash(f'Errore creazione datazione: {str(e)}', 'error')
-
-        return render_template('periodizzazione/form.html',
-                             datazione=None,
-                             title='Nuova Datazione')
-
-    @app.route('/periodizzazione/<int:datazione_id>/edit', methods=['GET', 'POST'])
-    @login_required
-    @write_permission_required
-    def periodizzazione_edit(datazione_id):
-        """Edit existing datazione"""
-        try:
-            datazione = datazione_service.get_datazione_by_id(datazione_id)
-            if not datazione:
-                flash('Datazione non trovata', 'error')
-                return redirect(url_for('periodizzazione_list'))
-
-            if request.method == 'POST':
-                update_data = {
-                    'nome_datazione': request.form.get('nome_datazione'),
-                    'fascia_cronologica': request.form.get('fascia_cronologica'),
-                    'descrizione': request.form.get('descrizione')
-                }
-
-                datazione_service.update_datazione(datazione_id, update_data)
-                flash('Datazione aggiornata con successo!', 'success')
-                return redirect(url_for('periodizzazione_list'))
-
-            return render_template('periodizzazione/form.html',
-                                 datazione=datazione,
-                                 title='Modifica Datazione')
-
-        except Exception as e:
-            flash(f'Errore modifica datazione: {str(e)}', 'error')
-            return redirect(url_for('periodizzazione_list'))
-
-    @app.route('/periodizzazione/<int:datazione_id>/delete', methods=['POST'])
-    @login_required
-    @write_permission_required
-    def periodizzazione_delete(datazione_id):
-        """Delete datazione"""
-        try:
-            datazione_service.delete_datazione(datazione_id)
-            flash('Datazione eliminata con successo!', 'success')
-        except Exception as e:
-            flash(f'Errore eliminazione datazione: {str(e)}', 'error')
-
-        return redirect(url_for('periodizzazione_list'))
-
-    # ===== Periodization Records Routes =====
-    @app.route('/periodization-records')
-    @login_required
-    def periodization_records_list():
-        """List all periodization records from periodizzazione_table"""
-        try:
-            from pyarchinit_mini.models.harris_matrix import Periodizzazione
-            from sqlalchemy import or_
-
-            # Get search parameters
-            search_site = request.args.get('search_site', '')
-            search_us = request.args.get('search_us', '')
-            search_period = request.args.get('search_period', '')
-            page = request.args.get('page', 1, type=int)
-            page_size = 50
-
-            with db_manager.connection.get_session() as session:
-                query = session.query(Periodizzazione)
-
-                # Apply filters
-                if search_site:
-                    query = query.filter(Periodizzazione.sito.contains(search_site))
-                if search_us:
-                    query = query.filter(Periodizzazione.us == int(search_us)) if search_us.isdigit() else query
-                if search_period:
-                    query = query.filter(or_(
-                        Periodizzazione.periodo_iniziale.contains(search_period),
-                        Periodizzazione.periodo_finale.contains(search_period),
-                        Periodizzazione.datazione_estesa.contains(search_period)
-                    ))
-
-                # Get total count
-                total = query.count()
-
-                # Apply pagination and ordering
-                db_records = query.order_by(Periodizzazione.sito, Periodizzazione.us)\
-                              .offset((page - 1) * page_size)\
-                              .limit(page_size)\
-                              .all()
-
-                # Convert to dicts to avoid detached instance errors
-                records = [{
-                    'sito': r.sito,
-                    'area': r.area,
-                    'us': r.us,
-                    'periodo_iniziale': r.periodo_iniziale,
-                    'fase_iniziale': r.fase_iniziale,
-                    'periodo_finale': r.periodo_finale,
-                    'fase_finale': r.fase_finale,
-                    'datazione_estesa': r.datazione_estesa,
-                    'affidabilita': r.affidabilita
-                } for r in db_records]
-
-            return render_template('periodizzazione/periods.html',
-                                 records=records,
-                                 total=total,
-                                 page=page,
-                                 page_size=page_size,
-                                 search_site=search_site,
-                                 search_us=search_us,
-                                 search_period=search_period)
-
-        except Exception as e:
-            flash(f'Error loading periodization records: {str(e)}', 'error')
-            return render_template('periodizzazione/periods.html',
-                                 records=[],
-                                 total=0,
-                                 page=1,
-                                 page_size=50)
-
-    # ===== Thesaurus Routes =====
-    @app.route('/thesaurus')
-    @login_required
-    def thesaurus_list():
-        """List thesaurus by table and field"""
-        try:
-            # Get available tables from THESAURUS_MAPPINGS
-            from pyarchinit_mini.models.thesaurus import THESAURUS_MAPPINGS
-
-            tables = list(THESAURUS_MAPPINGS.keys())
-
-            # Get selected table and field from query params
-            selected_table = request.args.get('table', '')
-            selected_field = request.args.get('field', '')
-
-            # Get fields for selected table
-            fields = []
-            values = []
-            if selected_table:
-                fields = thesaurus_service.get_table_fields(selected_table)
-
-                # Get values for selected field
-                if selected_field:
-                    values = thesaurus_service.get_field_values(selected_table, selected_field)
-
-            return render_template('thesaurus/list.html',
-                                 tables=tables,
-                                 fields=fields,
-                                 values=values,
-                                 selected_table=selected_table,
-                                 selected_field=selected_field)
-
-        except Exception as e:
-            flash(f'Errore caricamento thesaurus: {str(e)}', 'error')
-            return render_template('thesaurus/list.html',
-                                 tables=[],
-                                 fields=[],
-                                 values=[],
-                                 selected_table='',
-                                 selected_field='')
-
-    @app.route('/thesaurus/create', methods=['POST'])
-    @login_required
-    @write_permission_required
-    def thesaurus_create():
-        """Create new thesaurus value"""
-        try:
-            table_name = request.form.get('table_name')
-            field_name = request.form.get('field_name')
-            value = request.form.get('value')
-            label = request.form.get('label')
-            description = request.form.get('description')
-
-            thesaurus_service.add_field_value(
-                table_name=table_name,
-                field_name=field_name,
-                value=value,
-                label=label,
-                description=description
-            )
-
-            flash('Valore thesaurus creato con successo!', 'success')
-
-        except Exception as e:
-            flash(f'Errore creazione valore: {str(e)}', 'error')
-
-        return redirect(url_for('thesaurus_list',
-                               table=request.form.get('table_name'),
-                               field=request.form.get('field_name')))
-
-    @app.route('/thesaurus/<field_id>/edit', methods=['POST'])
-    @login_required
-    @write_permission_required
-    def thesaurus_edit(field_id):
-        """Edit thesaurus value"""
-        try:
-            # Check if this is a predefined value (read-only)
-            if str(field_id).startswith('predefined_'):
-                flash('I valori predefiniti non possono essere modificati. Crea un nuovo valore personalizzato.', 'warning')
-            else:
-                value = request.form.get('value')
-                label = request.form.get('label')
-                description = request.form.get('description')
-
-                thesaurus_service.update_field_value(
-                    field_id=int(field_id),
-                    value=value,
-                    label=label,
-                    description=description
-                )
-
-                flash('Valore thesaurus aggiornato con successo!', 'success')
-
-        except Exception as e:
-            flash(f'Errore modifica valore: {str(e)}', 'error')
-
-        table_name = request.form.get('table_name')
-        field_name = request.form.get('field_name')
-        return redirect(url_for('thesaurus_list',
-                               table=table_name,
-                               field=field_name))
-
-    @app.route('/thesaurus/<field_id>/delete', methods=['POST'])
-    @login_required
-    @write_permission_required
-    def thesaurus_delete(field_id):
-        """Delete thesaurus value"""
-        try:
-            # Check if this is a predefined value (read-only)
-            if str(field_id).startswith('predefined_'):
-                flash('I valori predefiniti non possono essere eliminati. Sono di sola lettura.', 'warning')
-            else:
-                thesaurus_service.delete_field_value(int(field_id))
-                flash('Valore thesaurus eliminato con successo!', 'success')
-        except Exception as e:
-            flash(f'Errore eliminazione valore: {str(e)}', 'error')
-
-        table_name = request.form.get('table_name')
-        field_name = request.form.get('field_name')
-        return redirect(url_for('thesaurus_list',
-                               table=table_name,
-                               field=field_name))
 
     # ===== 3D Model Viewer Routes (s3Dgraphy Integration) =====
     try:
-        from s3d_routes import init_s3d_routes
+        from pyarchinit_mini.web_interface.s3d_routes import init_s3d_routes
         init_s3d_routes(app, db_manager, media_handler)
         print("[FLASK] s3Dgraphy routes initialized")
     except ImportError as e:
@@ -3053,10 +2479,18 @@ def main():
     print(f"Starting PyArchInit-Mini Web Interface on {host}:{port}")
     print(f"Web Interface: http://{host if host != '0.0.0.0' else 'localhost'}:{port}/")
     print(f"WebSocket support enabled for real-time collaboration")
+    print(f"Press Ctrl+C to stop the server")
 
-    # Note: For production use, deploy with gunicorn + eventlet/gevent
-    # Example: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:5001 app:app
-    socketio.run(app, debug=debug, host=host, port=port, allow_unsafe_werkzeug=True)
+    try:
+        # Note: For production use, deploy with gunicorn + eventlet/gevent
+        # Example: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:5001 app:app
+        socketio.run(app, debug=debug, host=host, port=port, allow_unsafe_werkzeug=True)
+    except KeyboardInterrupt:
+        print("\nShutting down server...")
+    except Exception as e:
+        print(f"Error starting server: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == '__main__':
