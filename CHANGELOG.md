@@ -5,6 +5,23 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.13] - 2025-10-29
+
+### Changed
+- **Version Management**: Unified version display across all interfaces
+  - Web Interface: Dashboard and login now show dynamic version from `__version__`
+  - CLI: `--version` flag now shows dynamic version from `__version__`
+  - Desktop GUI: Now imports version from main package instead of hardcoded
+  - API: Already using dynamic version (no changes needed)
+  - All interfaces now consistently display version 1.7.13
+
+### Fixed
+- Removed hardcoded version strings from templates and interface files
+- Web dashboard was showing v1.5.5 (now shows v1.7.13)
+- Web login was showing v1.0.7 (now shows v1.7.13)
+- CLI was showing v0.1.0 (now shows v1.7.13)
+- Desktop GUI was using v0.1.0 (now shows v1.7.13)
+
 ## [1.7.12] - 2025-10-29
 
 ### Fixed - CRITICAL

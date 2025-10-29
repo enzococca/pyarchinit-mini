@@ -25,8 +25,7 @@ Or run directly:
     python desktop_gui/gui_app.py
 """
 
-__version__ = "0.1.0"
-__author__ = "PyArchInit Team"
+from pyarchinit_mini import __version__, __author__
 
 # Import main classes for easier access
 from .main_window import PyArchInitGUI
