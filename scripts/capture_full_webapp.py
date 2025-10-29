@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
 PyArchInit-Mini Web GUI - Complete Documentation Screenshot Capture
-Explores all pages, tabs, and functions with button/menu highlighting
+Cattura TUTTI gli screenshot della web GUI con evidenziazione gialla visibile
 """
-
 import sys
 import time
 from pathlib import Path
@@ -21,21 +20,22 @@ OUTPUT_DIR = Path("docs/images/webapp")
 USERNAME = "admin"
 PASSWORD = "admin"
 
-# CSS for highlighting elements with yellow circle overlay
+# CSS for BIG yellow circle highlighting - MOLTO PIU' VISIBILE
 HIGHLIGHT_CSS = """
 .pyarchinit-highlight-overlay {
     position: fixed !important;
-    border: 4px solid #FFD700 !important;
+    border: 6px solid #FFD700 !important;
     border-radius: 50% !important;
-    background: rgba(255, 215, 0, 0.3) !important;
+    background: rgba(255, 215, 0, 0.25) !important;
     pointer-events: none !important;
     z-index: 999999 !important;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.5) !important;
+    box-shadow: 0 0 40px 15px rgba(255, 215, 0, 0.9),
+                inset 0 0 30px rgba(255, 215, 0, 0.4) !important;
     animation: pulse 1s infinite !important;
 }
 @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.7; }
-    50% { transform: scale(1.05); opacity: 0.9; }
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.08); opacity: 1; }
 }
 """
 
@@ -56,12 +56,12 @@ class WebAppExplorer:
         print("🚀 Avvio browser Chromium...")
         playwright = sync_playwright().start()
         self.browser = playwright.chromium.launch(
-            headless=False,  # Mostra browser per debug
-            slow_mo=500  # Rallenta per vedere cosa succede
+            headless=False,  # Visible for debugging
+            slow_mo=800  # Slow down for visibility
         )
         self.context = self.browser.new_context(
             viewport={'width': 1920, 'height': 1080},
-            locale='en-US'  # English locale for international documentation
+            locale='en-US'  # English for international docs
         )
         self.page = self.context.new_page()
 
@@ -78,48 +78,45 @@ class WebAppExplorer:
         filepath = self.output_dir / filename
         self.page.screenshot(path=str(filepath), full_page=True)
         print(f"  📸 {self.screenshot_counter:03d}. {description or name}")
-        print(f"      → {filepath}")
         self.screenshot_counter += 1
         time.sleep(0.5)
 
-    def highlight_and_click(self, selector, description=""):
-        """Evidenzia elemento con cerchio giallo e poi clicca"""
+    def highlight_and_click(self, selector, description="", screenshot=True):
+        """Evidenzia elemento con GROSSO cerchio giallo e poi clicca"""
         try:
-            # Scroll element into view first
+            # Scroll into view
             self.page.evaluate(f"""
                 const el = document.querySelector('{selector}');
                 if (el) {{
                     el.scrollIntoView({{behavior: 'smooth', block: 'center'}});
                 }}
             """)
-            time.sleep(1.5)  # Wait for scroll to complete
+            time.sleep(2)  # Wait for scroll
 
-            # Add thick yellow border and glow directly to element
+            # Add BIG yellow glow - MOLTO PIU' GRANDE
             self.page.evaluate(f"""
                 const el = document.querySelector('{selector}');
                 if (el) {{
-                    // Store original styles
                     el.setAttribute('data-original-outline', el.style.outline || '');
                     el.setAttribute('data-original-box-shadow', el.style.boxShadow || '');
                     el.setAttribute('data-original-border-radius', el.style.borderRadius || '');
 
-                    // Apply yellow glow effect
-                    el.style.outline = '8px solid #FFD700';
-                    el.style.outlineOffset = '8px';
-                    el.style.boxShadow = '0 0 30px 10px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.3)';
+                    // Apply MASSIVE yellow glow
+                    el.style.outline = '10px solid #FFD700';
+                    el.style.outlineOffset = '12px';
+                    el.style.boxShadow = '0 0 50px 20px rgba(255, 215, 0, 0.9), inset 0 0 30px rgba(255, 215, 0, 0.4)';
                     el.style.borderRadius = '50%';
                     el.style.transition = 'all 0.3s ease';
                 }}
             """)
 
-            # Wait for effect to be visible
-            time.sleep(2)
+            time.sleep(2.5)  # Wait for effect to be visible
 
             # Screenshot with highlight
-            if description:
+            if screenshot and description:
                 self.save_screenshot(f"click_{description.replace(' ', '_')}", f"Click: {description}")
 
-            # Restore original styles
+            # Restore styles
             self.page.evaluate(f"""
                 const el = document.querySelector('{selector}');
                 if (el) {{
@@ -134,57 +131,49 @@ class WebAppExplorer:
             """)
             time.sleep(0.5)
 
-            # Click - use direct navigation for links
+            # Click with fallback
             try:
                 self.page.click(selector, timeout=5000)
             except:
-                # If click fails, try getting href and navigate
                 href = self.page.evaluate(f"document.querySelector('{selector}')?.getAttribute('href')")
                 if href:
                     self.page.goto(f"{BASE_URL}{href}")
 
-            time.sleep(2)  # Wait for page to load
+            time.sleep(3)  # Wait for page load
 
         except Exception as e:
             print(f"    ⚠️  Errore highlight/click {selector}: {e}")
 
     def highlight_element(self, selector, description=""):
-        """Evidenzia elemento senza cliccare"""
+        """Evidenzia elemento SENZA cliccare"""
         try:
-            # Scroll element into view first
             self.page.evaluate(f"""
                 const el = document.querySelector('{selector}');
                 if (el) {{
                     el.scrollIntoView({{behavior: 'smooth', block: 'center'}});
                 }}
             """)
-            time.sleep(1.5)  # Wait for scroll
+            time.sleep(2)
 
-            # Add thick yellow border and glow directly to element
             self.page.evaluate(f"""
                 const el = document.querySelector('{selector}');
                 if (el) {{
-                    // Store original styles
                     el.setAttribute('data-original-outline', el.style.outline || '');
                     el.setAttribute('data-original-box-shadow', el.style.boxShadow || '');
                     el.setAttribute('data-original-border-radius', el.style.borderRadius || '');
 
-                    // Apply yellow glow effect
-                    el.style.outline = '8px solid #FFD700';
-                    el.style.outlineOffset = '8px';
-                    el.style.boxShadow = '0 0 30px 10px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.3)';
+                    el.style.outline = '10px solid #FFD700';
+                    el.style.outlineOffset = '12px';
+                    el.style.boxShadow = '0 0 50px 20px rgba(255, 215, 0, 0.9), inset 0 0 30px rgba(255, 215, 0, 0.4)';
                     el.style.borderRadius = '50%';
-                    el.style.transition = 'all 0.3s ease';
                 }}
             """)
 
-            # Wait for effect to be visible
-            time.sleep(2)
+            time.sleep(2.5)
 
             if description:
                 self.save_screenshot(f"highlight_{description.replace(' ', '_')}", f"Highlight: {description}")
 
-            # Restore original styles
             self.page.evaluate(f"""
                 const el = document.querySelector('{selector}');
                 if (el) {{
@@ -202,248 +191,365 @@ class WebAppExplorer:
         except Exception as e:
             print(f"    ⚠️  Errore highlight {selector}: {e}")
 
+    def navigate_to(self, url, description=""):
+        """Navigate directly to URL"""
+        self.page.goto(f"{BASE_URL}{url}")
+        time.sleep(2)
+        if description:
+            print(f"  → Navigated to: {description}")
+
     def login(self):
         """Esegue login"""
-        print("\n🔐 === LOGIN ===")
+        print("\n🔐 === 1. LOGIN & DASHBOARD ===")
         self.page.goto(f"{BASE_URL}/auth/login")
         time.sleep(1)
 
-        # Screenshot pagina login
         self.save_screenshot("login_page", "Login Page")
 
-        # Evidenzia e compila username
-        self.highlight_element('input[name="username"]', "Username Field")
+        self.highlight_element('input[name="username"]', "Username_Field")
         self.page.fill('input[name="username"]', USERNAME)
 
-        # Evidenzia e compila password
-        self.highlight_element('input[name="password"]', "Password Field")
+        self.highlight_element('button[type="submit"]', "Login_Button")
         self.page.fill('input[name="password"]', PASSWORD)
 
-        # Evidenzia e clicca login button
-        self.highlight_and_click('button[type="submit"]', "Login Button")
-
-        # Wait for dashboard
+        self.highlight_and_click('button[type="submit"]', "", screenshot=False)
         self.page.wait_for_url(f"{BASE_URL}/")
         time.sleep(1)
 
-        print("  ✓ Login effettuato")
-
-        # IMPORTANT: Set language to English for international documentation
+        # Set English language
         print("  🌍 Setting language to English...")
         self.page.goto(f"{BASE_URL}/?lang=en")
         time.sleep(1)
-        print("  ✓ Language set to English")
-
-    def explore_dashboard(self):
-        """Esplora dashboard"""
-        print("\n📊 === DASHBOARD ===")
-        self.save_screenshot("dashboard_main", "Dashboard Principale")
-
-        # Evidenzia sezioni dashboard
-        self.highlight_element('.card:has-text("Statistiche Sito")', "Statistiche Sito")
-        self.highlight_element('.card:has-text("Attività Recente")', "Attività Recente")
-        self.highlight_element('.card:has-text("Sistema")', "Informazioni Sistema")
+        self.save_screenshot("dashboard_main", "Main Dashboard")
+        print("  ✓ Login completed, English set")
 
     def explore_sites(self):
-        """Esplora gestione siti"""
-        print("\n🏛️ === GESTIONE SITI ===")
+        """Explore Archaeological Sites"""
+        print("\n🏛️ === 2. ARCHAEOLOGICAL SITES ===")
 
-        # Click menu Sites
-        self.highlight_and_click('a[href="/sites"]', "Menu Siti")
-        self.save_screenshot("sites_list", "Lista Siti")
+        self.highlight_and_click('a[href="/sites"]', "Sites_Menu")
+        self.save_screenshot("sites_list", "Sites List")
 
-        # Try to click on first site if exists
-        try:
-            self.highlight_and_click('.table tbody tr:first-child a', "Dettaglio Primo Sito")
-            self.save_screenshot("sites_detail", "Dettaglio Sito")
-            self.page.go_back()
-            time.sleep(1)
-        except:
-            print("    ℹ️  Nessun sito da visualizzare")
-
-        # Click New Site button
-        self.highlight_and_click('a[href="/sites/new"]', "Bottone Nuovo Sito")
-        self.save_screenshot("sites_form", "Form Nuovo Sito")
+        # New site button
+        self.highlight_and_click('a[href="/sites/create"]', "New_Site_Button")
+        self.save_screenshot("sites_form", "Site Form")
 
         # Back to list
         self.page.go_back()
+        time.sleep(2)
+
+        # Click first site if exists
+        try:
+            self.highlight_and_click('.table tbody tr:first-child a', "Site_Detail_Link")
+            self.save_screenshot("sites_detail", "Site Detail Page")
+            self.page.go_back()
+            time.sleep(2)
+        except:
+            print("    ℹ️  No sites to view")
 
     def explore_us(self):
-        """Esplora gestione US"""
-        print("\n📦 === GESTIONE US ===")
+        """Explore Stratigraphic Units with CORRECT tab navigation"""
+        print("\n📦 === 3. STRATIGRAPHIC UNITS (US) ===")
 
-        # Click menu US
-        self.highlight_and_click('a[href="/us"]', "Menu US")
-        self.save_screenshot("us_list", "Lista Unità Stratigrafiche")
+        self.highlight_and_click('a[href="/us"]', "US_Menu")
+        self.save_screenshot("us_list", "US List")
 
-        # Click New US button
-        try:
-            self.highlight_and_click('a[href="/us/new"]', "Bottone Nuova US")
-            self.save_screenshot("us_form_tab1", "Form US - Tab 1")
+        # New US button
+        self.highlight_and_click('a[href="/us/create"]', "New_US_Button")
+        self.save_screenshot("us_form_tab1_basic", "US Form - Tab 1: Basic Information")
 
-            # Navigate tabs if exists
-            for i in range(2, 7):
-                try:
-                    self.highlight_and_click(f'#tab{i}', f"Tab {i}")
-                    self.save_screenshot(f"us_form_tab{i}", f"Form US - Tab {i}")
-                except:
-                    break
+        # Navigate tabs with CORRECT selectors
+        tabs = [
+            ("button#description-tab", "us_form_tab2_descriptions", "Tab 2: Descriptions"),
+            ("button#physical-tab", "us_form_tab3_physical", "Tab 3: Physical Characteristics"),
+            ("button#chronology-tab", "us_form_tab4_chronology", "Tab 4: Chronology"),
+            ("button#relationships-tab", "us_form_tab5_relationships", "Tab 5: Stratigraphic Relationships"),
+            ("button#documentation-tab", "us_form_tab6_documentation", "Tab 6: Documentation"),
+        ]
 
-            self.page.go_back()
-        except:
-            print("    ℹ️  Form US non disponibile")
+        for selector, screenshot_name, description in tabs:
+            try:
+                self.highlight_and_click(selector, f"US_{screenshot_name.replace('us_form_', '')}")
+                self.save_screenshot(screenshot_name, f"US Form - {description}")
+            except Exception as e:
+                print(f"    ⚠️  Tab {description} not found: {e}")
+
+        self.page.go_back()
+        time.sleep(2)
 
     def explore_inventario(self):
-        """Esplora inventario materiali"""
-        print("\n📋 === INVENTARIO MATERIALI ===")
+        """Explore Material Inventory with ALL tabs"""
+        print("\n📋 === 4. MATERIAL INVENTORY ===")
 
-        # Click menu Inventario
-        self.highlight_and_click('a[href="/inventario"]', "Menu Inventario")
-        self.save_screenshot("inventario_list", "Lista Inventario")
+        self.highlight_and_click('a[href="/inventario"]', "Inventario_Menu")
+        self.save_screenshot("inventario_list", "Inventory List")
 
-        # Click New Inventario
-        try:
-            self.highlight_and_click('a[href="/inventario/new"]', "Bottone Nuovo Reperto")
-            self.save_screenshot("inventario_form_tab1", "Form Inventario - Tab 1")
+        # New artifact button
+        self.highlight_and_click('a[href="/inventario/create"]', "New_Artifact_Button")
+        self.save_screenshot("inventario_form_tab1", "Inventory Form - Tab 1")
 
-            # Navigate tabs
-            for i in range(2, 9):
-                try:
-                    self.highlight_and_click(f'#tab{i}', f"Tab {i}")
-                    self.save_screenshot(f"inventario_form_tab{i}", f"Form Inventario - Tab {i}")
-                except:
-                    break
-
-            self.page.go_back()
-        except:
-            print("    ℹ️  Form Inventario non disponibile")
-
-    def explore_harris_matrix(self):
-        """Esplora Harris Matrix"""
-        print("\n🔗 === HARRIS MATRIX ===")
-
-        # Click menu Harris Matrix
-        try:
-            self.highlight_and_click('a[href="/harris-matrix"]', "Menu Harris Matrix")
-            time.sleep(2)
-            self.save_screenshot("harris_matrix_view", "Visualizzazione Harris Matrix")
-
-            # Try GraphML export
+        # Navigate all inventory tabs (usually 8 tabs)
+        for i in range(2, 9):
             try:
-                self.highlight_and_click('a[href="/harris-matrix/graphml"]', "Esporta GraphML")
-                self.save_screenshot("harris_matrix_graphml", "Export GraphML")
-                self.page.go_back()
+                # Inventory uses different tab IDs - check the template
+                self.page.click(f'.nav-tabs .nav-link:nth-child({i})', timeout=3000)
+                time.sleep(2)
+                self.save_screenshot(f"inventario_form_tab{i}", f"Inventory Form - Tab {i}")
             except:
-                print("    ℹ️  Export GraphML non disponibile")
+                print(f"    ℹ️  Inventory Tab {i} not found")
+                break
 
+        self.page.go_back()
+        time.sleep(2)
+
+    def explore_media_upload(self):
+        """Explore Media Upload"""
+        print("\n📤 === 5. UPLOAD MEDIA ===")
+
+        try:
+            self.highlight_and_click('a[href="/media/upload"]', "Media_Upload_Menu")
+            self.save_screenshot("media_upload_page", "Media Upload Interface")
         except:
-            print("    ℹ️  Harris Matrix non disponibile")
+            print("    ℹ️  Media Upload not accessible")
 
     def explore_harris_creator(self):
-        """Esplora Harris Creator"""
-        print("\n✏️ === HARRIS MATRIX CREATOR ===")
+        """Explore Harris Matrix Creator"""
+        print("\n✏️ === 6. HARRIS MATRIX CREATOR ===")
 
         try:
-            self.highlight_and_click('a[href="/harris-creator"]', "Menu Harris Creator")
-            time.sleep(2)
-            self.save_screenshot("harris_creator", "Editor Interattivo Harris Matrix")
+            self.highlight_and_click('a[href="/harris-creator"]', "Harris_Creator_Menu")
+            time.sleep(3)
+            self.save_screenshot("harris_creator_interface", "Harris Matrix Creator Interface")
+
+            # Try to access editor
+            try:
+                self.navigate_to("/harris-creator/editor", "Harris Creator Editor")
+                self.save_screenshot("harris_creator_editor", "Harris Matrix Creator Editor")
+            except:
+                print("    ℹ️  Harris Creator Editor not accessible")
         except:
-            print("    ℹ️  Harris Creator non disponibile")
+            print("    ℹ️  Harris Creator not accessible")
+
+    def explore_harris_matrix(self):
+        """Explore Harris Matrix View"""
+        print("\n🔗 === 7. HARRIS MATRIX VIEW ===")
+
+        try:
+            # Need a site name - use first available
+            self.navigate_to("/sites")
+            time.sleep(2)
+
+            # Get first site name from the page
+            site_name = self.page.evaluate("""
+                const firstSiteLink = document.querySelector('.table tbody tr:first-child a');
+                firstSiteLink ? firstSiteLink.textContent.trim() : null;
+            """)
+
+            if site_name:
+                self.navigate_to(f"/harris_matrix/{site_name}", "Harris Matrix View")
+                self.save_screenshot("harris_matrix_view", "Harris Matrix Visualization")
+
+                # GraphML export
+                self.navigate_to("/harris_matrix/graphml_export", "GraphML Export")
+                self.save_screenshot("harris_graphml_export", "Harris Matrix GraphML Export")
+            else:
+                print("    ℹ️  No sites available for Harris Matrix")
+        except Exception as e:
+            print(f"    ℹ️  Harris Matrix not accessible: {e}")
 
     def explore_excel_import(self):
-        """Esplora Excel Import"""
-        print("\n📥 === EXCEL IMPORT ===")
+        """Explore Excel Import"""
+        print("\n📥 === 8. EXCEL IMPORT ===")
 
         try:
-            self.highlight_and_click('a[href="/excel-import"]', "Menu Excel Import")
-            self.save_screenshot("excel_import", "Interfaccia Import Excel")
+            self.highlight_and_click('a[href="/excel-import"]', "Excel_Import_Menu")
+            self.save_screenshot("excel_import_interface", "Excel Import Interface")
         except:
-            print("    ℹ️  Excel Import non disponibile")
+            print("    ℹ️  Excel Import not accessible")
 
-    def explore_pyarchinit_import(self):
-        """Esplora PyArchInit Import/Export"""
-        print("\n🔄 === PYARCHINIT IMPORT/EXPORT ===")
+    def explore_pyarchinit_import_export(self):
+        """Explore PyArchInit Import/Export"""
+        print("\n🔄 === 9. PYARCHINIT IMPORT/EXPORT ===")
 
         try:
-            self.highlight_and_click('a[href="/pyarchinit-import-export"]', "Menu PyArchInit I/E")
-            self.save_screenshot("pyarchinit_import_export", "PyArchInit Import/Export")
+            self.highlight_and_click('a[href="/pyarchinit-import-export"]', "PyArchInit_IE_Menu")
+            self.save_screenshot("pyarchinit_ie_main", "PyArchInit Import/Export Main")
+
+            # Scroll to different sections
+            self.page.evaluate("window.scrollTo(0, 400)")
+            time.sleep(1)
+            self.save_screenshot("pyarchinit_import_section", "PyArchInit Import Section")
+
+            self.page.evaluate("window.scrollTo(0, 800)")
+            time.sleep(1)
+            self.save_screenshot("pyarchinit_export_section", "PyArchInit Export Section")
+
+            self.page.evaluate("window.scrollTo(0, 1200)")
+            time.sleep(1)
+            self.save_screenshot("pyarchinit_create_db", "PyArchInit Create Database")
+
         except:
-            print("    ℹ️  PyArchInit I/E non disponibile")
+            print("    ℹ️  PyArchInit I/E not accessible")
 
     def explore_em_node_config(self):
-        """Esplora EM Node Config"""
-        print("\n⚙️ === EXTENDED MATRIX NODE CONFIG ===")
+        """Explore Extended Matrix Node Config"""
+        print("\n⚙️ === 10. EXTENDED MATRIX NODE CONFIG ===")
 
         try:
-            self.highlight_and_click('a[href="/em-node-config"]', "Menu EM Node Config")
-            self.save_screenshot("em_node_config", "Configurazione Nodi Extended Matrix")
+            self.highlight_and_click('a[href="/em-node-config"]', "EM_Node_Config_Menu")
+            self.save_screenshot("em_node_config_interface", "EM Node Configuration")
         except:
-            print("    ℹ️  EM Node Config non disponibile")
+            print("    ℹ️  EM Node Config not accessible")
+
+    def explore_dating_periods(self):
+        """Explore Dating Periods"""
+        print("\n📅 === 11. DATING PERIODS ===")
+
+        try:
+            self.highlight_and_click('a[href="/periodizzazione"]', "Dating_Periods_Menu")
+            self.save_screenshot("dating_periods_list", "Dating Periods List")
+
+            # New period button
+            try:
+                self.highlight_and_click('a[href="/periodizzazione/create"]', "New_Dating_Period_Button")
+                self.save_screenshot("dating_periods_form", "Dating Period Form")
+                self.page.go_back()
+                time.sleep(2)
+            except:
+                print("    ℹ️  Dating period form not accessible")
+        except:
+            print("    ℹ️  Dating Periods not accessible")
+
+    def explore_periodization_records(self):
+        """Explore Periodization Records"""
+        print("\n🗓️ === 12. PERIODIZATION RECORDS ===")
+
+        try:
+            self.highlight_and_click('a[href="/periodization-records"]', "Periodization_Records_Menu")
+            self.save_screenshot("periodization_records_list", "Periodization Records List")
+
+            # Try to view a record
+            try:
+                self.page.click('.table tbody tr:first-child a', timeout=3000)
+                time.sleep(2)
+                self.save_screenshot("periodization_record_detail", "Periodization Record Detail")
+                self.page.go_back()
+                time.sleep(2)
+            except:
+                print("    ℹ️  No periodization records to view")
+        except:
+            print("    ℹ️  Periodization Records not accessible")
+
+    def explore_thesaurus(self):
+        """Explore ICCD Thesaurus"""
+        print("\n📚 === 13. ICCD THESAURUS ===")
+
+        try:
+            self.highlight_and_click('a[href="/thesaurus"]', "Thesaurus_Menu")
+            self.save_screenshot("thesaurus_list", "ICCD Thesaurus List")
+
+            # Show management interface
+            self.page.evaluate("window.scrollTo(0, 400)")
+            time.sleep(1)
+            self.save_screenshot("thesaurus_management", "Thesaurus Management")
+        except:
+            print("    ℹ️  Thesaurus not accessible")
 
     def explore_analytics(self):
-        """Esplora Analytics"""
-        print("\n📈 === ANALYTICS ===")
+        """Explore Analytics"""
+        print("\n📈 === 14. ANALYTICS ===")
 
         try:
-            self.highlight_and_click('a[href="/analytics"]', "Menu Analytics")
-            time.sleep(2)
-            self.save_screenshot("analytics_dashboard", "Dashboard Analytics")
+            self.highlight_and_click('a[href="/analytics"]', "Analytics_Menu")
+            time.sleep(3)
+            self.save_screenshot("analytics_dashboard", "Analytics Dashboard")
         except:
-            print("    ℹ️  Analytics non disponibile")
+            print("    ℹ️  Analytics not accessible")
 
     def explore_validation(self):
-        """Esplora Validation"""
-        print("\n✅ === VALIDAZIONE STRATIGRAFICA ===")
+        """Explore Validation"""
+        print("\n✅ === 15. VALIDATION ===")
 
         try:
-            self.highlight_and_click('a[href="/validation"]', "Menu Validazione")
-            self.save_screenshot("validation_report", "Report Validazione")
+            # Need a site name
+            self.navigate_to("/sites")
+            time.sleep(2)
+
+            site_name = self.page.evaluate("""
+                const firstSiteLink = document.querySelector('.table tbody tr:first-child a');
+                firstSiteLink ? firstSiteLink.textContent.trim() : null;
+            """)
+
+            if site_name:
+                self.navigate_to(f"/validate/{site_name}", "Validation Report")
+                self.save_screenshot("validation_report", "Stratigraphic Validation Report")
+            else:
+                print("    ℹ️  No sites for validation")
         except:
-            print("    ℹ️  Validazione non disponibile")
+            print("    ℹ️  Validation not accessible")
 
-    def explore_admin(self):
-        """Esplora Admin"""
-        print("\n🔧 === AMMINISTRAZIONE ===")
+    def explore_admin_database(self):
+        """Explore Admin Database Management"""
+        print("\n🔧 === 16. ADMIN - DATABASE MANAGEMENT ===")
 
-        # Database management
         try:
-            self.highlight_and_click('a[href="/admin/database"]', "Menu Database")
-            self.save_screenshot("admin_database", "Gestione Database")
-        except:
-            print("    ℹ️  Admin Database non disponibile")
+            self.highlight_and_click('a[href="/admin/database"]', "Admin_Database_Menu")
+            self.save_screenshot("admin_database_main", "Database Management")
 
-        # User management
-        try:
-            self.highlight_and_click('a[href="/auth/users"]', "Menu Utenti")
-            self.save_screenshot("admin_users", "Gestione Utenti")
+            # Upload database page
+            try:
+                self.navigate_to("/admin/database/upload", "Database Upload")
+                self.save_screenshot("admin_database_upload", "Upload Database")
+            except:
+                print("    ℹ️  Database upload not accessible")
+
+            # Connect database page
+            try:
+                self.navigate_to("/admin/database/connect", "Database Connect")
+                self.save_screenshot("admin_database_connect", "Connect to Database")
+            except:
+                print("    ℹ️  Database connect not accessible")
+
         except:
-            print("    ℹ️  Gestione Utenti non disponibile")
+            print("    ℹ️  Admin Database not accessible")
+
+    def explore_admin_users(self):
+        """Explore Admin User Management"""
+        print("\n👥 === 17. ADMIN - USER MANAGEMENT ===")
+
+        try:
+            self.highlight_and_click('a[href="/auth/users"]', "Admin_Users_Menu")
+            self.save_screenshot("admin_users_list", "User Management")
+        except:
+            print("    ℹ️  User Management not accessible")
 
     def run(self):
         """Esegue cattura completa"""
         print("=" * 70)
-        print("PyArchInit-Mini Web GUI - Screenshot Documentation Capture")
+        print("PyArchInit-Mini Web GUI - COMPLETE Screenshot Capture")
         print("=" * 70)
 
         try:
             self.init_browser()
 
-            # Login
+            # Execute all exploration functions
             self.login()
-
-            # Explore all sections
-            self.explore_dashboard()
             self.explore_sites()
             self.explore_us()
             self.explore_inventario()
-            self.explore_harris_matrix()
+            self.explore_media_upload()
             self.explore_harris_creator()
+            self.explore_harris_matrix()
             self.explore_excel_import()
-            self.explore_pyarchinit_import()
+            self.explore_pyarchinit_import_export()
             self.explore_em_node_config()
+            self.explore_dating_periods()
+            self.explore_periodization_records()
+            self.explore_thesaurus()
             self.explore_analytics()
             self.explore_validation()
-            self.explore_admin()
+            self.explore_admin_database()
+            self.explore_admin_users()
 
             print("\n" + "=" * 70)
             print(f"✅ Cattura completata!")
