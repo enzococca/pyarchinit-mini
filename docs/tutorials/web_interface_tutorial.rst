@@ -66,7 +66,7 @@ The login page is the entry point to the system.
 
 1. **Enter Username**
 
-.. figure:: ../_static/images/webapp/002_highlight_Campo Username.png
+.. figure:: ../_static/images/webapp/002_highlight_Username_Field.png
    :alt: Username Field
    :align: center
    :width: 70%
@@ -75,7 +75,7 @@ The login page is the entry point to the system.
 
 2. **Enter Password**
 
-.. figure:: ../_static/images/webapp/003_highlight_Campo Password.png
+.. figure:: ../_static/images/webapp/002_highlight_Username_Field.png
    :alt: Password Field
    :align: center
    :width: 70%
@@ -84,7 +84,7 @@ The login page is the entry point to the system.
 
 3. **Click Login Button**
 
-.. figure:: ../_static/images/webapp/004_click_Bottone Login.png
+.. figure:: ../_static/images/webapp/003_highlight_Login_Button.png
    :alt: Login Button
    :align: center
    :width: 70%
@@ -102,7 +102,7 @@ Security Features
 Dashboard
 =========
 
-.. figure:: ../_static/images/webapp/005_dashboard_main.png
+.. figure:: ../_static/images/webapp/004_dashboard_main.png
    :alt: Main Dashboard
    :align: center
    :width: 100%
@@ -139,7 +139,7 @@ Sites are the top-level organizational units representing archaeological sites o
 Site List
 ---------
 
-.. figure:: ../_static/images/webapp/007_sites_list.png
+.. figure:: ../_static/images/webapp/006_sites_list.png
    :alt: Sites List
    :align: center
    :width: 100%
@@ -157,7 +157,7 @@ Features:
 Site Detail View
 ----------------
 
-.. figure:: ../_static/images/webapp/009_sites_detail.png
+.. figure:: ../_static/images/webapp/010_sites_detail.png
    :alt: Site Detail
    :align: center
    :width: 100%
@@ -175,7 +175,7 @@ The site detail page shows:
 Creating a New Site
 -------------------
 
-.. figure:: ../_static/images/webapp/011_sites_form.png
+.. figure:: ../_static/images/webapp/008_sites_form.png
    :alt: New Site Form
    :align: center
    :width: 100%
@@ -211,7 +211,7 @@ The US (Unità Stratigrafiche) module manages stratigraphic units with comprehen
 US List
 -------
 
-.. figure:: ../_static/images/webapp/013_us_list.png
+.. figure:: ../_static/images/webapp/012_us_list.png
    :alt: US List
    :align: center
    :width: 100%
@@ -234,131 +234,144 @@ The US form is organized into **6 comprehensive tabs** for better data organizat
 Tab 1: Basic Information
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. figure:: ../_static/images/webapp/015_us_form_tab1.png
-   :alt: US Form Tab 1
+.. figure:: ../_static/images/webapp/014_us_form_tab1_basic.png
+   :alt: US Form Tab 1 - Basic Information
    :align: center
    :width: 100%
 
-   **Tab 1: Basic Information** - Site selection and primary fields
+   **Tab 1: Basic Information** - Site selection and primary identification fields
 
-**Fields:**
+**Required Fields:**
 
-* Site (required) - Select from dropdown
-* US Number (required) - Unique identifier
-* Area
-* Stratigraphic Description
-* Interpretative Description
-* Formation Type (Natural/Artificial)
-* Year of Excavation
-* Archaeologist
+* Site (Sito) - Select from dropdown
+* US Number (Numero US) - Unique stratigraphic unit identifier within the site
 
-Tab 2: Physical Characteristics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Optional Fields:**
 
-.. figure:: ../_static/images/webapp/017_us_form_tab2.png
-   :alt: US Form Tab 2
+* Area (Area) - Excavation area or sector
+* Year (Anno) - Excavation year
+* Archaeologist (Archeologo) - Person responsible for excavation
+
+.. tip::
+   The combination of Site + US Number must be unique in the system.
+
+Tab 2: Descriptions
+~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/016_us_form_tab2_descriptions.png
+   :alt: US Form Tab 2 - Descriptions
    :align: center
    :width: 100%
 
-   **Tab 2: Physical Characteristics** - Material properties
+   **Tab 2: Descriptions** - Stratigraphic and interpretative descriptions
 
 **Fields:**
 
-* Unit Type (e.g., Layer, Cut, Fill)
-* Color
-* Consistency
-* Texture
-* Compaction
-* Inclusions
+* **Stratigraphic Description** (Descrizione Stratigrafica) - Objective physical description
+* **Interpretative Description** (Descrizione Interpretativa) - Archaeological interpretation
+* **Detailed Description** (Descrizione Estesa) - Extended description with additional details
+* **Interpretation** (Interpretazione) - Functional/chronological interpretation
+* **Observations** (Osservazioni) - Additional observations and notes
+
+.. tip::
+   **Tip**: Specifying the initial and final period helps to chronologically contextualize the stratigraphic unit in the archaeological site.
+
+Tab 3: Physical Characteristics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/018_us_form_tab3_physical.png
+   :alt: US Form Tab 3 - Physical Characteristics
+   :align: center
+   :width: 100%
+
+   **Tab 3: Physical Characteristics** - Material properties and composition
+
+**Fields:**
+
+* Unit Type (Tipo US) - e.g., Layer (Strato), Cut (Taglio), Fill (Riempimento)
+* Formation Type (Tipo Formazione) - Natural (Naturale) / Artificial (Artificiale)
+* Color (Colore) - Munsell or descriptive color
+* Consistency (Consistenza) - Soil consistency description
+* Texture (Tessitura) - Grain size and texture
+* Compaction (Compattezza) - Degree of compaction
+* Inclusions (Inclusioni) - Materials present in the matrix
 * Soil composition details
 
-Tab 3: Stratigraphic Relationships
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tab 4: Chronology
+~~~~~~~~~~~~~~~~~~
 
-.. figure:: ../_static/images/webapp/019_us_form_tab3.png
-   :alt: US Form Tab 3
+.. figure:: ../_static/images/webapp/020_us_form_tab4_chronology.png
+   :alt: US Form Tab 4 - Chronology
    :align: center
    :width: 100%
 
-   **Tab 3: Relationships** - Define stratigraphic connections
+   **Tab 4: Chronology** - Dating and periodization
+
+**Periodization Section:**
+
+* **Initial Period** (Periodo Iniziale) - Starting chronological period (select from dating periods table)
+* **Final Period** (Periodo Finale) - Ending chronological period
+* **Dating** (Datazione) - Dating method and results dropdown
+* **Reliability** (Affidabilità) - Dating reliability assessment
+
+.. tip::
+   Use the standardized dating periods from the Datazione table for consistency across the project.
+
+Tab 5: Stratigraphic Relationships
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/022_us_form_tab5_relationships.png
+   :alt: US Form Tab 5 - Stratigraphic Relationships
+   :align: center
+   :width: 100%
+
+   **Tab 5: Stratigraphic Relationships** - Define stratigraphic connections for Harris Matrix
 
 **Relationship Types:**
 
-* Covers (Copre)
-* Covered by (Coperto da)
-* Cuts (Taglia)
-* Cut by (Tagliato da)
-* Fills (Riempie)
-* Filled by (Riempito da)
-* Equals (Uguale a)
-* Adjacent to (Si appoggia a)
+* **Covers** (Copre) - This US covers/overlies another US
+* **Covered by** (Coperto da) - This US is covered by another US
+* **Cuts** (Taglia) - This US cuts through another US
+* **Cut by** (Tagliato da) - This US is cut by another US
+* **Fills** (Riempie) - This US fills a cut
+* **Filled by** (Riempito da) - This US (a cut) is filled by another US
+* **Equals** (Uguale a) - This US is the same as another US
+* **Adjacent to** (Si appoggia a) - This US is adjacent to another US
 
-**Text Format:**
+**Text Format Example:**
 
 .. code-block:: text
 
-   copre 1002, taglia 1005, si appoggia a 1010
+   copre 1002, 1003
+   taglia 1005
+   si appoggia a 1010, 1011
 
-These relationships are used to automatically generate the Harris Matrix.
+These relationships are automatically used to generate the Harris Matrix.
 
 .. tip::
-   Use consistent relationship definitions to ensure accurate Harris Matrix generation.
+   Use consistent relationship definitions to ensure accurate Harris Matrix generation. Each relationship should be reciprocal (if US 1001 covers 1002, then 1002 is covered by 1001).
 
-Tab 4: Documentation
-~~~~~~~~~~~~~~~~~~~~
+Tab 6: Documentation
+~~~~~~~~~~~~~~~~~~~~~
 
-.. figure:: ../_static/images/webapp/021_us_form_tab4.png
-   :alt: US Form Tab 4
+.. figure:: ../_static/images/webapp/024_us_form_tab6_documentation.png
+   :alt: US Form Tab 6 - Documentation
    :align: center
    :width: 100%
 
-   **Tab 4: Documentation** - Detailed descriptions and notes
+   **Tab 6: Documentation** - Media attachments and references
 
-**Fields:**
+**Features:**
 
-* Detailed description (long text)
-* Interpretation notes
-* Bibliography references
-* Archaeological finds summary
-* Special observations
+* Photo uploads and gallery
+* Drawing attachments
+* 3D model links
+* Document references
+* Bibliography
+* Media metadata management
 
-Tab 5: Dimensions & Measurements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. figure:: ../_static/images/webapp/023_us_form_tab5.png
-   :alt: US Form Tab 5
-   :align: center
-   :width: 100%
-
-   **Tab 5: Dimensions** - Measurements and spatial data
-
-**Fields:**
-
-* Length (cm)
-* Width (cm)
-* Depth/Thickness (cm)
-* Volume (cubic meters)
-* Surface area (square meters)
-* Elevation values (top/bottom)
-
-Tab 6: Dating & Chronology
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. figure:: ../_static/images/webapp/025_us_form_tab6.png
-   :alt: US Form Tab 6
-   :align: center
-   :width: 100%
-
-   **Tab 6: Dating** - Chronological information
-
-**Fields:**
-
-* Chronological Period (from Datazioni table)
-* Dating Method
-* Terminus Post Quem (TPQ)
-* Terminus Ante Quem (TAQ)
-* Absolute dating
-* Relative chronology notes
+.. note::
+   Media files are stored in the uploads directory and linked to the US record. Supported formats: JPG, PNG, PDF, DXF, OBJ.
 
 Advanced US Features
 --------------------
@@ -379,12 +392,12 @@ Advanced US Features
 Material Inventory
 ==================
 
-The Inventario module manages archaeological finds and materials with **8 specialized tabs**.
+The Inventario module manages archaeological finds and materials with **8 specialized tabs** following ICCD (Istituto Centrale per il Catalogo e la Documentazione) standards.
 
 Inventory List
 --------------
 
-.. figure:: ../_static/images/webapp/027_inventario_list.png
+.. figure:: ../_static/images/webapp/026_inventario_list.png
    :alt: Inventory List
    :align: center
    :width: 100%
@@ -394,163 +407,192 @@ Inventory List
 Features:
 
 * Paginated list with filters
-* Filter by site, area, US, find type
+* Filter by site, area, US, artifact type
 * Material type icons
 * Conservation state indicators
 * Quick search by inventory number
+* Direct links to artifact details
 
 Creating a New Inventory Item
 ------------------------------
 
-The inventory form spans **8 comprehensive tabs**.
+The inventory form spans **8 comprehensive tabs** organized to capture complete artifact documentation.
 
 Tab 1: Identification
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. figure:: ../_static/images/webapp/029_inventario_form_tab1.png
-   :alt: Inventory Form Tab 1
+.. figure:: ../_static/images/webapp/028_inventario_form_tab1_identification.png
+   :alt: Inventory Form Tab 1 - Identification
    :align: center
    :width: 100%
 
-   **Tab 1: Identification** - Basic find information
+   **Tab 1: Identification** - Basic artifact identification and recording information
 
-**Fields:**
+**Required Fields:**
 
-* Site (required)
-* Inventory Number (required)
-* Find Type (Ceramica, Metallo, Pietra, Osso, Vetro, etc.)
-* Definition
-* Object Type
-* Area
-* Associated US
+* Site (Sito) - Select from dropdown
+* Inventory Number (Numero Inventario) - Unique identifier
 
-Tab 2: Physical Description
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Optional Fields:**
 
-.. figure:: ../_static/images/webapp/031_inventario_form_tab2.png
-   :alt: Inventory Form Tab 2
-   :align: center
-   :width: 100%
+* Artifact Number (N. Reperto)
+* Recorder (Schedatore) - Person who catalogued the artifact
+* Record Date (Date Scheda) - Date of cataloging (Format: YYYY-MM-DD)
+* Year (Years) - Excavation or discovery year
 
-   **Tab 2: Physical Description** - Material characteristics
+.. tip::
+   The combination of Site + Inventory Number must be unique in the system.
 
-**Fields:**
-
-* Material
-* Technique
-* Color description
-* Dimensions (length, width, height, diameter)
-* Weight (grams)
-* Thickness (mm)
-
-Tab 3: Conservation
-~~~~~~~~~~~~~~~~~~~~
-
-.. figure:: ../_static/images/webapp/033_inventario_form_tab3.png
-   :alt: Inventory Form Tab 3
-   :align: center
-   :width: 100%
-
-   **Tab 3: Conservation** - Preservation state
-
-**Fields:**
-
-* Conservation State (Ottimo, Buono, Discreto, Mediocre, Pessimo)
-* Completeness percentage
-* Degradation type
-* Restoration needed
-* Conservation notes
-
-Tab 4: Decoration & Style
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. figure:: ../_static/images/webapp/035_inventario_form_tab4.png
-   :alt: Inventory Form Tab 4
-   :align: center
-   :width: 100%
-
-   **Tab 4: Decoration** - Artistic attributes
-
-**Fields:**
-
-* Decoration technique
-* Decoration description
-* Decorative motifs
-* Style attribution
-* Artistic period
-
-Tab 5: Context & Dating
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. figure:: ../_static/images/webapp/037_inventario_form_tab5.png
-   :alt: Inventory Form Tab 5
-   :align: center
-   :width: 100%
-
-   **Tab 5: Context** - Archaeological context and dating
-
-**Fields:**
-
-* Archaeological context
-* Chronological period
-* Cultural attribution
-* Functional category
-* Use interpretation
-
-Tab 6: Documentation
-~~~~~~~~~~~~~~~~~~~~~
-
-.. figure:: ../_static/images/webapp/039_inventario_form_tab6.png
-   :alt: Inventory Form Tab 6
-   :align: center
-   :width: 100%
-
-   **Tab 6: Documentation** - Notes and references
-
-**Fields:**
-
-* Detailed description
-* Bibliography
-* Comparanda
-* Notes
-* Special observations
-
-Tab 7: Media & Files
-~~~~~~~~~~~~~~~~~~~~~
-
-.. figure:: ../_static/images/webapp/041_inventario_form_tab7.png
-   :alt: Inventory Form Tab 7
-   :align: center
-   :width: 100%
-
-   **Tab 7: Media** - Attachments and multimedia
-
-**Features:**
-
-* Photo uploads
-* Drawing attachments
-* 3D model links
-* Document attachments
-* Media gallery viewer
-
-Tab 8: Administrative
+Tab 2: Classification
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. figure:: ../_static/images/webapp/043_inventario_form_tab8.png
-   :alt: Inventory Form Tab 8
+.. figure:: ../_static/images/webapp/030_inventario_form_tab2_classification.png
+   :alt: Inventory Form Tab 2 - Classification
    :align: center
    :width: 100%
 
-   **Tab 8: Administrative** - Storage and cataloging
+   **Tab 2: Classification** - Typological classification and description
 
 **Fields:**
 
-* Storage location
-* Current location
-* Cataloguer name
-* Catalog date
-* Last modification
-* Ownership notes
+* **Artifact Type** (Tipo Reperto) - Controlled vocabulary from thesaurus (e.g., Ceramic, Metal, Stone, Bone, Glass)
+* Recording Criteria (Criterio Schedatura) - Documentation method used
+* Definition (Definizione) - Specific object definition
+* Type (Tipo) - Typological classification
+* Container Type (Tipo Contenitore) - For vessel artifacts
+* Structure (Struttura) - Structural characteristics
+* **Description** (Descrizione) - Detailed artifact description (long text field)
+
+.. note::
+   Artifact Type uses controlled vocabulary from the ICCD Thesaurus for consistency.
+
+Tab 3: Context
+~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/032_inventario_form_tab3_context.png
+   :alt: Inventory Form Tab 3 - Archaeological Context
+   :align: center
+   :width: 100%
+
+   **Tab 3: Context** - Archaeological context and stratigraphic provenance
+
+**Fields:**
+
+* Area (Area) - Excavation area where artifact was found
+* SU (US) - Associated Stratigraphic Unit number
+* Find Spot (Punto Rinv) - Precise location within the SU
+* Artifact Elements (Elementi Reperto) - Description of constituent elements
+
+.. tip::
+   **Archaeological Context Information**: This tab links the artifact to its stratigraphic origin, essential for understanding depositional context and dating.
+
+Tab 4: Physical Characteristics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/034_inventario_form_tab4_physical.png
+   :alt: Inventory Form Tab 4 - Physical Characteristics
+   :align: center
+   :width: 100%
+
+   **Tab 4: Physical Characteristics** - Material properties and storage
+
+**Fields:**
+
+* **Conservation State** (Stato Conservazione) - Controlled vocabulary from thesaurus
+* Washed (Lavato) - Yes/No dropdown
+* Box Number (Nr. Cassa) - Storage box identifier
+* Storage Location (Luogo Conservazione) - Current storage facility/room
+
+.. note::
+   Conservation State uses standardized terms from the ICCD Thesaurus.
+
+Tab 5: Conservation & Management
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/036_inventario_form_tab5_conservation.png
+   :alt: Inventory Form Tab 5 - Conservation Management
+   :align: center
+   :width: 100%
+
+   **Tab 5: Conservation** - Cataloging status and diagnostic significance
+
+**Fields:**
+
+* Catalogued (Repertato) - Yes/No - Has the artifact been photographically documented?
+* Diagnostic (Diagnostico) - Yes/No - Is the artifact significant for dating the layer?
+
+**Tips Box:**
+
+* **Catalogued**: Indicates if the artifact has been photographically documented
+* **Diagnostic**: Indicates if the artifact is significant for dating the layer
+
+.. important::
+   Diagnostic artifacts are particularly important for chronological interpretation of the stratigraphic sequence.
+
+Tab 6: Ceramic Characteristics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/038_inventario_form_tab6_ceramic.png
+   :alt: Inventory Form Tab 6 - Ceramic Analysis
+   :align: center
+   :width: 100%
+
+   **Tab 6: Ceramic** - Specialized fields for ceramic artifacts
+
+**Fields:**
+
+* **Ceramic Body** (Corpo Ceramico) - Controlled vocabulary from thesaurus (fabric type)
+* **Coating** (Rivestimento) - Controlled vocabulary from thesaurus (surface treatment)
+* Rim Diameter (Diametro Orlo) - In centimeters (e.g., 12.5)
+* Rim EVE (Eve Orlo) - Estimated Vessel Equivalent (preserved fraction 0-1, e.g., 0.25)
+
+.. note::
+   **This tab is specific for ceramic artifacts**. EVE (Estimated Vessel Equivalent) indicates the preserved fraction of the rim circumference.
+
+Tab 7: Measurements
+~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/040_inventario_form_tab7_measurements.png
+   :alt: Inventory Form Tab 7 - Quantitative Measurements
+   :align: center
+   :width: 100%
+
+   **Tab 7: Measurements** - Weight and quantitative data
+
+**Weight and Quantitative Measurements (Card Section):**
+
+* Weight (Peso) - In grams (e.g., 125.5)
+* Total Fragments (Totale Frammenti) - Number of fragments (e.g., 5)
+* Minimum Forms (Forme Minime) - Minimum number of individuals (e.g., 1)
+* Maximum Forms (Forme Massime) - Maximum number of individuals (e.g., 3)
+
+**Additional Field:**
+
+* Detailed Measurements (Misurazioni) - Free text for other measurements: length, width, height, thickness, etc.
+
+.. tip::
+   Minimum and Maximum Forms help estimate the number of individual vessels represented by the fragments.
+
+Tab 8: Documentation
+~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/042_inventario_form_tab8_documentation.png
+   :alt: Inventory Form Tab 8 - Documentation References
+   :align: center
+   :width: 100%
+
+   **Tab 8: Documentation** - Dating, technology, and bibliographic references
+
+**Fields:**
+
+* **Artifact Dating** (Datazione Reperto) - Proposed chronological attribution
+* Technologies (Tecnologie) - Production and processing techniques (long text)
+* Bibliographic References (Rif. Biblio) - Citations related to the artifact (long text)
+* Photo Negative (Negativo Photo) - Negative reference number
+* Slide (Diapositiva) - Slide reference number
+
+.. note::
+   Use this tab to document technical analysis, parallels, and scholarly references that support artifact interpretation.
 
 Harris Matrix
 =============
@@ -560,7 +602,7 @@ The Harris Matrix visualization tool generates and displays stratigraphic relati
 Harris Matrix View
 ------------------
 
-.. figure:: ../_static/images/webapp/045_harris_matrix_view.png
+.. figure:: ../_static/images/webapp/046_harris_creator_interface.png
    :alt: Harris Matrix View
    :align: center
    :width: 100%
@@ -594,7 +636,7 @@ Features:
 GraphML Export
 --------------
 
-.. figure:: ../_static/images/webapp/047_harris_matrix_graphml.png
+.. figure:: ../_static/images/webapp/047_harris_creator_editor.png
    :alt: GraphML Export
    :align: center
    :width: 100%
@@ -621,7 +663,7 @@ Harris Matrix Creator
 
 Interactive graphical editor for creating and editing Harris matrices.
 
-.. figure:: ../_static/images/webapp/049_harris_creator.png
+.. figure:: ../_static/images/webapp/046_harris_creator_interface.png
    :alt: Harris Matrix Creator
    :align: center
    :width: 100%
@@ -664,7 +706,7 @@ Data Import/Export
 Excel Import
 ------------
 
-.. figure:: ../_static/images/webapp/051_excel_import.png
+.. figure:: ../_static/images/webapp/049_excel_import_interface.png
    :alt: Excel Import Interface
    :align: center
    :width: 100%
@@ -697,7 +739,7 @@ Excel Import
 PyArchInit Import/Export
 -------------------------
 
-.. figure:: ../_static/images/webapp/053_pyarchinit_import_export.png
+.. figure:: ../_static/images/webapp/051_pyarchinit_ie_main.png
    :alt: PyArchInit Import/Export
    :align: center
    :width: 100%
@@ -726,7 +768,7 @@ Extended Matrix Configuration
 EM Node Configuration
 ---------------------
 
-.. figure:: ../_static/images/webapp/055_em_node_config.png
+.. figure:: ../_static/images/webapp/056_em_node_config_interface.png
    :alt: EM Node Config
    :align: center
    :width: 100%
@@ -763,7 +805,7 @@ Analytics
 
 The Analytics dashboard provides comprehensive data visualization and statistics.
 
-.. figure:: ../_static/images/webapp/057_analytics_dashboard.png
+.. figure:: ../_static/images/webapp/067_analytics_dashboard.png
    :alt: Analytics Dashboard
    :align: center
    :width: 100%
@@ -837,7 +879,7 @@ Validation
 
 Stratigraphic validation ensures data quality and identifies potential issues.
 
-.. figure:: ../_static/images/webapp/059_validation_report.png
+.. figure:: ../_static/images/webapp/067_analytics_dashboard.png
    :alt: Validation Report
    :align: center
    :width: 100%
@@ -903,7 +945,7 @@ Administrative functions for database and user management.
 Database Management
 -------------------
 
-.. figure:: ../_static/images/webapp/061_admin_database.png
+.. figure:: ../_static/images/webapp/069_admin_database_main.png
    :alt: Database Management
    :align: center
    :width: 100%
@@ -935,7 +977,7 @@ Database Management
 User Management
 ---------------
 
-.. figure:: ../_static/images/webapp/063_admin_users.png
+.. figure:: ../_static/images/webapp/071_admin_users_list.png
    :alt: User Management
    :align: center
    :width: 100%
