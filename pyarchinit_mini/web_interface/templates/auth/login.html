@@ -6,9 +6,8 @@
 <div class="row justify-content-center mt-5">
     <div class="col-md-6 col-lg-4">
         <div class="card shadow">
-            <div class="card-header text-center bg-dark text-white">
-                <img src="{{ url_for('static', filename='images/pyarchinit-mini-logo.png') }}" alt="PyArchInit-Mini" height="60" class="mb-2">
-                <h4>Login</h4>
+            <div class="card-header text-center">
+                <h4><i class="fas fa-sign-in-alt"></i> Login</h4>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('auth.login') }}">
@@ -39,7 +38,7 @@
                 </form>
             </div>
             <div class="card-footer text-center text-muted">
-                <small>PyArchInit-Mini v{{ version }}</small>
+                <small>PyArchInit-Mini v1.0.7</small>
             </div>
         </div>
 

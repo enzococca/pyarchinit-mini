@@ -6,31 +6,95 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{{ _('Stratigraphic Units') }}</h2>
-        <div>
-            <a href="{{ url_for('export_us_pdf') }}{% if sito_filter %}?sito={{ sito_filter }}{% endif %}" class="btn btn-danger">
+        <div class="btn-group">
+            <a href="{{ url_for('export_us_pdf') }}" class="btn btn-danger">
                 <i class="fas fa-file-pdf"></i> {{ _('Export PDF') }}
+                {% if sito_filter or area_filter or unita_tipo_filter or anno_scavo_filter or us_number_filter %}
+                <span class="badge bg-light text-dark">{{ total }} {{ _('filtered') }}</span>
+                {% endif %}
             </a>
+            {% if sito_filter %}
+            <a href="{{ url_for('export_harris_matrix_filtered') }}" class="btn btn-success">
+                <i class="fas fa-project-diagram"></i> {{ _('Export Matrix') }}
+                {% if area_filter or unita_tipo_filter or anno_scavo_filter or us_number_filter %}
+                <span class="badge bg-light text-dark">{{ total }} {{ _('filtered') }}</span>
+                {% endif %}
+            </a>
+            {% endif %}
             <a href="{{ url_for('create_us') }}" class="btn btn-primary">{{ _('New US') }}</a>
         </div>
     </div>
 
-    <!-- Filters -->
-    <form method="GET" class="mb-4">
-        <div class="row">
-            <div class="col-md-6">
-                <select name="sito" class="form-select">
-                    <option value="">{{ _('All sites') }}</option>
-                    {% for site in sites %}
-                    <option value="{{ site.sito }}" {% if sito_filter == site.sito %}selected{% endif %}>{{ site.sito }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-6">
-                <button type="submit" class="btn btn-primary">{{ _('Filter') }}</button>
-                <a href="{{ url_for('us_list') }}" class="btn btn-secondary">{{ _('Reset') }}</a>
-            </div>
+    <!-- Advanced Filters -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> {{ _('Advanced Search') }}</h5>
         </div>
-    </form>
+        <div class="card-body">
+            <form method="GET">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Site') }}</label>
+                        <select name="sito" class="form-select">
+                            <option value="">{{ _('All sites') }}</option>
+                            {% for site in sites %}
+                            <option value="{{ site.sito }}" {% if sito_filter == site.sito %}selected{% endif %}>{{ site.sito }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Area') }}</label>
+                        <select name="area" class="form-select">
+                            <option value="">{{ _('All areas') }}</option>
+                            {% for area in areas %}
+                            <option value="{{ area }}" {% if area_filter == area %}selected{% endif %}>{{ area }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Unit Type') }}</label>
+                        <select name="unita_tipo" class="form-select">
+                            <option value="">{{ _('All types') }}</option>
+                            {% for unit_type in unit_types %}
+                            <option value="{{ unit_type }}" {% if unita_tipo_filter == unit_type %}selected{% endif %}>{{ unit_type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ _('Excavation Year') }}</label>
+                        <select name="anno_scavo" class="form-select">
+                            <option value="">{{ _('All years') }}</option>
+                            {% for year in years %}
+                            <option value="{{ year }}" {% if anno_scavo_filter == year|string %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-4">
+                        <label class="form-label">{{ _('US Number') }}</label>
+                        <input type="text" name="us_number" class="form-control" value="{{ us_number_filter }}" placeholder="{{ _('Search by US number...') }}">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">&nbsp;</label>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> {{ _('Search') }}
+                            </button>
+                            <a href="{{ url_for('us_list') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> {{ _('Reset') }}
+                            </a>
+                            {% if total > 0 %}
+                            <span class="ms-3 text-muted">
+                                <i class="fas fa-info-circle"></i> {{ total }} {{ _('results found') }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- US Table -->
     {% if us_list %}

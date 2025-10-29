@@ -1,0 +1,1782 @@
+{
+  "version": "1.5",
+  "context": {
+    "absolute_time_Epochs": {
+      "epoch_01": {
+        "name": "1",
+        "start": null,
+        "end": null,
+        "color": "#FFD700"
+      },
+      "epoch_02": {
+        "name": "2",
+        "start": null,
+        "end": null,
+        "color": "#FF6347"
+      },
+      "epoch_03": {
+        "name": "3",
+        "start": null,
+        "end": null,
+        "color": "#4169E1"
+      },
+      "epoch_04": {
+        "name": "4",
+        "start": null,
+        "end": null,
+        "color": "#32CD32"
+      }
+    }
+  },
+  "graphs": {
+    "Scavo archeologico_stratigraphy": {
+      "id": "Scavo archeologico_stratigraphy",
+      "name": "Scavo archeologico Stratigraphy",
+      "description": "Stratigraphic graph exported from PyArchInit-Mini on 2025-10-25 16:27",
+      "defaults": {
+        "license": "CC-BY-NC-ND",
+        "authors": [
+          "pyarchinit_export_20251025"
+        ],
+        "embargo_until": null
+      },
+      "nodes": {
+        "authors": {},
+        "stratigraphic": {
+          "US": {
+            "geo_Scavo archeologico_stratigraphy": {
+              "name": "geo_position",
+              "description": ""
+            },
+            "Scavo archeologico_1_1": {
+              "name": "US 1",
+              "description": "Strato di macerie",
+              "us_number": "1",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di macerie",
+              "description_interp": "Fondazione in muratura",
+              "excavated": "No",
+              "period": "1",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_2": {
+              "name": "US 2",
+              "description": "Strato di terra",
+              "us_number": "2",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di terra",
+              "description_interp": "Livellamento",
+              "interpretation": "Livellamenti di epoca moderna e contemporanei.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "1",
+              "phase": "2"
+            },
+            "Scavo archeologico_1_3": {
+              "name": "US 3",
+              "description": "Strato di terra",
+              "us_number": "3",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di terra",
+              "description_interp": "Abbandono",
+              "interpretation": "Interfaccia di ripulitura dell'abbandono degli edifici.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_4": {
+              "name": "US 4",
+              "description": "Strato di sabbia e terra",
+              "us_number": "4",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di sabbia e terra",
+              "description_interp": "Pavimentazione in terra",
+              "interpretation": "Pavimentazione in terra dell'ED01, probabilmente di XVI-XVII secolo.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "2"
+            },
+            "Scavo archeologico_1_5": {
+              "name": "US 5",
+              "description": "Struttura in muratura",
+              "us_number": "5",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Struttura in muratura",
+              "description_interp": "Focolare",
+              "interpretation": "Possibile focolare domestico, con un punto di caricamento ed accensione frontale rappresentato dall'US30, e piani di cottura e lvorazione dei cibi verso ovest ed est dove era presente un condotto che permetteva il passaggio di aria calda, atto a riscaldare un eventule piano forato o lastra soprastante per la cottura dei cibi.\nMeno probabile per l'assenza di scarti di lavorazione, l'interpretazione come struttura artigianale.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_6": {
+              "name": "US 6",
+              "description": "Struttura in muratura",
+              "us_number": "6",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "USM",
+              "description_strat": "Struttura in muratura",
+              "description_interp": "Muro",
+              "interpretation": "Perimetrale sud del possibile edificio ED01",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_7": {
+              "name": "US 7",
+              "description": "Taglio",
+              "us_number": "7",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Taglio",
+              "description_interp": "Buca",
+              "interpretation": "Buca di epoca moderna dentro US2.",
+              "excavation_year": "2012",
+              "excavated": "No",
+              "period": "1",
+              "phase": "2"
+            },
+            "Scavo archeologico_1_8": {
+              "name": "US 8",
+              "description": "Riempimento",
+              "us_number": "8",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Riempimento",
+              "description_interp": "Buca",
+              "interpretation": "Riempimento della buca US7.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "1",
+              "phase": "2"
+            },
+            "Scavo archeologico_1_9": {
+              "name": "US 9",
+              "description": "Strato di malta",
+              "us_number": "9",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di malta",
+              "description_interp": "Disfacimento",
+              "interpretation": "Probabile disfacimento dei muri dell'ED01 al momento dell'abbandono.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_10": {
+              "name": "US 10",
+              "description": "Strato di malta",
+              "us_number": "10",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di malta",
+              "description_interp": "Disfacimento",
+              "interpretation": "Disfacimento legato all'abbandono dell'ED01.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_11": {
+              "name": "US 11",
+              "description": "Strato di terra",
+              "us_number": "11",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di terra",
+              "description_interp": "Battuto",
+              "interpretation": "Possibile rifacimento del battuto dell'ED01.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_12": {
+              "name": "US 12",
+              "description": "Struttura in muratura",
+              "us_number": "12",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "USM",
+              "description_strat": "Struttura in muratura",
+              "description_interp": "Muro",
+              "interpretation": "Muro riferibile ad una struttura che si trovava a sud dell'ED01.",
+              "excavation_year": "2012",
+              "excavated": "No",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_13": {
+              "name": "US 13",
+              "description": "Taglio",
+              "us_number": "13",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Taglio",
+              "description_interp": "Palo",
+              "interpretation": "Buca di palo riferibile al livello di vita US4, forse legato all focolare US5.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "2"
+            },
+            "Scavo archeologico_1_14": {
+              "name": "US 14",
+              "description": "Riempimento",
+              "us_number": "14",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Riempimento",
+              "description_interp": "Palo",
+              "interpretation": "Riempimento della buca di palo riferibile al livello di vita US4, forse legato all focolare US5.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_15": {
+              "name": "US 15",
+              "description": "Taglio",
+              "us_number": "15",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Taglio",
+              "description_interp": "Palo",
+              "interpretation": "Buca di palo riferibile al livello di vita US4, forse legato all focolare US5.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "2"
+            },
+            "Scavo archeologico_1_16": {
+              "name": "US 16",
+              "description": "Riempimento",
+              "us_number": "16",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Riempimento",
+              "description_interp": "Palo",
+              "interpretation": "Riempimento della buca di palo riferibile al livello di vita US4, forse legato all focolare US5.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_17": {
+              "name": "US 17",
+              "description": "Strato di terra e carboni",
+              "us_number": "17",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di terra e carboni",
+              "description_interp": "Punto di fuoco",
+              "interpretation": "Punto di fuoco legato al focolare US5. Probabilmente veniva caricato sfruttando una apertura verso nord  indicata dalla presenza dello strato di sabbie concotte US30.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_18": {
+              "name": "US 18",
+              "description": "Strato di sabbia e argilla",
+              "us_number": "18",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di sabbia e argilla",
+              "description_interp": "Pavimentazione in terra",
+              "interpretation": "Pavimentazione in terra relative alla fase dell'edificio 2 con il focolare US5. Sulla sua sua superficie sono presenti piccole buche di palo forse inerenti ad arredi in legno infissi nella pavimentazione.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_19": {
+              "name": "US 19",
+              "description": "Struttura in muratura",
+              "us_number": "19",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "USM",
+              "description_strat": "Struttura in muratura",
+              "description_interp": "Muro",
+              "interpretation": "E' verosimile che si legasse ad US6.Divisorio in fase con il battuto US18 e il focolare US5. Ando' in disuso con la costruzione la stesura del battuto US4.",
+              "excavation_year": "2012",
+              "excavated": "No",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_20": {
+              "name": "US 20",
+              "description": "Strato di carbone e cenere",
+              "us_number": "20",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di carbone e cenere",
+              "description_interp": "Punto di fuoco",
+              "interpretation": "Livello di difficile interpetazione per la poca superficie visibile. Puo' trattarsi di un punto di fuoco legato o disfacimenti incendi dell'edificio ripristinati con la stesura di US4, un focolare oppure attivita' di cantiere.",
+              "excavation_year": "2012",
+              "excavated": "No",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_21": {
+              "name": "US 21",
+              "description": "Taglio",
+              "us_number": "21",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Taglio",
+              "description_interp": "Palo",
+              "interpretation": "Possibile alloggio per palo forse riferibile con i tagli 22, 24 e 26 ad arredi in legno interni all'edificio.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_22": {
+              "name": "US 22",
+              "description": "Taglio",
+              "us_number": "22",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Taglio",
+              "description_interp": "Palo",
+              "interpretation": "Possibile alloggio per palo forse riferibile con i tagli 21, 24 e 26 ad arredi in legno interni all'edificio.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_23": {
+              "name": "US 23",
+              "description": "Riempimento",
+              "us_number": "23",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Riempimento",
+              "description_interp": "Palo",
+              "interpretation": "Riempimento del possibile alloggio per palo forse riferibile con i tagli 21, 24 e 26 ad arredi in legno interni all'edificio.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_24": {
+              "name": "US 24",
+              "description": "Strato di legno carbonizzato",
+              "us_number": "24",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di legno carbonizzato",
+              "description_interp": "Palo",
+              "interpretation": "Possibile alloggio per palo forse riferibile con i tagli 21, 22 e 26 ad arredi in legno interni all'edificio.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_25": {
+              "name": "US 25",
+              "description": "Riempimento",
+              "us_number": "25",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Riempimento",
+              "description_interp": "Palo",
+              "interpretation": "Riempimento del possibile alloggio per palo forse riferibile con i tagli 21, 22 e 26 ad arredi in legno interni all'edificio.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_26": {
+              "name": "US 26",
+              "description": "Taglio",
+              "us_number": "26",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Taglio",
+              "description_interp": "Palo",
+              "interpretation": "Possibile alloggio per palo forse riferibile con i tagli 21, 22 e 26 ad arredi in legno interni all'edificio.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_27": {
+              "name": "US 27",
+              "description": "Riempimento",
+              "us_number": "27",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Riempimento",
+              "description_interp": "Palo",
+              "interpretation": "Riempimento del possibile alloggio per palo forse riferibile con i tagli 21, 22 e 24 ad arredi in legno interni all'edificio.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_28": {
+              "name": "US 28",
+              "description": "Taglio",
+              "us_number": "28",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Taglio",
+              "description_interp": "Punto di fuoco",
+              "interpretation": "Si tratta del punto di fuoco principale del focolare US5 posto all'interno dell'edificio. E' possibile che venisse caricato e ripulito tramite una imboccatura verso nord testimoniata dal livello di sabbie concotte US30.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_29": {
+              "name": "US 29",
+              "description": "Strato di malta e ciottoli",
+              "us_number": "29",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di malta e ciottoli",
+              "description_interp": "Preparazione",
+              "interpretation": "Preparazione per la stesura dell'US18. E' coperto anche da US32 sul quale poggia il focolare US5.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "4"
+            },
+            "Scavo archeologico_1_30": {
+              "name": "US 30",
+              "description": "Strato di sabbia concotta",
+              "us_number": "30",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di sabbia concotta",
+              "description_interp": "Punto di fuoco",
+              "interpretation": "Probabile bocca del focolare US5 da cui veniva caricato e svuotato il principale punto di fuoco.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_31": {
+              "name": "US 31",
+              "description": "Strato di sabbia e argilla",
+              "us_number": "31",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di sabbia e argilla",
+              "description_interp": "Pavimentazione in terra",
+              "interpretation": "Probabile pavimentazione in terra relativa ad una prima fase di vita dell'edificio oppure inerente ad una precedente struttura di cui sarebbe il restauro del battuto, che e' andato a sostituire ed obliterare la struttura US36, forse un residuo di muratura.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "3",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_32": {
+              "name": "US 32",
+              "description": "Strato di sabbia",
+              "us_number": "32",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di sabbia",
+              "description_interp": "Preparazione",
+              "interpretation": "Preparazione per la posa del focolare US5. Dalla tipologia di materiali di cui e' costituito, potrebbe anche trattarsi di un precedente focolare destrutturato e i cui calcinacci sono stati sfruttati come sottofondo.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "2",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_33": {
+              "name": "US 33",
+              "description": "Strato di terra e carbone",
+              "us_number": "33",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di terra e carbone",
+              "description_interp": "Livellamento",
+              "interpretation": "Si tratta probabilmente di un livellamento inerente la costruzione dell'edificio indagato.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "3",
+              "phase": "2"
+            },
+            "Scavo archeologico_1_34": {
+              "name": "US 34",
+              "description": "Strato di carbone e cenere",
+              "us_number": "34",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di carbone e cenere",
+              "description_interp": "Disfacimento",
+              "interpretation": "Probabile disfacimento dell'edificio ED02.",
+              "excavation_year": "2013",
+              "excavated": "Si",
+              "period": "3",
+              "phase": "2"
+            },
+            "Scavo archeologico_1_35": {
+              "name": "US 35",
+              "description": "Strato di sabbia",
+              "us_number": "35",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di sabbia",
+              "description_interp": "Pavimentazione in terra",
+              "interpretation": "Possibile pavimentazione in terra o residuo di disfacimento di muratura in terra.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "3",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_36": {
+              "name": "US 36",
+              "description": "Struttura in muratura",
+              "us_number": "36",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Struttura in muratura",
+              "description_interp": "Pilastro",
+              "interpretation": "Probabile residuo di pilastro legato ad un edificio di cui non e' stato possibile determinarne le dimensioni.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "3",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_37": {
+              "name": "US 37",
+              "description": "Taglio",
+              "us_number": "37",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Taglio",
+              "description_interp": "Fossa di spoliazione",
+              "interpretation": "E' possibile che si tratti della spoliazione di una muratura che partiva da US36 sviluppandosi verso sud e curvando poi verso ovest alla quale si appoggiava US35. E' possibile che sia stata realizzata al momento della demolizione del primo edificio sostituito ed obliterato a partire dal livellamento US33.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "3",
+              "phase": "3"
+            },
+            "Scavo archeologico_1_38": {
+              "name": "US 38",
+              "description": "Strato di sabbia",
+              "us_number": "38",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di sabbia",
+              "description_interp": "Livellamento",
+              "interpretation": "Livellamenti forse volti alla bonifica della zona prima della realizzazione dei nuovi edifici.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "4",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_39": {
+              "name": "US 39",
+              "description": "Strato di terra",
+              "us_number": "39",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "US",
+              "description_strat": "Strato di terra",
+              "description_interp": "Livellamento",
+              "interpretation": "Livellamenti forse volti alla bonifica della zona prima della realizzazione dei nuovi edifici.",
+              "excavation_year": "2012",
+              "excavated": "Si",
+              "period": "4",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_500": {
+              "name": "US 500",
+              "description": "Continuity",
+              "us_number": "500",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "CON",
+              "description_strat": "Continuity",
+              "description_interp": "continuità con US 12",
+              "excavation_year": "2022",
+              "period": "2",
+              "phase": "1"
+            },
+            "Scavo archeologico_1_800": {
+              "name": "US 800",
+              "description": "Materiale pietra dura",
+              "us_number": "800",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "property",
+              "description_interp": "Materiale pietra dura",
+              "excavation_year": "2022",
+              "period": "2",
+              "phase": "2.1"
+            },
+            "Scavo archeologico_1_900": {
+              "name": "US 900",
+              "description": "ggggg",
+              "us_number": "900",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "Combinar",
+              "description_interp": "ggggg",
+              "excavation_year": "2022",
+              "period": "2",
+              "phase": "3.1"
+            }
+          },
+          "USVs": {
+            "Scavo archeologico_1_102": {
+              "name": "US 102",
+              "description": "test",
+              "us_number": "102",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "USVA",
+              "description_interp": "test",
+              "excavation_year": "2022",
+              "period": "2",
+              "phase": "2.1"
+            },
+            "Scavo archeologico_1_103": {
+              "name": "US 103",
+              "description": "bla bla bla",
+              "us_number": "103",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "USVA",
+              "description_interp": "bla bla bla",
+              "excavation_year": "2022",
+              "period": "2",
+              "phase": "2.1"
+            },
+            "Scavo archeologico_1_104": {
+              "name": "US 104",
+              "description": "gggg",
+              "us_number": "104",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "USVB",
+              "description_interp": "gggg",
+              "excavation_year": "2022",
+              "period": "2",
+              "phase": "3.1"
+            },
+            "Scavo archeologico_1_106": {
+              "name": "US 106",
+              "description": "USV 1",
+              "us_number": "106",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "USVA",
+              "description_interp": "USV 1",
+              "excavation_year": "2022",
+              "period": "2",
+              "phase": "2.1"
+            }
+          },
+          "SF": {
+            "Scavo archeologico_1_300": {
+              "name": "US 300",
+              "description": "blabla bla",
+              "us_number": "300",
+              "site": "Scavo archeologico",
+              "area": "1",
+              "unit_type": "SF",
+              "description_interp": "blabla bla",
+              "excavation_year": "2022",
+              "period": "2",
+              "phase": "2.1"
+            }
+          }
+        },
+        "epochs": {},
+        "groups": {},
+        "properties": {},
+        "documents": {
+          "Scavo archeologico_1_4002": {
+            "name": "US 4002",
+            "description": "DosCo\\Scavo archeologico_20220218_.xlsx",
+            "us_number": "4002",
+            "site": "Scavo archeologico",
+            "area": "1",
+            "unit_type": "DOC",
+            "description_interp": "DosCo\\Scavo archeologico_20220218_.xlsx",
+            "period": "2",
+            "phase": "2.1"
+          },
+          "Scavo archeologico_1_4001": {
+            "name": "US 4001",
+            "description": "DosCo\\test1_1.graphml",
+            "us_number": "4001",
+            "site": "Scavo archeologico",
+            "area": "1",
+            "unit_type": "DOC",
+            "description_interp": "DosCo\\test1_1.graphml",
+            "excavation_year": "2022",
+            "period": "2",
+            "phase": "2.1"
+          }
+        },
+        "extractors": {
+          "Scavo archeologico_1_400": {
+            "name": "US 400",
+            "description": "bla bla bla",
+            "us_number": "400",
+            "site": "Scavo archeologico",
+            "area": "1",
+            "unit_type": "Extractor",
+            "description_interp": "bla bla bla",
+            "excavation_year": "2022",
+            "period": "2",
+            "phase": "2.1"
+          },
+          "Scavo archeologico_1_402": {
+            "name": "US 402",
+            "description": "hhhh",
+            "us_number": "402",
+            "site": "Scavo archeologico",
+            "area": "1",
+            "unit_type": "Extractor",
+            "description_interp": "hhhh",
+            "excavation_year": "2022",
+            "period": "2",
+            "phase": "3.1"
+          }
+        },
+        "combiners": {},
+        "links": {},
+        "geo": {}
+      },
+      "edges": {
+        "is_before": [
+          {
+            "from": "Scavo archeologico_1_1",
+            "to": "Scavo archeologico_1_2",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_1",
+            "to": "Scavo archeologico_1_8",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_2",
+            "to": "Scavo archeologico_1_1",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_2",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_2",
+            "to": "Scavo archeologico_1_7",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_2",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_5",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_6",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_9",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_10",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_11",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_12",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_14",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_3",
+            "to": "Scavo archeologico_1_16",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_9",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_11",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_5",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_17",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_19",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_20",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_23",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_25",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_27",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_21",
+            "stratigraphic_relation": "FILLS",
+            "relation_label": "Fills"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_6",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_13",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_4",
+            "to": "Scavo archeologico_1_15",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_5",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_5",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_5",
+            "to": "Scavo archeologico_1_17",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_5",
+            "to": "Scavo archeologico_1_29",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_5",
+            "to": "Scavo archeologico_1_32",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_5",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "LEANED_AGAINST_BY",
+            "relation_label": "Leaned Against By"
+          },
+          {
+            "from": "Scavo archeologico_1_5",
+            "to": "Scavo archeologico_1_6",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Scavo archeologico_1_5",
+            "to": "Scavo archeologico_1_28",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_6",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_6",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "LEANED_AGAINST_BY",
+            "relation_label": "Leaned Against By"
+          },
+          {
+            "from": "Scavo archeologico_1_6",
+            "to": "Scavo archeologico_1_5",
+            "stratigraphic_relation": "LEANED_AGAINST_BY",
+            "relation_label": "Leaned Against By"
+          },
+          {
+            "from": "Scavo archeologico_1_6",
+            "to": "Scavo archeologico_1_12",
+            "stratigraphic_relation": "LEANED_AGAINST_BY",
+            "relation_label": "Leaned Against By"
+          },
+          {
+            "from": "Scavo archeologico_1_6",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "LEANED_AGAINST_BY",
+            "relation_label": "Leaned Against By"
+          },
+          {
+            "from": "Scavo archeologico_1_6",
+            "to": "Scavo archeologico_1_32",
+            "stratigraphic_relation": "LEANED_AGAINST_BY",
+            "relation_label": "Leaned Against By"
+          },
+          {
+            "from": "Scavo archeologico_1_7",
+            "to": "Scavo archeologico_1_8",
+            "stratigraphic_relation": "FILLED_BY",
+            "relation_label": "Filled By"
+          },
+          {
+            "from": "Scavo archeologico_1_7",
+            "to": "Scavo archeologico_1_2",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_8",
+            "to": "Scavo archeologico_1_1",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_8",
+            "to": "Scavo archeologico_1_7",
+            "stratigraphic_relation": "FILLS",
+            "relation_label": "Fills"
+          },
+          {
+            "from": "Scavo archeologico_1_9",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_9",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_10",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_10",
+            "to": "Scavo archeologico_1_11",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_11",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_11",
+            "to": "Scavo archeologico_1_10",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_11",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_12",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_12",
+            "to": "Scavo archeologico_1_6",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Scavo archeologico_1_13",
+            "to": "Scavo archeologico_1_14",
+            "stratigraphic_relation": "FILLED_BY",
+            "relation_label": "Filled By"
+          },
+          {
+            "from": "Scavo archeologico_1_13",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_13",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_14",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_14",
+            "to": "Scavo archeologico_1_13",
+            "stratigraphic_relation": "FILLS",
+            "relation_label": "Fills"
+          },
+          {
+            "from": "Scavo archeologico_1_15",
+            "to": "Scavo archeologico_1_16",
+            "stratigraphic_relation": "FILLED_BY",
+            "relation_label": "Filled By"
+          },
+          {
+            "from": "Scavo archeologico_1_15",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_16",
+            "to": "Scavo archeologico_1_3",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_16",
+            "to": "Scavo archeologico_1_15",
+            "stratigraphic_relation": "FILLS",
+            "relation_label": "Fills"
+          },
+          {
+            "from": "Scavo archeologico_1_17",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_17",
+            "to": "Scavo archeologico_1_5",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_17",
+            "to": "Scavo archeologico_1_30",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_17",
+            "to": "Scavo archeologico_1_28",
+            "stratigraphic_relation": "FILLS",
+            "relation_label": "Fills"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_30",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_29",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_31",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_5",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_6",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_19",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_13",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_21",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_22",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_24",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_18",
+            "to": "Scavo archeologico_1_26",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_19",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_19",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "LEANED_AGAINST_BY",
+            "relation_label": "Leaned Against By"
+          },
+          {
+            "from": "Scavo archeologico_1_19",
+            "to": "Scavo archeologico_1_20",
+            "stratigraphic_relation": "LEANED_AGAINST_BY",
+            "relation_label": "Leaned Against By"
+          },
+          {
+            "from": "Scavo archeologico_1_20",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_20",
+            "to": "Scavo archeologico_1_19",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Scavo archeologico_1_21",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "FILLED_BY",
+            "relation_label": "Filled By"
+          },
+          {
+            "from": "Scavo archeologico_1_21",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_22",
+            "to": "Scavo archeologico_1_23",
+            "stratigraphic_relation": "FILLED_BY",
+            "relation_label": "Filled By"
+          },
+          {
+            "from": "Scavo archeologico_1_22",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_23",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_23",
+            "to": "Scavo archeologico_1_22",
+            "stratigraphic_relation": "FILLS",
+            "relation_label": "Fills"
+          },
+          {
+            "from": "Scavo archeologico_1_24",
+            "to": "Scavo archeologico_1_25",
+            "stratigraphic_relation": "FILLED_BY",
+            "relation_label": "Filled By"
+          },
+          {
+            "from": "Scavo archeologico_1_24",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_25",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_25",
+            "to": "Scavo archeologico_1_24",
+            "stratigraphic_relation": "FILLS",
+            "relation_label": "Fills"
+          },
+          {
+            "from": "Scavo archeologico_1_26",
+            "to": "Scavo archeologico_1_27",
+            "stratigraphic_relation": "FILLED_BY",
+            "relation_label": "Filled By"
+          },
+          {
+            "from": "Scavo archeologico_1_26",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_27",
+            "to": "Scavo archeologico_1_4",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_27",
+            "to": "Scavo archeologico_1_26",
+            "stratigraphic_relation": "FILLS",
+            "relation_label": "Fills"
+          },
+          {
+            "from": "Scavo archeologico_1_28",
+            "to": "Scavo archeologico_1_17",
+            "stratigraphic_relation": "FILLED_BY",
+            "relation_label": "Filled By"
+          },
+          {
+            "from": "Scavo archeologico_1_28",
+            "to": "Scavo archeologico_1_5",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_28",
+            "to": "Scavo archeologico_1_30",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_28",
+            "to": "Scavo archeologico_1_32",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_29",
+            "to": "Scavo archeologico_1_5",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_29",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_29",
+            "to": "Scavo archeologico_1_32",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_29",
+            "to": "Scavo archeologico_1_31",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_29",
+            "to": "Scavo archeologico_1_33",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_29",
+            "to": "Scavo archeologico_1_34",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_30",
+            "to": "Scavo archeologico_1_17",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_30",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_30",
+            "to": "Scavo archeologico_1_28",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_31",
+            "to": "Scavo archeologico_1_18",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_31",
+            "to": "Scavo archeologico_1_29",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_31",
+            "to": "Scavo archeologico_1_33",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_31",
+            "to": "Scavo archeologico_1_34",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_31",
+            "to": "Scavo archeologico_1_35",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_31",
+            "to": "Scavo archeologico_1_36",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_32",
+            "to": "Scavo archeologico_1_5",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_32",
+            "to": "Scavo archeologico_1_29",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_32",
+            "to": "Scavo archeologico_1_6",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Scavo archeologico_1_32",
+            "to": "Scavo archeologico_1_28",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_33",
+            "to": "Scavo archeologico_1_29",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_33",
+            "to": "Scavo archeologico_1_31",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_33",
+            "to": "Scavo archeologico_1_34",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_33",
+            "to": "Scavo archeologico_1_35",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_33",
+            "to": "Scavo archeologico_1_36",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_33",
+            "to": "Scavo archeologico_1_38",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_33",
+            "to": "Scavo archeologico_1_37",
+            "stratigraphic_relation": "FILLS",
+            "relation_label": "Fills"
+          },
+          {
+            "from": "Scavo archeologico_1_34",
+            "to": "Scavo archeologico_1_29",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_34",
+            "to": "Scavo archeologico_1_31",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_34",
+            "to": "Scavo archeologico_1_33",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_34",
+            "to": "Scavo archeologico_1_35",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_34",
+            "to": "Scavo archeologico_1_36",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_35",
+            "to": "Scavo archeologico_1_31",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_35",
+            "to": "Scavo archeologico_1_33",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_35",
+            "to": "Scavo archeologico_1_34",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_35",
+            "to": "Scavo archeologico_1_38",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_35",
+            "to": "Scavo archeologico_1_36",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Scavo archeologico_1_35",
+            "to": "Scavo archeologico_1_37",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_36",
+            "to": "Scavo archeologico_1_31",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_36",
+            "to": "Scavo archeologico_1_33",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_36",
+            "to": "Scavo archeologico_1_34",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_36",
+            "to": "Scavo archeologico_1_35",
+            "stratigraphic_relation": "LEANED_AGAINST_BY",
+            "relation_label": "Leaned Against By"
+          },
+          {
+            "from": "Scavo archeologico_1_36",
+            "to": "Scavo archeologico_1_38",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_36",
+            "to": "Scavo archeologico_1_39",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_36",
+            "to": "Scavo archeologico_1_37",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_37",
+            "to": "Scavo archeologico_1_33",
+            "stratigraphic_relation": "FILLED_BY",
+            "relation_label": "Filled By"
+          },
+          {
+            "from": "Scavo archeologico_1_37",
+            "to": "Scavo archeologico_1_35",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_37",
+            "to": "Scavo archeologico_1_36",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_37",
+            "to": "Scavo archeologico_1_38",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_37",
+            "to": "Scavo archeologico_1_39",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_38",
+            "to": "Scavo archeologico_1_33",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_38",
+            "to": "Scavo archeologico_1_35",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_38",
+            "to": "Scavo archeologico_1_39",
+            "stratigraphic_relation": "COVERED_BY",
+            "relation_label": "Covered By"
+          },
+          {
+            "from": "Scavo archeologico_1_38",
+            "to": "Scavo archeologico_1_36",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_38",
+            "to": "Scavo archeologico_1_37",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_39",
+            "to": "Scavo archeologico_1_38",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Scavo archeologico_1_39",
+            "to": "Scavo archeologico_1_36",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Scavo archeologico_1_39",
+            "to": "Scavo archeologico_1_37",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          }
+        ],
+        "has_same_time": [],
+        "has_data_provenance": [],
+        "has_author": [],
+        "has_first_epoch": [],
+        "survive_in_epoch": [],
+        "is_in_activity": [],
+        "has_property": [],
+        "has_timebranch": [],
+        "has_linked_resource": []
+      }
+    }
+  }
+}

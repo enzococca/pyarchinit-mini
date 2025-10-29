@@ -1,0 +1,1457 @@
+{
+  "version": "1.5",
+  "context": {
+    "absolute_time_Epochs": {
+      "epoch_01": {
+        "name": "Medievale",
+        "start": null,
+        "end": null,
+        "color": "#FFD700"
+      },
+      "epoch_02": {
+        "name": "Romano Imperiale",
+        "start": null,
+        "end": null,
+        "color": "#FF6347"
+      },
+      "epoch_03": {
+        "name": "Romano Repubblicano",
+        "start": null,
+        "end": null,
+        "color": "#4169E1"
+      }
+    }
+  },
+  "graphs": {
+    "Sito Archeologico di Esempio_stratigraphy": {
+      "id": "Sito Archeologico di Esempio_stratigraphy",
+      "name": "Sito Archeologico di Esempio Stratigraphy",
+      "description": "Stratigraphic graph exported from PyArchInit-Mini on 2025-10-25 17:59",
+      "defaults": {
+        "license": "CC-BY-NC-ND",
+        "authors": [
+          "pyarchinit_export_20251025"
+        ],
+        "embargo_until": null
+      },
+      "nodes": {
+        "authors": {},
+        "stratigraphic": {
+          "US": {
+            "geo_Sito Archeologico di Esempio_stratigraphy": {
+              "name": "geo_position",
+              "description": ""
+            },
+            "Sito Archeologico di Esempio_A_1001": {
+              "name": "US 1001",
+              "description": "Humus - Strato superficiale di humus",
+              "us_number": "1001",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Humus - Strato superficiale di humus",
+              "description_interp": "Interpretazione: superficial. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1002": {
+              "name": "US 1002",
+              "description": "Terreno arativo - Strato di aratura moderna",
+              "us_number": "1002",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Terreno arativo - Strato di aratura moderna",
+              "description_interp": "Interpretazione: topsoil. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1003": {
+              "name": "US 1003",
+              "description": "Crollo - Crollo di strutture murarie",
+              "us_number": "1003",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Crollo - Crollo di strutture murarie",
+              "description_interp": "Interpretazione: collapse. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1004": {
+              "name": "US 1004",
+              "description": "Pavimento - Superficie pavimentale",
+              "us_number": "1004",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Pavimento - Superficie pavimentale",
+              "description_interp": "Interpretazione: floor. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1005": {
+              "name": "US 1005",
+              "description": "Riempimento - Riempimento di fossa",
+              "us_number": "1005",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Riempimento - Riempimento di fossa",
+              "description_interp": "Interpretazione: fill. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1006": {
+              "name": "US 1006",
+              "description": "Muro - Struttura muraria",
+              "us_number": "1006",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "USM",
+              "description_strat": "Muro - Struttura muraria",
+              "description_interp": "Interpretazione: wall. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1007": {
+              "name": "US 1007",
+              "description": "Taglio - Interfaccia di taglio",
+              "us_number": "1007",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Taglio - Interfaccia di taglio",
+              "description_interp": "Interpretazione: cut. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1008": {
+              "name": "US 1008",
+              "description": "Deposito - Deposito archeologico",
+              "us_number": "1008",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Deposito - Deposito archeologico",
+              "description_interp": "Interpretazione: deposit. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1009": {
+              "name": "US 1009",
+              "description": "Distruzione - Livello di distruzione",
+              "us_number": "1009",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Distruzione - Livello di distruzione",
+              "description_interp": "Interpretazione: destruction. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1010": {
+              "name": "US 1010",
+              "description": "Costruzione - Livello di costruzione",
+              "us_number": "1010",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Costruzione - Livello di costruzione",
+              "description_interp": "Interpretazione: construction. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1011": {
+              "name": "US 1011",
+              "description": "Humus - Strato superficiale di humus",
+              "us_number": "1011",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Humus - Strato superficiale di humus",
+              "description_interp": "Interpretazione: superficial. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1012": {
+              "name": "US 1012",
+              "description": "Terreno arativo - Strato di aratura moderna",
+              "us_number": "1012",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Terreno arativo - Strato di aratura moderna",
+              "description_interp": "Interpretazione: topsoil. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1013": {
+              "name": "US 1013",
+              "description": "Crollo - Crollo di strutture murarie",
+              "us_number": "1013",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Crollo - Crollo di strutture murarie",
+              "description_interp": "Interpretazione: collapse. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1014": {
+              "name": "US 1014",
+              "description": "Pavimento - Superficie pavimentale",
+              "us_number": "1014",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Pavimento - Superficie pavimentale",
+              "description_interp": "Interpretazione: floor. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1015": {
+              "name": "US 1015",
+              "description": "Riempimento - Riempimento di fossa",
+              "us_number": "1015",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Riempimento - Riempimento di fossa",
+              "description_interp": "Interpretazione: fill. Contesto medievale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Medievale",
+              "phase": "Alto Medioevo"
+            },
+            "Sito Archeologico di Esempio_A_1016": {
+              "name": "US 1016",
+              "description": "Muro - Struttura muraria",
+              "us_number": "1016",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "USM",
+              "description_strat": "Muro - Struttura muraria",
+              "description_interp": "Interpretazione: wall. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1017": {
+              "name": "US 1017",
+              "description": "Taglio - Interfaccia di taglio",
+              "us_number": "1017",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Taglio - Interfaccia di taglio",
+              "description_interp": "Interpretazione: cut. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1018": {
+              "name": "US 1018",
+              "description": "Deposito - Deposito archeologico",
+              "us_number": "1018",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Deposito - Deposito archeologico",
+              "description_interp": "Interpretazione: deposit. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1019": {
+              "name": "US 1019",
+              "description": "Distruzione - Livello di distruzione",
+              "us_number": "1019",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Distruzione - Livello di distruzione",
+              "description_interp": "Interpretazione: destruction. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1020": {
+              "name": "US 1020",
+              "description": "Costruzione - Livello di costruzione",
+              "us_number": "1020",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Costruzione - Livello di costruzione",
+              "description_interp": "Interpretazione: construction. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1021": {
+              "name": "US 1021",
+              "description": "Humus - Strato superficiale di humus",
+              "us_number": "1021",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Humus - Strato superficiale di humus",
+              "description_interp": "Interpretazione: superficial. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1022": {
+              "name": "US 1022",
+              "description": "Terreno arativo - Strato di aratura moderna",
+              "us_number": "1022",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Terreno arativo - Strato di aratura moderna",
+              "description_interp": "Interpretazione: topsoil. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1023": {
+              "name": "US 1023",
+              "description": "Crollo - Crollo di strutture murarie",
+              "us_number": "1023",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Crollo - Crollo di strutture murarie",
+              "description_interp": "Interpretazione: collapse. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1024": {
+              "name": "US 1024",
+              "description": "Pavimento - Superficie pavimentale",
+              "us_number": "1024",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Pavimento - Superficie pavimentale",
+              "description_interp": "Interpretazione: floor. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1025": {
+              "name": "US 1025",
+              "description": "Riempimento - Riempimento di fossa",
+              "us_number": "1025",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Riempimento - Riempimento di fossa",
+              "description_interp": "Interpretazione: fill. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1026": {
+              "name": "US 1026",
+              "description": "Muro - Struttura muraria",
+              "us_number": "1026",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "USM",
+              "description_strat": "Muro - Struttura muraria",
+              "description_interp": "Interpretazione: wall. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1027": {
+              "name": "US 1027",
+              "description": "Taglio - Interfaccia di taglio",
+              "us_number": "1027",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Taglio - Interfaccia di taglio",
+              "description_interp": "Interpretazione: cut. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1028": {
+              "name": "US 1028",
+              "description": "Deposito - Deposito archeologico",
+              "us_number": "1028",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Deposito - Deposito archeologico",
+              "description_interp": "Interpretazione: deposit. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1029": {
+              "name": "US 1029",
+              "description": "Distruzione - Livello di distruzione",
+              "us_number": "1029",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Distruzione - Livello di distruzione",
+              "description_interp": "Interpretazione: destruction. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1030": {
+              "name": "US 1030",
+              "description": "Costruzione - Livello di costruzione",
+              "us_number": "1030",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Costruzione - Livello di costruzione",
+              "description_interp": "Interpretazione: construction. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1031": {
+              "name": "US 1031",
+              "description": "Humus - Strato superficiale di humus",
+              "us_number": "1031",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Humus - Strato superficiale di humus",
+              "description_interp": "Interpretazione: superficial. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1032": {
+              "name": "US 1032",
+              "description": "Terreno arativo - Strato di aratura moderna",
+              "us_number": "1032",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Terreno arativo - Strato di aratura moderna",
+              "description_interp": "Interpretazione: topsoil. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1033": {
+              "name": "US 1033",
+              "description": "Crollo - Crollo di strutture murarie",
+              "us_number": "1033",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Crollo - Crollo di strutture murarie",
+              "description_interp": "Interpretazione: collapse. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1034": {
+              "name": "US 1034",
+              "description": "Pavimento - Superficie pavimentale",
+              "us_number": "1034",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Pavimento - Superficie pavimentale",
+              "description_interp": "Interpretazione: floor. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1035": {
+              "name": "US 1035",
+              "description": "Riempimento - Riempimento di fossa",
+              "us_number": "1035",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Riempimento - Riempimento di fossa",
+              "description_interp": "Interpretazione: fill. Contesto romano imperiale.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Imperiale",
+              "phase": "Alto Impero"
+            },
+            "Sito Archeologico di Esempio_A_1036": {
+              "name": "US 1036",
+              "description": "Muro - Struttura muraria",
+              "us_number": "1036",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "USM",
+              "description_strat": "Muro - Struttura muraria",
+              "description_interp": "Interpretazione: wall. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1037": {
+              "name": "US 1037",
+              "description": "Taglio - Interfaccia di taglio",
+              "us_number": "1037",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Taglio - Interfaccia di taglio",
+              "description_interp": "Interpretazione: cut. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1038": {
+              "name": "US 1038",
+              "description": "Deposito - Deposito archeologico",
+              "us_number": "1038",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Deposito - Deposito archeologico",
+              "description_interp": "Interpretazione: deposit. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1039": {
+              "name": "US 1039",
+              "description": "Distruzione - Livello di distruzione",
+              "us_number": "1039",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Distruzione - Livello di distruzione",
+              "description_interp": "Interpretazione: destruction. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1040": {
+              "name": "US 1040",
+              "description": "Costruzione - Livello di costruzione",
+              "us_number": "1040",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Costruzione - Livello di costruzione",
+              "description_interp": "Interpretazione: construction. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1041": {
+              "name": "US 1041",
+              "description": "Humus - Strato superficiale di humus",
+              "us_number": "1041",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Humus - Strato superficiale di humus",
+              "description_interp": "Interpretazione: superficial. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1042": {
+              "name": "US 1042",
+              "description": "Terreno arativo - Strato di aratura moderna",
+              "us_number": "1042",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Terreno arativo - Strato di aratura moderna",
+              "description_interp": "Interpretazione: topsoil. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1043": {
+              "name": "US 1043",
+              "description": "Crollo - Crollo di strutture murarie",
+              "us_number": "1043",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Crollo - Crollo di strutture murarie",
+              "description_interp": "Interpretazione: collapse. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1044": {
+              "name": "US 1044",
+              "description": "Pavimento - Superficie pavimentale",
+              "us_number": "1044",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Pavimento - Superficie pavimentale",
+              "description_interp": "Interpretazione: floor. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1045": {
+              "name": "US 1045",
+              "description": "Riempimento - Riempimento di fossa",
+              "us_number": "1045",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Riempimento - Riempimento di fossa",
+              "description_interp": "Interpretazione: fill. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1046": {
+              "name": "US 1046",
+              "description": "Muro - Struttura muraria",
+              "us_number": "1046",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "USM",
+              "description_strat": "Muro - Struttura muraria",
+              "description_interp": "Interpretazione: wall. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1047": {
+              "name": "US 1047",
+              "description": "Taglio - Interfaccia di taglio",
+              "us_number": "1047",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Taglio - Interfaccia di taglio",
+              "description_interp": "Interpretazione: cut. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1048": {
+              "name": "US 1048",
+              "description": "Deposito - Deposito archeologico",
+              "us_number": "1048",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Deposito - Deposito archeologico",
+              "description_interp": "Interpretazione: deposit. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "No",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1049": {
+              "name": "US 1049",
+              "description": "Distruzione - Livello di distruzione",
+              "us_number": "1049",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Distruzione - Livello di distruzione",
+              "description_interp": "Interpretazione: destruction. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Parzialmente",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            },
+            "Sito Archeologico di Esempio_A_1050": {
+              "name": "US 1050",
+              "description": "Costruzione - Livello di costruzione",
+              "us_number": "1050",
+              "site": "Sito Archeologico di Esempio",
+              "area": "A",
+              "unit_type": "US",
+              "description_strat": "Costruzione - Livello di costruzione",
+              "description_interp": "Interpretazione: construction. Contesto romano repubblicano.",
+              "excavation_year": "2024",
+              "excavated": "Sì",
+              "period": "Romano Repubblicano",
+              "phase": "Tardo Repubblicano"
+            }
+          },
+          "USVs": {},
+          "SF": {}
+        },
+        "epochs": {},
+        "groups": {},
+        "properties": {},
+        "documents": {},
+        "extractors": {},
+        "combiners": {},
+        "links": {},
+        "geo": {}
+      },
+      "edges": {
+        "is_before": [
+          {
+            "from": "Sito Archeologico di Esempio_A_1001",
+            "to": "Sito Archeologico di Esempio_A_1002",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1001",
+            "to": "Sito Archeologico di Esempio_A_1005",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1002",
+            "to": "Sito Archeologico di Esempio_A_1003",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1002",
+            "to": "Sito Archeologico di Esempio_A_1001",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1003",
+            "to": "Sito Archeologico di Esempio_A_1004",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1004",
+            "to": "Sito Archeologico di Esempio_A_1005",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1004",
+            "to": "Sito Archeologico di Esempio_A_1006",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1005",
+            "to": "Sito Archeologico di Esempio_A_1006",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1005",
+            "to": "Sito Archeologico di Esempio_A_1007",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1005",
+            "to": "Sito Archeologico di Esempio_A_1008",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1006",
+            "to": "Sito Archeologico di Esempio_A_1007",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1007",
+            "to": "Sito Archeologico di Esempio_A_1008",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1008",
+            "to": "Sito Archeologico di Esempio_A_1009",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1008",
+            "to": "Sito Archeologico di Esempio_A_1010",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1008",
+            "to": "Sito Archeologico di Esempio_A_1011",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1009",
+            "to": "Sito Archeologico di Esempio_A_1010",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1009",
+            "to": "Sito Archeologico di Esempio_A_1011",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1010",
+            "to": "Sito Archeologico di Esempio_A_1011",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1010",
+            "to": "Sito Archeologico di Esempio_A_1009",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1011",
+            "to": "Sito Archeologico di Esempio_A_1012",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1011",
+            "to": "Sito Archeologico di Esempio_A_1013",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1011",
+            "to": "Sito Archeologico di Esempio_A_1014",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1012",
+            "to": "Sito Archeologico di Esempio_A_1013",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1013",
+            "to": "Sito Archeologico di Esempio_A_1014",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1013",
+            "to": "Sito Archeologico di Esempio_A_1015",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1013",
+            "to": "Sito Archeologico di Esempio_A_1016",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1013",
+            "to": "Sito Archeologico di Esempio_A_1012",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1014",
+            "to": "Sito Archeologico di Esempio_A_1015",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1014",
+            "to": "Sito Archeologico di Esempio_A_1016",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1014",
+            "to": "Sito Archeologico di Esempio_A_1017",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1014",
+            "to": "Sito Archeologico di Esempio_A_1018",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1015",
+            "to": "Sito Archeologico di Esempio_A_1016",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1015",
+            "to": "Sito Archeologico di Esempio_A_1017",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1015",
+            "to": "Sito Archeologico di Esempio_A_1018",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1016",
+            "to": "Sito Archeologico di Esempio_A_1017",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1016",
+            "to": "Sito Archeologico di Esempio_A_1017",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1017",
+            "to": "Sito Archeologico di Esempio_A_1018",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1017",
+            "to": "Sito Archeologico di Esempio_A_1019",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1017",
+            "to": "Sito Archeologico di Esempio_A_1020",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1018",
+            "to": "Sito Archeologico di Esempio_A_1019",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1018",
+            "to": "Sito Archeologico di Esempio_A_1017",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1019",
+            "to": "Sito Archeologico di Esempio_A_1020",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1019",
+            "to": "Sito Archeologico di Esempio_A_1021",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1019",
+            "to": "Sito Archeologico di Esempio_A_1022",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1020",
+            "to": "Sito Archeologico di Esempio_A_1021",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1020",
+            "to": "Sito Archeologico di Esempio_A_1023",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1021",
+            "to": "Sito Archeologico di Esempio_A_1022",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1021",
+            "to": "Sito Archeologico di Esempio_A_1023",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1021",
+            "to": "Sito Archeologico di Esempio_A_1024",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1021",
+            "to": "Sito Archeologico di Esempio_A_1024",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1022",
+            "to": "Sito Archeologico di Esempio_A_1023",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1022",
+            "to": "Sito Archeologico di Esempio_A_1024",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1023",
+            "to": "Sito Archeologico di Esempio_A_1024",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1023",
+            "to": "Sito Archeologico di Esempio_A_1025",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1023",
+            "to": "Sito Archeologico di Esempio_A_1026",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1024",
+            "to": "Sito Archeologico di Esempio_A_1025",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1024",
+            "to": "Sito Archeologico di Esempio_A_1026",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1024",
+            "to": "Sito Archeologico di Esempio_A_1027",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1025",
+            "to": "Sito Archeologico di Esempio_A_1026",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1026",
+            "to": "Sito Archeologico di Esempio_A_1027",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1026",
+            "to": "Sito Archeologico di Esempio_A_1028",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1026",
+            "to": "Sito Archeologico di Esempio_A_1029",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1026",
+            "to": "Sito Archeologico di Esempio_A_1027",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1027",
+            "to": "Sito Archeologico di Esempio_A_1028",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1028",
+            "to": "Sito Archeologico di Esempio_A_1029",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1029",
+            "to": "Sito Archeologico di Esempio_A_1030",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1029",
+            "to": "Sito Archeologico di Esempio_A_1028",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1029",
+            "to": "Sito Archeologico di Esempio_A_1033",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1030",
+            "to": "Sito Archeologico di Esempio_A_1031",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1031",
+            "to": "Sito Archeologico di Esempio_A_1032",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1031",
+            "to": "Sito Archeologico di Esempio_A_1033",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1031",
+            "to": "Sito Archeologico di Esempio_A_1034",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1031",
+            "to": "Sito Archeologico di Esempio_A_1030",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1032",
+            "to": "Sito Archeologico di Esempio_A_1033",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1032",
+            "to": "Sito Archeologico di Esempio_A_1034",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1032",
+            "to": "Sito Archeologico di Esempio_A_1035",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1032",
+            "to": "Sito Archeologico di Esempio_A_1036",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1033",
+            "to": "Sito Archeologico di Esempio_A_1034",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1033",
+            "to": "Sito Archeologico di Esempio_A_1034",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1034",
+            "to": "Sito Archeologico di Esempio_A_1035",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1034",
+            "to": "Sito Archeologico di Esempio_A_1036",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1034",
+            "to": "Sito Archeologico di Esempio_A_1037",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1035",
+            "to": "Sito Archeologico di Esempio_A_1036",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1035",
+            "to": "Sito Archeologico di Esempio_A_1037",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1035",
+            "to": "Sito Archeologico di Esempio_A_1038",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1036",
+            "to": "Sito Archeologico di Esempio_A_1037",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1036",
+            "to": "Sito Archeologico di Esempio_A_1038",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1036",
+            "to": "Sito Archeologico di Esempio_A_1035",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1036",
+            "to": "Sito Archeologico di Esempio_A_1039",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1037",
+            "to": "Sito Archeologico di Esempio_A_1038",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1037",
+            "to": "Sito Archeologico di Esempio_A_1039",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1037",
+            "to": "Sito Archeologico di Esempio_A_1040",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1038",
+            "to": "Sito Archeologico di Esempio_A_1039",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1038",
+            "to": "Sito Archeologico di Esempio_A_1040",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1039",
+            "to": "Sito Archeologico di Esempio_A_1040",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1040",
+            "to": "Sito Archeologico di Esempio_A_1041",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1040",
+            "to": "Sito Archeologico di Esempio_A_1042",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1040",
+            "to": "Sito Archeologico di Esempio_A_1043",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1041",
+            "to": "Sito Archeologico di Esempio_A_1042",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1041",
+            "to": "Sito Archeologico di Esempio_A_1043",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1041",
+            "to": "Sito Archeologico di Esempio_A_1044",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1041",
+            "to": "Sito Archeologico di Esempio_A_1040",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1042",
+            "to": "Sito Archeologico di Esempio_A_1043",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1042",
+            "to": "Sito Archeologico di Esempio_A_1044",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1042",
+            "to": "Sito Archeologico di Esempio_A_1044",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1043",
+            "to": "Sito Archeologico di Esempio_A_1044",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1044",
+            "to": "Sito Archeologico di Esempio_A_1045",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1044",
+            "to": "Sito Archeologico di Esempio_A_1046",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1044",
+            "to": "Sito Archeologico di Esempio_A_1047",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1044",
+            "to": "Sito Archeologico di Esempio_A_1043",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1045",
+            "to": "Sito Archeologico di Esempio_A_1046",
+            "stratigraphic_relation": "COVERS",
+            "relation_label": "Covers"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1045",
+            "to": "Sito Archeologico di Esempio_A_1044",
+            "stratigraphic_relation": "LEANS_AGAINST",
+            "relation_label": "Leans Against"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1045",
+            "to": "Sito Archeologico di Esempio_A_1048",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          },
+          {
+            "from": "Sito Archeologico di Esempio_A_1046",
+            "to": "Sito Archeologico di Esempio_A_1047",
+            "stratigraphic_relation": "CUTS",
+            "relation_label": "Cuts"
+          }
+        ],
+        "has_same_time": [],
+        "has_data_provenance": [],
+        "has_author": [],
+        "has_first_epoch": [],
+        "survive_in_epoch": [],
+        "is_in_activity": [],
+        "has_property": [],
+        "has_timebranch": [],
+        "has_linked_resource": []
+      }
+    }
+  }
+}

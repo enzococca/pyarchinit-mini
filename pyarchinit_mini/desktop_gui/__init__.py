@@ -5,7 +5,7 @@ This package provides a complete Tkinter-based desktop interface for
 archaeological data management including:
 
 - Site management
-- Stratigraphic units (US) management
+- Stratigraphic units (US) management  
 - Inventory management
 - Harris Matrix generation and visualization
 - PDF export capabilities
@@ -25,7 +25,7 @@ Or run directly:
     python desktop_gui/gui_app.py
 """
 
-from pyarchinit_mini import __version__
+__version__ = "0.1.0"
 __author__ = "PyArchInit Team"
 
 # Import main classes for easier access

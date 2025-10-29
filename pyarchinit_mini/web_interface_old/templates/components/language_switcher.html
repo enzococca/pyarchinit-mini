@@ -1,0 +1,47 @@
+<!-- Language Switcher Component -->
+<div class="language-switcher ms-3">
+    <div class="btn-group" role="group" aria-label="Language selector">
+        {% set current_lang = get_locale() %}
+
+        {# Build query string with all current params except lang #}
+        {% set query_params = [] %}
+        {% for key, value in request.args.items() %}
+            {% if key != 'lang' %}
+                {% set _ = query_params.append(key ~ '=' ~ value) %}
+            {% endif %}
+        {% endfor %}
+
+        {# Build URLs #}
+        {% if query_params %}
+            {% set base_query = '?' ~ query_params|join('&') %}
+            {% set it_url = request.path ~ base_query ~ '&lang=it' %}
+            {% set en_url = request.path ~ base_query ~ '&lang=en' %}
+        {% else %}
+            {% set it_url = request.path ~ '?lang=it' %}
+            {% set en_url = request.path ~ '?lang=en' %}
+        {% endif %}
+
+        <a href="{{ it_url }}"
+           class="btn btn-sm {% if current_lang == 'it' %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+           title="Italiano">
+            🇮🇹 IT
+        </a>
+
+        <a href="{{ en_url }}"
+           class="btn btn-sm {% if current_lang == 'en' %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+           title="English">
+            🇬🇧 EN
+        </a>
+    </div>
+</div>
+
+<style>
+.language-switcher .btn {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.language-switcher .btn:hover {
+    text-decoration: none;
+}
+</style>

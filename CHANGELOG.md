@@ -5,6 +5,21 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.12] - 2025-10-29
+
+### Fixed - CRITICAL
+- **Desktop GUI**: Synchronized all files with actively developed version
+  - Added missing `assets/` folder with GUI assets
+  - Updated `__init__.py`, `graphml_export_dialog.py`, `i18n.py`
+  - Updated `media_manager_advanced.py`, `us_dialog_extended.py`
+  - All Desktop GUI features now match latest development version
+
+### Impact
+- Desktop GUI was missing critical files (assets folder and 5+ Python files)
+- Systematic comparison revealed archive_local contained most complete versions
+- All interface directories (Web, CLI, Desktop GUI) now fully synchronized
+- Package now contains complete, up-to-date code for all interfaces
+
 ## [1.7.10] - 2025-10-29
 
 ### Fixed - CRITICAL

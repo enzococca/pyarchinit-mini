@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Harris Matrix Editor - {{ site_name }} - PyArchInit-Mini{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Editor Layout */
+#editor-container {
+    display: flex;
+    height: calc(100vh - 150px);
+    gap: 10px;
+}
+
+/* Toolbar */
+#toolbar {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    width: 300px;
+    overflow-y: auto;
+}
+
+/* Canvas */
+#cy-canvas {
+    flex: 1;
+    background: #ffffff;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    position: relative;
+}
+
+/* Cytoscape container */
+#cy {
+    width: 100%;
+    height: 100%;
+}
+
+/* Node Type Buttons */
+.node-type-btn {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    padding: 8px 12px;
+}
+
+/* Relationship Type Select */
+#relationshipType {
+    width: 100%;
+}
+
+/* Properties Panel */
+#properties-panel {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    width: 300px;
+    overflow-y: auto;
+}
+
+.property-field {
+    margin-bottom: 10px;
+}
+
+.property-field label {
+    font-weight: 600;
+    font-size: 0.9em;
+    margin-bottom: 3px;
+    display: block;
+}
+
+.property-field input,
+.property-field select,
+.property-field textarea {
+    width: 100%;
+    font-size: 0.9em;
+}
+
+/* Mode indicator */
+#mode-indicator {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: 2px solid #007bff;
+    font-weight: 600;
+}
+
+#mode-indicator.edge-mode {
+    border-color: #28a745;
+}
+
+/* Canvas controls */
+#canvas-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+#canvas-controls button {
+    margin-left: 5px;
+}
+
+/* Legend */
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 0.85em;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #333;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+/* Help text */
+.help-text {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 5px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+        <div>
+            <h1 class="h4 mb-1">
+                <i class="fas fa-project-diagram"></i> Harris Matrix Editor
+            </h1>
+            <small class="text-muted">
+                Site: <strong>{{ site_name }}</strong>
+                <span class="mx-2">|</span>
+                Mode: <strong id="current-mode">{{ mode|capitalize }}</strong>
+            </small>
+        </div>
+        <div>
+            <button class="btn btn-success btn-sm" id="save-btn" title="Save to database">
+                <i class="fas fa-save"></i> Save
+            </button>
+            <button class="btn btn-info btn-sm" id="export-graphml-btn" title="Export to GraphML">
+                <i class="fas fa-download"></i> GraphML
+            </button>
+            <button class="btn btn-secondary btn-sm" id="export-dot-btn" title="Export to DOT">
+                <i class="fas fa-download"></i> DOT
+            </button>
+            <a href="{{ url_for('harris_creator.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Editor Layout -->
+    <div id="editor-container" class="mt-3">
+        <!-- Left Toolbar -->
+        <div id="toolbar">
+            <h6 class="mb-3"><i class="fas fa-tools"></i> Tools</h6>
+
+            <!-- Mode Selection -->
+            <div class="mb-4">
+                <h6 class="text-muted mb-2">Mode</h6>
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="editorMode" id="nodeMode" value="node" checked>
+                    <label class="btn btn-outline-primary btn-sm" for="nodeMode">
+                        <i class="fas fa-square"></i> Nodes
+                    </label>
+
+                    <input type="radio" class="btn-check" name="editorMode" id="edgeMode" value="edge">
+                    <label class="btn btn-outline-success btn-sm" for="edgeMode">
+                        <i class="fas fa-arrow-right"></i> Edges
+                    </label>
+                </div>
+                <p class="help-text mt-2">
+                    <strong>Node Mode:</strong> Click on canvas to add nodes<br>
+                    <strong>Edge Mode:</strong> Click source then target node
+                </p>
+            </div>
+
+            <!-- Node Type Selection (shown in node mode) -->
+            <div id="node-tools" class="mb-4">
+                <h6 class="text-muted mb-2">Node Type</h6>
+                <div id="node-type-buttons">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Relationship Type Selection (shown in edge mode) -->
+            <div id="edge-tools" class="mb-4" style="display: none;">
+                <h6 class="text-muted mb-2">Relationship Type</h6>
+                <select id="relationshipType" class="form-select form-select-sm">
+                    <!-- Will be populated by JavaScript -->
+                </select>
+                <p class="help-text mt-2">
+                    Select relationship type, then click source node and target node to create connection.
+                </p>
+            </div>
+
+            <!-- Legend -->
+            <div class="mb-3">
+                <h6 class="text-muted mb-2">Legend</h6>
+                <div id="node-legend">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div>
+                <h6 class="text-muted mb-2">Actions</h6>
+                <button class="btn btn-sm btn-outline-danger w-100 mb-2" id="delete-selected-btn">
+                    <i class="fas fa-trash"></i> Delete Selected
+                </button>
+                <button class="btn btn-sm btn-outline-warning w-100 mb-2" id="clear-all-btn">
+                    <i class="fas fa-eraser"></i> Clear All
+                </button>
+                <button class="btn btn-sm btn-outline-secondary w-100" id="layout-btn">
+                    <i class="fas fa-sitemap"></i> Auto Layout
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas -->
+        <div id="cy-canvas">
+            <!-- Mode Indicator -->
+            <div id="mode-indicator">
+                <i class="fas fa-square"></i> Node Mode
+            </div>
+
+            <!-- Cytoscape Canvas -->
+            <div id="cy"></div>
+
+            <!-- Canvas Controls -->
+            <div id="canvas-controls">
+                <button class="btn btn-sm btn-light" id="zoom-in-btn" title="Zoom In">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="btn btn-sm btn-light" id="zoom-out-btn" title="Zoom Out">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button class="btn btn-sm btn-light" id="fit-btn" title="Fit to Screen">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Properties Panel -->
+        <div id="properties-panel">
+            <h6 class="mb-3"><i class="fas fa-cog"></i> Properties</h6>
+
+            <div id="no-selection" class="text-center text-muted py-5">
+                <i class="fas fa-hand-pointer fa-3x mb-3"></i>
+                <p>Select a node or edge to edit its properties</p>
+            </div>
+
+            <div id="node-properties" style="display: none;">
+                <h6 class="text-primary mb-3">Node Properties</h6>
+
+                <div class="property-field">
+                    <label>US Number *</label>
+                    <input type="text" class="form-control form-control-sm" id="prop-us-number" required>
+                </div>
+
+                <div class="property-field">
+                    <label>Unit Type</label>
+                    <select class="form-select form-select-sm" id="prop-unit-type">
+                        <!-- Will be populated -->
+                    </select>
+                </div>
+
+                <div class="property-field">
+                    <label>Description</label>
+                    <textarea class="form-control form-control-sm" id="prop-description" rows="2"></textarea>
+                </div>
+
+                <div class="property-field">
+                    <label>Area</label>
+                    <input type="text" class="form-control form-control-sm" id="prop-area"
+                           placeholder="e.g., Area A, Trench 1">
+                </div>
+
+                <div class="property-field">
+                    <label>Period</label>
+                    <select class="form-select form-select-sm" id="prop-period">
+                        <option value="">-- Select Period --</option>
+                        <!-- Will be populated by JavaScript -->
+                    </select>
+                </div>
+
+                <div class="property-field">
+                    <label>Phase</label>
+                    <select class="form-select form-select-sm" id="prop-phase">
+                        <option value="">-- Select Phase --</option>
+                        <!-- Will be populated based on selected period -->
+                    </select>
+                </div>
+
+                <div class="property-field">
+                    <label>Datazione <small class="text-muted">(from periodizzazione)</small></label>
+                    <input type="text" class="form-control form-control-sm" id="prop-datazione"
+                           placeholder="Es: Età contemporanea / Età contemporanea" readonly>
+                </div>
+
+                <div class="property-field" id="file-path-field" style="display: none;">
+                    <label>File Path <small class="text-muted">(for DOC type)</small></label>
+                    <input type="text" class="form-control form-control-sm" id="prop-file-path"
+                           placeholder="docs/plan.pdf">
+                </div>
+
+                <button class="btn btn-sm btn-primary w-100 mt-3" id="apply-node-props-btn">
+                    <i class="fas fa-check"></i> Apply Changes
+                </button>
+            </div>
+
+            <div id="edge-properties" style="display: none;">
+                <h6 class="text-success mb-3">Edge Properties</h6>
+
+                <div class="property-field">
+                    <label>From US</label>
+                    <input type="text" class="form-control form-control-sm" id="prop-from-us" readonly>
+                </div>
+
+                <div class="property-field">
+                    <label>To US</label>
+                    <input type="text" class="form-control form-control-sm" id="prop-to-us" readonly>
+                </div>
+
+                <div class="property-field">
+                    <label>Relationship Type</label>
+                    <select class="form-select form-select-sm" id="prop-relationship-type">
+                        <!-- Will be populated -->
+                    </select>
+                </div>
+
+                <button class="btn btn-sm btn-primary w-100 mt-3" id="apply-edge-props-btn">
+                    <i class="fas fa-check"></i> Apply Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data -->
+<input type="hidden" id="site-name" value="{{ site_name }}">
+<input type="hidden" id="existing-nodes" value="{{ existing_nodes }}">
+<input type="hidden" id="existing-relationships" value="{{ existing_relationships }}">
+{% endblock %}
+
+{% block extra_js %}
+<!-- Cytoscape.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+
+<!-- Dagre layout for hierarchical graphs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+
+<!-- ELK layout for orthogonal edges -->
+<script src="https://cdn.jsdelivr.net/npm/elkjs@0.8.2/lib/elk.bundled.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-elk@2.1.0/cytoscape-elk.js"></script>
+
+<!-- Editor JavaScript -->
+<script src="{{ url_for('static', filename='js/harris_creator_editor.js') }}"></script>
+{% endblock %}
