@@ -96,6 +96,28 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **Multi-Interface Support**: Available in both Web UI (Chart.js) and Desktop GUI (matplotlib)
 - **Real-Time Data**: Charts update automatically with current database state
 
+---
+
+## 🆕 What's New in v1.7.13 (2025-10-29)
+
+### Unified Version Management
+All interfaces now display the same version number dynamically from a single source:
+- **Web Interface**: Dashboard and login pages show v1.7.13
+- **Desktop GUI**: Main window displays v1.7.13
+- **CLI**: `--version` flag shows v1.7.13
+- **REST API**: Version endpoint returns v1.7.13
+
+### Complete Web GUI Documentation
+- **New Tutorial**: Comprehensive [Web GUI Tutorial](docs/WEB_GUI_TUTORIAL.md) with 63 screenshots
+- **Visual Guide**: Step-by-step walkthrough of all features and forms
+- **Complete Coverage**: Login, Dashboard, Sites, US (6 tabs), Inventario (8 tabs), Harris Matrix, Analytics, Validation, and Administration
+- **Best Practices**: Workflow recommendations and troubleshooting guide
+
+### Version Consistency
+Fixed hardcoded version strings across all interfaces to use centralized `__version__` from main package, ensuring consistent versioning across Web, Desktop GUI, CLI, and API.
+
+---
+
 ### 🔄 Extended Matrix Framework & GraphML Export (v1.3.0+)
 Complete implementation of Extended Matrix Framework with GraphML export for yEd Graph Editor, including PyArchInit-compatible edge styling and DOT-based workflow.
 
