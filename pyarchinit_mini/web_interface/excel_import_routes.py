@@ -9,14 +9,10 @@ from flask import Blueprint, render_template, request, jsonify, session, current
 from flask_babel import gettext as _
 from werkzeug.utils import secure_filename
 import os
-import sys
 import tempfile
 import logging
 from pathlib import Path
 from typing import Dict, Any
-
-# Add parent directory to path for imports
-sys.path.append('..')
 
 logger = logging.getLogger(__name__)
 

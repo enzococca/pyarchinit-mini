@@ -19,8 +19,6 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 import json
 import os
-import sys
-sys.path.append('..')
 
 from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
 from pyarchinit_mini.config.em_node_config_manager import get_config_manager

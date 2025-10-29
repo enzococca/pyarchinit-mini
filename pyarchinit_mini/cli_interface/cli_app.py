@@ -16,7 +16,6 @@ from datetime import datetime
 # Add parent directory to path for imports
 sys.path.append('..')
 
-from pyarchinit_mini import __version__
 from pyarchinit_mini.database.connection import DatabaseConnection
 from pyarchinit_mini.database.manager import DatabaseManager
 from pyarchinit_mini.services.site_service import SiteService
@@ -52,28 +51,14 @@ class PyArchInitCLI:
     
     def show_welcome(self):
         """Show welcome screen"""
-        logo_art = """
-    ╔═══════════════════════════════════════════╗
-    ║          ┌─┐                              ║
-    ║          │ │  ┌─┐┬ ┬                     ║
-    ║          ├─┘  │─┘└┬┘                     ║
-    ║          │    │   └┘                      ║
-    ║      ╔═══════════════════════╗            ║
-    ║      ║ PyArchInit-Mini v1.2.12 ║           ║
-    ║      ╚═══════════════════════╝            ║
-    ╚═══════════════════════════════════════════╝
+        welcome_text = """
+🏛️  [bold blue]PyArchInit-Mini CLI[/bold blue]
+Archaeological Data Management System
+
+Gestione dati archeologici via interfaccia a riga di comando
         """
         
-        welcome_text = f"""
-{logo_art}
-
-[bold blue]Archaeological Data Management System[/bold blue]
-[dim]Lightweight, Multi-Interface, Open Source[/dim]
-
-[yellow]Gestione dati archeologici via interfaccia a riga di comando[/yellow]
-        """
-        
-        self.console.print(Panel(welcome_text, title="PyArchInit-Mini", border_style="blue", expand=False))
+        self.console.print(Panel(welcome_text, title="Benvenuto", border_style="blue"))
     
     def show_main_menu(self):
         """Show main menu and handle selection"""
@@ -390,14 +375,45 @@ class PyArchInitCLI:
                     
                     # Ask for export
                     if Confirm.ask("Vuoi esportare la matrix?"):
+                        # Ask for format
+                        self.console.print("\n[bold]FORMATO EXPORT:[/bold]")
+                        self.console.print("1. PNG/SVG/HTML (visualizzazione)")
+                        self.console.print("2. GraphML (yEd - Extended Matrix)")
+                        self.console.print("3. Entrambi")
+
+                        export_choice = Prompt.ask("Seleziona formato", choices=["1","2","3"], default="3")
+
                         filename = f"harris_matrix_{site_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                        
-                        with self.console.status("[bold green]Esportando matrix..."):
-                            exports = self.matrix_visualizer.export_to_formats(graph, levels, filename)
-                        
-                        self.console.print(f"[green]✅ Matrix esportata in: {', '.join(exports.keys())}[/green]")
-                        for format_type, path in exports.items():
-                            self.console.print(f"  {format_type}: {path}")
+                        exports = {}
+
+                        # Export PNG/SVG/HTML
+                        if export_choice in ["1", "3"]:
+                            with self.console.status("[bold green]Esportando matrix (PNG/SVG/HTML)..."):
+                                viz_exports = self.matrix_visualizer.export_to_formats(graph, levels, filename)
+                                exports.update(viz_exports)
+
+                        # Export GraphML
+                        if export_choice in ["2", "3"]:
+                            with self.console.status("[bold green]Esportando matrix (GraphML)..."):
+                                graphml_path = f"{filename}.graphml"
+                                result = self.matrix_generator.export_to_graphml(
+                                    graph=graph,
+                                    output_path=graphml_path,
+                                    site_name=site_name,
+                                    title=site_name,
+                                    use_extended_labels=True,
+                                    include_periods=True,
+                                    reverse_epochs=False
+                                )
+                                if result:
+                                    exports['graphml'] = result
+
+                        if exports:
+                            self.console.print(f"[green]✅ Matrix esportata in: {', '.join(exports.keys())}[/green]")
+                            for format_type, path in exports.items():
+                                self.console.print(f"  {format_type}: {path}")
+                        else:
+                            self.console.print("[red]❌ Errore durante l'export[/red]")
                 
             except (ValueError, IndexError):
                 self.console.print("[red]Selezione non valida[/red]")
@@ -501,9 +517,8 @@ def main(database_url, version):
     """PyArchInit-Mini Interactive CLI"""
     
     if version:
-        console.print(f"[bold blue]PyArchInit-Mini CLI v{__version__}[/bold blue]")
+        console.print("[bold blue]PyArchInit-Mini CLI v0.1.0[/bold blue]")
         console.print("Archaeological Data Management System")
-        console.print("© 2025 PyArchInit Team - GPL v2 License")
         return
     
     cli = PyArchInitCLI(database_url)

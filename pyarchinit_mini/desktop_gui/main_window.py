@@ -27,8 +27,7 @@ from pyarchinit_mini.pdf_export.pdf_generator import PDFGenerator
 from pyarchinit_mini.media_manager.media_handler import MediaHandler
 
 # Import i18n
-from .i18n import _, get_i18n
-from pyarchinit_mini.i18n.locale_manager import LocaleManager
+from .i18n import _
 
 # Import dialog classes
 from .dialogs import (
@@ -47,6 +46,8 @@ from .postgres_installer_dialog import PostgreSQLInstallerDialog
 from .export_import_dialog import show_export_import_dialog
 from .analytics_dialog import show_analytics_dialog
 from .graphml_export_dialog import show_graphml_export_dialog
+from .pyarchinit_import_export_dialog import PyArchInitImportExportDialog
+from .excel_import_dialog import ExcelImportDialog
 
 class PyArchInitGUI:
     """Main GUI application for PyArchInit-Mini"""
@@ -57,20 +58,20 @@ class PyArchInitGUI:
         self.root.title(_("PyArchInit-Mini - Archaeological Data Management"))
         self.root.geometry("1200x800")
         self.root.minsize(1000, 600)
-        
-        # Try to set window icon
-        try:
-            import os
-            logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'docs', '_static', 'images', 'pyarchinit-mini-logo.png')
-            if os.path.exists(logo_path):
-                icon = tk.PhotoImage(file=logo_path)
-                self.root.iconphoto(True, icon)
-        except Exception:
-            # If icon loading fails, continue without it
-            pass
 
-        # Initialize locale manager
-        self.locale_manager = LocaleManager()
+        # Set window icon
+        try:
+            logo_path = os.path.join(os.path.dirname(__file__), 'assets', 'logo.png')
+            if os.path.exists(logo_path):
+                from PIL import Image, ImageTk
+                logo_img = Image.open(logo_path)
+                logo_img = logo_img.resize((64, 64), Image.Resampling.LANCZOS)
+                logo_photo = ImageTk.PhotoImage(logo_img)
+                self.root.iconphoto(True, logo_photo)
+                # Keep a reference to prevent garbage collection
+                self.root._logo_ref = logo_photo
+        except Exception as e:
+            print(f"Could not load window icon: {e}")
 
         # Initialize database and services
         self.setup_database()
@@ -170,6 +171,9 @@ class PyArchInitGUI:
         tools_menu.add_command(label=_("Harris Matrix"), command=self.show_harris_matrix_dialog)
         tools_menu.add_command(label=_("Export GraphML (yEd)"), command=self.show_graphml_export_dialog)
         tools_menu.add_separator()
+        tools_menu.add_command(label=_("Excel Import - Harris Matrix"), command=self.show_excel_import_dialog)
+        tools_menu.add_command(label=_("PyArchInit Import/Export"), command=self.show_pyarchinit_import_export_dialog)
+        tools_menu.add_separator()
         tools_menu.add_command(label=_("Thesaurus Management"), command=self.show_thesaurus_dialog)
         tools_menu.add_separator()
         tools_menu.add_command(label=_("Media Manager"), command=self.show_media_manager)
@@ -216,26 +220,8 @@ class PyArchInitGUI:
         toolbar = ttk.Frame(parent)
         toolbar.pack(fill=tk.X, pady=(0, 10))
 
-        # Logo and Title
-        logo_frame = ttk.Frame(toolbar)
-        logo_frame.pack(side=tk.LEFT)
-        
-        # Try to load logo
-        try:
-            import os
-            from PIL import Image, ImageTk
-            logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'docs', '_static', 'images', 'pyarchinit-mini-logo.png')
-            if os.path.exists(logo_path):
-                logo_img = Image.open(logo_path)
-                logo_img = logo_img.resize((40, 40), Image.Resampling.LANCZOS)
-                self.logo_photo = ImageTk.PhotoImage(logo_img)
-                logo_label = ttk.Label(logo_frame, image=self.logo_photo)
-                logo_label.pack(side=tk.LEFT, padx=(0, 10))
-        except Exception:
-            # If logo loading fails, just show text
-            pass
-        
-        title_label = ttk.Label(logo_frame, text="PyArchInit-Mini", style="Title.TLabel")
+        # Title
+        title_label = ttk.Label(toolbar, text="PyArchInit-Mini", style="Title.TLabel")
         title_label.pack(side=tk.LEFT)
 
         # Current site selection
@@ -1489,6 +1475,8 @@ SCORCIATOIE:
 
         ttk.Button(button_frame, text=_("OK"), command=save_and_restart).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text=_("Cancel"), command=lang_dialog.destroy).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(help_window, text="Chiudi", command=help_window.destroy).pack(pady=10)
     
     def import_database(self):
         """Import database from file"""
@@ -1794,6 +1782,28 @@ SCORCIATOIE:
             show_analytics_dialog(self.root, self.db_manager)
         except Exception as e:
             messagebox.showerror("Errore", f"Errore apertura analytics: {str(e)}")
+
+    def show_pyarchinit_import_export_dialog(self):
+        """Show PyArchInit import/export dialog"""
+        try:
+            dialog = PyArchInitImportExportDialog(self.root, self.db_manager)
+            dialog.wait_window()
+            # Refresh data after dialog closes
+            self.refresh_data()
+        except Exception as e:
+            messagebox.showerror(_("Error"), f"{_('Error opening PyArchInit import/export')}: {str(e)}")
+
+    def show_excel_import_dialog(self):
+        """Show Excel Import dialog"""
+        try:
+            with self.db_manager.connection.get_session() as session:
+                dialog = ExcelImportDialog(self.root, session, self.db_manager)
+                # Wait for dialog to close
+                self.root.wait_window(dialog.dialog)
+            # Refresh data after dialog closes
+            self.refresh_data()
+        except Exception as e:
+            messagebox.showerror(_("Error"), f"{_('Error opening Excel import')}: {str(e)}")
 
     def refresh_current_tab(self):
         """Refresh the current tab (called by export/import dialog after import)"""

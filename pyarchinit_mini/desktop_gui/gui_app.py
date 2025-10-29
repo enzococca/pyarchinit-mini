@@ -11,7 +11,6 @@ from tkinter import messagebox
 try:
     from pyarchinit_mini.desktop_gui.main_window import PyArchInitGUI
     from pyarchinit_mini.desktop_gui.dialogs import *
-    from pyarchinit_mini.desktop_gui.i18n import get_i18n
 except ImportError as e:
     print(f"Import error: {e}")
     print("Make sure all dependencies are installed and the module path is correct")
@@ -75,9 +74,6 @@ def main():
         sys.exit(1)
     
     try:
-        # Initialize i18n before creating GUI
-        i18n = get_i18n()
-        
         # Create and run GUI application
         print("Avvio interfaccia grafica...")
         app = PyArchInitGUI()

@@ -4,14 +4,9 @@ Provides web UI for managing EM node types via YAML configuration
 """
 
 import os
-import sys
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
 from flask_login import login_required
-from auth_routes import write_permission_required
-
-# Add parent directory to path
-sys.path.append('..')
-
+from pyarchinit_mini.web_interface.auth_routes import write_permission_required
 from pyarchinit_mini.config.em_node_config_manager import get_config_manager, reset_config_manager
 
 # Create blueprint
