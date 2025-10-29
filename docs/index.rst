@@ -98,6 +98,19 @@ New to PyArchInit-Mini? Start here for installation and basic setup.
    installation/configuration
    installation/first_steps
 
+Tutorials
+=========
+
+Step-by-step tutorials with screenshots to get you started quickly.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Interactive Tutorials
+
+   tutorials/installation_tutorial
+   tutorials/web_interface_tutorial
+   tutorials/desktop_gui_tutorial
+
 User Guides
 ===========
 

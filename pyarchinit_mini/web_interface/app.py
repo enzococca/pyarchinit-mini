@@ -18,6 +18,7 @@ import base64
 from sqlalchemy import text
 
 # PyArchInit-Mini imports
+from pyarchinit_mini import __version__
 from pyarchinit_mini.database.connection import DatabaseConnection
 from pyarchinit_mini.database.manager import DatabaseManager
 from pyarchinit_mini.services.site_service import SiteService
@@ -375,10 +376,10 @@ def create_app():
     from pyarchinit_mini.i18n import init_babel, get_locale
     babel = init_babel(app)
 
-    # Make get_locale available in all templates
+    # Make get_locale and version available in all templates
     @app.context_processor
     def inject_locale():
-        return dict(get_locale=get_locale)
+        return dict(get_locale=get_locale, version=__version__)
 
     # Create necessary folders
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

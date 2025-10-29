@@ -16,6 +16,7 @@ from datetime import datetime
 # Add parent directory to path for imports
 sys.path.append('..')
 
+from pyarchinit_mini import __version__
 from pyarchinit_mini.database.connection import DatabaseConnection
 from pyarchinit_mini.database.manager import DatabaseManager
 from pyarchinit_mini.services.site_service import SiteService
@@ -500,7 +501,7 @@ def main(database_url, version):
     """PyArchInit-Mini Interactive CLI"""
     
     if version:
-        console.print("[bold blue]PyArchInit-Mini CLI v1.2.12[/bold blue]")
+        console.print(f"[bold blue]PyArchInit-Mini CLI v{__version__}[/bold blue]")
         console.print("Archaeological Data Management System")
         console.print("© 2025 PyArchInit Team - GPL v2 License")
         return

@@ -166,3 +166,27 @@ test_*.db
 
 # Archive directory (local development files not for git)
 archive/
+archive_local/
+/screenshot-tool/
+
+# Development databases (exclude from git, keep only sample DBs)
+pyarchinit_mini/pyarchinit_mini.db
+!data/pyarchinit_tutorial.db
+
+# Temporary script files
+create_*.py
+
+# Documentation duplicates and build files
+docs/*\ 2.*
+docs/*\ 2/
+docs/_build\ 2/
+docs/_static\ 2/
+docs/tutorials\ 2/
+
+# Git rewrite artifacts
+.git-rewrite/
+
+# Duplicate development directories
+/web_interface/
+/cli_interface/
+/desktop_gui/

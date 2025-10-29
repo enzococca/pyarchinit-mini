@@ -4,6 +4,7 @@ FastAPI REST API for PyArchInit-Mini
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pyarchinit_mini import __version__
 from .site import router as site_router
 from .us import router as us_router
 from .inventario import router as inventario_router
@@ -13,17 +14,17 @@ from .graphml import router as graphml_router
 def create_app(database_url: str = None) -> FastAPI:
     """
     Create and configure FastAPI application
-    
+
     Args:
         database_url: Database connection URL
-        
+
     Returns:
         Configured FastAPI app
     """
     app = FastAPI(
         title="PyArchInit-Mini API",
         description="REST API for archaeological data management",
-        version="0.1.0",
+        version=__version__,
         docs_url="/docs",
         redoc_url="/redoc"
     )
@@ -52,7 +53,7 @@ def create_app(database_url: str = None) -> FastAPI:
     async def root():
         return {
             "message": "PyArchInit-Mini API",
-            "version": "0.1.0",
+            "version": __version__,
             "docs": "/docs"
         }
     

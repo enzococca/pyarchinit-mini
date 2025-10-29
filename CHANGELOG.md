@@ -5,6 +5,95 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.8] - 2025-10-29
+
+### Fixed
+- **Version Consistency Across All Interfaces**: Unified version display across all interfaces
+  - **API**: Now uses `__version__` from main package instead of hardcoded "0.1.0"
+  - **CLI**: Updated version display from hardcoded "v1.2.12" to dynamic `v{__version__}`
+  - **Desktop GUI**: Now imports and uses `__version__` from main package
+  - **Web Interface**: Already using dynamic version (from 1.7.7)
+  - All interfaces now display correct synchronized version number
+
+### Changed
+- **Repository Cleanup**: Removed duplicate development directories
+  - Moved old package versions (1.2.14, 1.4.0, 1.6.1) to `archive_local/`
+  - Removed duplicate `web_interface/`, `cli_interface/`, `desktop_gui/` directories
+  - Removed test directories: `test_data/`, `test_graphml/`, `examples/`
+  - Updated `.gitignore` to exclude archived and development files
+
+### Added
+- **Documentation**: Added comprehensive tutorial documentation
+  - Installation tutorial with step-by-step setup guide
+  - Web interface tutorial with screenshots
+  - Desktop GUI tutorial
+  - Tutorial index page in ReadTheDocs
+
+### Impact
+- All interfaces (API, CLI, Desktop GUI, Web) now display version 1.7.8
+- Cleaner repository structure with only necessary files
+- Better documentation for new users
+- Reduced package confusion from duplicate directories
+
+## [1.7.7] - 2025-10-29
+
+### Fixed
+- **Database Schema i18n**: Added missing internationalization columns to sample databases
+  - **Site table**: Added `definizione_sito_en`, `descrizione_en` (2 columns)
+  - **US table**: Added 15 i18n/document columns (`d_stratigrafica_en`, `d_interpretativa_en`, `descrizione_en`, `interpretazione_en`, `formazione_en`, `stato_di_conservazione_en`, `colore_en`, `consistenza_en`, `struttura_en`, `inclusi_en`, `campioni_en`, `documentazione_en`, `osservazioni_en`, `tipo_documento`, `file_path`)
+  - **Inventario table**: Added 9 i18n columns (`tipo_reperto_en`, `criterio_schedatura_en`, `definizione_en`, `descrizione_en`, `stato_conservazione_en`, `elementi_reperto_en`, `corpo_ceramico_en`, `rivestimento_en`, `tipo_contenitore_en`)
+  - Fixed all `OperationalError: no such column` errors on dashboard load
+  - All sample databases now have complete schema with full i18n support
+
+### Impact
+- Dashboard loads correctly without SQL errors
+- All main tables (Sites, US, Inventory) support bilingual content
+- Full bilingual (IT/EN) support now functional in web interface
+- Resolves issues for users in multilingual archaeological projects
+- Total: 26 new columns added across all sample databases
+
+## [1.7.6] - 2025-10-29
+
+### Fixed
+- **Sample Databases Authentication**: Added admin user to all sample databases
+  - Created `users` table in `pyarchinit_mini.db`
+  - Created `users` table in `pyarchinit_mini_sample.db`
+  - All databases now include admin user (username: `admin`, password: `admin`)
+  - Users can now log in to web interface without manual database setup
+
+### Impact
+- Fresh installs can immediately access web interface with admin credentials
+- No need to manually create admin user after installation
+
+## [1.7.5] - 2025-10-29
+
+### Fixed
+- **Critical Code Restoration**: Restored complete 1.7.0 code base with all features
+  - Version 1.7.4 published with incomplete code (missing database_creator, harris features)
+  - Restored from git commit 5a3fbf0 which contains all 1.7.0 features
+  - All features now present: database creation, harris matrix, networks, extended matrix
+- **Version String Alignment**: Corrected `__version__` in `__init__.py` to match package version
+  - All version identifiers now consistently report correct version
+  - Login template now dynamically displays version from `__version__`
+
+### Added
+- **Dynamic Version Display**: Login template now uses `{{ version }}` variable
+  - Added `__version__` import in web interface app.py
+  - Modified context_processor to inject version into all templates
+  - No more hardcoded version strings in templates
+
+### Documentation
+- Interactive Tutorials with Screenshots remain from 1.7.4
+- Tutorial database and screenshot automation tools available
+
+## [1.7.4] - 2025-10-29
+
+⚠️ **This version was published with incomplete code. Use 1.7.5 instead.**
+
+### Issues
+- Published with code from version 1.7.2 instead of 1.7.0
+- Missing: database_creator, enhanced harris matrix features, network exporters
+
 ## [1.7.3] - 2025-10-29
 
 ### Added
