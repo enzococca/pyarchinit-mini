@@ -167,6 +167,7 @@ pyarchinit-graphml = "pyarchinit_mini.cli.graphml_cli:main"
 pyarchinit-mini-import = "pyarchinit_mini.cli.pyarchinit_import_export_cli:pyarchinit"
 pyarchinit-harris-import = "pyarchinit_mini.cli.harris_import:import_harris_matrix"
 pyarchinit-harris-template = "pyarchinit_mini.cli.harris_template:generate_template"
+pyarchinit-mini-migrate = "pyarchinit_mini.cli.migrate:cli"
 
 [tool.setuptools.packages.find]
 where = ["."]

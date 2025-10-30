@@ -73,7 +73,16 @@ setup(
     },
     include_package_data=True,
     package_data={
-        "pyarchinit_mini": ["*.yaml", "*.yml", "*.json", "graphml_converter/templates/*.graphml"],
+        "pyarchinit_mini": [
+            "*.yaml", "*.yml", "*.json",
+            "data/*.db", "data/*.sql",
+            "graphml_converter/templates/*.graphml",
+            "web_interface/templates/*.html",
+            "web_interface/templates/**/*.html",
+            "web_interface/static/**/*",
+            "translations/**/*.mo",
+            "translations/**/*.po",
+        ],
     },
     keywords=[
         "archaeology",
