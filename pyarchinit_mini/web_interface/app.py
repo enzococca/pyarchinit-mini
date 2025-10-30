@@ -2490,23 +2490,17 @@ def create_app():
             entity_type = request.form.get('entity_type')
             entity_id = request.form.get('entity_id')
 
-            logger.debug(f"AJAX upload - entity_type: {entity_type}, entity_id: {entity_id}")
-
             if not entity_type or not entity_id:
-                logger.error(f"Missing params - entity_type: {entity_type}, entity_id: {entity_id}")
                 return jsonify({'error': f'Missing entity_type ({entity_type}) or entity_id ({entity_id})'}), 400
 
             # Convert entity_id to int
             try:
                 entity_id = int(entity_id)
             except ValueError:
-                logger.error(f"Invalid entity_id: {entity_id}")
                 return jsonify({'error': f'Invalid entity_id: {entity_id}'}), 400
 
             files = request.files.getlist('files')
-            logger.debug(f"Received {len(files)} files")
             if not files or len(files) == 0:
-                logger.error("No files in request")
                 return jsonify({'error': 'No files provided'}), 400
 
             uploaded_ids = []
@@ -2545,7 +2539,6 @@ def create_app():
             }), 200
 
         except Exception as e:
-            logger.error(f"AJAX upload error: {str(e)}")
             return jsonify({'error': str(e)}), 500
 
     @app.route('/media/list')
