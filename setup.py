@@ -16,7 +16,7 @@ if (this_directory / "requirements.txt").exists():
 
 setup(
     name="pyarchinit-mini",
-    version="1.7.0",
+    version="1.7.4",
     author="PyArchInit Team",
     author_email="enzo.ccc@gmail.com",
     description="Lightweight archaeological data management system with multi-user authentication, real-time collaboration, and analytics dashboard",
@@ -68,6 +68,7 @@ setup(
         "console_scripts": [
             "pyarchinit-mini=pyarchinit_mini.cli:main",
             "pyarchinit-graphml=pyarchinit_mini.cli.graphml_cli:main",
+            "pyarchinit-mini-migrate=pyarchinit_mini.cli.migrate:cli",
         ],
     },
     include_package_data=True,
