@@ -2289,7 +2289,7 @@ def create_app():
     def api_media_sites():
         """Get list of all sites for media upload form"""
         try:
-            sites = site_service.list()
+            sites = site_service.get_all_sites(size=1000)
             return jsonify([{
                 'id': site.id_sito,
                 'name': site.sito
@@ -2303,11 +2303,11 @@ def create_app():
         """Get list of all US for media upload form"""
         try:
             site_name = request.args.get('site')
+            filters = {}
             if site_name:
-                # Filter by site if provided
-                us_list = us_service.list({'sito': site_name})
-            else:
-                us_list = us_service.list()
+                filters['sito'] = site_name
+
+            us_list = us_service.get_all_us(size=1000, filters=filters if filters else None)
 
             return jsonify([{
                 'id': us.id_us,
@@ -2325,11 +2325,11 @@ def create_app():
         """Get list of all inventory items for media upload form"""
         try:
             site_name = request.args.get('site')
+            filters = {}
             if site_name:
-                # Filter by site if provided
-                inv_list = inventario_service.list({'sito': site_name})
-            else:
-                inv_list = inventario_service.list()
+                filters['sito'] = site_name
+
+            inv_list = inventario_service.get_all_inventario(size=1000, filters=filters if filters else None)
 
             return jsonify([{
                 'id': inv.id_invmat,
@@ -2347,7 +2347,7 @@ def create_app():
         form = MediaUploadForm()
 
         # Populate site dropdown choices
-        sites = site_service.list()
+        sites = site_service.get_all_sites(size=1000)
         site_choices = [('', '-- Seleziona Sito --')] + [(str(site.id_sito), site.sito) for site in sites]
         form.site_id.choices = [(int(id_val) if id_val else 0, name) for id_val, name in site_choices if id_val]
         form.us_site.choices = [('', '-- Seleziona Sito --')] + [(site.sito, site.sito) for site in sites]
@@ -2375,7 +2375,7 @@ def create_app():
                     us_filters = {'sito': site_name, 'us': us_number}
                     if area:
                         us_filters['area'] = area
-                    us_list = us_service.list(us_filters)
+                    us_list = us_service.get_all_us(size=1000, filters=us_filters)
 
                     if not us_list:
                         flash(f'US non trovata: {site_name} - Area {area or "N/A"} - US {us_number}', 'error')
@@ -2393,7 +2393,7 @@ def create_app():
                         return render_template('media/upload.html', form=form)
 
                     # Search for inventory record
-                    inv_list = inventario_service.list({'sito': site_name, 'numero_inventario': inv_number})
+                    inv_list = inventario_service.get_all_inventario(size=1000, filters={'sito': site_name, 'numero_inventario': inv_number})
 
                     if not inv_list:
                         flash(f'Inventario non trovato: {site_name} - Inv. {inv_number}', 'error')
