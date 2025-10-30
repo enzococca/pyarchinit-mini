@@ -623,6 +623,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadStatus = document.getElementById('uploadStatus');
     const usId = {{ us_id }};
 
+    // Get CSRF token from meta tag or form
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                     document.querySelector('input[name="csrf_token"]')?.value;
+
     // Click to browse
     dropZone.addEventListener('click', () => fileInput.click());
 
@@ -721,6 +725,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         xhr.open('POST', '/media/upload/ajax', true);
+
+        // Add CSRF token header
+        if (csrfToken) {
+            xhr.setRequestHeader('X-CSRFToken', csrfToken);
+        }
+
         xhr.send(formData);
 
         // Reset file input
