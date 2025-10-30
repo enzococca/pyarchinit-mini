@@ -2422,6 +2422,9 @@ def create_app():
                         form.author.data
                     )
 
+                    # Remove thumbnail_path - thumbnails go in MediaThumb table, not Media table
+                    metadata.pop('thumbnail_path', None)
+
                     # Save record to database
                     media_record = media_service.create_media_record(metadata)
 
