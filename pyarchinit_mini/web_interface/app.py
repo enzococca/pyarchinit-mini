@@ -2470,21 +2470,32 @@ def create_app():
             stats = media_service.get_media_statistics()
 
             # Enrich media with entity information
+            # First, capture entity info while objects are in memory
+            media_enrichment = []
             for media in media_list:
                 try:
-                    if media.entity_type == 'site':
-                        site = site_service.get_site_by_id(media.entity_id)
-                        media.entity_name = site.sito if site else f'Site ID {media.entity_id}'
-                    elif media.entity_type == 'us':
-                        us = us_service.get_us_by_id(media.entity_id)
-                        media.entity_name = f"{us.sito} - US {us.us}" if us else f'US ID {media.entity_id}'
-                    elif media.entity_type == 'inventario':
-                        inv = inventario_service.get_inventario_by_id(media.entity_id)
-                        media.entity_name = f"{inv.sito} - {inv.numero_inventario}" if inv else f'Inventory ID {media.entity_id}'
-                    else:
-                        media.entity_name = f'{media.entity_type} ID {media.entity_id}'
+                    entity_type = media.entity_type
+                    entity_id = media.entity_id
+                    media_enrichment.append((media, entity_type, entity_id))
                 except:
-                    media.entity_name = f'{media.entity_type} ID {media.entity_id}'
+                    media_enrichment.append((media, None, None))
+
+            # Now enrich with entity names
+            for media, entity_type, entity_id in media_enrichment:
+                try:
+                    if entity_type == 'site':
+                        site = site_service.get_site_by_id(entity_id)
+                        media.entity_name = site.sito if site else f'Site ID {entity_id}'
+                    elif entity_type == 'us':
+                        us = us_service.get_us_by_id(entity_id)
+                        media.entity_name = f"{us.sito} - US {us.us}" if us else f'US ID {entity_id}'
+                    elif entity_type == 'inventario':
+                        inv = inventario_service.get_inventario_by_id(entity_id)
+                        media.entity_name = f"{inv.sito} - {inv.numero_inventario}" if inv else f'Inventory ID {entity_id}'
+                    else:
+                        media.entity_name = f'{entity_type} ID {entity_id}' if entity_type else 'Unknown'
+                except:
+                    media.entity_name = f'{entity_type} ID {entity_id}' if entity_type else 'Unknown'
 
             return render_template('media/list.html',
                                  media_list=media_list,
