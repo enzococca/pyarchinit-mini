@@ -565,7 +565,7 @@ def create_app():
             except Exception as e:
                 flash(f'Errore nella creazione del sito: {str(e)}', 'error')
         
-        return render_template('sites/form.html', form=form, title='Nuovo Sito')
+        return render_template('sites/form.html', form=form, title='New Site')
 
     @app.route('/sites/<int:site_id>/edit', methods=['GET', 'POST'])
     @login_required
@@ -617,7 +617,7 @@ def create_app():
             logger.warning(f"Failed to fetch media for site {site_id}: {e}")
             media_list = []
 
-        return render_template('sites/form.html', form=form, title='Modifica Sito', edit_mode=True,
+        return render_template('sites/form.html', form=form, title='Edit Site', edit_mode=True,
                              site_id=site_id, media_list=media_list)
 
     @app.route('/sites/<int:site_id>/delete', methods=['POST'])
@@ -945,7 +945,7 @@ def create_app():
             flash('Errore nella validazione del form. Controlla i campi obbligatori.', 'error')
             print(f"Form validation errors: {form.errors}")
         
-        return render_template('us/form.html', form=form, title='Nuova US')
+        return render_template('us/form.html', form=form, title='New SU')
 
     @app.route('/us/<us_id>/edit', methods=['GET', 'POST'])
     @login_required
@@ -1234,7 +1234,7 @@ def create_app():
 
         return render_template('us/form.html',
                              form=form,
-                             title='Modifica US',
+                             title='Edit SU',
                              edit_mode=True,
                              prev_id=prev_id,
                              next_id=next_id,
@@ -1372,7 +1372,7 @@ def create_app():
             flash('Errore nella validazione del form. Controlla i campi obbligatori.', 'error')
             print(f"Form validation errors: {form.errors}")
 
-        return render_template('inventario/form.html', form=form, title='Nuovo Reperto')
+        return render_template('inventario/form.html', form=form, title='New Find')
 
     @app.route('/inventario/<int:inv_id>/edit', methods=['GET', 'POST'])
     @login_required
@@ -1529,7 +1529,7 @@ def create_app():
             logger.warning(f"Failed to fetch media for inventario {inv_id}: {e}")
             media_list = []
 
-        return render_template('inventario/form.html', form=form, title='Modifica Reperto', edit_mode=True,
+        return render_template('inventario/form.html', form=form, title='Edit Find', edit_mode=True,
                              inv_id=inv_id, media_list=media_list)
 
     # Harris Matrix routes
@@ -3069,7 +3069,7 @@ def create_app():
 
         return render_template('periodizzazione/form.html',
                              datazione=None,
-                             title='Nuova Datazione')
+                             title='New Dating')
 
     @app.route('/periodizzazione/<int:datazione_id>/edit', methods=['GET', 'POST'])
     @login_required
@@ -3095,7 +3095,7 @@ def create_app():
 
             return render_template('periodizzazione/form.html',
                                  datazione=datazione,
-                                 title='Modifica Datazione')
+                                 title='Edit Dating')
 
         except Exception as e:
             flash(f'Errore modifica datazione: {str(e)}', 'error')
