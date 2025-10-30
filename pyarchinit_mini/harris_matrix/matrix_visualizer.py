@@ -2,6 +2,8 @@
 Harris Matrix visualization and rendering
 """
 
+import matplotlib
+matplotlib.use('Agg')  # Use headless backend for server environments
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import networkx as nx
