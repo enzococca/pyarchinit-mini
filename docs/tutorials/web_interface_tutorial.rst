@@ -741,126 +741,6 @@ Export Harris Matrix diagrams in GraphML format for advanced editing with yEd Gr
 .. tip::
    Download yEd Graph Editor from https://www.yworks.com/products/yed for advanced diagram editing and automatic layout algorithms.
 
-Excel/CSV Import
-================
-
-Import archaeological data from Excel or CSV files for bulk data entry.
-
-.. figure:: ../_static/images/webapp/051_excel_import_interface.png
-   :alt: Excel Import Interface
-   :align: center
-   :width: 100%
-
-   **Excel Import** - Bulk data import from spreadsheets
-
-**Supported Data Types:**
-
-* Stratigraphic Units (US)
-* Material Inventory
-* Site information
-* Dating periods
-
-**Import Process:**
-
-1. Download template file for the data type
-2. Fill in the spreadsheet with your data
-3. Upload the completed file
-4. Review validation report
-5. Confirm import
-
-.. note::
-   Excel import validates data before insertion to ensure database integrity.
-
-Data Import/Export
-==================
-
-PyArchInit-compatible import and export for data migration and backup.
-
-.. figure:: ../_static/images/webapp/053_pyarchinit_ie_main.png
-   :alt: PyArchInit Import/Export Main Interface
-   :align: center
-   :width: 100%
-
-   **PyArchInit Import/Export** - Data migration and backup tools
-
-Import from PyArchInit Database
---------------------------------
-
-.. figure:: ../_static/images/webapp/054_pyarchinit_import_section.png
-   :alt: Import Section
-   :align: center
-   :width: 100%
-
-   **Import Interface** - Migrate data from existing PyArchInit databases
-
-**Import Options:**
-
-* Full database import
-* Selective table import
-* Data mapping and transformation
-* Validation and error reporting
-
-Export to PyArchInit Format
-----------------------------
-
-.. figure:: ../_static/images/webapp/055_pyarchinit_export_section.png
-   :alt: Export Section
-   :align: center
-   :width: 100%
-
-   **Export Interface** - Export data in PyArchInit-compatible format
-
-**Export Formats:**
-
-* SQLite database export
-* CSV export by table
-* Complete project backup
-* Selective data export
-
-Create New Database
--------------------
-
-.. figure:: ../_static/images/webapp/056_pyarchinit_create_db.png
-   :alt: Create Database Interface
-   :align: center
-   :width: 100%
-
-   **Database Creation** - Initialize new PyArchInit-Mini database
-
-**Database Setup:**
-
-* Database name and location
-* Schema initialization
-* Default data population
-* User account creation
-
-Extended Matrix Node Configuration
-===================================
-
-Configure node types for Extended Matrix Framework diagrams.
-
-.. figure:: ../_static/images/webapp/058_em_node_config_interface.png
-   :alt: EM Node Configuration
-   :align: center
-   :width: 100%
-
-   **Extended Matrix Node Configuration** - Manage node types and relationships
-
-**Node Type Management:**
-
-* 14 standard node types (US, USM, USVA, DOC, etc.)
-* Custom node type creation
-* Color and style configuration
-* Icon assignment
-* Display preferences
-
-**Relationship Configuration:**
-
-* 14 relationship types
-* Bidirectional relationship mapping
-* Validation rules
-* Visual representation settings
-
 Dating Periods Management
 =========================
 
@@ -1073,9 +953,6 @@ You now know how to:
 * Upload and manage media files
 * Create and visualize Harris Matrix diagrams
 * Export diagrams to GraphML and Extended Matrix formats
-* Import data from Excel/CSV files
-* Manage PyArchInit database import/export
-* Configure Extended Matrix node types
 * Define dating periods and periodization schemes
 * Manage ICCD thesaurus terms
 * View analytics and validation reports
