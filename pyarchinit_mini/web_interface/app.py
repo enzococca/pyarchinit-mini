@@ -1522,7 +1522,15 @@ def create_app():
             except Exception as e:
                 flash(f'Errore nell\'aggiornamento reperto: {str(e)}', 'error')
 
-        return render_template('inventario/form.html', form=form, title='Modifica Reperto', edit_mode=True)
+        # Get associated media files
+        try:
+            media_list = media_service.get_media_by_entity('inventario', inv_id, size=100)
+        except Exception as e:
+            logger.warning(f"Failed to fetch media for inventario {inv_id}: {e}")
+            media_list = []
+
+        return render_template('inventario/form.html', form=form, title='Modifica Reperto', edit_mode=True,
+                             inv_id=inv_id, media_list=media_list)
 
     # Harris Matrix routes
     @app.route('/harris_matrix/<site_name>')
