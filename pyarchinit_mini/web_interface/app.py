@@ -3217,7 +3217,7 @@ def create_app():
                                  selected_field=selected_field)
 
         except Exception as e:
-            flash(f'Errore caricamento thesaurus: {str(e)}', 'error')
+            flash(f'Thesaurus loading error: {str(e)}', 'error')
             return render_template('thesaurus/list.html',
                                  tables=[],
                                  fields=[],
@@ -3245,10 +3245,10 @@ def create_app():
                 description=description
             )
 
-            flash('Valore thesaurus creato con successo!', 'success')
+            flash('Thesaurus value created successfully!', 'success')
 
         except Exception as e:
-            flash(f'Errore creazione valore: {str(e)}', 'error')
+            flash(f'Value creation error: {str(e)}', 'error')
 
         return redirect(url_for('thesaurus_list',
                                table=request.form.get('table_name'),
@@ -3262,7 +3262,7 @@ def create_app():
         try:
             # Check if this is a predefined value (read-only)
             if str(field_id).startswith('predefined_'):
-                flash('I valori predefiniti non possono essere modificati. Crea un nuovo valore personalizzato.', 'warning')
+                flash('Predefined values cannot be modified. Create a new custom value.', 'warning')
             else:
                 value = request.form.get('value')
                 label = request.form.get('label')
@@ -3275,10 +3275,10 @@ def create_app():
                     description=description
                 )
 
-                flash('Valore thesaurus aggiornato con successo!', 'success')
+                flash('Thesaurus value updated successfully!', 'success')
 
         except Exception as e:
-            flash(f'Errore modifica valore: {str(e)}', 'error')
+            flash(f'Value update error: {str(e)}', 'error')
 
         table_name = request.form.get('table_name')
         field_name = request.form.get('field_name')
@@ -3294,12 +3294,12 @@ def create_app():
         try:
             # Check if this is a predefined value (read-only)
             if str(field_id).startswith('predefined_'):
-                flash('I valori predefiniti non possono essere eliminati. Sono di sola lettura.', 'warning')
+                flash('Predefined values cannot be deleted. They are read-only.', 'warning')
             else:
                 thesaurus_service.delete_field_value(int(field_id))
-                flash('Valore thesaurus eliminato con successo!', 'success')
+                flash('Thesaurus value deleted successfully!', 'success')
         except Exception as e:
-            flash(f'Errore eliminazione valore: {str(e)}', 'error')
+            flash(f'Value deletion error: {str(e)}', 'error')
 
         table_name = request.form.get('table_name')
         field_name = request.form.get('field_name')
