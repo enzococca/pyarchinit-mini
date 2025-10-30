@@ -32,7 +32,14 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 - **3D Visualization**: s3Dgraphy integration for stratigraphic unit visualization
 - **Stratigraphic Validation**: Paradox detection, cycle detection, auto-fix reciprocal relationships
 - **PDF Export**: Desktop-style reports (Sites, US, Inventario, Harris Matrix embedded)
-- **Media Management**: Images, documents, videos with metadata
+- **Media Management** (NEW in v1.8.0):
+  - **Drag-and-Drop Upload**: Intuitive file upload with visual feedback
+  - **6 Specialized Viewers**: Images (GLightbox), PDF, Video, Excel/CSV, DOCX, 3D models (Three.js)
+  - **10 Video Formats**: MP4, AVI, MOV, WMV, FLV, WebM, MKV, M4V, MPEG, MPG
+  - **6 3D Model Formats**: OBJ, STL, PLY, GLTF, GLB, DAE
+  - **Delete Functionality**: Remove media from all entity forms with confirmation
+  - **Smart Organization**: Automatic file organization by entity type and ID
+  - **Gallery Support**: Separate galleries per entity to prevent cross-contamination
 - **Thesaurus ICCD**: 4 controlled vocabularies for standardized data entry
 - **Chronological Datazioni System**: Standardized archaeological dating periods table
   - 36 pre-configured Italian archaeological periods (Paleolitico → Età Contemporanea)
@@ -98,7 +105,40 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 
 ---
 
-## 🆕 What's New in v1.7.13 (2025-10-29)
+## 🆕 What's New in v1.8.0 (2025-10-30)
+
+### Enhanced Media Management System
+Complete overhaul of media file handling with professional viewing capabilities:
+
+**Specialized Media Viewers**:
+- **Image Viewer**: GLightbox integration with gallery support, separate galleries per entity type (sites, US, inventario)
+- **PDF Viewer**: In-browser PDF viewing with GLightbox iframe support
+- **Video Viewer**: Native HTML5 video playback with GLightbox support for 10 formats (MP4, AVI, MOV, WMV, FLV, WebM, MKV, M4V, MPEG, MPG)
+- **Excel/CSV Viewer**: pandas-powered spreadsheet viewer with Bootstrap-styled tables, supports up to 1000 rows
+- **DOCX Viewer**: python-docx HTML converter with table support and heading detection
+- **3D Model Viewer**: Interactive Three.js viewer with OrbitControls for OBJ, STL, PLY, GLTF, GLB, DAE formats
+
+**Media Management Features**:
+- **Enhanced Video Detection**: Improved file type recognition by extension for 10 video formats
+- **Delete Functionality**: Delete media from list view and all entity forms with JavaScript confirmation
+- **Smart Redirects**: Context-aware redirects after deletion (returns to form if deleted from edit page)
+- **Drag-and-Drop Upload**: Intuitive file upload with visual feedback (completed in v1.7.13)
+- **File Organization**: Automatic organization by entity type and ID
+
+**Technical Improvements**:
+- Added `python-docx>=1.0.0` dependency for DOCX viewing
+- GLightbox 3.2.0 for image/PDF/video lightbox viewing
+- Three.js r147 for stable 3D model rendering
+- pandas for Excel/CSV data parsing
+- Separate galleries prevent cross-entity media mixing
+
+**User Experience**:
+- Complex viewers (DOCX, Excel, 3D) open in new window for better screen space
+- Simple viewers (images, PDF, video) use lightbox for quick preview
+- Consistent viewer interface across all entity forms
+- CSRF protection on all delete operations
+
+## What's New in v1.7.13 (2025-10-29)
 
 ### Unified Version Management
 All interfaces now display the same version number dynamically from a single source:

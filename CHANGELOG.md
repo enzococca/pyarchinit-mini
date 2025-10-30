@@ -5,6 +5,57 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2025-10-30
+
+### Added - Enhanced Media Management System
+- **Image Viewer**: GLightbox 3.2.0 integration with gallery support
+  - Separate galleries per entity type (sites, US, inventario)
+  - Lightbox navigation with touch support
+  - Thumbnail generation and preview
+- **PDF Viewer**: In-browser PDF viewing with GLightbox iframe support
+- **Video Viewer**: Native HTML5 video playback with GLightbox
+  - Support for 10 video formats: MP4, AVI, MOV, WMV, FLV, WebM, MKV, M4V, MPEG, MPG
+  - Fullscreen playback and controls
+- **Excel/CSV Viewer**: pandas-powered spreadsheet viewer
+  - Bootstrap-styled HTML tables
+  - Supports up to 1000 rows
+  - Preserves formatting and data types
+- **DOCX Viewer**: python-docx HTML converter
+  - Table support with Bootstrap styling
+  - Heading detection and conversion
+  - Opens in new window for better screen space
+- **3D Model Viewer**: Interactive Three.js r147 viewer
+  - OrbitControls for navigation (rotate, pan, zoom)
+  - Support for 6 formats: OBJ, STL, PLY, GLTF, GLB, DAE
+  - Wireframe toggle and reset view features
+  - Opens in new window for immersive experience
+- **Media Deletion**: Delete functionality across all interfaces
+  - Available in media list view
+  - Available in all entity forms (sites, US, inventario)
+  - JavaScript confirmation before deletion
+  - Smart redirect logic (returns to form if deleted from edit page)
+  - CSRF protection on all delete operations
+
+### Changed
+- **Video Detection**: Enhanced file type recognition by extension
+  - Improved detection for 10 video formats in `MediaHandler._determine_media_type()`
+  - More reliable than MIME-type based detection
+- **Media Organization**: Automatic file organization by entity type and ID
+  - Separate galleries prevent cross-entity media mixing
+  - Consistent viewer interface across all entity forms
+- **Dependencies**: Added media viewing libraries
+  - `python-docx>=1.0.0` for DOCX viewing
+  - `pandas>=2.0.0` for Excel/CSV parsing (already in export dependencies)
+  - `openpyxl>=3.1.0` for Excel file support
+  - GLightbox 3.2.0 loaded from CDN for image/PDF/video lightbox
+  - Three.js r147 loaded from CDN for 3D model rendering
+
+### Technical Details
+- Complex viewers (DOCX, Excel, 3D) open in new window (`target="_blank"`)
+- Simple viewers (images, PDF, video) use lightbox for quick preview
+- Three.js r147 used for stable 3D loader compatibility (last version with legacy `/examples/js/` structure)
+- Removed unsupported formats: FBX and 3DS (loaders not available in Three.js r147)
+
 ## [1.7.13] - 2025-10-29
 
 ### Changed
