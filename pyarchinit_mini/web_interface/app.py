@@ -2898,7 +2898,7 @@ def create_app():
 
             # Check file extension
             file_ext = file_path.suffix.lower()
-            supported_formats = ['.obj', '.stl', '.ply', '.gltf', '.glb', '.dae', '.fbx', '.3ds']
+            supported_formats = ['.obj', '.stl', '.ply', '.gltf', '.glb', '.dae']
             if file_ext not in supported_formats:
                 return f'<html><body><h3>Unsupported 3D format: {file_ext}</h3><p>Supported formats: {", ".join(supported_formats)}</p></body></html>', 400
 
@@ -2909,9 +2909,7 @@ def create_app():
                 '.ply': 'PLYLoader',
                 '.gltf': 'GLTFLoader',
                 '.glb': 'GLTFLoader',
-                '.dae': 'ColladaLoader',
-                '.fbx': 'FBXLoader',
-                '.3ds': 'TDSLoader'
+                '.dae': 'ColladaLoader'
             }
 
             loader_type = loader_map.get(file_ext, 'GLTFLoader')
@@ -3035,16 +3033,14 @@ def create_app():
                     </div>
                 </div>
 
-                <!-- Three.js and loaders -->
-                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/OBJLoader.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/STLLoader.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/PLYLoader.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/ColladaLoader.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/FBXLoader.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/TDSLoader.js"></script>
+                <!-- Three.js and loaders (using r147 - last version with legacy format) -->
+                <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/OBJLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/STLLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/PLYLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/ColladaLoader.js"></script>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
                 <script>
@@ -3121,8 +3117,6 @@ def create_app():
                                 model = object.scene;
                             }} else if (loaderType === 'ColladaLoader') {{
                                 model = object.scene;
-                            }} else if (loaderType === 'FBXLoader') {{
-                                model = object;
                             }} else {{
                                 // For OBJ, STL, PLY - wrap geometry in mesh
                                 const geometry = object.isBufferGeometry ? object : object.geometry;
@@ -3186,12 +3180,6 @@ def create_app():
                                 break;
                             case 'ColladaLoader':
                                 loader = new THREE.ColladaLoader();
-                                break;
-                            case 'FBXLoader':
-                                loader = new THREE.FBXLoader();
-                                break;
-                            case 'TDSLoader':
-                                loader = new THREE.TDSLoader();
                                 break;
                             default:
                                 onError({{ message: 'Unsupported file format' }});

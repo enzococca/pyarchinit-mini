@@ -133,7 +133,7 @@ class MediaHandler:
         if file_path:
             ext = file_path.suffix.lower()
             # 3D models
-            if ext in ['.obj', '.stl', '.ply', '.gltf', '.glb', '.dae', '.fbx', '.3ds']:
+            if ext in ['.obj', '.stl', '.ply', '.gltf', '.glb', '.dae']:
                 return '3d_model'
             # Videos
             if ext in ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v', '.mpeg', '.mpg']:
