@@ -6,8 +6,8 @@ Complete video tutorial demonstrating the PyArchInit-Mini web interface workflow
 .. raw:: html
 
    <video width="100%" controls>
-     <source src="../tutorial_video/pyarchinit_tutorial_complete.webm" type="video/webm">
-     Your browser does not support the video tag. <a href="../tutorial_video/pyarchinit_tutorial_complete.webm">Download the video</a>
+     <source src="/tutorial_video/pyarchinit_tutorial_complete.webm" type="video/webm">
+     Your browser does not support the video tag. <a href="/tutorial_video/pyarchinit_tutorial_complete.webm">Download the video</a>
    </video>
 
 .. note::
@@ -21,7 +21,7 @@ Video Information
 - **Duration**: ~12 minutes at 1x speed (~6 minutes at 2x speed)
 - **Resolution**: 1920x1080 (Full HD)
 - **File size**: 61 MB
-- **Direct download**: :download:`pyarchinit_tutorial_complete.webm <../tutorial_video/pyarchinit_tutorial_complete.webm>`
+- **Direct download**: Download the `video file </tutorial_video/pyarchinit_tutorial_complete.webm>`_
 
 Tutorial Content
 ----------------

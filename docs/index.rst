@@ -107,6 +107,7 @@ Step-by-step tutorials with screenshots to get you started quickly.
    :maxdepth: 2
    :caption: Interactive Tutorials
 
+   tutorials/video_tutorial
    tutorials/installation_tutorial
    tutorials/web_interface_tutorial
    tutorials/desktop_gui_tutorial
