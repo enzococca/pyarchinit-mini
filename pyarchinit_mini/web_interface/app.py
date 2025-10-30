@@ -2294,12 +2294,15 @@ def create_app():
                         "",  # tags
                         form.author.data
                     )
-                    
+
+                    # Save record to database
+                    media_record = media_service.create_media_record(metadata)
+
                     # Clean up temp file
                     os.remove(temp_path)
-                    
-                    flash('File caricato con successo!', 'success')
-                    return redirect(url_for('upload_media'))
+
+                    flash(f'File caricato con successo! (ID: {media_record.id_media})', 'success')
+                    return redirect(url_for('media_list'))
                     
             except Exception as e:
                 flash(f'Errore caricamento file: {str(e)}', 'error')
