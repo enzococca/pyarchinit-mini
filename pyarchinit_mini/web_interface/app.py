@@ -610,7 +610,15 @@ def create_app():
             form.definizione_sito.data = site.definizione_sito
             form.descrizione.data = site.descrizione
 
-        return render_template('sites/form.html', form=form, title='Modifica Sito', edit_mode=True)
+        # Get associated media files
+        try:
+            media_list = media_service.get_media_by_entity('site', site_id, size=100)
+        except Exception as e:
+            logger.warning(f"Failed to fetch media for site {site_id}: {e}")
+            media_list = []
+
+        return render_template('sites/form.html', form=form, title='Modifica Sito', edit_mode=True,
+                             site_id=site_id, media_list=media_list)
 
     @app.route('/sites/<int:site_id>/delete', methods=['POST'])
     @login_required
@@ -2439,6 +2447,20 @@ def create_app():
 
             except Exception as e:
                 flash(f'Errore caricamento file: {str(e)}', 'error')
+
+        # Pre-populate form from query parameters (when coming from entity forms)
+        if request.method == 'GET':
+            entity_type_param = request.args.get('entity_type')
+            entity_id_param = request.args.get('entity_id')
+
+            if entity_type_param:
+                form.entity_type.data = entity_type_param
+
+                if entity_id_param and entity_type_param == 'site':
+                    try:
+                        form.site_id.data = int(entity_id_param)
+                    except (ValueError, TypeError):
+                        pass
 
         return render_template('media/upload.html', form=form)
 
