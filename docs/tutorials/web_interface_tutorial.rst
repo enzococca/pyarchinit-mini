@@ -678,6 +678,388 @@ Interactive visual editor for creating and editing Harris Matrix diagrams.
 
 For users who prefer working with spreadsheets, Harris Matrices can also be created by importing CSV or Excel files using the command-line tool.
 
+Harris Matrix Visualization
+============================
+
+View and analyze the generated Harris Matrix diagrams with interactive tools.
+
+.. figure:: ../_static/images/webapp/048_harris_matrix_view.png
+   :alt: Harris Matrix Visualization
+   :align: center
+   :width: 100%
+
+   **Harris Matrix View** - Interactive stratigraphic diagram with depth levels
+
+**Visualization Features:**
+
+* Hierarchical stratigraphic sequence display
+* Maximum depth level calculation
+* Node relationships visualization
+* Graphviz rendering engine
+* Zoom and navigation controls
+
+**Matrix Information:**
+
+* Total stratigraphic units count
+* Relationship connections display
+* Stratigraphic sequence by levels
+* Period and area grouping
+
+GraphML Export
+==============
+
+Export Harris Matrix diagrams in GraphML format for advanced editing with yEd Graph Editor.
+
+.. figure:: ../_static/images/webapp/049_harris_graphml_export.png
+   :alt: GraphML Export Interface
+   :align: center
+   :width: 100%
+
+   **GraphML Export** - Advanced export options with Extended Matrix support
+
+**Export Parameters:**
+
+* Archaeological Site selection
+* Diagram title customization
+* Grouping options (Period + Area)
+* Period order (Normal/Reverse)
+
+**Export Formats:**
+
+* **GraphML**: yEd Graph Editor compatible format with complete metadata
+* **s3Dgraphy (Extended Matrix)**: Export in Heriverse/ATON format with 3D model support
+* **Interactive Viewer**: Web-based interactive stratigraphic viewer
+
+**s3Dgraphy Features:**
+
+* Complete metadata for each SU
+* 3D model support (GLB/GLTF)
+* Extended Matrix Framework compliant
+* Heriverse/ATON wrapper with CocoDrill semantic shapes
+* Interactive 3D stratigraphy viewer
+
+.. tip::
+   Download yEd Graph Editor from https://www.yworks.com/products/yed for advanced diagram editing and automatic layout algorithms.
+
+Excel/CSV Import
+================
+
+Import archaeological data from Excel or CSV files for bulk data entry.
+
+.. figure:: ../_static/images/webapp/051_excel_import_interface.png
+   :alt: Excel Import Interface
+   :align: center
+   :width: 100%
+
+   **Excel Import** - Bulk data import from spreadsheets
+
+**Supported Data Types:**
+
+* Stratigraphic Units (US)
+* Material Inventory
+* Site information
+* Dating periods
+
+**Import Process:**
+
+1. Download template file for the data type
+2. Fill in the spreadsheet with your data
+3. Upload the completed file
+4. Review validation report
+5. Confirm import
+
+.. note::
+   Excel import validates data before insertion to ensure database integrity.
+
+Data Import/Export
+==================
+
+PyArchInit-compatible import and export for data migration and backup.
+
+.. figure:: ../_static/images/webapp/053_pyarchinit_ie_main.png
+   :alt: PyArchInit Import/Export Main Interface
+   :align: center
+   :width: 100%
+
+   **PyArchInit Import/Export** - Data migration and backup tools
+
+Import from PyArchInit Database
+--------------------------------
+
+.. figure:: ../_static/images/webapp/054_pyarchinit_import_section.png
+   :alt: Import Section
+   :align: center
+   :width: 100%
+
+   **Import Interface** - Migrate data from existing PyArchInit databases
+
+**Import Options:**
+
+* Full database import
+* Selective table import
+* Data mapping and transformation
+* Validation and error reporting
+
+Export to PyArchInit Format
+----------------------------
+
+.. figure:: ../_static/images/webapp/055_pyarchinit_export_section.png
+   :alt: Export Section
+   :align: center
+   :width: 100%
+
+   **Export Interface** - Export data in PyArchInit-compatible format
+
+**Export Formats:**
+
+* SQLite database export
+* CSV export by table
+* Complete project backup
+* Selective data export
+
+Create New Database
+-------------------
+
+.. figure:: ../_static/images/webapp/056_pyarchinit_create_db.png
+   :alt: Create Database Interface
+   :align: center
+   :width: 100%
+
+   **Database Creation** - Initialize new PyArchInit-Mini database
+
+**Database Setup:**
+
+* Database name and location
+* Schema initialization
+* Default data population
+* User account creation
+
+Extended Matrix Node Configuration
+===================================
+
+Configure node types for Extended Matrix Framework diagrams.
+
+.. figure:: ../_static/images/webapp/058_em_node_config_interface.png
+   :alt: EM Node Configuration
+   :align: center
+   :width: 100%
+
+   **Extended Matrix Node Configuration** - Manage node types and relationships
+
+**Node Type Management:**
+
+* 14 standard node types (US, USM, USVA, DOC, etc.)
+* Custom node type creation
+* Color and style configuration
+* Icon assignment
+* Display preferences
+
+**Relationship Configuration:**
+
+* 14 relationship types
+* Bidirectional relationship mapping
+* Validation rules
+* Visual representation settings
+
+Dating Periods Management
+=========================
+
+Manage standardized chronological periods for consistent dating across the project.
+
+.. figure:: ../_static/images/webapp/060_dating_periods_list.png
+   :alt: Dating Periods List
+   :align: center
+   :width: 100%
+
+   **Dating Periods** - Chronological period definitions
+
+Create New Dating Period
+-------------------------
+
+.. figure:: ../_static/images/webapp/062_dating_periods_form.png
+   :alt: Dating Period Form
+   :align: center
+   :width: 100%
+
+   **Dating Period Form** - Define chronological periods with date ranges
+
+**Period Fields:**
+
+* Period name (e.g., "Bronze Age", "Roman Imperial")
+* Start date (numeric or BCE/CE)
+* End date
+* Description and notes
+* Parent period (for hierarchical periodization)
+* Geographic scope
+
+**Usage:**
+
+These standardized periods are used throughout the system for:
+
+* US chronology tab
+* Material inventory dating
+* Site periodization
+* Temporal analysis and queries
+
+Periodization Records
+=====================
+
+Define and manage archaeological periodization schemes.
+
+.. figure:: ../_static/images/webapp/064_periodization_records_list.png
+   :alt: Periodization Records
+   :align: center
+   :width: 100%
+
+   **Periodization Records** - Archaeological period definitions
+
+**Periodization Features:**
+
+* Multiple periodization schemes per site
+* Hierarchical period structure
+* Cultural period associations
+* Chronological boundaries
+* Period descriptions
+
+ICCD Thesaurus
+==============
+
+Manage controlled vocabulary from the Italian Central Institute for Cataloging and Documentation (ICCD).
+
+.. figure:: ../_static/images/webapp/066_thesaurus_list.png
+   :alt: ICCD Thesaurus List
+   :align: center
+   :width: 100%
+
+   **ICCD Thesaurus** - Controlled terminology management
+
+Thesaurus Management
+--------------------
+
+.. figure:: ../_static/images/webapp/067_thesaurus_management.png
+   :alt: Thesaurus Management
+   :align: center
+   :width: 100%
+
+   **Thesaurus Management** - Add and edit controlled terms
+
+**Vocabulary Categories:**
+
+* Object types (Tipo Oggetto)
+* Materials (Materiali)
+* Techniques (Tecniche)
+* Conservation states (Stati di Conservazione)
+* Functional categories (Categorie Funzionali)
+
+**Features:**
+
+* Hierarchical term structure
+* Multilingual support
+* Term relationships (broader/narrower)
+* ICCD standard compliance
+* Search and filtering
+
+Analytics Dashboard
+===================
+
+Statistical analysis and reporting tools for archaeological data.
+
+.. figure:: ../_static/images/webapp/069_analytics_dashboard.png
+   :alt: Analytics Dashboard
+   :align: center
+   :width: 100%
+
+   **Analytics** - Data visualization and statistics
+
+**Analytics Features:**
+
+* Site statistics overview
+* US distribution by type
+* Material inventory summaries
+* Chronological distribution charts
+* Relationship network analysis
+* Export reports to PDF/Excel
+
+Stratigraphic Validation
+=========================
+
+Validate stratigraphic relationships and identify potential inconsistencies.
+
+.. figure:: ../_static/images/webapp/070_validation_report.png
+   :alt: Validation Report
+   :align: center
+   :width: 100%
+
+   **Validation Report** - Stratigraphic consistency checks
+
+**Validation Checks:**
+
+* Relationship reciprocity (if A covers B, then B is covered by A)
+* Circular relationship detection
+* Orphaned units identification
+* Missing critical relationships
+* Chronological inconsistencies
+
+Administration
+==============
+
+System administration tools for database and user management.
+
+Database Management
+-------------------
+
+.. figure:: ../_static/images/webapp/072_admin_database_main.png
+   :alt: Database Management
+   :align: center
+   :width: 100%
+
+   **Database Administration** - Database operations and maintenance
+
+Upload Database
+~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/073_admin_database_upload.png
+   :alt: Upload Database
+   :align: center
+   :width: 100%
+
+   **Upload Database** - Import existing SQLite databases
+
+Connect to Database
+~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../_static/images/webapp/074_admin_database_connect.png
+   :alt: Connect to Database
+   :align: center
+   :width: 100%
+
+   **Database Connection** - Configure database connection settings
+
+User Management
+---------------
+
+.. figure:: ../_static/images/webapp/076_admin_users_list.png
+   :alt: User Management
+   :align: center
+   :width: 100%
+
+   **User Management** - Manage application users and permissions
+
+**User Administration:**
+
+* Create new users
+* Edit user profiles
+* Assign roles (Admin, Operator, Viewer)
+* Enable/disable user accounts
+* Password reset
+* Activity monitoring
+
+**Access Levels:**
+
+* **Admin**: Full system access including administration
+* **Operator**: Create and edit archaeological data
+* **Viewer**: Read-only access to data
+
 Next Steps
 
 Congratulations! You have completed the PyArchInit-Mini web interface tutorial.
@@ -690,6 +1072,14 @@ You now know how to:
 * Record material inventory finds with ICCD-compliant fields
 * Upload and manage media files
 * Create and visualize Harris Matrix diagrams
+* Export diagrams to GraphML and Extended Matrix formats
+* Import data from Excel/CSV files
+* Manage PyArchInit database import/export
+* Configure Extended Matrix node types
+* Define dating periods and periodization schemes
+* Manage ICCD thesaurus terms
+* View analytics and validation reports
+* Administer databases and users
 
 For more advanced features and workflows, refer to the :ref:`Python API Guide <python-api-reference>` and the :ref:`Command Line Tools <command-line-reference>`.
 
