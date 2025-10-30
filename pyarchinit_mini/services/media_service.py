@@ -198,47 +198,49 @@ class MediaService:
     def get_media_statistics(self) -> Dict[str, Any]:
         """Get media statistics"""
         try:
-            # Total counts
-            total_media = self.count_media()
-            
-            # Count by type
-            type_counts = {}
-            for media_type in ['image', 'document', 'video', 'audio']:
-                count = self.count_media({'media_type': media_type})
-                type_counts[media_type] = count
-            
-            # Count by entity type
-            entity_counts = {}
-            for entity_type in ['site', 'us', 'inventario']:
-                count = self.count_media({'entity_type': entity_type})
-                entity_counts[entity_type] = count
-            
-            # Get all media to calculate storage stats
-            all_media = self.get_all_media(size=10000)
-            total_size = sum(media.file_size or 0 for media in all_media)
-            
-            # Count public/private
-            public_count = self.count_media({'is_public': True})
-            private_count = total_media - public_count
-            
-            # Authors
-            authors = set()
-            for media in all_media:
-                if media.author:
-                    authors.add(media.author)
-            
-            return {
-                'total_media': total_media,
-                'type_distribution': type_counts,
-                'entity_distribution': entity_counts,
-                'total_storage_bytes': total_size,
-                'total_storage_mb': round(total_size / (1024 * 1024), 2),
-                'public_count': public_count,
-                'private_count': private_count,
-                'unique_authors': len(authors),
-                'average_file_size_mb': round((total_size / total_media) / (1024 * 1024), 2) if total_media > 0 else 0
-            }
-            
+            with self.db_manager.connection.get_session() as session:
+                # Total counts
+                total_media = session.query(Media).count()
+
+                # Count by type
+                type_counts = {}
+                for media_type in ['image', 'document', 'video', 'audio']:
+                    count = session.query(Media).filter(Media.media_type == media_type).count()
+                    type_counts[media_type] = count
+
+                # Count by entity type
+                entity_counts = {}
+                for entity_type in ['site', 'us', 'inventario']:
+                    count = session.query(Media).filter(Media.entity_type == entity_type).count()
+                    entity_counts[entity_type] = count
+
+                # Calculate storage stats and collect authors within session
+                total_size = 0
+                authors = set()
+
+                # Query all media and access attributes within session
+                all_media = session.query(Media).limit(10000).all()
+                for media in all_media:
+                    total_size += media.file_size or 0
+                    if media.author:
+                        authors.add(media.author)
+
+                # Count public/private
+                public_count = session.query(Media).filter(Media.is_public == True).count()
+                private_count = total_media - public_count
+
+                return {
+                    'total_media': total_media,
+                    'type_distribution': type_counts,
+                    'entity_distribution': entity_counts,
+                    'total_storage_bytes': total_size,
+                    'total_storage_mb': round(total_size / (1024 * 1024), 2) if total_size > 0 else 0,
+                    'public_count': public_count,
+                    'private_count': private_count,
+                    'unique_authors': len(authors),
+                    'average_file_size_mb': round((total_size / total_media) / (1024 * 1024), 2) if total_media > 0 else 0
+                }
+
         except Exception as e:
             from ..utils.exceptions import DatabaseError
             raise DatabaseError(f"Failed to get media statistics: {e}")
