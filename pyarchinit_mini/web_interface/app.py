@@ -279,11 +279,24 @@ class InventarioForm(FlaskForm):
 
 class MediaUploadForm(FlaskForm):
     entity_type = SelectField('Tipo Entità', choices=[
+        ('', '-- Seleziona --'),
         ('site', 'Sito'),
         ('us', 'US'),
         ('inventario', 'Inventario')
     ], validators=[DataRequired()])
-    entity_id = IntegerField('ID Entità', validators=[DataRequired()])
+
+    # Fields for Site selection
+    site_id = SelectField('Sito', choices=[], coerce=int, validators=[Optional()])
+
+    # Fields for US selection
+    us_site = SelectField('Sito', choices=[], coerce=str, validators=[Optional()])
+    us_area = StringField('Area', validators=[Optional()])
+    us_number = StringField('Numero US', validators=[Optional()])
+
+    # Fields for Inventory selection
+    inv_site = SelectField('Sito', choices=[], coerce=str, validators=[Optional()])
+    inv_number = StringField('Numero Inventario', validators=[Optional()])
+
     file = FileField('File', validators=[DataRequired()])
     description = TextAreaField('Descrizione')
     author = StringField('Autore/Fotografo')
@@ -2270,26 +2283,140 @@ def create_app():
             return redirect(url_for('inventario_list'))
 
     # Media routes
+    # API endpoints for media upload entity selection
+    @app.route('/api/media/sites')
+    @login_required
+    def api_media_sites():
+        """Get list of all sites for media upload form"""
+        try:
+            sites = site_service.list()
+            return jsonify([{
+                'id': site.id_sito,
+                'name': site.sito
+            } for site in sites])
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/api/media/us')
+    @login_required
+    def api_media_us():
+        """Get list of all US for media upload form"""
+        try:
+            site_name = request.args.get('site')
+            if site_name:
+                # Filter by site if provided
+                us_list = us_service.list({'sito': site_name})
+            else:
+                us_list = us_service.list()
+
+            return jsonify([{
+                'id': us.id_us,
+                'sito': us.sito,
+                'area': us.area or '',
+                'us': str(us.us),
+                'label': f"{us.sito} - Area {us.area or 'N/A'} - US {us.us}"
+            } for us in us_list])
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/api/media/inventario')
+    @login_required
+    def api_media_inventario():
+        """Get list of all inventory items for media upload form"""
+        try:
+            site_name = request.args.get('site')
+            if site_name:
+                # Filter by site if provided
+                inv_list = inventario_service.list({'sito': site_name})
+            else:
+                inv_list = inventario_service.list()
+
+            return jsonify([{
+                'id': inv.id_invmat,
+                'sito': inv.sito,
+                'numero_inventario': inv.numero_inventario,
+                'label': f"{inv.sito} - Inv. {inv.numero_inventario}"
+            } for inv in inv_list])
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
     @app.route('/media/upload', methods=['GET', 'POST'])
     @login_required
     @write_permission_required
     def upload_media():
         form = MediaUploadForm()
-        
+
+        # Populate site dropdown choices
+        sites = site_service.list()
+        site_choices = [('', '-- Seleziona Sito --')] + [(str(site.id_sito), site.sito) for site in sites]
+        form.site_id.choices = [(int(id_val) if id_val else 0, name) for id_val, name in site_choices if id_val]
+        form.us_site.choices = [('', '-- Seleziona Sito --')] + [(site.sito, site.sito) for site in sites]
+        form.inv_site.choices = [('', '-- Seleziona Sito --')] + [(site.sito, site.sito) for site in sites]
+
         if form.validate_on_submit():
             try:
+                # Determine entity_id based on entity_type and form fields
+                entity_type = form.entity_type.data
+                entity_id = None
+
+                if entity_type == 'site':
+                    entity_id = form.site_id.data
+                elif entity_type == 'us':
+                    # Find US by site, area, and US number
+                    site_name = form.us_site.data
+                    area = form.us_area.data
+                    us_number = form.us_number.data
+
+                    if not all([site_name, us_number]):
+                        flash('Per US è necessario specificare Sito e Numero US', 'error')
+                        return render_template('media/upload.html', form=form)
+
+                    # Search for US record
+                    us_filters = {'sito': site_name, 'us': us_number}
+                    if area:
+                        us_filters['area'] = area
+                    us_list = us_service.list(us_filters)
+
+                    if not us_list:
+                        flash(f'US non trovata: {site_name} - Area {area or "N/A"} - US {us_number}', 'error')
+                        return render_template('media/upload.html', form=form)
+
+                    entity_id = us_list[0].id_us
+
+                elif entity_type == 'inventario':
+                    # Find inventory item by site and inventory number
+                    site_name = form.inv_site.data
+                    inv_number = form.inv_number.data
+
+                    if not all([site_name, inv_number]):
+                        flash('Per Inventario è necessario specificare Sito e Numero Inventario', 'error')
+                        return render_template('media/upload.html', form=form)
+
+                    # Search for inventory record
+                    inv_list = inventario_service.list({'sito': site_name, 'numero_inventario': inv_number})
+
+                    if not inv_list:
+                        flash(f'Inventario non trovato: {site_name} - Inv. {inv_number}', 'error')
+                        return render_template('media/upload.html', form=form)
+
+                    entity_id = inv_list[0].id_invmat
+
+                if not entity_id:
+                    flash('Errore: impossibile determinare l\'entità associata', 'error')
+                    return render_template('media/upload.html', form=form)
+
                 uploaded_file = form.file.data
                 if uploaded_file and uploaded_file.filename:
                     # Save uploaded file temporarily
                     filename = secure_filename(uploaded_file.filename)
                     temp_path = os.path.join(tempfile.gettempdir(), filename)
                     uploaded_file.save(temp_path)
-                    
+
                     # Store using media handler
                     metadata = media_handler.store_file(
                         temp_path,
-                        form.entity_type.data,
-                        form.entity_id.data,
+                        entity_type,
+                        entity_id,
                         form.description.data,
                         "",  # tags
                         form.author.data
@@ -2303,10 +2430,10 @@ def create_app():
 
                     flash(f'File caricato con successo! (ID: {media_record.id_media})', 'success')
                     return redirect(url_for('media_list'))
-                    
+
             except Exception as e:
                 flash(f'Errore caricamento file: {str(e)}', 'error')
-        
+
         return render_template('media/upload.html', form=form)
 
     @app.route('/media/list')
