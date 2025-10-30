@@ -341,6 +341,24 @@
                     </a>
                 </div>
 
+                <!-- Drag and Drop Upload Zone -->
+                <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-4"
+                     style="border-color: #6c757d !important; background-color: #f8f9fa; cursor: pointer;">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-2"></i>
+                    <p class="mb-1"><strong>Drag & drop files here or click to browse</strong></p>
+                    <p class="small text-muted mb-0">Supports: images, documents, videos, audio, 3D models</p>
+                    <input type="file" id="fileInput" multiple class="d-none" accept="image/*,application/pdf,.doc,.docx,video/*,audio/*,.obj,.stl,.ply,.gltf,.glb,.dae,.fbx,.3ds">
+                </div>
+
+                <!-- Upload Progress -->
+                <div id="uploadProgress" class="d-none mb-3">
+                    <div class="progress">
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <p id="uploadStatus" class="small text-muted mt-1 mb-0"></p>
+                </div>
+
                 {% if media_list %}
                 <div class="row">
                     {% for media in media_list %}
@@ -359,6 +377,8 @@
                                     <i class="fas fa-video fa-3x text-primary mb-2"></i>
                                 {% elif media.media_type == 'audio' %}
                                     <i class="fas fa-music fa-3x text-info mb-2"></i>
+                                {% elif media.media_type == '3d_model' %}
+                                    <i class="fas fa-cube fa-3x text-success mb-2"></i>
                                 {% else %}
                                     <i class="fas fa-file fa-3x text-secondary mb-2"></i>
                                 {% endif %}
@@ -408,4 +428,123 @@
         </div>
     </form>
 </div>
+
+<script>
+// Drag and Drop Upload for Inventario Media
+{% if edit_mode and inv_id %}
+(function() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const invId = {{ inv_id }};
+
+    // Click to browse
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Highlight drop zone when dragging over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropZone.style.borderColor = '#007bff';
+        dropZone.style.backgroundColor = '#e7f3ff';
+    }
+
+    function unhighlight(e) {
+        dropZone.style.borderColor = '#6c757d';
+        dropZone.style.backgroundColor = '#f8f9fa';
+    }
+
+    // Handle dropped files
+    dropZone.addEventListener('drop', handleDrop, false);
+    fileInput.addEventListener('change', handleFiles, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles({ target: { files: files } });
+    }
+
+    function handleFiles(e) {
+        const files = e.target.files;
+        if (files.length === 0) return;
+
+        uploadFiles(files);
+    }
+
+    function uploadFiles(files) {
+        const formData = new FormData();
+
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
+        formData.append('entity_type', 'inventario');
+        formData.append('entity_id', invId);
+
+        // Show progress
+        uploadProgress.classList.remove('d-none');
+        progressBar.style.width = '0%';
+        uploadStatus.textContent = `Uploading ${files.length} file(s)...`;
+
+        // Upload via AJAX
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+                const percentComplete = (e.loaded / e.total) * 100;
+                progressBar.style.width = percentComplete + '%';
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+                progressBar.style.width = '100%';
+                uploadStatus.textContent = 'Upload complete! Refreshing...';
+                progressBar.classList.remove('progress-bar-animated');
+                progressBar.classList.add('bg-success');
+
+                // Reload page after short delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                uploadStatus.textContent = 'Upload failed: ' + xhr.statusText;
+                progressBar.classList.add('bg-danger');
+            }
+        });
+
+        xhr.addEventListener('error', () => {
+            uploadStatus.textContent = 'Upload error occurred';
+            progressBar.classList.add('bg-danger');
+        });
+
+        xhr.open('POST', '/media/upload/ajax', true);
+        xhr.send(formData);
+
+        // Reset file input
+        fileInput.value = '';
+    }
+})();
+{% endif %}
+</script>
+
 {% endblock %}
