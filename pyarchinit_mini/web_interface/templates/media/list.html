@@ -146,9 +146,23 @@
                                         <i class="fas fa-image fa-2x text-muted"></i>
                                     {% endif %}
                                 {% elif media.media_type == 'document' %}
-                                    <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                    <a href="/{{ media.media_path }}"
+                                       class="glightbox"
+                                       data-type="iframe"
+                                       data-gallery="media-docs"
+                                       data-title="{{ media.media_name }}"
+                                       data-description="{{ media.description if media.description else '' }}">
+                                        <i class="fas fa-file-pdf fa-2x text-danger" style="cursor: pointer;"></i>
+                                    </a>
                                 {% elif media.media_type == 'video' %}
-                                    <i class="fas fa-video fa-2x text-primary"></i>
+                                    <a href="/{{ media.media_path }}"
+                                       class="glightbox"
+                                       data-type="video"
+                                       data-gallery="media-videos"
+                                       data-title="{{ media.media_name }}"
+                                       data-description="{{ media.description if media.description else '' }}">
+                                        <i class="fas fa-video fa-2x text-primary" style="cursor: pointer;"></i>
+                                    </a>
                                 {% elif media.media_type == 'audio' %}
                                     <i class="fas fa-music fa-2x text-info"></i>
                                 {% else %}

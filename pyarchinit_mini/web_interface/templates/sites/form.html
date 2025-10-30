@@ -100,9 +100,23 @@
                                          onerror="this.parentElement.innerHTML='<i class=\'fas fa-image fa-3x text-muted mb-2\'></i>'">
                                 </a>
                             {% elif media.media_type == 'document' %}
-                                <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                                <a href="/{{ media.media_path }}"
+                                   class="glightbox"
+                                   data-type="iframe"
+                                   data-gallery="site-docs"
+                                   data-title="{{ media.media_name }}"
+                                   data-description="{{ media.description if media.description else '' }}">
+                                    <i class="fas fa-file-pdf fa-3x text-danger mb-2" style="cursor: pointer;"></i>
+                                </a>
                             {% elif media.media_type == 'video' %}
-                                <i class="fas fa-video fa-3x text-primary mb-2"></i>
+                                <a href="/{{ media.media_path }}"
+                                   class="glightbox"
+                                   data-type="video"
+                                   data-gallery="site-videos"
+                                   data-title="{{ media.media_name }}"
+                                   data-description="{{ media.description if media.description else '' }}">
+                                    <i class="fas fa-video fa-3x text-primary mb-2" style="cursor: pointer;"></i>
+                                </a>
                             {% elif media.media_type == 'audio' %}
                                 <i class="fas fa-music fa-3x text-info mb-2"></i>
                             {% elif media.media_type == '3d_model' %}
