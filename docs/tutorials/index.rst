@@ -7,6 +7,7 @@ Step-by-step tutorials to get you started with PyArchInit-Mini. Each tutorial in
    :maxdepth: 2
    :caption: Available Tutorials
 
+   video_tutorial
    installation_tutorial
    web_interface_tutorial
    desktop_gui_tutorial
@@ -15,6 +16,11 @@ Overview
 --------
 
 These tutorials are designed for different audiences:
+
+**Video Tutorial** 📹
+   Watch a complete 12-minute automated video demonstration of PyArchInit-Mini workflow.
+   Perfect for visual learners! Includes site creation, stratigraphic units, materials, and Harris Matrix generation.
+   Recommended: Watch at 2x speed (~6 minutes).
 
 **Installation Tutorial**
    Perfect for new users who want to install PyArchInit-Mini from scratch.

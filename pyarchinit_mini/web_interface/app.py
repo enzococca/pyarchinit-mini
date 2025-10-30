@@ -785,18 +785,36 @@ def create_app():
                             return None
                     return None
 
+                def to_int(value):
+                    if value and str(value).strip():
+                        try:
+                            return int(value)
+                        except (ValueError, TypeError):
+                            return None
+                    return None
+
+                def to_date(value):
+                    if value and str(value).strip():
+                        try:
+                            from datetime import datetime
+                            # Try parsing date string (YYYY-MM-DD)
+                            return datetime.strptime(str(value).strip(), '%Y-%m-%d').date()
+                        except (ValueError, TypeError):
+                            return None
+                    return None
+
                 us_data = {
                     # TAB 1: Informazioni Base
                     'sito': form.sito.data,
                     'area': form.area.data,
-                    'us': form.us.data,
+                    'us': to_int(form.us.data),
                     'unita_tipo': form.unita_tipo.data,
                     'tipo_documento': form.tipo_documento.data if form.unita_tipo.data == 'DOC' else None,
                     'anno_scavo': form.anno_scavo.data,
                     'scavato': form.scavato.data,
                     'schedatore': form.schedatore.data,
                     'metodo_di_scavo': form.metodo_di_scavo.data,
-                    'data_schedatura': form.data_schedatura.data,
+                    'data_schedatura': to_date(form.data_schedatura.data),
                     'attivita': form.attivita.data,
                     'direttore_us': form.direttore_us.data,
                     'responsabile_us': form.responsabile_us.data,
@@ -1010,18 +1028,26 @@ def create_app():
                             return None
                     return None
 
+                def to_int(value):
+                    if value and str(value).strip():
+                        try:
+                            return int(value)
+                        except (ValueError, TypeError):
+                            return None
+                    return None
+
                 update_data = {
                     # TAB 1: Informazioni Base
                     'sito': form.sito.data,
                     'area': form.area.data,
-                    'us': form.us.data,
+                    'us': to_int(form.us.data),
                     'unita_tipo': form.unita_tipo.data,
                     'tipo_documento': form.tipo_documento.data if form.unita_tipo.data == 'DOC' else None,
                     'anno_scavo': form.anno_scavo.data,
                     'scavato': form.scavato.data,
                     'schedatore': form.schedatore.data,
                     'metodo_di_scavo': form.metodo_di_scavo.data,
-                    'data_schedatura': form.data_schedatura.data,
+                    'data_schedatura': to_date(form.data_schedatura.data),
                     'attivita': form.attivita.data,
                     'direttore_us': form.direttore_us.data,
                     'responsabile_us': form.responsabile_us.data,

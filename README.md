@@ -108,6 +108,7 @@ All interfaces now display the same version number dynamically from a single sou
 - **REST API**: Version endpoint returns v1.7.13
 
 ### Complete Web GUI Documentation
+- **📹 Video Tutorial**: Complete [Video Walkthrough](docs/VIDEO_TUTORIAL.md) showing full workflow (~12 min, watch at 2x speed recommended)
 - **New Tutorial**: Comprehensive [Web GUI Tutorial](docs/WEB_GUI_TUTORIAL.md) with 63 screenshots
 - **Visual Guide**: Step-by-step walkthrough of all features and forms
 - **Complete Coverage**: Login, Dashboard, Sites, US (6 tabs), Inventario (8 tabs), Harris Matrix, Analytics, Validation, and Administration
