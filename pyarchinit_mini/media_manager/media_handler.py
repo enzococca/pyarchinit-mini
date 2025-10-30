@@ -141,6 +141,9 @@ class MediaHandler:
             # Spreadsheets
             if ext in ['.xlsx', '.xls', '.csv']:
                 return 'spreadsheet'
+            # Word documents
+            if ext in ['.docx', '.doc']:
+                return 'docx'
 
         if not mime_type:
             return 'unknown'

@@ -2758,6 +2758,124 @@ def create_app():
         except Exception as e:
             return f'<html><body><h3>Error: {str(e)}</h3></body></html>', 500
 
+    @app.route('/media/view/docx/<int:media_id>')
+    @login_required
+    def view_docx(media_id):
+        """View DOCX files as HTML"""
+        try:
+            from docx import Document
+            from pathlib import Path
+            import html
+
+            # Get the media record
+            media = media_service.get_media_by_id(media_id)
+            if not media:
+                return '<html><body><h3>Media file not found</h3></body></html>', 404
+
+            # Get file path
+            if not media.media_path:
+                return '<html><body><h3>File path not available</h3></body></html>', 404
+
+            file_path = Path(media.media_path)
+            if not file_path.exists():
+                return '<html><body><h3>File not found on disk</h3></body></html>', 404
+
+            # Check file extension
+            if file_path.suffix.lower() not in ['.docx', '.doc']:
+                return f'<html><body><h3>Unsupported file format: {file_path.suffix}</h3></body></html>', 400
+
+            try:
+                # Read DOCX file
+                doc = Document(file_path)
+
+                # Convert to HTML
+                html_content_parts = []
+
+                # Process each paragraph
+                for paragraph in doc.paragraphs:
+                    if paragraph.text.strip():
+                        # Basic styling based on paragraph style
+                        style = paragraph.style.name if paragraph.style else 'Normal'
+                        if 'Heading' in style:
+                            level = style.replace('Heading ', '').strip()
+                            if level.isdigit():
+                                html_content_parts.append(f'<h{level}>{html.escape(paragraph.text)}</h{level}>')
+                            else:
+                                html_content_parts.append(f'<h3>{html.escape(paragraph.text)}</h3>')
+                        else:
+                            html_content_parts.append(f'<p>{html.escape(paragraph.text)}</p>')
+
+                # Process tables
+                for table in doc.tables:
+                    html_content_parts.append('<table class="table table-bordered table-striped">')
+                    for i, row in enumerate(table.rows):
+                        html_content_parts.append('<tr>')
+                        cell_tag = 'th' if i == 0 else 'td'
+                        for cell in row.cells:
+                            html_content_parts.append(f'<{cell_tag}>{html.escape(cell.text)}</{cell_tag}>')
+                        html_content_parts.append('</tr>')
+                    html_content_parts.append('</table>')
+
+                document_html = '\n'.join(html_content_parts)
+
+                # Create complete HTML page
+                full_html = f'''
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <title>{media.media_name}</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        body {{
+                            padding: 20px;
+                            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                            line-height: 1.6;
+                        }}
+                        .container {{
+                            max-width: 900px;
+                            margin: 0 auto;
+                        }}
+                        h1, h2, h3, h4, h5, h6 {{
+                            margin-top: 20px;
+                            margin-bottom: 10px;
+                            color: #212529;
+                        }}
+                        p {{
+                            margin-bottom: 10px;
+                        }}
+                        table {{
+                            margin: 20px 0;
+                        }}
+                        .header {{
+                            border-bottom: 2px solid #dee2e6;
+                            padding-bottom: 10px;
+                            margin-bottom: 20px;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h2>{media.media_name}</h2>
+                        </div>
+                        <div class="content">
+                            {document_html}
+                        </div>
+                    </div>
+                </body>
+                </html>
+                '''
+
+                return full_html
+
+            except Exception as e:
+                return f'<html><body><h3>Error reading file: {str(e)}</h3></body></html>', 500
+
+        except Exception as e:
+            return f'<html><body><h3>Error: {str(e)}</h3></body></html>', 500
+
     # Database Administration Routes
     @app.route('/admin/database')
     @login_required

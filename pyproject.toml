@@ -94,10 +94,11 @@ media = [
     "python-magic>=0.4.0",
     "moviepy>=1.0.0",
 ]
-# Excel/CSV export and import
+# Excel/CSV/DOCX export and import
 export = [
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",
+    "python-docx>=1.0.0",
 ]
 # Authentication and authorization
 auth = [
@@ -126,6 +127,7 @@ all = [
     "moviepy>=1.0.0",
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",
+    "python-docx>=1.0.0",
     "passlib>=1.7.4",
     "bcrypt>=4.0.0,<4.1.0",
     "python-jose[cryptography]>=3.3.0",
