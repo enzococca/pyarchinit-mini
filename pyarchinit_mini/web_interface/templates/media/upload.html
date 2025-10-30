@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Carica Media{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-upload"></i> Carica File Media</h2>
+        <a href="{{ url_for('media_list') }}" class="btn btn-secondary">
+            <i class="fas fa-list"></i> Vai alla Lista Media
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data" id="mediaUploadForm">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label">Tipo Entità *</label>
+                    {{ form.entity_type(class="form-select", id="entity_type", required=True) }}
+                    <small class="text-muted">Seleziona il tipo di record a cui associare il file</small>
+                </div>
+
+                <!-- Site Selection Fields -->
+                <div id="site_fields" class="entity-fields" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Sito *</label>
+                        {{ form.site_id(class="form-select", required=False) }}
+                    </div>
+                </div>
+
+                <!-- US Selection Fields -->
+                <div id="us_fields" class="entity-fields" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Sito *</label>
+                        {{ form.us_site(class="form-select", required=False) }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Area</label>
+                            {{ form.us_area(class="form-control", placeholder="Es: 1000") }}
+                            <small class="text-muted">Opzionale</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Numero US *</label>
+                            {{ form.us_number(class="form-control", placeholder="Es: 2001", required=False) }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Selection Fields -->
+                <div id="inv_fields" class="entity-fields" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Sito *</label>
+                        {{ form.inv_site(class="form-select", required=False) }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Numero Inventario *</label>
+                        {{ form.inv_number(class="form-control", placeholder="Es: 001", required=False) }}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="mb-3">
+                    <label class="form-label">File *</label>
+                    {{ form.file(class="form-control", required=True) }}
+                    <small class="text-muted">Formati supportati: immagini (JPG, PNG, TIFF), documenti (PDF, DOCX), video (MP4, AVI), audio (MP3, WAV)</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Descrizione</label>
+                    {{ form.description(class="form-control", rows=3, placeholder="Descrizione del file media...") }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Autore/Fotografo</label>
+                    {{ form.author(class="form-control", placeholder="Nome dell'autore o fotografo") }}
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Carica File
+                    </button>
+                    <a href="{{ url_for('media_list') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Annulla
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const entityTypeSelect = document.getElementById('entity_type');
+    const entityFieldGroups = document.querySelectorAll('.entity-fields');
+
+    function updateFieldVisibility() {
+        const selectedType = entityTypeSelect.value;
+
+        // Hide all entity field groups
+        entityFieldGroups.forEach(group => {
+            group.style.display = 'none';
+        });
+
+        // Show the relevant field group
+        if (selectedType === 'site') {
+            document.getElementById('site_fields').style.display = 'block';
+        } else if (selectedType === 'us') {
+            document.getElementById('us_fields').style.display = 'block';
+        } else if (selectedType === 'inventario') {
+            document.getElementById('inv_fields').style.display = 'block';
+        }
+    }
+
+    // Update visibility when entity type changes
+    entityTypeSelect.addEventListener('change', updateFieldVisibility);
+
+    // Set initial state
+    updateFieldVisibility();
+});
+</script>
+{% endblock %}
