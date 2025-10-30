@@ -165,6 +165,15 @@
                                     </a>
                                 {% elif media.media_type == 'audio' %}
                                     <i class="fas fa-music fa-2x text-info"></i>
+                                {% elif media.media_type == 'spreadsheet' %}
+                                    <a href="{{ url_for('view_spreadsheet', media_id=media.id_media) }}"
+                                       class="glightbox"
+                                       data-type="iframe"
+                                       data-gallery="media-spreadsheets"
+                                       data-title="{{ media.media_name }}"
+                                       data-description="{{ media.description if media.description else '' }}">
+                                        <i class="fas fa-table fa-2x text-success" style="cursor: pointer;"></i>
+                                    </a>
                                 {% else %}
                                     <i class="fas fa-file fa-2x text-secondary"></i>
                                 {% endif %}

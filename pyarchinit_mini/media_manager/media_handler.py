@@ -138,6 +138,9 @@ class MediaHandler:
             # Videos
             if ext in ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v', '.mpeg', '.mpg']:
                 return 'video'
+            # Spreadsheets
+            if ext in ['.xlsx', '.xls', '.csv']:
+                return 'spreadsheet'
 
         if not mime_type:
             return 'unknown'

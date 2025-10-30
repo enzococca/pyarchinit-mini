@@ -2654,6 +2654,110 @@ def create_app():
             flash(f'Error deleting media: {str(e)}', 'error')
             return redirect(url_for('media_list'))
 
+    @app.route('/media/view/spreadsheet/<int:media_id>')
+    @login_required
+    def view_spreadsheet(media_id):
+        """View Excel/CSV files as HTML table"""
+        try:
+            import pandas as pd
+            from pathlib import Path
+
+            # Get the media record
+            media = media_service.get_media_by_id(media_id)
+            if not media:
+                return '<html><body><h3>Media file not found</h3></body></html>', 404
+
+            # Get file path
+            if not media.media_path:
+                return '<html><body><h3>File path not available</h3></body></html>', 404
+
+            file_path = Path(media.media_path)
+            if not file_path.exists():
+                return '<html><body><h3>File not found on disk</h3></body></html>', 404
+
+            # Read file based on extension
+            file_ext = file_path.suffix.lower()
+
+            try:
+                if file_ext in ['.xlsx', '.xls']:
+                    # Read Excel file
+                    df = pd.read_excel(file_path)
+                elif file_ext == '.csv':
+                    # Read CSV file
+                    df = pd.read_csv(file_path)
+                else:
+                    return f'<html><body><h3>Unsupported file format: {file_ext}</h3></body></html>', 400
+
+                # Convert to HTML with Bootstrap styling
+                html_table = df.to_html(
+                    classes='table table-striped table-bordered table-hover table-sm',
+                    index=False,
+                    escape=True,
+                    max_rows=1000  # Limit to 1000 rows for performance
+                )
+
+                # Create complete HTML page
+                html_content = f'''
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <title>{media.media_name}</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        body {{
+                            padding: 20px;
+                            font-size: 12px;
+                        }}
+                        .table-container {{
+                            overflow-x: auto;
+                            max-width: 100%;
+                        }}
+                        .table {{
+                            margin-bottom: 0;
+                        }}
+                        .table thead th {{
+                            position: sticky;
+                            top: 0;
+                            background-color: #212529;
+                            color: white;
+                            z-index: 10;
+                        }}
+                        h3 {{
+                            margin-bottom: 20px;
+                        }}
+                        .info {{
+                            margin-bottom: 15px;
+                            padding: 10px;
+                            background-color: #f8f9fa;
+                            border-left: 4px solid #0d6efd;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="container-fluid">
+                        <h3>{media.media_name}</h3>
+                        <div class="info">
+                            <p class="mb-1"><strong>Rows:</strong> {len(df)} | <strong>Columns:</strong> {len(df.columns)}</p>
+                            {f'<p class="mb-0 text-muted"><small>Showing first 1000 rows</small></p>' if len(df) > 1000 else ''}
+                        </div>
+                        <div class="table-container">
+                            {html_table}
+                        </div>
+                    </div>
+                </body>
+                </html>
+                '''
+
+                return html_content
+
+            except Exception as e:
+                return f'<html><body><h3>Error reading file: {str(e)}</h3></body></html>', 500
+
+        except Exception as e:
+            return f'<html><body><h3>Error: {str(e)}</h3></body></html>', 500
+
     # Database Administration Routes
     @app.route('/admin/database')
     @login_required
