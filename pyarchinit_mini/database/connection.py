@@ -59,7 +59,8 @@ class DatabaseConnection:
             self.SessionLocal = sessionmaker(
                 autocommit=False,
                 autoflush=False,
-                bind=self.engine
+                bind=self.engine,
+                expire_on_commit=False  # Allow accessing attributes after session closes
             )
             
             logger.info(f"Database connection established: {self._get_db_type()}")
