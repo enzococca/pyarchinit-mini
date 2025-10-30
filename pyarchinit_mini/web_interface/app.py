@@ -2619,6 +2619,41 @@ def create_app():
         media_dir = os.path.join(os.getcwd(), 'media')
         return send_from_directory(media_dir, filepath)
 
+    @app.route('/media/delete/<int:media_id>', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def delete_media(media_id):
+        """Delete a media file"""
+        try:
+            # Get the media record to retrieve entity info before deletion
+            media = media_service.get_media_by_id(media_id)
+            if not media:
+                flash('Media file not found', 'error')
+                return redirect(url_for('media_list'))
+
+            # Store entity info for potential redirect
+            entity_type = media.entity_type
+            entity_id = media.entity_id
+
+            # Delete the media
+            success = media_service.delete_media(media_id, delete_file=True)
+
+            if success:
+                flash('Media file deleted successfully', 'success')
+            else:
+                flash('Error deleting media file', 'error')
+
+            # Redirect back to referrer or media list
+            referrer = request.referrer
+            if referrer and ('edit_site' in referrer or 'edit_us' in referrer or 'edit_inventario' in referrer):
+                return redirect(referrer)
+            else:
+                return redirect(url_for('media_list'))
+
+        except Exception as e:
+            flash(f'Error deleting media: {str(e)}', 'error')
+            return redirect(url_for('media_list'))
+
     # Database Administration Routes
     @app.route('/admin/database')
     @login_required
