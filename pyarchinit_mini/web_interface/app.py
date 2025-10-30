@@ -1225,6 +1225,13 @@ def create_app():
             form.flottazione.data = us.flottazione
             form.setacciatura.data = us.setacciatura
 
+        # Get associated media files
+        try:
+            media_list = media_service.get_media_by_entity('us', us_id, size=100)
+        except Exception as e:
+            logger.warning(f"Failed to fetch media for US {us_id}: {e}")
+            media_list = []
+
         return render_template('us/form.html',
                              form=form,
                              title='Modifica US',
@@ -1232,7 +1239,9 @@ def create_app():
                              prev_id=prev_id,
                              next_id=next_id,
                              current_position=current_position,
-                             total_records=total_records)
+                             total_records=total_records,
+                             us_id=us_id,
+                             media_list=media_list)
 
     # Inventory routes
     @app.route('/inventario')
