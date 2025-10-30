@@ -5,15 +5,47 @@ Complete video tutorial demonstrating the PyArchInit-Mini web interface workflow
 
 .. raw:: html
 
-   <video width="100%" controls>
-     <source src="https://github.com/enzococca/pyarchinit-mini/raw/main/docs/tutorial_video/pyarchinit_tutorial_complete.webm" type="video/webm">
-     Your browser does not support the video tag. <a href="https://github.com/enzococca/pyarchinit-mini/raw/main/docs/tutorial_video/pyarchinit_tutorial_complete.webm">Download the video</a>
-   </video>
+   <div style="margin-bottom: 20px;">
+     <video id="tutorialVideo" width="100%" controls>
+       <source src="https://github.com/enzococca/pyarchinit-mini/raw/main/docs/tutorial_video/pyarchinit_tutorial_complete.webm" type="video/webm">
+       Your browser does not support the video tag. <a href="https://github.com/enzococca/pyarchinit-mini/raw/main/docs/tutorial_video/pyarchinit_tutorial_complete.webm">Download the video</a>
+     </video>
+
+     <div style="margin-top: 10px; padding: 10px; background-color: #f5f5f5; border-radius: 5px;">
+       <strong>Playback Speed:</strong>
+       <button onclick="setSpeed(0.5)" style="margin: 2px; padding: 5px 10px; cursor: pointer;">0.5x</button>
+       <button onclick="setSpeed(1)" style="margin: 2px; padding: 5px 10px; cursor: pointer;">1x</button>
+       <button onclick="setSpeed(1.5)" style="margin: 2px; padding: 5px 10px; cursor: pointer;">1.5x</button>
+       <button onclick="setSpeed(2)" style="margin: 2px; padding: 5px 10px; cursor: pointer; background-color: #4CAF50; color: white; font-weight: bold;">2x ⭐</button>
+       <button onclick="setSpeed(3)" style="margin: 2px; padding: 5px 10px; cursor: pointer;">3x</button>
+       <button onclick="setSpeed(4)" style="margin: 2px; padding: 5px 10px; cursor: pointer;">4x</button>
+       <span id="currentSpeed" style="margin-left: 10px; font-weight: bold;">Current: 1x</span>
+     </div>
+
+     <script>
+       function setSpeed(speed) {
+         var video = document.getElementById('tutorialVideo');
+         video.playbackRate = speed;
+         document.getElementById('currentSpeed').textContent = 'Current: ' + speed + 'x';
+
+         // Highlight active button
+         var buttons = document.querySelectorAll('button[onclick^="setSpeed"]');
+         buttons.forEach(function(btn) {
+           btn.style.backgroundColor = '';
+           btn.style.color = '';
+           btn.style.fontWeight = '';
+         });
+         event.target.style.backgroundColor = '#4CAF50';
+         event.target.style.color = 'white';
+         event.target.style.fontWeight = 'bold';
+       }
+     </script>
+   </div>
 
 .. note::
-   **Recommended viewing**: Watch at 2x speed for optimal viewing experience.
+   **Recommended viewing**: Watch at 2x-4x speed for faster viewing.
 
-   To adjust playback speed in most browsers: Right-click video → Playback speed → 2x
+   Use the speed buttons above the video to adjust playback speed from 0.5x to 4x.
 
 Video Information
 -----------------
