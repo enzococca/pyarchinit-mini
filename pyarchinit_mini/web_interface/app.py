@@ -278,28 +278,28 @@ class InventarioForm(FlaskForm):
     diapositiva = StringField('Diapositiva')
 
 class MediaUploadForm(FlaskForm):
-    entity_type = SelectField('Tipo Entità', choices=[
-        ('', '-- Seleziona --'),
-        ('site', 'Sito'),
+    entity_type = SelectField('Entity Type', choices=[
+        ('', '-- Select --'),
+        ('site', 'Site'),
         ('us', 'US'),
-        ('inventario', 'Inventario')
+        ('inventario', 'Inventory')
     ], validators=[DataRequired()])
 
     # Fields for Site selection
-    site_id = SelectField('Sito', choices=[], coerce=int, validators=[Optional()])
+    site_id = SelectField('Site', choices=[], coerce=int, validators=[Optional()])
 
     # Fields for US selection
-    us_site = SelectField('Sito', choices=[], coerce=str, validators=[Optional()])
+    us_site = SelectField('Site', choices=[], coerce=str, validators=[Optional()])
     us_area = StringField('Area', validators=[Optional()])
-    us_number = StringField('Numero US', validators=[Optional()])
+    us_number = StringField('US Number', validators=[Optional()])
 
     # Fields for Inventory selection
-    inv_site = SelectField('Sito', choices=[], coerce=str, validators=[Optional()])
-    inv_number = StringField('Numero Inventario', validators=[Optional()])
+    inv_site = SelectField('Site', choices=[], coerce=str, validators=[Optional()])
+    inv_number = StringField('Inventory Number', validators=[Optional()])
 
     file = FileField('File', validators=[DataRequired()])
-    description = TextAreaField('Descrizione')
-    author = StringField('Autore/Fotografo')
+    description = TextAreaField('Description')
+    author = StringField('Author/Photographer')
 
 class DatabaseUploadForm(FlaskForm):
     """Form for uploading SQLite database files"""
@@ -2393,7 +2393,7 @@ def create_app():
                     us_number = form.us_number.data
 
                     if not all([site_name, us_number]):
-                        flash('Per US è necessario specificare Sito e Numero US', 'error')
+                        flash('For US, Site and US Number are required', 'error')
                         return render_template('media/upload.html', form=form)
 
                     # Search for US record
@@ -2403,7 +2403,7 @@ def create_app():
                     us_list = us_service.get_all_us(size=1000, filters=us_filters)
 
                     if not us_list:
-                        flash(f'US non trovata: {site_name} - Area {area or "N/A"} - US {us_number}', 'error')
+                        flash(f'US not found: {site_name} - Area {area or "N/A"} - US {us_number}', 'error')
                         return render_template('media/upload.html', form=form)
 
                     entity_id = us_list[0].id_us
@@ -2414,20 +2414,20 @@ def create_app():
                     inv_number = form.inv_number.data
 
                     if not all([site_name, inv_number]):
-                        flash('Per Inventario è necessario specificare Sito e Numero Inventario', 'error')
+                        flash('For Inventory, Site and Inventory Number are required', 'error')
                         return render_template('media/upload.html', form=form)
 
                     # Search for inventory record
                     inv_list = inventario_service.get_all_inventario(size=1000, filters={'sito': site_name, 'numero_inventario': inv_number})
 
                     if not inv_list:
-                        flash(f'Inventario non trovato: {site_name} - Inv. {inv_number}', 'error')
+                        flash(f'Inventory not found: {site_name} - Inv. {inv_number}', 'error')
                         return render_template('media/upload.html', form=form)
 
                     entity_id = inv_list[0].id_invmat
 
                 if not entity_id:
-                    flash('Errore: impossibile determinare l\'entità associata', 'error')
+                    flash('Error: unable to determine associated entity', 'error')
                     return render_template('media/upload.html', form=form)
 
                 uploaded_file = form.file.data
@@ -2459,11 +2459,11 @@ def create_app():
                     # Clean up temp file
                     os.remove(temp_path)
 
-                    flash(f'File caricato con successo! (ID: {media_id})', 'success')
+                    flash(f'File uploaded successfully! (ID: {media_id})', 'success')
                     return redirect(url_for('media_list'))
 
             except Exception as e:
-                flash(f'Errore caricamento file: {str(e)}', 'error')
+                flash(f'File upload error: {str(e)}', 'error')
 
         # Pre-populate form from query parameters (when coming from entity forms)
         if request.method == 'GET':
