@@ -143,24 +143,49 @@ class DatabaseMigrations:
             logger.error(f"Error during i18n migration: {e}")
             raise
     
+    def migrate_tipo_documento(self):
+        """Add tipo_documento and file_path columns to US table"""
+        try:
+            logger.info("Starting tipo_documento migration...")
+
+            migrations_applied = 0
+
+            # Add tipo_documento column
+            if self.add_column_if_not_exists('us_table', 'tipo_documento', 'VARCHAR(100)'):
+                migrations_applied += 1
+
+            # Add file_path column (for document files)
+            if self.add_column_if_not_exists('us_table', 'file_path', 'TEXT'):
+                migrations_applied += 1
+
+            logger.info(f"tipo_documento migration completed. {migrations_applied} new columns added")
+            return migrations_applied
+
+        except Exception as e:
+            logger.error(f"Error during tipo_documento migration: {e}")
+            raise
+
     def migrate_all_tables(self):
         """Run all necessary migrations"""
         try:
             logger.info("Starting database migrations...")
-            
+
             total_migrations = 0
-            
+
             # Migrate inventario_materiali_table
             total_migrations += self.migrate_inventario_materiali_table()
-            
+
             # Add i18n columns
             total_migrations += self.migrate_i18n_columns()
-            
+
+            # Add tipo_documento and file_path columns to US table
+            total_migrations += self.migrate_tipo_documento()
+
             # Add other table migrations here as needed
-            
+
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations
-            
+
         except Exception as e:
             logger.error(f"Error during database migrations: {e}")
             raise

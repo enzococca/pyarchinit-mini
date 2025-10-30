@@ -5,6 +5,24 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] - 2025-10-30
+
+### Fixed - Database Migration Hotfix
+- **Critical Bug**: Fixed missing `tipo_documento` and `file_path` columns in existing databases
+  - Root cause: `DatabaseMigrations.migrate_all_tables()` was not calling the tipo_documento migration
+  - Added `migrate_tipo_documento()` method to `pyarchinit_mini/database/migrations.py`
+  - Updated `migrate_all_tables()` to include tipo_documento migration
+  - Ensures compatibility with databases created before version 1.8.0
+  - Users upgrading from versions prior to 1.8.0 will now have columns added automatically
+  - Resolves `sqlite3.OperationalError: no such column: us_table.tipo_documento` error
+
+### Technical Details
+- Migration script `add_tipo_documento.py` existed but was not being executed
+- Adds two columns to `us_table`:
+  - `tipo_documento` VARCHAR(100) - Document type classification
+  - `file_path` TEXT - Path to associated document files
+- Migration uses safe `add_column_if_not_exists()` method to prevent duplicate column errors
+
 ## [1.8.0] - 2025-10-30
 
 ### Added - Enhanced Media Management System
