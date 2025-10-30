@@ -29,6 +29,7 @@ from pyarchinit_mini.services.user_service import UserService
 from pyarchinit_mini.services.analytics_service import AnalyticsService
 from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
 from pyarchinit_mini.services.datazione_service import DatazioneService
+from pyarchinit_mini.services.media_service import MediaService
 from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
 from pyarchinit_mini.harris_matrix.matrix_visualizer import MatrixVisualizer
 from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
@@ -413,6 +414,7 @@ def create_app():
     graphviz_visualizer = PyArchInitMatrixVisualizer()  # Graphviz visualizer (desktop GUI style)
     pdf_generator = PDFGenerator()
     media_handler = MediaHandler()
+    media_service = MediaService(db_manager, media_handler)
 
     # Store services in app for access in routes
     app.user_service = user_service
@@ -2303,6 +2305,62 @@ def create_app():
                 flash(f'Errore caricamento file: {str(e)}', 'error')
         
         return render_template('media/upload.html', form=form)
+
+    @app.route('/media/list')
+    @login_required
+    def media_list():
+        """List all uploaded media files with search and filter capabilities"""
+        try:
+            # Get query parameters
+            search_term = request.args.get('search', '').strip()
+            media_type_filter = request.args.get('type', '').strip()
+            entity_type_filter = request.args.get('entity', '').strip()
+            page = int(request.args.get('page', 1))
+            per_page = int(request.args.get('per_page', 20))
+
+            # Get media list based on filters
+            if search_term:
+                media_list = media_service.search_media(search_term, page=page, size=per_page)
+            elif media_type_filter:
+                media_list = media_service.get_media_by_type(media_type_filter, page=page, size=per_page)
+            elif entity_type_filter:
+                # For entity filter, we need to get all media and filter (or modify service)
+                media_list = media_service.get_all_media(page=page, size=per_page,
+                                                        filters={'entity_type': entity_type_filter} if entity_type_filter else None)
+            else:
+                media_list = media_service.get_all_media(page=page, size=per_page)
+
+            # Get statistics
+            stats = media_service.get_media_statistics()
+
+            # Enrich media with entity information
+            for media in media_list:
+                try:
+                    if media.entity_type == 'site':
+                        site = site_service.get_site_by_id(media.entity_id)
+                        media.entity_name = site.sito if site else f'Site ID {media.entity_id}'
+                    elif media.entity_type == 'us':
+                        us = us_service.get_us_by_id(media.entity_id)
+                        media.entity_name = f"{us.sito} - US {us.us}" if us else f'US ID {media.entity_id}'
+                    elif media.entity_type == 'inventario':
+                        inv = inventario_service.get_inventario_by_id(media.entity_id)
+                        media.entity_name = f"{inv.sito} - {inv.numero_inventario}" if inv else f'Inventory ID {media.entity_id}'
+                    else:
+                        media.entity_name = f'{media.entity_type} ID {media.entity_id}'
+                except:
+                    media.entity_name = f'{media.entity_type} ID {media.entity_id}'
+
+            return render_template('media/list.html',
+                                 media_list=media_list,
+                                 stats=stats,
+                                 search_term=search_term,
+                                 media_type_filter=media_type_filter,
+                                 entity_type_filter=entity_type_filter,
+                                 page=page,
+                                 per_page=per_page)
+        except Exception as e:
+            flash(f'Error loading media list: {str(e)}', 'error')
+            return render_template('media/list.html', media_list=[], stats={})
 
     # Database Administration Routes
     @app.route('/admin/database')

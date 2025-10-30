@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Media Files{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-photo-video"></i> Media Files</h2>
+        <div>
+            <a href="{{ url_for('upload_media') }}" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Upload Media
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    {% if stats %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-file fa-2x text-primary mb-2"></i>
+                    <h5 class="display-6">{{ stats.total_media }}</h5>
+                    <p class="text-muted mb-0">Total Files</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-image fa-2x text-success mb-2"></i>
+                    <h5 class="display-6">{{ stats.type_distribution.get('image', 0) }}</h5>
+                    <p class="text-muted mb-0">Images</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-pdf fa-2x text-danger mb-2"></i>
+                    <h5 class="display-6">{{ stats.type_distribution.get('document', 0) }}</h5>
+                    <p class="text-muted mb-0">Documents</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-hdd fa-2x text-info mb-2"></i>
+                    <h5 class="display-6">{{ stats.total_storage_mb }} MB</h5>
+                    <p class="text-muted mb-0">Storage Used</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('media_list') }}" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Search by name, description, tags, author..."
+                           value="{{ search_term }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Media Type</label>
+                    <select name="type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="image" {% if media_type_filter == 'image' %}selected{% endif %}>Images</option>
+                        <option value="document" {% if media_type_filter == 'document' %}selected{% endif %}>Documents</option>
+                        <option value="video" {% if media_type_filter == 'video' %}selected{% endif %}>Videos</option>
+                        <option value="audio" {% if media_type_filter == 'audio' %}selected{% endif %}>Audio</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Entity Type</label>
+                    <select name="entity" class="form-select">
+                        <option value="">All Entities</option>
+                        <option value="site" {% if entity_type_filter == 'site' %}selected{% endif %}>Sites</option>
+                        <option value="us" {% if entity_type_filter == 'us' %}selected{% endif %}>Stratigraphic Units</option>
+                        <option value="inventario" {% if entity_type_filter == 'inventario' %}selected{% endif %}>Inventory</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Media List -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-list"></i> Media Files
+                {% if search_term %}
+                    - Search: "{{ search_term }}"
+                {% elif media_type_filter %}
+                    - Type: {{ media_type_filter|title }}
+                {% elif entity_type_filter %}
+                    - Entity: {{ entity_type_filter|title }}
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if media_list %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px">Preview</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Associated Record</th>
+                            <th>Size</th>
+                            <th>Author</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for media in media_list %}
+                        <tr>
+                            <td class="text-center">
+                                {% if media.media_type == 'image' %}
+                                    {% if media.media_path %}
+                                        <img src="{{ url_for('static', filename='uploads/' + media.media_filename) }}"
+                                             alt="{{ media.media_name }}"
+                                             class="img-thumbnail"
+                                             style="max-width: 60px; max-height: 60px;"
+                                             onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+                                    {% else %}
+                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                    {% endif %}
+                                {% elif media.media_type == 'document' %}
+                                    <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                {% elif media.media_type == 'video' %}
+                                    <i class="fas fa-video fa-2x text-primary"></i>
+                                {% elif media.media_type == 'audio' %}
+                                    <i class="fas fa-music fa-2x text-info"></i>
+                                {% else %}
+                                    <i class="fas fa-file fa-2x text-secondary"></i>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ media.media_name }}</strong>
+                                {% if media.description %}
+                                <br><small class="text-muted">{{ media.description[:100] }}{% if media.description|length > 100 %}...{% endif %}</small>
+                                {% endif %}
+                                {% if media.is_primary %}
+                                <br><span class="badge bg-success">Primary</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ media.media_type|title if media.media_type else 'Unknown' }}</span>
+                                {% if media.mime_type %}
+                                <br><small class="text-muted">{{ media.mime_type }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ media.entity_type|title }}</span><br>
+                                <small>{{ media.entity_name }}</small>
+                            </td>
+                            <td>
+                                {% if media.file_size %}
+                                    {% if media.file_size < 1024 %}
+                                        {{ media.file_size }} B
+                                    {% elif media.file_size < 1048576 %}
+                                        {{ "%.1f"|format(media.file_size / 1024) }} KB
+                                    {% else %}
+                                        {{ "%.1f"|format(media.file_size / 1048576) }} MB
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ media.author if media.author else '-' }}</td>
+                            <td>
+                                {% if media.media_path %}
+                                <a href="{{ url_for('static', filename='uploads/' + media.media_filename) }}"
+                                   target="_blank"
+                                   class="btn btn-sm btn-primary"
+                                   title="Open">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('static', filename='uploads/' + media.media_filename) }}"
+                                   download="{{ media.media_name }}"
+                                   class="btn btn-sm btn-success"
+                                   title="Download">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                {% else %}
+                                <span class="text-muted">File not available</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-3">
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('media_list', page=page-1, search=search_term, type=media_type_filter, entity=entity_type_filter) }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        <li class="page-item active">
+                            <span class="page-link">Page {{ page }}</span>
+                        </li>
+                        {% if media_list|length == per_page %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('media_list', page=page+1, search=search_term, type=media_type_filter, entity=entity_type_filter) }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                {% if search_term or media_type_filter or entity_type_filter %}
+                    No media files found matching your filters. <a href="{{ url_for('media_list') }}">Clear filters</a>
+                {% else %}
+                    No media files have been uploaded yet. <a href="{{ url_for('upload_media') }}">Upload your first media file</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
