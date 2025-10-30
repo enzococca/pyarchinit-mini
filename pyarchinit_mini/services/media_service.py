@@ -204,7 +204,7 @@ class MediaService:
 
                 # Count by type
                 type_counts = {}
-                for media_type in ['image', 'document', 'video', 'audio']:
+                for media_type in ['image', 'document', 'video', 'audio', '3d_model']:
                     count = session.query(Media).filter(Media.media_type == media_type).count()
                     type_counts[media_type] = count
 

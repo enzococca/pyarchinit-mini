@@ -23,9 +23,11 @@ class MediaHandler:
         self.images_path = self.base_media_path / "images"
         self.documents_path = self.base_media_path / "documents"
         self.videos_path = self.base_media_path / "videos"
+        self.models_path = self.base_media_path / "3d_models"
         self.thumbnails_path = self.base_media_path / "thumbnails"
-        
-        for path in [self.images_path, self.documents_path, self.videos_path, self.thumbnails_path]:
+
+        for path in [self.images_path, self.documents_path, self.videos_path,
+                     self.models_path, self.thumbnails_path]:
             path.mkdir(exist_ok=True)
     
     def store_file(self, file_path: str, entity_type: str, entity_id: int,
@@ -62,6 +64,8 @@ class MediaHandler:
             target_dir = self.documents_path
         elif file_info['media_type'] == 'video':
             target_dir = self.videos_path
+        elif file_info['media_type'] == '3d_model':
+            target_dir = self.models_path
         else:
             target_dir = self.base_media_path / "other"
             target_dir.mkdir(exist_ok=True)
@@ -101,16 +105,16 @@ class MediaHandler:
     
     def _analyze_file(self, file_path: Path) -> Dict[str, Any]:
         """Analyze file and extract metadata"""
-        
+
         file_stat = file_path.stat()
         mime_type, _ = mimetypes.guess_type(str(file_path))
-        
+
         info = {
             'file_size': file_stat.st_size,
             'mime_type': mime_type or 'application/octet-stream',
-            'media_type': self._determine_media_type(mime_type)
+            'media_type': self._determine_media_type(mime_type, file_path)
         }
-        
+
         # For images, get dimensions
         if info['media_type'] == 'image':
             try:
@@ -119,21 +123,39 @@ class MediaHandler:
                     info['height'] = img.height
             except Exception:
                 pass
-        
+
         return info
     
-    def _determine_media_type(self, mime_type: str) -> str:
-        """Determine media type from MIME type"""
+    def _determine_media_type(self, mime_type: str, file_path: Path = None) -> str:
+        """Determine media type from MIME type and file extension"""
+
+        # Check file extension for 3D models (more reliable than MIME types)
+        if file_path:
+            ext = file_path.suffix.lower()
+            if ext in ['.obj', '.stl', '.ply', '.gltf', '.glb', '.dae', '.fbx', '.3ds']:
+                return '3d_model'
+
         if not mime_type:
             return 'unknown'
-        
+
         if mime_type.startswith('image/'):
             return 'image'
         elif mime_type.startswith('video/'):
             return 'video'
         elif mime_type.startswith('audio/'):
             return 'audio'
-        elif mime_type in ['application/pdf', 'application/msword', 
+        elif mime_type.startswith('model/') or mime_type in [
+            'application/sla',  # STL files
+            'application/vnd.ms-pki.stl',  # STL files
+            'application/ply',  # PLY files
+            'model/gltf+json',  # glTF JSON
+            'model/gltf-binary',  # glTF binary (GLB)
+            'model/obj',  # OBJ files
+            'model/stl',  # STL files
+            'model/vnd.collada+xml'  # COLLADA
+        ]:
+            return '3d_model'
+        elif mime_type in ['application/pdf', 'application/msword',
                           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                           'text/plain', 'text/html']:
             return 'document'
