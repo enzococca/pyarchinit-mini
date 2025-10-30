@@ -2509,6 +2509,17 @@ def create_app():
             flash(f'Error loading media list: {str(e)}', 'error')
             return render_template('media/list.html', media_list=[], stats={})
 
+    @app.route('/media/<path:filepath>')
+    @login_required
+    def serve_media(filepath):
+        """Serve media files from the media directory"""
+        from flask import send_from_directory
+        import os
+
+        # Get the media directory path (relative to project root)
+        media_dir = os.path.join(os.getcwd(), 'media')
+        return send_from_directory(media_dir, filepath)
+
     # Database Administration Routes
     @app.route('/admin/database')
     @login_required

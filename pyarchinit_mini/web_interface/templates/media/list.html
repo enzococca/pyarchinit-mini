@@ -131,7 +131,7 @@
                             <td class="text-center">
                                 {% if media.media_type == 'image' %}
                                     {% if media.media_path %}
-                                        <img src="{{ url_for('static', filename='uploads/' + media.media_filename) }}"
+                                        <img src="/{{ media.media_path }}"
                                              alt="{{ media.media_name }}"
                                              class="img-thumbnail"
                                              style="max-width: 60px; max-height: 60px;"
@@ -184,13 +184,13 @@
                             <td>{{ media.author if media.author else '-' }}</td>
                             <td>
                                 {% if media.media_path %}
-                                <a href="{{ url_for('static', filename='uploads/' + media.media_filename) }}"
+                                <a href="/{{ media.media_path }}"
                                    target="_blank"
                                    class="btn btn-sm btn-primary"
                                    title="Open">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{{ url_for('static', filename='uploads/' + media.media_filename) }}"
+                                <a href="/{{ media.media_path }}"
                                    download="{{ media.media_name }}"
                                    class="btn btn-sm btn-success"
                                    title="Download">
