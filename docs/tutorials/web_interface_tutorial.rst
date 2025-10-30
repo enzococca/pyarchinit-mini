@@ -741,6 +741,160 @@ Export Harris Matrix diagrams in GraphML format for advanced editing with yEd Gr
 .. tip::
    Download yEd Graph Editor from https://www.yworks.com/products/yed for advanced diagram editing and automatic layout algorithms.
 
+Excel/CSV Import
+================
+
+Import stratigraphic data from Excel files and generate Extended Matrix.
+
+.. figure:: ../_static/images/webapp/051_excel_import_interface.png
+   :alt: Excel Import Interface
+   :align: center
+   :width: 100%
+
+   **Excel Import** - Bulk import from Excel files with Harris Matrix generation
+
+**Excel Format Options:**
+
+* **Harris Matrix Template**: Sheet-based format with separate NODES and RELATIONSHIPS sheets
+* **Extended Matrix Parser**: Inline format with relationships in columns
+
+**Import Process:**
+
+1. Select Excel format type
+2. Upload Excel file (.xlsx, .xls, .csv)
+3. Enter archaeological site name
+4. Optionally generate GraphML for visualization
+5. Click Import Excel
+
+**Generated Output:**
+
+* US records in database
+* Stratigraphic relationships
+* Periodization data
+* GraphML file for visualization (optional)
+
+.. note::
+   Example Excel files are provided for testing both Harris Template and Extended Matrix formats.
+
+Data Import/Export
+==================
+
+PyArchInit-compatible import and export for data migration and backup.
+
+.. figure:: ../_static/images/webapp/053_pyarchinit_ie_main.png
+   :alt: PyArchInit Import/Export Interface
+   :align: center
+   :width: 100%
+
+   **PyArchInit Import/Export** - Data migration between PyArchInit databases
+
+Import from PyArchInit Database
+--------------------------------
+
+.. figure:: ../_static/images/webapp/054_pyarchinit_import_section.png
+   :alt: Import from PyArchInit
+   :align: center
+   :width: 100%
+
+   **Import Interface** - Migrate data from PyArchInit full version
+
+**Import Options:**
+
+* Source database type: SQLite or PostgreSQL
+* Database file path selection
+* Test connection before import
+* Select which tables to import:
+
+  * Siti (Sites)
+  * US - Stratigraphic Units
+  * US Relationships (from rapporti field)
+  * Inventario Materiali (Material Inventory)
+  * Periodizzazione (Periodization)
+  * Thesaurus
+
+* Optional site filtering
+
+**Datazione Sync:**
+
+After import, use the "Sync Datazioni from Periodizzazione" button to synchronize dating period data with US datazione fields.
+
+Export to PyArchInit Format
+----------------------------
+
+.. figure:: ../_static/images/webapp/055_pyarchinit_export_section.png
+   :alt: Export to PyArchInit
+   :align: center
+   :width: 100%
+
+   **Export Interface** - Export data to PyArchInit-compatible database
+
+**Export Features:**
+
+* Create new SQLite database compatible with PyArchInit
+* Export selected tables
+* Maintain data integrity and relationships
+* Backup current project data
+
+Create New Database
+-------------------
+
+.. figure:: ../_static/images/webapp/056_pyarchinit_create_db.png
+   :alt: Create Empty Database
+   :align: center
+   :width: 100%
+
+   **Create Database** - Initialize new empty PyArchInit-Mini database
+
+**Database Creation:**
+
+* Create new SQLite database file
+* Initialize complete schema
+* Set up all tables and relationships
+* Ready for immediate use
+
+Extended Matrix Node Configuration
+===================================
+
+Configure node types for Extended Matrix Framework diagrams.
+
+.. figure:: ../_static/images/webapp/058_em_node_config_interface.png
+   :alt: Extended Matrix Node Configuration
+   :align: center
+   :width: 100%
+
+   **EM Node Configuration** - Manage 10 standard stratigraphic and 4 non-stratigraphic node types
+
+**Built-in Node Types:**
+
+**Stratigraphic Units (10 types):**
+
+* **US**: Standard stratigraphic unit (rectangle, white/brown)
+* **USM**: Masonry stratigraphic unit (rectangle, white/brown)
+* **VSF**: Virtual stratigraphic face (roundrectangle, white/yellow)
+* **SF**: Stratigraphic face (octagon, white/yellow)
+* **USD**: Destructive stratigraphic unit (roundrectangle, white/brown)
+* **USVA**: Virtual stratigraphic unit A (parallelogram, black/blue)
+* **USVB**: Virtual stratigraphic unit B (hexagon, black/green)
+* **USVC**: Virtual stratigraphic unit C (hexagon, black/green)
+* **TU**: Typological unit (rectangle, white/brown)
+* **CON**: Connector/continuity node (svg, white/white)
+
+**Non-Stratigraphic Units (4 types):**
+
+* **DOC**: Documentation node
+* **Extractor**: Data extractor node
+* **Combiner**: Data combiner node
+* **Property**: Property/attribute node
+
+**Node Configuration:**
+
+* Label format with placeholders (e.g., `US{number}`)
+* Symbol type for GraphML export
+* Shape for visualization
+* Colors (fill and border)
+* Read-only for built-in types
+* Custom types can be added/edited/deleted
+
 Dating Periods Management
 =========================
 
@@ -953,6 +1107,9 @@ You now know how to:
 * Upload and manage media files
 * Create and visualize Harris Matrix diagrams
 * Export diagrams to GraphML and Extended Matrix formats
+* Import data from Excel/CSV files
+* Manage PyArchInit database import/export
+* Configure Extended Matrix node types
 * Define dating periods and periodization schemes
 * Manage ICCD thesaurus terms
 * View analytics and validation reports
