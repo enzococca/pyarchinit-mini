@@ -2428,10 +2428,13 @@ def create_app():
                     # Save record to database
                     media_record = media_service.create_media_record(metadata)
 
+                    # Get ID immediately while object is in memory
+                    media_id = media_record.id_media
+
                     # Clean up temp file
                     os.remove(temp_path)
 
-                    flash(f'File caricato con successo! (ID: {media_record.id_media})', 'success')
+                    flash(f'File caricato con successo! (ID: {media_id})', 'success')
                     return redirect(url_for('media_list'))
 
             except Exception as e:
