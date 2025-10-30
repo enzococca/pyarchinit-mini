@@ -311,7 +311,10 @@
             }
         }
     </style>
-    
+
+    <!-- GLightbox CSS for image/media viewer -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.2.0/dist/css/glightbox.min.css">
+
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -723,7 +726,36 @@
         }
     </script>
     {% endif %}
-    
+
+    <!-- GLightbox JS for image/media viewer -->
+    <script src="https://cdn.jsdelivr.net/npm/glightbox@3.2.0/dist/js/glightbox.min.js"></script>
+    <script>
+        // Initialize GLightbox for all images and videos
+        const lightbox = GLightbox({
+            selector: '.glightbox',
+            touchNavigation: true,
+            loop: true,
+            autoplayVideos: false,
+            plyr: {
+                config: {
+                    ratio: '16:9',
+                    youtube: {
+                        noCookie: true,
+                        rel: 0,
+                        showinfo: 0,
+                        iv_load_policy: 3
+                    },
+                    vimeo: {
+                        byline: false,
+                        portrait: false,
+                        title: false,
+                        transparent: false
+                    }
+                }
+            }
+        });
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

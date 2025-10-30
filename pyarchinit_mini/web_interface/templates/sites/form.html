@@ -88,11 +88,17 @@
                     <div class="card h-100">
                         <div class="card-body text-center">
                             {% if media.media_type == 'image' and media.media_path %}
-                                <img src="/{{ media.media_path }}"
-                                     alt="{{ media.media_name }}"
-                                     class="img-fluid mb-2"
-                                     style="max-height: 150px; object-fit: cover;"
-                                     onerror="this.parentElement.innerHTML='<i class=\'fas fa-image fa-3x text-muted mb-2\'></i>'">
+                                <a href="/{{ media.media_path }}"
+                                   class="glightbox"
+                                   data-gallery="site-gallery"
+                                   data-title="{{ media.media_name }}"
+                                   data-description="{{ media.description if media.description else '' }}">
+                                    <img src="/{{ media.media_path }}"
+                                         alt="{{ media.media_name }}"
+                                         class="img-fluid mb-2"
+                                         style="max-height: 150px; object-fit: cover; cursor: pointer;"
+                                         onerror="this.parentElement.innerHTML='<i class=\'fas fa-image fa-3x text-muted mb-2\'></i>'">
+                                </a>
                             {% elif media.media_type == 'document' %}
                                 <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
                             {% elif media.media_type == 'video' %}
