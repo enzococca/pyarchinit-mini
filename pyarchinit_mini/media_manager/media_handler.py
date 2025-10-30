@@ -129,11 +129,15 @@ class MediaHandler:
     def _determine_media_type(self, mime_type: str, file_path: Path = None) -> str:
         """Determine media type from MIME type and file extension"""
 
-        # Check file extension for 3D models (more reliable than MIME types)
+        # Check file extension for specific types (more reliable than MIME types)
         if file_path:
             ext = file_path.suffix.lower()
+            # 3D models
             if ext in ['.obj', '.stl', '.ply', '.gltf', '.glb', '.dae', '.fbx', '.3ds']:
                 return '3d_model'
+            # Videos
+            if ext in ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v', '.mpeg', '.mpg']:
+                return 'video'
 
         if not mime_type:
             return 'unknown'
