@@ -220,30 +220,50 @@ def create_postgresql_database(
 
 def create_empty_database(
     db_type: str,
-    db_path_or_config: Any,
-    overwrite: bool = False
+    db_path_or_config: Any = None,
+    overwrite: bool = False,
+    use_default_path: bool = False
 ) -> Dict[str, Any]:
     """
     Unified interface to create empty database (SQLite or PostgreSQL)
-    
+
     Args:
         db_type: 'sqlite' or 'postgresql'
-        db_path_or_config: 
-            - For SQLite: string path to database file
+        db_path_or_config:
+            - For SQLite: string path to database file (or None to use default)
             - For PostgreSQL: dict with keys {host, port, database, username, password}
         overwrite: If True, overwrite/drop existing database
-    
+        use_default_path: If True, use default path ~/.pyarchinit_mini/data/ for SQLite
+
     Returns:
         Dictionary with creation statistics
-        
+
     Raises:
         ValueError: If db_type is invalid or config is incomplete
         FileExistsError/ValueError: If database exists and overwrite=False
         SQLAlchemyError: If database creation fails
     """
+    from pathlib import Path
+
     db_type = db_type.lower()
-    
+
     if db_type == 'sqlite':
+        # Use default path if requested or if no path specified
+        if use_default_path or db_path_or_config is None:
+            default_dir = Path.home() / '.pyarchinit_mini' / 'data'
+            default_dir.mkdir(parents=True, exist_ok=True)
+
+            # Generate default filename
+            if db_path_or_config and isinstance(db_path_or_config, str):
+                # Use provided filename in default directory
+                filename = os.path.basename(db_path_or_config)
+            else:
+                # Use default filename
+                filename = 'pyarchinit_empty.db'
+
+            db_path_or_config = str(default_dir / filename)
+            logger.info(f"Using default database path: {db_path_or_config}")
+
         if not isinstance(db_path_or_config, str):
             raise ValueError("For SQLite, db_path_or_config must be a string path")
         return create_sqlite_database(db_path_or_config, overwrite=overwrite)

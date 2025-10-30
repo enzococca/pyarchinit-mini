@@ -462,19 +462,24 @@ def create_database():
         data = request.get_json()
         db_type = data.get('db_type', 'sqlite')
         overwrite = data.get('overwrite', False)
+        use_default_path = data.get('use_default_path', False)
 
         from pyarchinit_mini.database.database_creator import create_empty_database
 
         if db_type == 'sqlite':
             db_path = data.get('db_path')
-            if not db_path:
+
+            # If use_default_path is True, allow empty db_path
+            if not db_path and not use_default_path:
                 return jsonify({'success': False, 'message': _('Please provide database path')}), 400
 
-            # Expand user home directory and convert to absolute path
-            db_path = os.path.abspath(os.path.expanduser(db_path))
+            # If db_path is provided but use_default_path is True, just use the filename
+            if db_path and not use_default_path:
+                # Expand user home directory and convert to absolute path
+                db_path = os.path.abspath(os.path.expanduser(db_path))
 
-            logger.info(f"Creating empty SQLite database at: {db_path}")
-            result = create_empty_database('sqlite', db_path, overwrite=overwrite)
+            logger.info(f"Creating empty SQLite database (use_default_path={use_default_path})")
+            result = create_empty_database('sqlite', db_path, overwrite=overwrite, use_default_path=use_default_path)
 
         else:  # PostgreSQL
             host = data.get('pg_host', 'localhost')
