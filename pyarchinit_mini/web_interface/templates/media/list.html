@@ -183,6 +183,15 @@
                                        data-description="{{ media.description if media.description else '' }}">
                                         <i class="fas fa-file-word fa-2x text-primary" style="cursor: pointer;"></i>
                                     </a>
+                                {% elif media.media_type == '3d_model' %}
+                                    <a href="{{ url_for('view_3d_model', media_id=media.id_media) }}"
+                                       class="glightbox"
+                                       data-type="iframe"
+                                       data-gallery="media-3d"
+                                       data-title="{{ media.media_name }}"
+                                       data-description="{{ media.description if media.description else '' }}">
+                                        <i class="fas fa-cube fa-2x text-success" style="cursor: pointer;"></i>
+                                    </a>
                                 {% else %}
                                     <i class="fas fa-file fa-2x text-secondary"></i>
                                 {% endif %}

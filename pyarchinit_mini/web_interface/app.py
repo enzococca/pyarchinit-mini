@@ -2876,6 +2876,376 @@ def create_app():
         except Exception as e:
             return f'<html><body><h3>Error: {str(e)}</h3></body></html>', 500
 
+    @app.route('/media/view/3d/<int:media_id>')
+    @login_required
+    def view_3d_model(media_id):
+        """View 3D models using Three.js"""
+        try:
+            from pathlib import Path
+
+            # Get the media record
+            media = media_service.get_media_by_id(media_id)
+            if not media:
+                return '<html><body><h3>Media file not found</h3></body></html>', 404
+
+            # Get file path and validate
+            if not media.media_path:
+                return '<html><body><h3>File path not available</h3></body></html>', 404
+
+            file_path = Path(media.media_path)
+            if not file_path.exists():
+                return '<html><body><h3>File not found on disk</h3></body></html>', 404
+
+            # Check file extension
+            file_ext = file_path.suffix.lower()
+            supported_formats = ['.obj', '.stl', '.ply', '.gltf', '.glb', '.dae', '.fbx', '.3ds']
+            if file_ext not in supported_formats:
+                return f'<html><body><h3>Unsupported 3D format: {file_ext}</h3><p>Supported formats: {", ".join(supported_formats)}</p></body></html>', 400
+
+            # Determine the appropriate Three.js loader based on file extension
+            loader_map = {
+                '.obj': 'OBJLoader',
+                '.stl': 'STLLoader',
+                '.ply': 'PLYLoader',
+                '.gltf': 'GLTFLoader',
+                '.glb': 'GLTFLoader',
+                '.dae': 'ColladaLoader',
+                '.fbx': 'FBXLoader',
+                '.3ds': 'TDSLoader'
+            }
+
+            loader_type = loader_map.get(file_ext, 'GLTFLoader')
+
+            # Create the model URL - need to serve it relative to web root
+            model_url = f'/{media.media_path}'
+
+            # Create complete HTML page with Three.js viewer
+            full_html = f'''
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>{media.media_name} - 3D Viewer</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                <style>
+                    body {{
+                        margin: 0;
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        overflow: hidden;
+                    }}
+                    .viewer-container {{
+                        position: relative;
+                        width: 100vw;
+                        height: 100vh;
+                        display: flex;
+                        flex-direction: column;
+                    }}
+                    .header {{
+                        background: rgba(255, 255, 255, 0.95);
+                        padding: 15px 30px;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                        z-index: 100;
+                    }}
+                    .header h2 {{
+                        margin: 0;
+                        font-size: 1.5rem;
+                        color: #333;
+                    }}
+                    .header .info {{
+                        color: #666;
+                        font-size: 0.9rem;
+                        margin-top: 5px;
+                    }}
+                    #canvas-container {{
+                        flex: 1;
+                        position: relative;
+                        background: #1a1a2e;
+                    }}
+                    #loading {{
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        text-align: center;
+                        color: white;
+                        font-size: 1.2rem;
+                        z-index: 10;
+                    }}
+                    .controls {{
+                        position: absolute;
+                        bottom: 20px;
+                        right: 20px;
+                        background: rgba(255, 255, 255, 0.9);
+                        padding: 15px;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                        z-index: 10;
+                    }}
+                    .controls button {{
+                        margin: 3px;
+                    }}
+                    .error {{
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(255, 255, 255, 0.95);
+                        padding: 30px;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                        text-align: center;
+                        max-width: 500px;
+                        z-index: 100;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="viewer-container">
+                    <div class="header">
+                        <h2><i class="fas fa-cube"></i> {media.media_name}</h2>
+                        <div class="info">
+                            {media.description if media.description else 'Interactive 3D Model Viewer'}
+                        </div>
+                    </div>
+
+                    <div id="canvas-container">
+                        <div id="loading">
+                            <div class="spinner-border text-light" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading 3D model...</p>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <div class="mb-2"><small><strong>Controls:</strong></small></div>
+                        <div><small>🖱️ Left click + drag: Rotate</small></div>
+                        <div><small>🖱️ Right click + drag: Pan</small></div>
+                        <div><small>🖱️ Scroll: Zoom</small></div>
+                        <div class="mt-2">
+                            <button id="resetBtn" class="btn btn-sm btn-primary">
+                                <i class="fas fa-redo"></i> Reset View
+                            </button>
+                            <button id="wireframeBtn" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-border-all"></i> Wireframe
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Three.js and loaders -->
+                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/OBJLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/STLLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/PLYLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/ColladaLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/FBXLoader.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/TDSLoader.js"></script>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+                <script>
+                    let scene, camera, renderer, controls, model;
+                    let wireframeMode = false;
+                    const modelUrl = "{model_url}";
+                    const fileExt = "{file_ext}";
+                    const loaderType = "{loader_type}";
+
+                    function init() {{
+                        const container = document.getElementById('canvas-container');
+
+                        // Scene
+                        scene = new THREE.Scene();
+                        scene.background = new THREE.Color(0x1a1a2e);
+
+                        // Camera
+                        camera = new THREE.PerspectiveCamera(
+                            75,
+                            container.clientWidth / container.clientHeight,
+                            0.1,
+                            1000
+                        );
+                        camera.position.set(5, 5, 5);
+
+                        // Renderer
+                        renderer = new THREE.WebGLRenderer({{ antialias: true }});
+                        renderer.setSize(container.clientWidth, container.clientHeight);
+                        renderer.setPixelRatio(window.devicePixelRatio);
+                        container.appendChild(renderer.domElement);
+
+                        // Controls
+                        controls = new THREE.OrbitControls(camera, renderer.domElement);
+                        controls.enableDamping = true;
+                        controls.dampingFactor = 0.05;
+                        controls.screenSpacePanning = false;
+                        controls.minDistance = 1;
+                        controls.maxDistance = 100;
+
+                        // Lights
+                        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                        scene.add(ambientLight);
+
+                        const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+                        directionalLight1.position.set(10, 10, 10);
+                        scene.add(directionalLight1);
+
+                        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+                        directionalLight2.position.set(-10, -10, -10);
+                        scene.add(directionalLight2);
+
+                        // Grid
+                        const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+                        scene.add(gridHelper);
+
+                        // Load model
+                        loadModel();
+
+                        // Event listeners
+                        window.addEventListener('resize', onWindowResize, false);
+                        document.getElementById('resetBtn').addEventListener('click', resetCamera);
+                        document.getElementById('wireframeBtn').addEventListener('click', toggleWireframe);
+
+                        // Animation loop
+                        animate();
+                    }}
+
+                    function loadModel() {{
+                        const loadingElement = document.getElementById('loading');
+
+                        function onLoad(object) {{
+                            // Handle different loader return types
+                            if (loaderType === 'GLTFLoader') {{
+                                model = object.scene;
+                            }} else if (loaderType === 'ColladaLoader') {{
+                                model = object.scene;
+                            }} else if (loaderType === 'FBXLoader') {{
+                                model = object;
+                            }} else {{
+                                // For OBJ, STL, PLY - wrap geometry in mesh
+                                const geometry = object.isBufferGeometry ? object : object.geometry;
+                                const material = new THREE.MeshPhongMaterial({{
+                                    color: 0x00aaff,
+                                    shininess: 30,
+                                    flatShading: false
+                                }});
+                                model = new THREE.Mesh(geometry, material);
+                            }}
+
+                            // Center and scale model
+                            const box = new THREE.Box3().setFromObject(model);
+                            const center = box.getCenter(new THREE.Vector3());
+                            const size = box.getSize(new THREE.Vector3());
+                            const maxDim = Math.max(size.x, size.y, size.z);
+                            const scale = 5 / maxDim;
+
+                            model.position.sub(center);
+                            model.scale.multiplyScalar(scale);
+
+                            scene.add(model);
+                            loadingElement.style.display = 'none';
+                        }}
+
+                        function onProgress(xhr) {{
+                            const percent = (xhr.loaded / xhr.total) * 100;
+                            loadingElement.innerHTML = `
+                                <div class="spinner-border text-light" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3">Loading 3D model... ${{Math.round(percent)}}%</p>
+                            `;
+                        }}
+
+                        function onError(error) {{
+                            console.error('Error loading model:', error);
+                            loadingElement.innerHTML = `
+                                <div class="error">
+                                    <h3 class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error Loading Model</h3>
+                                    <p class="mb-0">Could not load the 3D model file.</p>
+                                    <p class="small text-muted mt-2">${{error.message || 'Unknown error'}}</p>
+                                </div>
+                            `;
+                        }}
+
+                        // Choose appropriate loader
+                        let loader;
+                        switch (loaderType) {{
+                            case 'OBJLoader':
+                                loader = new THREE.OBJLoader();
+                                break;
+                            case 'STLLoader':
+                                loader = new THREE.STLLoader();
+                                break;
+                            case 'PLYLoader':
+                                loader = new THREE.PLYLoader();
+                                break;
+                            case 'GLTFLoader':
+                                loader = new THREE.GLTFLoader();
+                                break;
+                            case 'ColladaLoader':
+                                loader = new THREE.ColladaLoader();
+                                break;
+                            case 'FBXLoader':
+                                loader = new THREE.FBXLoader();
+                                break;
+                            case 'TDSLoader':
+                                loader = new THREE.TDSLoader();
+                                break;
+                            default:
+                                onError({{ message: 'Unsupported file format' }});
+                                return;
+                        }}
+
+                        loader.load(modelUrl, onLoad, onProgress, onError);
+                    }}
+
+                    function animate() {{
+                        requestAnimationFrame(animate);
+                        controls.update();
+                        renderer.render(scene, camera);
+                    }}
+
+                    function onWindowResize() {{
+                        const container = document.getElementById('canvas-container');
+                        camera.aspect = container.clientWidth / container.clientHeight;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(container.clientWidth, container.clientHeight);
+                    }}
+
+                    function resetCamera() {{
+                        camera.position.set(5, 5, 5);
+                        camera.lookAt(0, 0, 0);
+                        controls.reset();
+                    }}
+
+                    function toggleWireframe() {{
+                        wireframeMode = !wireframeMode;
+                        if (model) {{
+                            model.traverse((child) => {{
+                                if (child.isMesh) {{
+                                    child.material.wireframe = wireframeMode;
+                                }}
+                            }});
+                        }}
+                        const btn = document.getElementById('wireframeBtn');
+                        btn.classList.toggle('btn-secondary');
+                        btn.classList.toggle('btn-success');
+                    }}
+
+                    // Initialize viewer
+                    init();
+                </script>
+            </body>
+            </html>
+            '''
+
+            return full_html
+
+        except Exception as e:
+            return f'<html><body><h3>Error: {{str(e)}}</h3></body></html>', 500
+
     # Database Administration Routes
     @app.route('/admin/database')
     @login_required
