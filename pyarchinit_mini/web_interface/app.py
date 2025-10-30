@@ -2481,6 +2481,67 @@ def create_app():
 
         return render_template('media/upload.html', form=form)
 
+    @app.route('/media/upload/ajax', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def upload_media_ajax():
+        """AJAX endpoint for drag-and-drop media uploads"""
+        try:
+            entity_type = request.form.get('entity_type')
+            entity_id = request.form.get('entity_id')
+
+            if not entity_type or not entity_id:
+                return jsonify({'error': 'Missing entity_type or entity_id'}), 400
+
+            # Convert entity_id to int
+            try:
+                entity_id = int(entity_id)
+            except ValueError:
+                return jsonify({'error': 'Invalid entity_id'}), 400
+
+            files = request.files.getlist('files')
+            if not files:
+                return jsonify({'error': 'No files provided'}), 400
+
+            uploaded_ids = []
+
+            for uploaded_file in files:
+                if uploaded_file and uploaded_file.filename:
+                    # Save uploaded file temporarily
+                    filename = secure_filename(uploaded_file.filename)
+                    temp_path = os.path.join(tempfile.gettempdir(), filename)
+                    uploaded_file.save(temp_path)
+
+                    # Store using media handler
+                    metadata = media_handler.store_file(
+                        temp_path,
+                        entity_type,
+                        entity_id,
+                        "",  # description (empty for drag-drop)
+                        "",  # tags
+                        ""   # author
+                    )
+
+                    # Remove thumbnail_path
+                    metadata.pop('thumbnail_path', None)
+
+                    # Save record to database
+                    media_record = media_service.create_media_record(metadata)
+                    uploaded_ids.append(media_record.id_media)
+
+                    # Clean up temp file
+                    os.remove(temp_path)
+
+            return jsonify({
+                'success': True,
+                'uploaded': len(uploaded_ids),
+                'ids': uploaded_ids
+            }), 200
+
+        except Exception as e:
+            logger.error(f"AJAX upload error: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+
     @app.route('/media/list')
     @login_required
     def media_list():

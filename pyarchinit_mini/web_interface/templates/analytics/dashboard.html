@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Analytics Dashboard - PyArchInit-Mini{% endblock %}
+{% block title %}{{ _('Analytics Dashboard') }} - PyArchInit-Mini{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -56,29 +56,29 @@
 {% block content %}
 <div class="container-fluid">
     <h1 class="mb-4">
-        <i class="fas fa-chart-bar"></i> Dashboard Analytics
+        <i class="fas fa-chart-bar"></i> {{ _('Analytics Dashboard') }}
     </h1>
 
     <!-- Overview Statistics -->
     <div class="stats-grid">
         <div class="stat-box">
-            <div class="stat-label">Siti Totali</div>
+            <div class="stat-label">{{ _('Total Sites') }}</div>
             <div class="stat-number">{{ data.overview.total_sites }}</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">US Totali</div>
+            <div class="stat-label">{{ _('Total US') }}</div>
             <div class="stat-number">{{ data.overview.total_us }}</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">Reperti Totali</div>
+            <div class="stat-label">{{ _('Total Finds') }}</div>
             <div class="stat-number">{{ data.overview.total_inventario }}</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">Regioni</div>
+            <div class="stat-label">{{ _('Regions') }}</div>
             <div class="stat-number">{{ data.overview.total_regions }}</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">Province</div>
+            <div class="stat-label">{{ _('Provinces') }}</div>
             <div class="stat-number">{{ data.overview.total_provinces }}</div>
         </div>
     </div>
@@ -88,7 +88,7 @@
         <div class="col-md-6">
             <div class="chart-card">
                 <div class="chart-title">
-                    <i class="fas fa-map-marked-alt"></i> Siti per Regione
+                    <i class="fas fa-map-marked-alt"></i> {{ _('Sites by Region') }}
                 </div>
                 <div class="chart-container">
                     <canvas id="sitesByRegionChart"></canvas>
@@ -100,7 +100,7 @@
         <div class="col-md-6">
             <div class="chart-card">
                 <div class="chart-title">
-                    <i class="fas fa-city"></i> Siti per Provincia (Top 10)
+                    <i class="fas fa-city"></i> {{ _('Sites by Province') }} (Top 10)
                 </div>
                 <div class="chart-container">
                     <canvas id="sitesByProvinceChart"></canvas>
@@ -112,7 +112,7 @@
         <div class="col-md-6">
             <div class="chart-card">
                 <div class="chart-title">
-                    <i class="fas fa-clock"></i> US per Periodo Cronologico
+                    <i class="fas fa-clock"></i> {{ _('US by Chronological Period') }}
                 </div>
                 <div class="chart-container">
                     <canvas id="usByPeriodChart"></canvas>
@@ -124,7 +124,7 @@
         <div class="col-md-6">
             <div class="chart-card">
                 <div class="chart-title">
-                    <i class="fas fa-layer-group"></i> US per Tipologia
+                    <i class="fas fa-layer-group"></i> {{ _('US by Type') }}
                 </div>
                 <div class="chart-container">
                     <canvas id="usByTypeChart"></canvas>
@@ -136,7 +136,7 @@
         <div class="col-md-6">
             <div class="chart-card">
                 <div class="chart-title">
-                    <i class="fas fa-archive"></i> Reperti per Tipologia (Top 10)
+                    <i class="fas fa-archive"></i> {{ _('Finds by Type') }} (Top 10)
                 </div>
                 <div class="chart-container">
                     <canvas id="inventarioByTypeChart"></canvas>
@@ -148,7 +148,7 @@
         <div class="col-md-6">
             <div class="chart-card">
                 <div class="chart-title">
-                    <i class="fas fa-heartbeat"></i> Reperti per Stato di Conservazione
+                    <i class="fas fa-heartbeat"></i> {{ _('Finds by Conservation State') }}
                 </div>
                 <div class="chart-container">
                     <canvas id="inventarioByConservationChart"></canvas>
@@ -160,7 +160,7 @@
         <div class="col-md-6">
             <div class="chart-card">
                 <div class="chart-title">
-                    <i class="fas fa-sitemap"></i> US per Sito (Top 10)
+                    <i class="fas fa-sitemap"></i> {{ _('US by Site') }} (Top 10)
                 </div>
                 <div class="chart-container">
                     <canvas id="usBySiteChart"></canvas>
@@ -172,7 +172,7 @@
         <div class="col-md-6">
             <div class="chart-card">
                 <div class="chart-title">
-                    <i class="fas fa-boxes"></i> Reperti per Sito (Top 10)
+                    <i class="fas fa-boxes"></i> {{ _('Finds by Site') }} (Top 10)
                 </div>
                 <div class="chart-container">
                     <canvas id="inventarioBySiteChart"></canvas>
@@ -243,7 +243,7 @@
             data: {
                 labels: Object.keys(analyticsData.sites_by_province),
                 datasets: [{
-                    label: 'Numero Siti',
+                    label: "{{ _('Number of Sites') }}",
                     data: Object.values(analyticsData.sites_by_province),
                     backgroundColor: colors.background[0],
                     borderColor: colors.primary[0],
@@ -271,7 +271,7 @@
             data: {
                 labels: Object.keys(analyticsData.us_by_period),
                 datasets: [{
-                    label: 'Numero US',
+                    label: "{{ _('Number of US') }}",
                     data: Object.values(analyticsData.us_by_period),
                     backgroundColor: colors.background[1],
                     borderColor: colors.primary[1],
@@ -317,7 +317,7 @@
             data: {
                 labels: Object.keys(analyticsData.inventario_by_type),
                 datasets: [{
-                    label: 'Numero Reperti',
+                    label: "{{ _('Number of Finds') }}",
                     data: Object.values(analyticsData.inventario_by_type),
                     backgroundColor: colors.background[2],
                     borderColor: colors.primary[2],
@@ -362,7 +362,7 @@
             data: {
                 labels: Object.keys(analyticsData.us_by_site),
                 datasets: [{
-                    label: 'Numero US',
+                    label: "{{ _('Number of US') }}",
                     data: Object.values(analyticsData.us_by_site),
                     backgroundColor: colors.background[3],
                     borderColor: colors.primary[3],
@@ -390,7 +390,7 @@
             data: {
                 labels: Object.keys(analyticsData.inventario_by_site),
                 datasets: [{
-                    label: 'Numero Reperti',
+                    label: "{{ _('Number of Finds') }}",
                     data: Object.values(analyticsData.inventario_by_site),
                     backgroundColor: colors.background[4],
                     borderColor: colors.primary[4],
