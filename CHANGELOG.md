@@ -5,6 +5,24 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] - 2025-10-31
+
+### Fixed
+- **Italian Translation**: Corrected "Media Files" translation in dashboard from "ha modificato US" to "File Multimediali"
+  - Fixed in `pyarchinit_mini/translations/it/LC_MESSAGES/messages.po` line 934
+  - Compiled updated translation files (.mo)
+
+- **Windows Installation**: Fixed passlib dependency error on Windows
+  - Changed from separate `passlib>=1.7.4` + `bcrypt>=4.0.0,<4.1.0` to unified `passlib[bcrypt]>=1.7.4`
+  - Updated in both `auth` and `all` dependency groups in `pyproject.toml`
+  - Resolves: "Error creating admin user: passlib is required for password hashing. Install with: pip install 'passlib[bcrypt]'"
+  - Ensures bcrypt backend is properly installed on all platforms, especially Windows
+
+### Technical Details
+- Translation files properly compiled with pybabel
+- Dependencies now correctly specify bcrypt as a passlib extra
+- Improves cross-platform compatibility (macOS, Linux, Windows)
+
 ## [1.8.1] - 2025-10-30
 
 ### Fixed - Database Migration Hotfix

@@ -931,7 +931,7 @@ msgstr "Errore caricamento file"
 #: pyarchinit_mini/desktop_gui/main_window.py:307
 #: web_interface/templates/dashboard.html:53
 msgid "Media Files"
-msgstr "ha modificato US"
+msgstr "File Multimediali"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1861
 msgid "Media file list (in development)"
