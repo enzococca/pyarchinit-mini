@@ -1796,6 +1796,14 @@ class ImportExportService:
                     stats['errors'].append(error_msg)
                     # Continue with other tables even if one fails
 
+            # Reset PostgreSQL sequences after migration
+            if target_db_url.startswith('postgresql'):
+                logger.info("Resetting PostgreSQL sequences...")
+                sequence_stats = ImportExportService._reset_postgresql_sequences(target_engine)
+                logger.info(f"Reset {sequence_stats['sequences_reset']} sequences")
+                if sequence_stats['errors']:
+                    stats['errors'].extend(sequence_stats['errors'])
+
             stats['success'] = stats['tables_migrated'] > 0
             stats['duration_seconds'] = time.time() - start_time
 
@@ -1808,6 +1816,64 @@ class ImportExportService:
             stats['errors'].append(str(e))
             stats['duration_seconds'] = time.time() - start_time
             return stats
+
+    @staticmethod
+    def _reset_postgresql_sequences(target_engine) -> Dict[str, Any]:
+        """
+        Reset PostgreSQL sequences to max(id) + 1 after migration
+
+        This fixes the issue where sequences are not updated during data migration,
+        causing IntegrityError when inserting new records.
+
+        Args:
+            target_engine: Target database engine
+
+        Returns:
+            Dictionary with reset statistics
+        """
+        stats = {'sequences_reset': 0, 'errors': []}
+
+        # Only reset if target is PostgreSQL
+        if not str(target_engine.url).startswith('postgresql'):
+            return stats
+
+        # Define tables with auto-increment primary keys (SERIAL columns)
+        # Format: (table_name, id_column_name, sequence_name)
+        sequences = [
+            ('site_table', 'id_sito', 'site_table_id_sito_seq'),
+            ('inventario_materiali_table', 'id_invmat', 'inventario_materiali_table_id_invmat_seq'),
+            ('media_table', 'id_media', 'media_table_id_media_seq'),
+            ('users_table', 'id_user', 'users_table_id_user_seq'),
+            ('datazioni_table', 'id_datazione', 'datazioni_table_id_datazione_seq'),
+            ('periodizzazione_table', 'id_periodizzazione', 'periodizzazione_table_id_periodizzazione_seq'),
+            ('us_relationships_table', 'id_relationship', 'us_relationships_table_id_relationship_seq'),
+            ('pyarchinit_thesaurus_sigle', 'id_thesaurus_sigle', 'pyarchinit_thesaurus_sigle_id_thesaurus_sigle_seq'),
+            ('harris_matrix_table', 'id_matrix', 'harris_matrix_table_id_matrix_seq'),
+            ('periods_table', 'id', 'periods_table_id_seq'),
+            ('extended_matrix_nodes_table', 'id', 'extended_matrix_nodes_table_id_seq'),
+        ]
+
+        with target_engine.connect() as conn:
+            for table_name, id_column, sequence_name in sequences:
+                try:
+                    # Get max ID from table
+                    result = conn.execute(text(f"SELECT MAX({id_column}) FROM {table_name}"))
+                    max_id = result.scalar()
+
+                    if max_id is not None:
+                        # Reset sequence to max_id + 1
+                        conn.execute(text(f"SELECT setval('{sequence_name}', :max_id, true)"), {'max_id': max_id})
+                        conn.commit()
+                        stats['sequences_reset'] += 1
+                        logger.info(f"Reset sequence {sequence_name} to {max_id + 1}")
+
+                except Exception as e:
+                    error_msg = f"Failed to reset sequence for {table_name}: {str(e)}"
+                    logger.warning(error_msg)
+                    stats['errors'].append(error_msg)
+                    # Continue with other sequences
+
+        return stats
 
     @staticmethod
     def _convert_boolean_fields(table_name: str, row_data: Dict[str, Any],

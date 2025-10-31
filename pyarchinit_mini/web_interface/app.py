@@ -3282,8 +3282,22 @@ def create_app():
             'inventory': total_inventory
         }
 
-        # Get saved connections
-        connections = app.config.get('DATABASE_CONNECTIONS', {})
+        # Load saved connections from ConnectionManager
+        from pyarchinit_mini.config.connection_manager import get_connection_manager
+        conn_manager = get_connection_manager()
+        saved_connections_list = conn_manager.list_connections()
+
+        # Convert to dict format expected by template
+        connections = {}
+        for conn in saved_connections_list:
+            conn_full = conn_manager.get_connection(conn['name'])
+            if conn_full:
+                connections[conn['name']] = {
+                    'type': conn['db_type'],
+                    'url': conn_full['connection_string'],
+                    'description': conn.get('description', ''),
+                    'uploaded': False  # Will be updated if it's an uploaded DB
+                }
 
         return render_template('admin/database.html',
                              db_info=db_info,
@@ -3331,6 +3345,16 @@ def create_app():
                     'uploaded': True
                 }
                 app.config['DATABASE_CONNECTIONS'] = connections
+
+                # Save to persistent ConnectionManager
+                from pyarchinit_mini.config.connection_manager import get_connection_manager
+                conn_manager = get_connection_manager()
+                conn_manager.add_connection(
+                    name=db_name,
+                    db_type='sqlite',
+                    connection_string=f'sqlite:///{db_path}',
+                    description=description
+                )
 
                 flash(f'Database "{db_name}" caricato con successo!', 'success')
                 return redirect(url_for('admin_database'))
@@ -3388,6 +3412,16 @@ def create_app():
                     'uploaded': False
                 }
                 app.config['DATABASE_CONNECTIONS'] = connections
+
+                # Save to persistent ConnectionManager
+                from pyarchinit_mini.config.connection_manager import get_connection_manager
+                conn_manager = get_connection_manager()
+                conn_manager.add_connection(
+                    name=conn_name,
+                    db_type=db_type,
+                    connection_string=connection_url,
+                    description=''
+                )
 
                 flash(f'Connessione "{conn_name}" aggiunta con successo!', 'success')
                 return redirect(url_for('admin_database'))

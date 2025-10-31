@@ -634,3 +634,151 @@ def migrate_database():
             'success': False,
             'message': str(e)
         }), 500
+
+
+# ============================================================
+# Saved Connections Management
+# ============================================================
+
+@pyarchinit_import_export_bp.route('/api/connections/list', methods=['GET'])
+def list_saved_connections():
+    """Get list of all saved database connections"""
+    try:
+        from pyarchinit_mini.config.connection_manager import get_connection_manager
+
+        conn_manager = get_connection_manager()
+        connections = conn_manager.list_connections()
+
+        return jsonify({
+            'success': True,
+            'connections': connections,
+            'count': len(connections)
+        })
+
+    except Exception as e:
+        logger.error(f"Failed to list connections: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+
+@pyarchinit_import_export_bp.route('/api/connections/add', methods=['POST'])
+def add_saved_connection():
+    """Save a new database connection"""
+    try:
+        data = request.get_json()
+
+        name = data.get('name', '').strip()
+        db_type = data.get('db_type', '').strip()
+        description = data.get('description', '').strip()
+
+        # Build connection string based on type
+        if db_type == 'sqlite':
+            db_path = data.get('db_path', '').strip()
+            if not db_path:
+                return jsonify({
+                    'success': False,
+                    'message': _('Database path is required')
+                }), 400
+
+            # Expand user home directory
+            db_path = os.path.expanduser(db_path)
+            if not os.path.isabs(db_path):
+                db_path = os.path.abspath(db_path)
+
+            connection_string = f"sqlite:///{db_path}"
+
+        elif db_type == 'postgresql':
+            host = data.get('pg_host', 'localhost').strip()
+            port = data.get('pg_port', '5432').strip()
+            database = data.get('pg_database', '').strip()
+            user = data.get('pg_user', '').strip()
+            password = data.get('pg_password', '')
+
+            if not all([host, port, database, user]):
+                return jsonify({
+                    'success': False,
+                    'message': _('Missing PostgreSQL connection details')
+                }), 400
+
+            connection_string = f"postgresql://{user}:{password}@{host}:{port}/{database}"
+
+        else:
+            return jsonify({
+                'success': False,
+                'message': _('Invalid database type')
+            }), 400
+
+        # Save connection
+        from pyarchinit_mini.config.connection_manager import get_connection_manager
+
+        conn_manager = get_connection_manager()
+        result = conn_manager.add_connection(
+            name=name,
+            db_type=db_type,
+            connection_string=connection_string,
+            description=description
+        )
+
+        if result['success']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 400
+
+    except Exception as e:
+        logger.error(f"Failed to save connection: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+
+@pyarchinit_import_export_bp.route('/api/connections/<connection_name>', methods=['GET'])
+def get_saved_connection(connection_name):
+    """Get connection string for a saved connection"""
+    try:
+        from pyarchinit_mini.config.connection_manager import get_connection_manager
+
+        conn_manager = get_connection_manager()
+        connection_string = conn_manager.get_connection_string(connection_name)
+
+        if connection_string:
+            return jsonify({
+                'success': True,
+                'connection_string': connection_string
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': _('Connection not found')
+            }), 404
+
+    except Exception as e:
+        logger.error(f"Failed to get connection: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+
+@pyarchinit_import_export_bp.route('/api/connections/<connection_name>', methods=['DELETE'])
+def remove_saved_connection(connection_name):
+    """Remove a saved connection"""
+    try:
+        from pyarchinit_mini.config.connection_manager import get_connection_manager
+
+        conn_manager = get_connection_manager()
+        result = conn_manager.remove_connection(connection_name)
+
+        if result['success']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 404
+
+    except Exception as e:
+        logger.error(f"Failed to remove connection: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
