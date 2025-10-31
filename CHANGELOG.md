@@ -5,6 +5,25 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3] - 2025-10-31
+
+### Fixed
+- **Web Interface Dependencies**: Added authentication dependencies to `web` optional dependency group
+  - Added `passlib[bcrypt]>=1.7.4` to web dependencies
+  - Added `python-jose[cryptography]>=3.3.0` to web dependencies
+  - Added `flask-login>=0.6.3` to web dependencies
+  - Resolves: `ImportError: passlib is required for password hashing` when installing with `pip install pyarchinit-mini[web]`
+  - Web interface now works correctly on Windows without requiring separate `pip install pyarchinit-mini[web,auth]`
+
+### Changed
+- Web interface installation is now self-contained with all required dependencies
+- Users can install with just `pip install pyarchinit-mini[web]` and have full authentication support
+
+### Technical Details
+- Authentication libraries were previously only in `auth` and `all` dependency groups
+- Web interface requires authentication for login, so these dependencies are now included in `web` group
+- Improves user experience by reducing installation steps
+
 ## [1.8.2] - 2025-10-31
 
 ### Fixed

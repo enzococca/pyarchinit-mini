@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.8.2"
+version = "1.8.3"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, and Heriverse/ATON export integration"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -75,6 +75,9 @@ web = [
     "python-socketio>=5.10.0",
     "flask-babel>=3.1.0",
     "babel>=2.12.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-jose[cryptography]>=3.3.0",
+    "flask-login>=0.6.3",
 ]
 # Desktop GUI dependencies (tkinter is stdlib, no external deps needed)
 gui = [
