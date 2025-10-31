@@ -1810,6 +1810,45 @@ class ImportExportService:
             return stats
 
     @staticmethod
+    def _convert_boolean_fields(table_name: str, row_data: Dict[str, Any],
+                                 target_engine) -> Dict[str, Any]:
+        """
+        Convert integer boolean values (0/1) to Python boolean (False/True) for PostgreSQL
+
+        Args:
+            table_name: Name of the table
+            row_data: Row data dictionary
+            target_engine: Target database engine
+
+        Returns:
+            Row data with converted boolean fields
+        """
+        # Only convert if target is PostgreSQL
+        if not str(target_engine.url).startswith('postgresql'):
+            return row_data
+
+        # Define boolean columns for each table
+        boolean_columns = {
+            'site_table': ['find_check'],
+            'media_table': ['is_primary', 'is_public'],
+            'harris_matrix_table': ['is_final', 'is_public'],
+            'users_table': ['is_active', 'is_superuser']
+        }
+
+        # Get boolean columns for this table
+        bool_cols = boolean_columns.get(table_name, [])
+
+        # Convert integer values to boolean
+        converted_data = row_data.copy()
+        for col in bool_cols:
+            if col in converted_data and converted_data[col] is not None:
+                # Convert 0/1 to False/True
+                if isinstance(converted_data[col], int):
+                    converted_data[col] = bool(converted_data[col])
+
+        return converted_data
+
+    @staticmethod
     def _migrate_table(table_name: str, source_session_maker, target_session_maker) -> int:
         """
         Migrate data from one table to another
@@ -1845,9 +1884,17 @@ class ImportExportService:
             # Get column names
             column_names = list(rows[0]._mapping.keys())
 
+            # Get target engine for boolean conversion
+            target_engine = target_session.get_bind()
+
             # Insert rows into target table
             for row in rows:
                 row_data = dict(row._mapping)
+
+                # Convert boolean fields if needed (SQLite -> PostgreSQL)
+                row_data = ImportExportService._convert_boolean_fields(
+                    table_name, row_data, target_engine
+                )
 
                 # Build INSERT query
                 columns = ', '.join(column_names)
