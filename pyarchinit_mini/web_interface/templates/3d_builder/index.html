@@ -320,20 +320,59 @@
                             </select>
                         </div>
 
-                        <!-- Date Range Filter -->
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Date Range (BCE/CE)</label>
-                            <div class="input-group input-group-sm mb-2">
-                                <span class="input-group-text">Start</span>
-                                <input type="number" class="form-control" id="dateStart" placeholder="-1200">
-                                <span class="input-group-text">BCE/CE</span>
+                        <!-- Date Range Filter - Enhanced -->
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label d-flex justify-content-between align-items-center">
+                                <span>Date Range (BCE/CE)</span>
+                                <small class="text-muted" id="dateRangeDisplay">All dates</small>
+                            </label>
+
+                            <!-- Quick Presets -->
+                            <div class="btn-group btn-group-sm mb-2 w-100" role="group">
+                                <button type="button" class="btn btn-outline-secondary date-preset" data-start="-3300" data-end="-1200">
+                                    <small>Bronze Age</small>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary date-preset" data-start="-1200" data-end="-500">
+                                    <small>Iron Age</small>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary date-preset" data-start="-500" data-end="500">
+                                    <small>Roman</small>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary date-preset" data-start="500" data-end="1500">
+                                    <small>Medieval</small>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="clearDateRange">
+                                    <small><i class="fas fa-times"></i></small>
+                                </button>
                             </div>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text">End</span>
-                                <input type="number" class="form-control" id="dateEnd" placeholder="-800">
-                                <span class="input-group-text">BCE/CE</span>
+
+                            <div class="row">
+                                <!-- Start Date -->
+                                <div class="col-6">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <span class="input-group-text">From</span>
+                                        <input type="number" class="form-control" id="dateStart" placeholder="-1200" step="10">
+                                        <span class="input-group-text text-muted" style="font-size: 0.75rem;">BCE/CE</span>
+                                    </div>
+                                    <input type="range" class="form-range form-range-sm" id="dateStartSlider"
+                                           min="-5000" max="2000" value="-1200" step="10">
+                                </div>
+
+                                <!-- End Date -->
+                                <div class="col-6">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <span class="input-group-text">To</span>
+                                        <input type="number" class="form-control" id="dateEnd" placeholder="-800" step="10">
+                                        <span class="input-group-text text-muted" style="font-size: 0.75rem;">BCE/CE</span>
+                                    </div>
+                                    <input type="range" class="form-range form-range-sm" id="dateEndSlider"
+                                           min="-5000" max="2000" value="-800" step="10">
+                                </div>
                             </div>
-                            <div class="form-text">Negative = BCE, Positive = CE</div>
+
+                            <div class="form-text mt-1">
+                                <i class="fas fa-info-circle"></i> Negative = BCE, Positive = CE
+                            </div>
                         </div>
 
                         <!-- Transparency Slider -->
@@ -357,6 +396,253 @@
                             <button type="button" class="btn btn-outline-secondary btn-sm" id="resetFiltersBtn">
                                 <i class="fas fa-undo"></i> Reset
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proxy Info Panel -->
+    <div class="row mt-4 d-none" id="proxyInfoPanel">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> Stratigraphic Unit Details
+                    </h5>
+                    <button type="button" class="btn btn-sm btn-outline-light" id="closeProxyInfoBtn">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+                <div class="card-body">
+                    <!-- Basic Info Header -->
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <h4 class="mb-1">
+                                <span class="badge bg-secondary" id="proxyUsLabel">US -</span>
+                                <span id="proxyUsTitle" class="text-muted">-</span>
+                            </h4>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-map-marker-alt"></i> <span id="proxySite">-</span> /
+                                <span id="proxyArea">-</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Visibility</small>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-success" id="showProxyBtn">
+                                        <i class="fas fa-eye"></i> Show
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" id="hideProxyBtn">
+                                        <i class="fas fa-eye-slash"></i> Hide
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabbed Content -->
+                    <ul class="nav nav-tabs mb-3" id="proxyInfoTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-basic" data-bs-toggle="tab"
+                                    data-bs-target="#panel-basic" type="button" role="tab">
+                                <i class="fas fa-info"></i> Basic
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-stratigraphy" data-bs-toggle="tab"
+                                    data-bs-target="#panel-stratigraphy" type="button" role="tab">
+                                <i class="fas fa-layer-group"></i> Stratigraphy
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-chronology" data-bs-toggle="tab"
+                                    data-bs-target="#panel-chronology" type="button" role="tab">
+                                <i class="fas fa-clock"></i> Chronology
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-relationships" data-bs-toggle="tab"
+                                    data-bs-target="#panel-relationships" type="button" role="tab">
+                                <i class="fas fa-project-diagram"></i> Relationships
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="proxyInfoTabContent">
+                        <!-- Basic Info Tab -->
+                        <div class="tab-pane fade show active" id="panel-basic" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th width="40%">Unit Type:</th>
+                                                <td id="proxyUnitType">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Definition:</th>
+                                                <td id="proxyDefinition">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Formation:</th>
+                                                <td id="proxyFormation">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Interpretation:</th>
+                                                <td id="proxyInterpretation">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th width="40%">Sector:</th>
+                                                <td id="proxySector">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Min Quota:</th>
+                                                <td id="proxyQuotaMin">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Max Quota:</th>
+                                                <td id="proxyQuotaMax">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <h6>Description:</h6>
+                                    <p id="proxyDescription" class="text-muted">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stratigraphy Tab -->
+                        <div class="tab-pane fade" id="panel-stratigraphy" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Physical Characteristics:</h6>
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th width="40%">Consistency:</th>
+                                                <td id="proxyConsistency">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Color:</th>
+                                                <td id="proxyColor">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Inclusions:</th>
+                                                <td id="proxyInclusions">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Dimensions:</h6>
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th width="40%">Max Length:</th>
+                                                <td id="proxyLengthMax">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Max Height:</th>
+                                                <td id="proxyHeightMax">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Max Depth:</th>
+                                                <td id="proxyDepthMax">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chronology Tab -->
+                        <div class="tab-pane fade" id="panel-chronology" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Period:</h6>
+                                    <div class="mb-3">
+                                        <span class="badge bg-info fs-6" id="proxyPeriod">Unknown</span>
+                                    </div>
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th width="40%">Phase:</th>
+                                                <td id="proxyPhase">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Initial Chronology:</th>
+                                                <td id="proxyCronInitial">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Final Chronology:</th>
+                                                <td id="proxyCronFinal">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Dating Range:</h6>
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th width="40%">Start:</th>
+                                                <td id="proxyDatingStart">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>End:</th>
+                                                <td id="proxyDatingEnd">-</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Reliability:</th>
+                                                <td id="proxyReliability">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Relationships Tab -->
+                        <div class="tab-pane fade" id="panel-relationships" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-arrow-up text-success"></i> Overlying (Above):</h6>
+                                    <div class="mb-3">
+                                        <div id="proxyCoveredBy" class="small text-muted">-</div>
+                                    </div>
+                                    <h6><i class="fas fa-arrow-down text-danger"></i> Underlying (Below):</h6>
+                                    <div class="mb-3">
+                                        <div id="proxyCovers" class="small text-muted">-</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-fill text-primary"></i> Fills:</h6>
+                                    <div class="mb-3">
+                                        <div id="proxyFills" class="small text-muted">-</div>
+                                    </div>
+                                    <h6><i class="fas fa-fill-drip text-warning"></i> Filled By:</h6>
+                                    <div class="mb-3">
+                                        <div id="proxyFilledBy" class="small text-muted">-</div>
+                                    </div>
+                                    <h6><i class="fas fa-cut text-info"></i> Cuts / Cut By:</h6>
+                                    <div class="mb-3">
+                                        <div id="proxyCuts" class="small text-muted">-</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -474,8 +760,11 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('periodFilter').selectedIndex = -1;
         document.getElementById('dateStart').value = '';
         document.getElementById('dateEnd').value = '';
+        document.getElementById('dateStartSlider').value = '-1200';
+        document.getElementById('dateEndSlider').value = '-800';
         document.getElementById('transparencySlider').value = 100;
         document.getElementById('transparencyValue').textContent = '100%';
+        updateDateRangeDisplay();
 
         // Reset viewer
         currentProxies.forEach(proxy => {
@@ -485,6 +774,97 @@ document.addEventListener('DOMContentLoaded', function() {
 
         showAlert('Filters reset', 'success');
     });
+
+    // Date range spinbox/slider synchronization
+    const dateStartInput = document.getElementById('dateStart');
+    const dateStartSlider = document.getElementById('dateStartSlider');
+    const dateEndInput = document.getElementById('dateEnd');
+    const dateEndSlider = document.getElementById('dateEndSlider');
+
+    // Sync start date input -> slider
+    dateStartInput?.addEventListener('input', function() {
+        if (this.value !== '') {
+            dateStartSlider.value = this.value;
+        }
+        updateDateRangeDisplay();
+    });
+
+    // Sync start date slider -> input
+    dateStartSlider?.addEventListener('input', function() {
+        dateStartInput.value = this.value;
+        updateDateRangeDisplay();
+    });
+
+    // Sync end date input -> slider
+    dateEndInput?.addEventListener('input', function() {
+        if (this.value !== '') {
+            dateEndSlider.value = this.value;
+        }
+        updateDateRangeDisplay();
+    });
+
+    // Sync end date slider -> input
+    dateEndSlider?.addEventListener('input', function() {
+        dateEndInput.value = this.value;
+        updateDateRangeDisplay();
+    });
+
+    // Period preset buttons
+    document.querySelectorAll('.date-preset').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const start = this.dataset.start;
+            const end = this.dataset.end;
+
+            dateStartInput.value = start;
+            dateStartSlider.value = start;
+            dateEndInput.value = end;
+            dateEndSlider.value = end;
+
+            updateDateRangeDisplay();
+
+            // Highlight selected preset
+            document.querySelectorAll('.date-preset').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Clear date range button
+    document.getElementById('clearDateRange')?.addEventListener('click', function() {
+        dateStartInput.value = '';
+        dateEndInput.value = '';
+        dateStartSlider.value = '-1200';
+        dateEndSlider.value = '-800';
+        updateDateRangeDisplay();
+
+        // Remove active state from presets
+        document.querySelectorAll('.date-preset').forEach(b => b.classList.remove('active'));
+    });
+
+    // Update date range display text
+    function updateDateRangeDisplay() {
+        const display = document.getElementById('dateRangeDisplay');
+        if (!display) return;
+
+        const start = dateStartInput.value;
+        const end = dateEndInput.value;
+
+        if (start === '' && end === '') {
+            display.textContent = 'All dates';
+        } else if (start !== '' && end !== '') {
+            const startLabel = parseInt(start) < 0 ? `${Math.abs(start)} BCE` : `${start} CE`;
+            const endLabel = parseInt(end) < 0 ? `${Math.abs(end)} BCE` : `${end} CE`;
+            display.textContent = `${startLabel} to ${endLabel}`;
+        } else if (start !== '') {
+            const startLabel = parseInt(start) < 0 ? `${Math.abs(start)} BCE` : `${start} CE`;
+            display.textContent = `From ${startLabel}`;
+        } else {
+            const endLabel = parseInt(end) < 0 ? `${Math.abs(end)} BCE` : `${end} CE`;
+            display.textContent = `Until ${endLabel}`;
+        }
+    }
+
+    // Initialize display on load
+    updateDateRangeDisplay();
 
     // Real-time transparency update
     document.getElementById('transparencySlider')?.addEventListener('input', function() {
@@ -685,9 +1065,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 viewer3D.onProxySelect = function(proxy) {
                     if (proxy) {
                         document.getElementById('selectedProxy').textContent = `US ${proxy.us_id}`;
-                        // TODO: Show proxy details panel (Task #15)
+                        showProxyInfoPanel(proxy);
                     } else {
                         document.getElementById('selectedProxy').textContent = 'None';
+                        hideProxyInfoPanel();
                     }
                 };
 
@@ -729,6 +1110,127 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => alertDiv.classList.add('d-none'), 5000);
         }
     }
+
+    // ========================================================================
+    // Proxy Info Panel Functions
+    // ========================================================================
+
+    let currentSelectedProxy = null;
+
+    function showProxyInfoPanel(proxy) {
+        currentSelectedProxy = proxy;
+
+        // Show panel
+        const panel = document.getElementById('proxyInfoPanel');
+        panel.classList.remove('d-none');
+
+        // Scroll to panel
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // Populate basic header
+        const stratig = proxy.stratigraphic_data || {};
+        const chronology = proxy.chronology || {};
+        const relationships = proxy.relationships || {};
+
+        document.getElementById('proxyUsLabel').textContent = `US ${proxy.us_id}`;
+        document.getElementById('proxyUsTitle').textContent = stratig.interpretazione || '-';
+        document.getElementById('proxySite').textContent = stratig.sito || '-';
+        document.getElementById('proxyArea').textContent = stratig.area || '-';
+
+        // Populate Basic tab
+        document.getElementById('proxyUnitType').textContent = stratig.unita_tipo || '-';
+        document.getElementById('proxyDefinition').textContent = stratig.definizione_stratigrafica || '-';
+        document.getElementById('proxyFormation').textContent = stratig.formazione || '-';
+        document.getElementById('proxyInterpretation').textContent = stratig.interpretazione || '-';
+        document.getElementById('proxySector').textContent = stratig.settore || '-';
+        document.getElementById('proxyQuotaMin').textContent =
+            stratig.quota_min != null ? stratig.quota_min.toFixed(2) + ' m' : '-';
+        document.getElementById('proxyQuotaMax').textContent =
+            stratig.quota_max != null ? stratig.quota_max.toFixed(2) + ' m' : '-';
+        document.getElementById('proxyDescription').textContent = stratig.descrizione || '-';
+
+        // Populate Stratigraphy tab
+        document.getElementById('proxyConsistency').textContent = stratig.consistenza || '-';
+        document.getElementById('proxyColor').textContent = stratig.colore || '-';
+        document.getElementById('proxyInclusions').textContent = stratig.inclusi || '-';
+        document.getElementById('proxyLengthMax').textContent =
+            stratig.lunghezza_max != null ? stratig.lunghezza_max.toFixed(2) + ' m' : '-';
+        document.getElementById('proxyHeightMax').textContent =
+            stratig.altezza_max != null ? stratig.altezza_max.toFixed(2) + ' m' : '-';
+        document.getElementById('proxyDepthMax').textContent =
+            stratig.profondita_max != null ? stratig.profondita_max.toFixed(2) + ' m' : '-';
+
+        // Populate Chronology tab
+        document.getElementById('proxyPeriod').textContent = chronology.period_name || 'Unknown';
+        document.getElementById('proxyPhase').textContent = chronology.fase || '-';
+        document.getElementById('proxyCronInitial').textContent = chronology.cron_iniziale || '-';
+        document.getElementById('proxyCronFinal').textContent = chronology.cron_finale || '-';
+
+        // Format dating range
+        if (chronology.dating_start != null) {
+            const startLabel = chronology.dating_start < 0 ?
+                `${Math.abs(chronology.dating_start)} BCE` : `${chronology.dating_start} CE`;
+            document.getElementById('proxyDatingStart').textContent = startLabel;
+        } else {
+            document.getElementById('proxyDatingStart').textContent = '-';
+        }
+
+        if (chronology.dating_end != null) {
+            const endLabel = chronology.dating_end < 0 ?
+                `${Math.abs(chronology.dating_end)} BCE` : `${chronology.dating_end} CE`;
+            document.getElementById('proxyDatingEnd').textContent = endLabel;
+        } else {
+            document.getElementById('proxyDatingEnd').textContent = '-';
+        }
+
+        document.getElementById('proxyReliability').textContent = chronology.affidabilita || '-';
+
+        // Populate Relationships tab
+        const formatRelList = (usList) => {
+            if (!usList || usList.length === 0) return '<em class="text-muted">None</em>';
+            return usList.map(us => `<span class="badge bg-secondary me-1">US ${us}</span>`).join(' ');
+        };
+
+        document.getElementById('proxyCovers').innerHTML = formatRelList(relationships.covers);
+        document.getElementById('proxyCoveredBy').innerHTML = formatRelList(relationships.covered_by);
+        document.getElementById('proxyFills').innerHTML = formatRelList(relationships.fills);
+        document.getElementById('proxyFilledBy').innerHTML = formatRelList(relationships.filled_by);
+
+        const cuts = relationships.cuts || [];
+        const cutBy = relationships.cut_by || [];
+        const allCuts = [...cuts, ...cutBy];
+        document.getElementById('proxyCuts').innerHTML = formatRelList(allCuts);
+    }
+
+    function hideProxyInfoPanel() {
+        currentSelectedProxy = null;
+        document.getElementById('proxyInfoPanel').classList.add('d-none');
+    }
+
+    // Close proxy info panel button
+    document.getElementById('closeProxyInfoBtn')?.addEventListener('click', function() {
+        hideProxyInfoPanel();
+
+        // Deselect in viewer
+        if (viewer3D) {
+            viewer3D.deselectProxy();
+        }
+    });
+
+    // Show/Hide proxy visibility buttons
+    document.getElementById('showProxyBtn')?.addEventListener('click', function() {
+        if (currentSelectedProxy && viewer3D) {
+            viewer3D.updateProxyVisibility(currentSelectedProxy.us_id, true);
+            showAlert(`US ${currentSelectedProxy.us_id} is now visible`, 'success');
+        }
+    });
+
+    document.getElementById('hideProxyBtn')?.addEventListener('click', function() {
+        if (currentSelectedProxy && viewer3D) {
+            viewer3D.updateProxyVisibility(currentSelectedProxy.us_id, false);
+            showAlert(`US ${currentSelectedProxy.us_id} is now hidden`, 'info');
+        }
+    });
 
     async function loadActiveSessions() {
         try {
