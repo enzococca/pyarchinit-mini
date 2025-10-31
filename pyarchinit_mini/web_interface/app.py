@@ -430,8 +430,18 @@ def create_app():
     media_service = MediaService(db_manager, media_handler)
 
     # Store services in app for access in routes
-    app.user_service = user_service
     app.db_manager = db_manager
+    app.user_service = user_service
+    app.site_service = site_service
+    app.us_service = us_service
+    app.inventario_service = inventario_service
+    app.thesaurus_service = thesaurus_service
+    app.analytics_service = analytics_service
+    app.relationship_sync_service = relationship_sync_service
+    app.datazione_service = datazione_service
+    app.matrix_generator = matrix_generator
+    app.export_import_service = export_import_service
+    app.media_service = media_service
 
     # Initialize Flask-Login
     init_login_manager(app, user_service)
@@ -3457,9 +3467,19 @@ def create_app():
             matrix_generator = HarrisMatrixGenerator(db_manager, us_service)
             export_import_service = ExportImportService(db_manager)
 
-            # Update app stored services
-            app.user_service = user_service
+            # Update app stored services (ALL of them to ensure switch works)
             app.db_manager = db_manager
+            app.user_service = user_service
+            app.site_service = site_service
+            app.us_service = us_service
+            app.inventario_service = inventario_service
+            app.thesaurus_service = thesaurus_service
+            app.analytics_service = analytics_service
+            app.relationship_sync_service = relationship_sync_service
+            app.datazione_service = datazione_service
+            app.matrix_generator = matrix_generator
+            app.export_import_service = export_import_service
+            app.media_service = media_service
 
             # Log the switch for debugging
             print(f"[DATABASE SWITCH] Changed to: {new_db_url}")
