@@ -11,8 +11,8 @@ from typing import Dict, Any, List, Optional, Tuple
 from pathlib import Path
 
 from ..models.us import US
-from ..models.periodizzazione import Periodizzazione
-from ..models.datazioni import Datazioni
+from ..models.harris_matrix import Periodizzazione
+from ..models.datazione import Datazione
 
 
 logger = logging.getLogger(__name__)
@@ -433,9 +433,9 @@ class GraphMLParser:
         period_detail = None
         if period_record.periodo:
             period_detail = (
-                self.db_session.query(Datazioni)
-                .filter(Datazioni.sito == us_record.sito)
-                .filter(Datazioni.periodo.ilike(f"%{period_record.periodo}%"))
+                self.db_session.query(Datazione)
+                .filter(Datazione.sito == us_record.sito)
+                .filter(Datazione.periodo.ilike(f"%{period_record.periodo}%"))
                 .first()
             )
 
