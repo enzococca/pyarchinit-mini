@@ -337,6 +337,9 @@ def save_matrix():
             except Exception as sync_error:
                 print(f"Warning: Failed to sync relationships to rapporti field: {sync_error}")
 
+            # Explicitly commit all changes
+            db.commit()
+
             return jsonify({
                 'success': True,
                 'message': f'Successfully saved Harris Matrix',
