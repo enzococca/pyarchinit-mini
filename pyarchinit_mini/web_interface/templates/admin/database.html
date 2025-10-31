@@ -410,11 +410,89 @@
                                         {{ _('Warning: Deletes existing database!') }}
                                     </div>
                                 </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="migrate_auto_backup" checked>
+                                    <label class="form-check-label" for="migrate_auto_backup">
+                                        <i class="fas fa-save me-1"></i>{{ _('Create backup before migration') }}
+                                    </label>
+                                    <div class="form-text text-muted">
+                                        {{ _('Recommended: Creates timestamped backup of source database') }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="d-grid mt-3">
+                    <!-- Migration Options -->
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <h6 class="mb-3"><strong><i class="fas fa-cog me-2"></i>{{ _('Conflict Resolution Strategy') }}</strong></h6>
+                            <div class="alert alert-info">
+                                <small>
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {{ _('Choose how to handle records with duplicate IDs between source and target databases.') }}
+                                </small>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="migrate_strategy"
+                                                       id="migrate_strategy_skip" value="skip" checked>
+                                                <label class="form-check-label" for="migrate_strategy_skip">
+                                                    <strong>{{ _('Skip') }}</strong> <span class="badge bg-secondary">{{ _('Default') }}</span>
+                                                </label>
+                                            </div>
+                                            <p class="text-muted mt-2 mb-0" style="font-size: 0.85rem;">
+                                                {{ _('Skip records with conflicting IDs. Target data is preserved, only new records are added.') }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="migrate_strategy"
+                                                       id="migrate_strategy_overwrite" value="overwrite">
+                                                <label class="form-check-label" for="migrate_strategy_overwrite">
+                                                    <strong>{{ _('Overwrite') }}</strong>
+                                                </label>
+                                            </div>
+                                            <p class="text-muted mt-2 mb-0" style="font-size: 0.85rem;">
+                                                {{ _('Update existing records with source data. Use when source has the latest information.') }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="migrate_strategy"
+                                                       id="migrate_strategy_renumber" value="renumber">
+                                                <label class="form-check-label" for="migrate_strategy_renumber">
+                                                    <strong>{{ _('Renumber') }}</strong>
+                                                </label>
+                                            </div>
+                                            <p class="text-muted mt-2 mb-0" style="font-size: 0.85rem;">
+                                                {{ _('Generate new IDs for conflicting records. Keeps all data from both databases.') }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="button" class="btn btn-info btn-lg" id="preview_conflicts_btn">
+                            <i class="fas fa-eye me-2"></i>{{ _('Preview Conflicts') }}
+                        </button>
                         <button type="button" class="btn btn-warning btn-lg" id="migrate_db_btn">
                             <i class="fas fa-exchange-alt me-2"></i>{{ _('Start Migration') }}
                         </button>
@@ -538,6 +616,64 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conflict Preview Modal -->
+<div class="modal fade" id="conflictsModal" tabindex="-1" aria-labelledby="conflictsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="conflictsModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ _('Migration Conflict Analysis') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="conflicts_loading" style="display: none;">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">{{ _('Analyzing databases for conflicts...') }}</p>
+                    </div>
+                </div>
+
+                <div id="conflicts_content" style="display: none;">
+                    <!-- Summary -->
+                    <div class="alert alert-info" id="conflicts_summary">
+                        <!-- Summary content will be inserted here -->
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div id="conflicts_recommendations" class="alert" style="display: none;">
+                        <!-- Recommendations will be inserted here -->
+                    </div>
+
+                    <!-- Tables Details -->
+                    <div id="conflicts_tables">
+                        <!-- Tables conflict details will be inserted here -->
+                    </div>
+
+                    <!-- Errors (if any) -->
+                    <div id="conflicts_errors" style="display: none;">
+                        <!-- Errors will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="conflicts_error" class="alert alert-danger" style="display: none;">
+                    <!-- Error messages will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>{{ _('Close') }}
+                </button>
+                <button type="button" class="btn btn-warning" id="proceed_migration_btn" style="display: none;">
+                    <i class="fas fa-exchange-alt me-2"></i>{{ _('Proceed with Migration') }}
+                </button>
             </div>
         </div>
     </div>
@@ -694,21 +830,27 @@ document.querySelectorAll('input[name="migrate_target_db_type"]').forEach(radio 
     });
 });
 
-// Database Migration button handler
-document.getElementById('migrate_db_btn').addEventListener('click', function() {
+// Helper function to build migration request data (DRY principle)
+function buildMigrationRequestData() {
     const sourceType = document.querySelector('input[name="migrate_source_type"]:checked').value;
     const targetDbType = document.querySelector('input[name="migrate_target_db_type"]:checked').value;
     const overwrite = document.getElementById('migrate_overwrite').checked;
-    const statusEl = document.getElementById('migrate_db_status');
-    const btn = this;
+    const autoBackup = document.getElementById('migrate_auto_backup').checked;
+    const mergeStrategy = document.querySelector('input[name="migrate_strategy"]:checked').value;
 
     let requestData = {
         source_type: sourceType,
         target_db_type: targetDbType,
-        overwrite_target: overwrite
+        overwrite_target: overwrite,
+        auto_backup: autoBackup,
+        merge_strategy: mergeStrategy
     };
 
-    // Build source database connection
+    return { requestData, sourceType, targetDbType };
+}
+
+// Helper function to validate and add source database fields
+function addSourceDatabaseFields(requestData, sourceType) {
     if (sourceType === 'custom') {
         const sourceDbType = document.querySelector('input[name="migrate_source_db_type"]:checked').value;
         requestData.source_db_type = sourceDbType;
@@ -716,9 +858,7 @@ document.getElementById('migrate_db_btn').addEventListener('click', function() {
         if (sourceDbType === 'sqlite') {
             const sourcePath = document.getElementById('migrate_source_db_path').value.trim();
             if (!sourcePath) {
-                statusEl.style.display = 'block';
-                statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please provide source database path</div>';
-                return;
+                return { error: 'Please provide source database path' };
             }
             requestData.source_db_path = sourcePath;
         } else {
@@ -729,9 +869,7 @@ document.getElementById('migrate_db_btn').addEventListener('click', function() {
             const password = document.getElementById('migrate_source_pg_password').value;
 
             if (!host || !port || !database || !user) {
-                statusEl.style.display = 'block';
-                statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please fill all source PostgreSQL fields</div>';
-                return;
+                return { error: 'Please fill all source PostgreSQL fields' };
             }
 
             requestData.source_pg_host = host;
@@ -741,14 +879,15 @@ document.getElementById('migrate_db_btn').addEventListener('click', function() {
             requestData.source_pg_password = password;
         }
     }
+    return { error: null };
+}
 
-    // Build target database connection
+// Helper function to validate and add target database fields
+function addTargetDatabaseFields(requestData, targetDbType) {
     if (targetDbType === 'sqlite') {
         const targetPath = document.getElementById('migrate_target_db_path').value.trim();
         if (!targetPath) {
-            statusEl.style.display = 'block';
-            statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please provide target database path</div>';
-            return;
+            return { error: 'Please provide target database path' };
         }
         requestData.target_db_path = targetPath;
         requestData.use_default_path = true;
@@ -760,9 +899,7 @@ document.getElementById('migrate_db_btn').addEventListener('click', function() {
         const password = document.getElementById('migrate_target_pg_password').value;
 
         if (!host || !port || !database || !user) {
-            statusEl.style.display = 'block';
-            statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please fill all target PostgreSQL fields</div>';
-            return;
+            return { error: 'Please fill all target PostgreSQL fields' };
         }
 
         requestData.target_pg_host = host;
@@ -770,6 +907,155 @@ document.getElementById('migrate_db_btn').addEventListener('click', function() {
         requestData.target_pg_database = database;
         requestData.target_pg_user = user;
         requestData.target_pg_password = password;
+    }
+    return { error: null };
+}
+
+// Preview Conflicts button handler
+document.getElementById('preview_conflicts_btn').addEventListener('click', function() {
+    const { requestData, sourceType, targetDbType } = buildMigrationRequestData();
+
+    // Validate source
+    const sourceResult = addSourceDatabaseFields(requestData, sourceType);
+    if (sourceResult.error) {
+        alert(sourceResult.error);
+        return;
+    }
+
+    // Validate target
+    const targetResult = addTargetDatabaseFields(requestData, targetDbType);
+    if (targetResult.error) {
+        alert(targetResult.error);
+        return;
+    }
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('conflictsModal'));
+    modal.show();
+
+    // Show loading
+    document.getElementById('conflicts_loading').style.display = 'block';
+    document.getElementById('conflicts_content').style.display = 'none';
+    document.getElementById('conflicts_error').style.display = 'none';
+
+    // Call preview API
+    fetch('/pyarchinit-import-export/api/pyarchinit/preview-migration-conflicts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        document.getElementById('conflicts_loading').style.display = 'none';
+
+        if (result.success) {
+            document.getElementById('conflicts_content').style.display = 'block';
+
+            // Build summary
+            let summaryHTML = '<h6><i class="fas fa-info-circle me-2"></i>Summary</h6>';
+            summaryHTML += `<p><strong>Total Conflicts:</strong> ${result.total_conflicts}<br>`;
+            summaryHTML += `<strong>Total New Records:</strong> ${result.total_new_records}</p>`;
+            document.getElementById('conflicts_summary').innerHTML = summaryHTML;
+
+            // Build recommendations
+            const recDiv = document.getElementById('conflicts_recommendations');
+            if (result.has_conflicts) {
+                recDiv.style.display = 'block';
+                recDiv.className = 'alert alert-warning';
+                let recHTML = '<h6><i class="fas fa-lightbulb me-2"></i>Recommendations</h6>';
+                recHTML += '<ul class="mb-0">';
+                if (result.total_conflicts > 50) {
+                    recHTML += '<li><strong>Overwrite</strong> strategy recommended for large updates</li>';
+                } else if (result.total_conflicts > 0) {
+                    recHTML += '<li><strong>Skip</strong> strategy (default) to preserve target data</li>';
+                    recHTML += '<li><strong>Overwrite</strong> if source has latest data</li>';
+                    recHTML += '<li><strong>Renumber</strong> to keep both versions</li>';
+                }
+                recHTML += '</ul>';
+                recDiv.innerHTML = recHTML;
+            } else {
+                recDiv.style.display = 'block';
+                recDiv.className = 'alert alert-success';
+                recDiv.innerHTML = '<h6><i class="fas fa-check-circle me-2"></i>No Conflicts Found</h6><p class="mb-0">All records are new. Safe to migrate with any strategy.</p>';
+            }
+
+            // Build tables details
+            let tablesHTML = '<h6 class="mt-3"><i class="fas fa-table me-2"></i>Tables Analysis</h6>';
+            tablesHTML += '<div class="table-responsive"><table class="table table-sm table-hover">';
+            tablesHTML += '<thead><tr><th>Table</th><th>Source Records</th><th>Conflicts</th><th>New Records</th><th>Conflicting IDs</th></tr></thead>';
+            tablesHTML += '<tbody>';
+
+            for (const [tableName, data] of Object.entries(result.tables)) {
+                if (data.total_source_records > 0) {
+                    const rowClass = data.conflicts > 0 ? 'table-warning' : '';
+                    tablesHTML += `<tr class="${rowClass}">`;
+                    tablesHTML += `<td><code>${tableName}</code></td>`;
+                    tablesHTML += `<td>${data.total_source_records}</td>`;
+                    tablesHTML += `<td><span class="badge bg-${data.conflicts > 0 ? 'warning' : 'success'}">${data.conflicts}</span></td>`;
+                    tablesHTML += `<td><span class="badge bg-info">${data.new_records}</span></td>`;
+                    tablesHTML += `<td><small>${data.conflicting_ids.length > 0 ? data.conflicting_ids.slice(0, 5).join(', ') + (data.conflicting_ids.length > 5 ? '...' : '') : '-'}</small></td>`;
+                    tablesHTML += '</tr>';
+                }
+            }
+            tablesHTML += '</tbody></table></div>';
+            document.getElementById('conflicts_tables').innerHTML = tablesHTML;
+
+            // Show errors if any
+            if (result.errors && result.errors.length > 0) {
+                const errDiv = document.getElementById('conflicts_errors');
+                errDiv.style.display = 'block';
+                errDiv.className = 'alert alert-warning';
+                let errHTML = '<h6><i class="fas fa-exclamation-triangle me-2"></i>Warnings</h6><ul class="mb-0">';
+                result.errors.forEach(err => {
+                    errHTML += `<li>${err}</li>`;
+                });
+                errHTML += '</ul>';
+                errDiv.innerHTML = errHTML;
+            }
+
+            // Show proceed button
+            document.getElementById('proceed_migration_btn').style.display = 'inline-block';
+
+        } else {
+            document.getElementById('conflicts_error').style.display = 'block';
+            document.getElementById('conflicts_error').innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + result.message;
+        }
+    })
+    .catch(error => {
+        document.getElementById('conflicts_loading').style.display = 'none';
+        document.getElementById('conflicts_error').style.display = 'block';
+        document.getElementById('conflicts_error').innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>Error: ' + error.message;
+    });
+});
+
+// Proceed with migration from modal
+document.getElementById('proceed_migration_btn').addEventListener('click', function() {
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('conflictsModal')).hide();
+    // Trigger migration
+    document.getElementById('migrate_db_btn').click();
+});
+
+// Database Migration button handler
+document.getElementById('migrate_db_btn').addEventListener('click', function() {
+    const { requestData, sourceType, targetDbType } = buildMigrationRequestData();
+    const statusEl = document.getElementById('migrate_db_status');
+    const btn = this;
+
+    // Validate source
+    const sourceResult = addSourceDatabaseFields(requestData, sourceType);
+    if (sourceResult.error) {
+        statusEl.style.display = 'block';
+        statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>' + sourceResult.error + '</div>';
+        return;
+    }
+
+    // Validate target
+    const targetResult = addTargetDatabaseFields(requestData, targetDbType);
+    if (targetResult.error) {
+        statusEl.style.display = 'block';
+        statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>' + targetResult.error + '</div>';
+        return;
     }
 
     // Show loading status
@@ -799,6 +1085,15 @@ document.getElementById('migrate_db_btn').addEventListener('click', function() {
             message += '<small>Tables migrated: ' + result.tables_migrated + '</small><br>';
             message += '<small>Total rows copied: ' + result.total_rows_copied + '</small><br>';
             message += '<small>Duration: ' + result.duration_seconds.toFixed(2) + ' seconds</small>';
+
+            // Show backup info if created
+            if (result.backup_created) {
+                message += '<br><div class="mt-2 p-2 bg-light border rounded"><small>';
+                message += '<i class="fas fa-save text-success me-1"></i><strong>Backup Created:</strong><br>';
+                message += 'Path: <code>' + result.backup_path + '</code><br>';
+                message += 'Size: ' + result.backup_size_mb.toFixed(2) + ' MB';
+                message += '</small></div>';
+            }
 
             if (result.rows_per_table && Object.keys(result.rows_per_table).length > 0) {
                 message += '<br><details class="mt-2"><summary>Tables Details</summary><ul class="small">';
