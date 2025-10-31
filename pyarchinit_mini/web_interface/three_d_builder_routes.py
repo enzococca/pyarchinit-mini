@@ -11,13 +11,13 @@ import logging
 import uuid
 from typing import Dict, Any, Optional
 
-from ...database.manager import DatabaseManager
-from ...mcp_server.graphml_parser import GraphMLParser
-from ...mcp_server.proxy_generator import ProxyGenerator
-from ...mcp_server.blender_client import BlenderClient, BlenderConnectionError
-from ...models.extended_matrix import ExtendedMatrix
-from ...models.site import Site
-from ...models.us import US
+from pyarchinit_mini.database.manager import DatabaseManager
+from pyarchinit_mini.mcp_server.graphml_parser import GraphMLParser
+from pyarchinit_mini.mcp_server.proxy_generator import ProxyGenerator
+from pyarchinit_mini.mcp_server.blender_client import BlenderClient, BlenderConnectionError
+from pyarchinit_mini.models.extended_matrix import ExtendedMatrix
+from pyarchinit_mini.models.site import Site
+from pyarchinit_mini.models.us import US
 
 logger = logging.getLogger(__name__)
 
