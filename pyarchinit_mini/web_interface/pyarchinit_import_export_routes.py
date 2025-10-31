@@ -527,6 +527,96 @@ def create_database():
         }), 500
 
 
+@pyarchinit_import_export_bp.route('/api/pyarchinit/preview-migration-conflicts', methods=['POST'])
+def preview_migration_conflicts():
+    """Preview conflicts between source and target databases before migration"""
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'success': False, 'message': _('Invalid request: no JSON data')}), 400
+
+        # Get source database URL (same logic as migrate_database)
+        source_type = data.get('source_type')
+
+        if source_type == 'current':
+            source_db_url = current_app.config.get('CURRENT_DATABASE_URL')
+            if not source_db_url:
+                source_db_url = current_app.config.get('DATABASE_URL', 'sqlite:///./pyarchinit_mini.db')
+        else:
+            source_db_type = data.get('source_db_type', 'sqlite')
+
+            if source_db_type == 'sqlite':
+                source_db_path = data.get('source_db_path')
+                if not source_db_path:
+                    return jsonify({'success': False, 'message': _('Please provide source database path')}), 400
+
+                source_db_path = os.path.abspath(os.path.expanduser(source_db_path))
+                if not os.path.exists(source_db_path):
+                    return jsonify({'success': False, 'message': _('Source database file not found') + f': {source_db_path}'}), 400
+
+                source_db_url = f"sqlite:///{source_db_path}"
+            else:  # PostgreSQL
+                source_host = data.get('source_pg_host', 'localhost')
+                source_port = data.get('source_pg_port', '5432')
+                source_database = data.get('source_pg_database')
+                source_user = data.get('source_pg_user')
+                source_password = data.get('source_pg_password')
+
+                if not all([source_host, source_port, source_database, source_user]):
+                    return jsonify({'success': False, 'message': _('Missing source PostgreSQL connection details')}), 400
+
+                source_db_url = f"postgresql://{source_user}:{source_password}@{source_host}:{source_port}/{source_database}"
+
+        # Get target database details
+        target_db_type = data.get('target_db_type', 'sqlite')
+
+        if target_db_type == 'sqlite':
+            target_db_path = data.get('target_db_path')
+            if not target_db_path:
+                return jsonify({'success': False, 'message': _('Please provide target database path')}), 400
+
+            use_default_path = data.get('use_default_path', False)
+            if not use_default_path:
+                target_db_path = os.path.abspath(os.path.expanduser(target_db_path))
+
+            target_db_url = f"sqlite:///{target_db_path}"
+        else:  # PostgreSQL
+            target_host = data.get('target_pg_host', 'localhost')
+            target_port = data.get('target_pg_port', '5432')
+            target_database = data.get('target_pg_database')
+            target_user = data.get('target_pg_user')
+            target_password = data.get('target_pg_password')
+
+            if not all([target_host, target_port, target_database, target_user]):
+                return jsonify({'success': False, 'message': _('Missing target PostgreSQL connection details')}), 400
+
+            target_db_url = f"postgresql://{target_user}:{target_password}@{target_host}:{target_port}/{target_database}"
+
+        # Detect conflicts
+        from pyarchinit_mini.services.import_export_service import ImportExportService
+
+        logger.info(f"Analyzing conflicts between databases: {source_db_url} → {target_db_url}")
+
+        conflicts = ImportExportService._detect_conflicts(source_db_url, target_db_url)
+
+        return jsonify({
+            'success': True,
+            'has_conflicts': conflicts['has_conflicts'],
+            'total_conflicts': conflicts['total_conflicts'],
+            'total_new_records': conflicts['total_new_records'],
+            'tables': conflicts['tables'],
+            'errors': conflicts['errors']
+        })
+
+    except Exception as e:
+        logger.error(f"Error previewing migration conflicts: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': _('Failed to analyze conflicts') + f': {str(e)}'
+        }), 500
+
+
 @pyarchinit_import_export_bp.route('/api/pyarchinit/migrate-database', methods=['POST'])
 def migrate_database():
     """Migrate all data from source database to target database (SQLite ↔ PostgreSQL)"""
@@ -598,17 +688,28 @@ def migrate_database():
 
         # Get options
         overwrite_target = data.get('overwrite_target', False)
+        merge_strategy = data.get('merge_strategy', 'skip')  # 'skip', 'overwrite', or 'renumber'
+        auto_backup = data.get('auto_backup', True)
+
+        # Validate merge_strategy
+        if merge_strategy not in ['skip', 'overwrite', 'renumber']:
+            return jsonify({
+                'success': False,
+                'message': _('Invalid merge strategy. Must be: skip, overwrite, or renumber')
+            }), 400
 
         # Perform migration
         from pyarchinit_mini.services.import_export_service import ImportExportService
 
-        logger.info(f"Starting database migration: {source_db_url} → {target_db_url}")
+        logger.info(f"Starting database migration: {source_db_url} → {target_db_url} (strategy: {merge_strategy})")
 
         result = ImportExportService.migrate_database(
             source_db_url=source_db_url,
             target_db_url=target_db_url,
             create_target=True,
-            overwrite_target=overwrite_target
+            overwrite_target=overwrite_target,
+            auto_backup=auto_backup,
+            merge_strategy=merge_strategy
         )
 
         if result['success']:
@@ -619,6 +720,9 @@ def migrate_database():
                 'total_rows_copied': result['total_rows_copied'],
                 'rows_per_table': result['rows_per_table'],
                 'duration_seconds': result['duration_seconds'],
+                'backup_created': result.get('backup_created', False),
+                'backup_path': result.get('backup_path'),
+                'backup_size_mb': result.get('backup_size_mb', 0.0),
                 'errors': result['errors']
             })
         else:

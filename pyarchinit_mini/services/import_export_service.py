@@ -1680,7 +1680,10 @@ class ImportExportService:
     @staticmethod
     def migrate_database(source_db_url: str, target_db_url: str,
                         create_target: bool = True,
-                        overwrite_target: bool = False) -> Dict[str, Any]:
+                        overwrite_target: bool = False,
+                        auto_backup: bool = True,
+                        backup_dir: Optional[str] = None,
+                        merge_strategy: str = 'skip') -> Dict[str, Any]:
         """
         Migrate all data from source database to target database
 
@@ -1695,9 +1698,15 @@ class ImportExportService:
             target_db_url: Target database connection string
             create_target: If True, create target database with schema if it doesn't exist
             overwrite_target: If True and create_target=True, overwrite existing target database
+            auto_backup: If True, automatically create a backup of source database before migration
+            backup_dir: Optional directory for backups (defaults to same dir as source)
+            merge_strategy: How to handle ID conflicts: 'skip', 'overwrite', or 'renumber'
+                - 'skip': Skip records with conflicting IDs (default)
+                - 'overwrite': Update existing records with new data
+                - 'renumber': Generate new IDs for conflicting records
 
         Returns:
-            Dictionary with migration statistics
+            Dictionary with migration statistics including backup info
         """
         stats = {
             'success': False,
@@ -1705,13 +1714,33 @@ class ImportExportService:
             'total_rows_copied': 0,
             'rows_per_table': {},
             'errors': [],
-            'duration_seconds': 0
+            'duration_seconds': 0,
+            'backup_created': False,
+            'backup_path': None,
+            'backup_size_mb': 0.0
         }
 
         import time
         start_time = time.time()
 
         try:
+            # Create backup of source database if requested
+            if auto_backup:
+                logger.info("Creating backup of source database...")
+                backup_result = ImportExportService._create_backup(source_db_url, backup_dir)
+
+                if backup_result['success']:
+                    stats['backup_created'] = True
+                    stats['backup_path'] = backup_result['path']
+                    stats['backup_size_mb'] = backup_result['size_mb']
+                    logger.info(f"✓ Backup created: {backup_result['path']}")
+                else:
+                    logger.warning(f"⚠ Backup failed: {backup_result['message']}")
+                    stats['errors'].append(f"Backup warning: {backup_result['message']}")
+                    # Continue with migration even if backup fails (user chose auto_backup=True)
+            else:
+                logger.info("Skipping backup (auto_backup=False)")
+
             # Create target database with schema if requested
             if create_target:
                 logger.info(f"Creating target database with schema...")
@@ -1779,7 +1808,8 @@ class ImportExportService:
                     rows_copied = ImportExportService._migrate_table(
                         table_name,
                         source_session_maker,
-                        target_session_maker
+                        target_session_maker,
+                        merge_strategy=merge_strategy
                     )
 
                     if rows_copied > 0:
@@ -1816,6 +1846,256 @@ class ImportExportService:
             stats['errors'].append(str(e))
             stats['duration_seconds'] = time.time() - start_time
             return stats
+
+    @staticmethod
+    def _create_backup(db_url: str, backup_dir: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Create a backup of a database before migration
+
+        Args:
+            db_url: Database connection string
+            backup_dir: Optional directory for backup (defaults to same dir as source)
+
+        Returns:
+            Dictionary with backup info: {'success': bool, 'path': str, 'size_mb': float, 'message': str}
+        """
+        result = {
+            'success': False,
+            'path': None,
+            'size_mb': 0.0,
+            'message': ''
+        }
+
+        try:
+            # SQLite backup
+            if db_url.startswith('sqlite:///'):
+                # Extract file path from connection string
+                db_path = db_url.replace('sqlite:///', '')
+
+                # Handle absolute paths (start with /)
+                if not db_path.startswith('/'):
+                    db_path = '/' + db_path
+
+                if not os.path.exists(db_path):
+                    result['message'] = f"Source database file not found: {db_path}"
+                    return result
+
+                # Create backup with timestamp
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+                if backup_dir:
+                    os.makedirs(backup_dir, exist_ok=True)
+                    backup_filename = os.path.basename(db_path)
+                    backup_path = os.path.join(backup_dir, f"{backup_filename}.backup_{timestamp}")
+                else:
+                    backup_path = f"{db_path}.backup_{timestamp}"
+
+                shutil.copy2(db_path, backup_path)
+                file_size = os.path.getsize(backup_path) / (1024 * 1024)  # MB
+
+                result['success'] = True
+                result['path'] = backup_path
+                result['size_mb'] = round(file_size, 2)
+                result['message'] = f"SQLite backup created ({result['size_mb']} MB)"
+                logger.info(f"✓ Database backup: {backup_path} ({result['size_mb']} MB)")
+
+            # PostgreSQL backup
+            elif db_url.startswith('postgresql'):
+                import subprocess
+                from sqlalchemy.engine.url import make_url
+
+                # Parse connection URL
+                url = make_url(db_url)
+                host = url.host or 'localhost'
+                port = url.port or 5432
+                database = url.database
+                user = url.username
+                password = url.password
+
+                # Create backup file path
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+                if backup_dir:
+                    os.makedirs(backup_dir, exist_ok=True)
+                    backup_path = os.path.join(backup_dir, f"{database}_backup_{timestamp}.sql")
+                else:
+                    backup_path = f"{database}_backup_{timestamp}.sql"
+
+                # Set password environment variable
+                env = os.environ.copy()
+                if password:
+                    env['PGPASSWORD'] = password
+
+                # Run pg_dump
+                cmd = [
+                    'pg_dump',
+                    '-h', host,
+                    '-p', str(port),
+                    '-U', user,
+                    '-F', 'p',  # Plain SQL format
+                    '-f', backup_path,
+                    database
+                ]
+
+                pg_result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+
+                if pg_result.returncode == 0:
+                    file_size = os.path.getsize(backup_path) / (1024 * 1024)  # MB
+                    result['success'] = True
+                    result['path'] = backup_path
+                    result['size_mb'] = round(file_size, 2)
+                    result['message'] = f"PostgreSQL backup created ({result['size_mb']} MB)"
+                    logger.info(f"✓ PostgreSQL backup: {backup_path} ({result['size_mb']} MB)")
+                else:
+                    result['message'] = f"pg_dump failed: {pg_result.stderr}"
+                    logger.error(result['message'])
+            else:
+                result['message'] = f"Unsupported database type for backup: {db_url}"
+
+        except Exception as e:
+            result['message'] = f"Backup failed: {str(e)}"
+            logger.error(result['message'])
+
+        return result
+
+    @staticmethod
+    def _detect_conflicts(source_db_url: str, target_db_url: str) -> Dict[str, Any]:
+        """
+        Detect conflicts between source and target databases before migration
+
+        Analyzes both databases to find:
+        - Duplicate IDs (primary key conflicts)
+        - New records that don't exist in target
+        - Records that exist in both databases
+
+        Args:
+            source_db_url: Source database connection string
+            target_db_url: Target database connection string
+
+        Returns:
+            Dictionary with conflict analysis:
+            {
+                'has_conflicts': bool,
+                'total_conflicts': int,
+                'total_new_records': int,
+                'tables': {
+                    'table_name': {
+                        'conflicts': int,
+                        'new_records': int,
+                        'conflicting_ids': [list of IDs],
+                        'exists_in_target': bool
+                    }
+                }
+            }
+        """
+        result = {
+            'has_conflicts': False,
+            'total_conflicts': 0,
+            'total_new_records': 0,
+            'tables': {},
+            'errors': []
+        }
+
+        try:
+            # Connect to both databases
+            source_engine = create_engine(source_db_url)
+            target_engine = create_engine(target_db_url)
+
+            source_session_maker = sessionmaker(bind=source_engine)
+            target_session_maker = sessionmaker(bind=target_engine)
+
+            # Tables to check (in same order as migration)
+            tables_order = [
+                'users_table',
+                'site_table',
+                'datazioni_table',
+                'us_table',
+                'us_relationships_table',
+                'periodizzazione_table',
+                'inventario_materiali_table',
+                'pyarchinit_thesaurus_sigle',
+                'media_table',
+                'harris_matrix_table',
+                'periods_table',
+                'extended_matrix_nodes_table'
+            ]
+
+            for table_name in tables_order:
+                source_session = source_session_maker()
+                target_session = target_session_maker()
+
+                try:
+                    # Get primary key column name for this table
+                    inspector = inspect(source_engine)
+                    pk_columns = inspector.get_pk_constraint(table_name).get('constrained_columns', [])
+
+                    if not pk_columns:
+                        logger.warning(f"No primary key found for {table_name}, skipping")
+                        continue
+
+                    pk_column = pk_columns[0]  # Use first PK column
+
+                    # Check if table exists in source
+                    try:
+                        source_result = source_session.execute(text(f"SELECT {pk_column} FROM {table_name}"))
+                        source_ids = set(row[0] for row in source_result.fetchall())
+                    except Exception:
+                        # Table doesn't exist in source or has no data
+                        continue
+
+                    if not source_ids:
+                        continue  # Skip empty tables
+
+                    # Check if table exists in target
+                    target_ids = set()
+                    table_exists_in_target = False
+                    try:
+                        target_result = target_session.execute(text(f"SELECT {pk_column} FROM {table_name}"))
+                        target_ids = set(row[0] for row in target_result.fetchall())
+                        table_exists_in_target = True
+                    except Exception:
+                        # Table doesn't exist in target or is empty - all records are new
+                        table_exists_in_target = False
+
+                    # Find conflicts (IDs that exist in both)
+                    conflicting_ids = source_ids & target_ids
+                    new_ids = source_ids - target_ids
+
+                    # Store results for this table
+                    result['tables'][table_name] = {
+                        'conflicts': len(conflicting_ids),
+                        'new_records': len(new_ids),
+                        'conflicting_ids': sorted(list(conflicting_ids)),
+                        'exists_in_target': table_exists_in_target,
+                        'total_source_records': len(source_ids)
+                    }
+
+                    # Update totals
+                    result['total_conflicts'] += len(conflicting_ids)
+                    result['total_new_records'] += len(new_ids)
+
+                    if len(conflicting_ids) > 0:
+                        result['has_conflicts'] = True
+                        logger.info(f"⚠️  {table_name}: {len(conflicting_ids)} conflicts, {len(new_ids)} new")
+                    else:
+                        logger.info(f"✓ {table_name}: {len(new_ids)} new records, no conflicts")
+
+                except Exception as e:
+                    error_msg = f"Error analyzing {table_name}: {str(e)}"
+                    logger.error(error_msg)
+                    result['errors'].append(error_msg)
+                finally:
+                    source_session.close()
+                    target_session.close()
+
+            logger.info(f"Conflict detection complete: {result['total_conflicts']} conflicts, {result['total_new_records']} new records")
+
+        except Exception as e:
+            error_msg = f"Conflict detection failed: {str(e)}"
+            logger.error(error_msg)
+            result['errors'].append(error_msg)
+
+        return result
 
     @staticmethod
     def _reset_postgresql_sequences(target_engine) -> Dict[str, Any]:
@@ -1915,22 +2195,27 @@ class ImportExportService:
         return converted_data
 
     @staticmethod
-    def _migrate_table(table_name: str, source_session_maker, target_session_maker) -> int:
+    def _migrate_table(table_name: str, source_session_maker, target_session_maker,
+                      merge_strategy: str = 'skip') -> int:
         """
-        Migrate data from one table to another
+        Migrate data from one table to another with conflict resolution
 
         Args:
             table_name: Name of the table to migrate
             source_session_maker: Source database session maker
             target_session_maker: Target database session maker
+            merge_strategy: How to handle ID conflicts: 'skip', 'overwrite', or 'renumber'
 
         Returns:
-            Number of rows copied
+            Number of rows copied/updated
         """
         source_session = source_session_maker()
         target_session = target_session_maker()
 
-        rows_copied = 0
+        rows_processed = 0
+        rows_skipped = 0
+        rows_updated = 0
+        rows_renumbered = 0
 
         try:
             # Check if table exists in source
@@ -1939,6 +2224,19 @@ class ImportExportService:
             except Exception:
                 # Table doesn't exist in source, skip it
                 return 0
+
+            # Get primary key column for this table
+            from sqlalchemy import inspect
+            source_engine = source_session.get_bind()
+            inspector = inspect(source_engine)
+            pk_columns = inspector.get_pk_constraint(table_name).get('constrained_columns', [])
+
+            if not pk_columns:
+                logger.warning(f"No primary key found for {table_name}, using simple INSERT strategy")
+                pk_column = None
+            else:
+                pk_column = pk_columns[0]  # Use first PK column
+                logger.debug(f"Using primary key column '{pk_column}' for {table_name}")
 
             # Get all rows from source table
             result = source_session.execute(text(f"SELECT * FROM {table_name}"))
@@ -1953,7 +2251,32 @@ class ImportExportService:
             # Get target engine for boolean conversion
             target_engine = target_session.get_bind()
 
-            # Insert rows into target table
+            # Get existing IDs in target (for conflict detection)
+            existing_ids = set()
+            if pk_column:
+                try:
+                    existing_result = target_session.execute(
+                        text(f"SELECT {pk_column} FROM {table_name}")
+                    )
+                    existing_ids = {row[0] for row in existing_result.fetchall()}
+                    logger.debug(f"Found {len(existing_ids)} existing records in target {table_name}")
+                except Exception:
+                    # Target table might be empty or not exist
+                    existing_ids = set()
+
+            # Find max ID in target (for renumber strategy)
+            max_id = 0
+            if pk_column and merge_strategy == 'renumber':
+                try:
+                    max_result = target_session.execute(
+                        text(f"SELECT MAX({pk_column}) FROM {table_name}")
+                    )
+                    max_id = max_result.scalar() or 0
+                    logger.debug(f"Max ID in target {table_name}: {max_id}")
+                except Exception:
+                    max_id = 0
+
+            # Process each row
             for row in rows:
                 row_data = dict(row._mapping)
 
@@ -1962,28 +2285,92 @@ class ImportExportService:
                     table_name, row_data, target_engine
                 )
 
-                # Build INSERT query
-                columns = ', '.join(column_names)
-                placeholders = ', '.join([f':{col}' for col in column_names])
-
-                insert_query = text(f"""
-                    INSERT INTO {table_name} ({columns})
-                    VALUES ({placeholders})
-                """)
+                # Check for conflict
+                record_id = row_data.get(pk_column) if pk_column else None
+                has_conflict = pk_column and record_id in existing_ids
 
                 try:
-                    target_session.execute(insert_query, row_data)
-                    rows_copied += 1
+                    if has_conflict:
+                        # Handle conflict based on strategy
+                        if merge_strategy == 'skip':
+                            # Skip this record
+                            rows_skipped += 1
+                            logger.debug(f"Skipping {table_name} ID {record_id} (already exists)")
+                            continue
+
+                        elif merge_strategy == 'overwrite':
+                            # Update existing record
+                            set_clause = ', '.join([f"{col} = :{col}" for col in column_names if col != pk_column])
+                            update_query = text(f"""
+                                UPDATE {table_name}
+                                SET {set_clause}
+                                WHERE {pk_column} = :_pk_value
+                            """)
+
+                            # Add PK value for WHERE clause
+                            update_params = row_data.copy()
+                            update_params['_pk_value'] = record_id
+
+                            target_session.execute(update_query, update_params)
+                            rows_updated += 1
+                            rows_processed += 1
+                            logger.debug(f"Updated {table_name} ID {record_id}")
+
+                        elif merge_strategy == 'renumber':
+                            # Generate new ID and insert
+                            max_id += 1
+                            row_data[pk_column] = max_id
+                            existing_ids.add(max_id)  # Track new ID
+
+                            # Build INSERT query
+                            columns = ', '.join(column_names)
+                            placeholders = ', '.join([f':{col}' for col in column_names])
+                            insert_query = text(f"""
+                                INSERT INTO {table_name} ({columns})
+                                VALUES ({placeholders})
+                            """)
+
+                            target_session.execute(insert_query, row_data)
+                            rows_renumbered += 1
+                            rows_processed += 1
+                            logger.debug(f"Renumbered {table_name} ID {record_id} -> {max_id}")
+
+                    else:
+                        # No conflict, insert normally
+                        columns = ', '.join(column_names)
+                        placeholders = ', '.join([f':{col}' for col in column_names])
+                        insert_query = text(f"""
+                            INSERT INTO {table_name} ({columns})
+                            VALUES ({placeholders})
+                        """)
+
+                        target_session.execute(insert_query, row_data)
+                        rows_processed += 1
+
+                        # Track new ID if applicable
+                        if pk_column and record_id:
+                            existing_ids.add(record_id)
+
                 except Exception as e:
                     # Log error but continue with other rows
-                    logger.warning(f"Failed to insert row in {table_name}: {str(e)}")
+                    logger.warning(f"Failed to process row in {table_name}: {str(e)}")
                     target_session.rollback()
                     continue
 
-            # Commit all inserts for this table
+            # Commit all changes for this table
             target_session.commit()
 
-            return rows_copied
+            # Log summary
+            if rows_skipped > 0 or rows_updated > 0 or rows_renumbered > 0:
+                logger.info(
+                    f"{table_name} merge summary: "
+                    f"{rows_processed} processed, "
+                    f"{rows_skipped} skipped, "
+                    f"{rows_updated} updated, "
+                    f"{rows_renumbered} renumbered"
+                )
+
+            return rows_processed
 
         except Exception as e:
             target_session.rollback()
