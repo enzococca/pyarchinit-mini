@@ -5,6 +5,30 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.5] - 2025-10-31
+
+### Added
+- **Default Database in Saved Connections**: Default SQLite database now automatically appears in "Saved Connections" section
+  - Added initialization code in `app.py` to save active default database to ConnectionManager during startup
+  - Default database persists across server restarts and is visible in Admin → Database Management
+  - Resolves issue where only uploaded databases appeared in saved connections
+
+### Improved
+- **Complete English Translation for Database Management**: Fully translated the Database Management page to English
+  - Translated all Italian strings in `admin/database.html` template
+  - Added 30+ new translations to `messages.po` for both Italian and English
+  - Sections now translated:
+    - Database statistics (Sites, Stratigraphic Units, Inventory)
+    - Database operations (Upload, Connect, Info)
+    - Data migration section (SQLite ↔ PostgreSQL)
+    - Saved connections table headers and actions
+    - Help section
+  - English interface now fully functional for database administration
+
+### Changed
+- Database Management UI now uses Flask-Babel translation functions throughout
+- Compiled translation files (.mo) updated with new strings
+
 ## [1.8.4] - 2025-10-31
 
 ### Fixed

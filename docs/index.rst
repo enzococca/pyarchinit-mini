@@ -52,7 +52,7 @@ Quick Links
 What's New
 ----------
 
-Version 1.7.0 - Database Creation & Chronological Management
+Version 1.8.5 - Database Creation & Chronological Management
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. versionadded:: 1.7.0
@@ -66,7 +66,7 @@ Version 1.7.0 - Database Creation & Chronological Management
 
    See :doc:`features/database_creation` for complete documentation.
 
-Version 1.6.0 - Extended Matrix & GraphML Export
+Version 1.8.5 - Extended Matrix & GraphML Export
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. versionadded:: 1.6.0

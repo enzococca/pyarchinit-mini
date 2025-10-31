@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Amministrazione Database{% endblock %}
+{% block title %}{{ _('Database Management') }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-database"></i> Amministrazione Database</h2>
+        <h2><i class="fas fa-database"></i> {{ _('Database Management') }}</h2>
         <a href="{{ url_for('index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Dashboard
+            <i class="fas fa-arrow-left"></i> {{ _('Dashboard') }}
         </a>
     </div>
 
@@ -16,12 +16,12 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Database Corrente</h5>
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> {{ _('Current Database') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6><strong>Tipo:</strong></h6>
+                            <h6><strong>{{ _('Type') }}:</strong></h6>
                             <p>
                                 {% if db_info.type == 'SQLite' %}
                                     <i class="fas fa-file-alt text-info"></i> SQLite
@@ -39,11 +39,11 @@
                         <div class="col-md-12">
                             {% if db_info.is_default %}
                             <span class="badge bg-success">
-                                <i class="fas fa-check-circle"></i> Database Predefinito
+                                <i class="fas fa-check-circle"></i> {{ _('Default Database') }}
                             </span>
                             {% else %}
                             <span class="badge bg-info">
-                                <i class="fas fa-plug"></i> Database Connesso
+                                <i class="fas fa-plug"></i> {{ _('Connected Database') }}
                             </span>
                             {% endif %}
                         </div>
@@ -60,7 +60,7 @@
                 <div class="card-body text-center">
                     <i class="fas fa-map-marked-alt text-primary fa-2x mb-2"></i>
                     <h5 class="display-6">{{ stats.sites }}</h5>
-                    <p class="text-muted mb-0">Siti</p>
+                    <p class="text-muted mb-0">{{ _('Sites') }}</p>
                 </div>
             </div>
         </div>
@@ -69,7 +69,7 @@
                 <div class="card-body text-center">
                     <i class="fas fa-layer-group text-success fa-2x mb-2"></i>
                     <h5 class="display-6">{{ stats.us }}</h5>
-                    <p class="text-muted mb-0">Unità Stratigrafiche</p>
+                    <p class="text-muted mb-0">{{ _('Stratigraphic Units') }}</p>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@
                 <div class="card-body text-center">
                     <i class="fas fa-box-open text-warning fa-2x mb-2"></i>
                     <h5 class="display-6">{{ stats.inventory }}</h5>
-                    <p class="text-muted mb-0">Inventario</p>
+                    <p class="text-muted mb-0">{{ _('Inventory') }}</p>
                 </div>
             </div>
         </div>
@@ -89,7 +89,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0"><i class="fas fa-tools"></i> Operazioni Database</h5>
+                    <h5 class="mb-0"><i class="fas fa-tools"></i> {{ _('Database Operations') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -97,33 +97,33 @@
                             <div class="d-grid">
                                 <a href="{{ url_for('upload_database') }}" class="btn btn-lg btn-primary">
                                     <i class="fas fa-upload"></i><br>
-                                    <span class="mt-2">Carica Database SQLite</span>
+                                    <span class="mt-2">{{ _('Upload SQLite Database') }}</span>
                                 </a>
                             </div>
                             <small class="text-muted d-block mt-2">
-                                Carica un file .db SQLite esistente
+                                {{ _('Upload an existing SQLite .db file') }}
                             </small>
                         </div>
                         <div class="col-md-4 mb-3">
                             <div class="d-grid">
                                 <a href="{{ url_for('connect_database') }}" class="btn btn-lg btn-success">
                                     <i class="fas fa-plug"></i><br>
-                                    <span class="mt-2">Connetti Database</span>
+                                    <span class="mt-2">{{ _('Connect Database') }}</span>
                                 </a>
                             </div>
                             <small class="text-muted d-block mt-2">
-                                Connetti a PostgreSQL o SQLite locale
+                                {{ _('Connect to PostgreSQL or local SQLite') }}
                             </small>
                         </div>
                         <div class="col-md-4 mb-3">
                             <div class="d-grid">
                                 <a href="{{ url_for('database_info') }}" class="btn btn-lg btn-info">
                                     <i class="fas fa-info-circle"></i><br>
-                                    <span class="mt-2">Info Database</span>
+                                    <span class="mt-2">{{ _('Database Info') }}</span>
                                 </a>
                             </div>
                             <small class="text-muted d-block mt-2">
-                                Visualizza tabelle e statistiche dettagliate
+                                {{ _('View tables and detailed statistics') }}
                             </small>
                         </div>
                     </div>
@@ -254,32 +254,31 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="fas fa-exchange-alt"></i> Migrazione Dati (SQLite ↔ PostgreSQL)</h5>
+                    <h5 class="mb-0"><i class="fas fa-exchange-alt"></i> {{ _('Data Migration (SQLite ↔ PostgreSQL)') }}</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted">
-                        Migra tutti i dati dal database di origine al database di destinazione.
-                        Supporta migrazione bidirezionale tra SQLite e PostgreSQL.
+                        {{ _('Migrate all data from source database to target database. Supports bidirectional migration between SQLite and PostgreSQL.') }}
                     </p>
 
                     <div class="row">
                         <div class="col-md-6">
                             <!-- Source Database -->
-                            <h6 class="mb-3"><strong>Database Origine</strong></h6>
+                            <h6 class="mb-3"><strong>{{ _('Source Database') }}</strong></h6>
 
                             <div class="mb-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="migrate_source_type"
                                            id="migrate_source_current" value="current" checked>
                                     <label class="form-check-label" for="migrate_source_current">
-                                        <i class="fas fa-database me-1"></i>Database Corrente
+                                        <i class="fas fa-database me-1"></i>{{ _('Current Database') }}
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="migrate_source_type"
                                            id="migrate_source_custom" value="custom">
                                     <label class="form-check-label" for="migrate_source_custom">
-                                        <i class="fas fa-cog me-1"></i>Database Personalizzato
+                                        <i class="fas fa-cog me-1"></i>{{ _('Custom Database') }}
                                     </label>
                                 </div>
                             </div>
@@ -287,7 +286,7 @@
                             <!-- Custom Source Fields (hidden by default) -->
                             <div id="migrate_custom_source_fields" style="display: none;">
                                 <div class="mb-2">
-                                    <label class="form-label">Tipo Database Origine</label>
+                                    <label class="form-label">{{ _('Source Database Type') }}</label>
                                     <div class="btn-group w-100" role="group">
                                         <input type="radio" class="btn-check" name="migrate_source_db_type"
                                                id="migrate_source_sqlite" value="sqlite" checked>
@@ -305,7 +304,7 @@
                                 <!-- Source SQLite Fields -->
                                 <div id="migrate_source_sqlite_fields">
                                     <div class="mb-2">
-                                        <label for="migrate_source_db_path" class="form-label">Percorso Database</label>
+                                        <label for="migrate_source_db_path" class="form-label">{{ _('Database Path') }}</label>
                                         <input type="text" class="form-control form-control-sm"
                                                id="migrate_source_db_path" placeholder="/path/to/source.db">
                                     </div>
@@ -344,10 +343,10 @@
 
                         <div class="col-md-6">
                             <!-- Target Database -->
-                            <h6 class="mb-3"><strong>Database Destinazione</strong></h6>
+                            <h6 class="mb-3"><strong>{{ _('Target Database') }}</strong></h6>
 
                             <div class="mb-2">
-                                <label class="form-label">Tipo Database Destinazione</label>
+                                <label class="form-label">{{ _('Target Database Type') }}</label>
                                 <div class="btn-group w-100" role="group">
                                     <input type="radio" class="btn-check" name="migrate_target_db_type"
                                            id="migrate_target_sqlite" value="sqlite" checked>
@@ -365,7 +364,7 @@
                             <!-- Target SQLite Fields -->
                             <div id="migrate_target_sqlite_fields">
                                 <div class="mb-2">
-                                    <label for="migrate_target_db_path" class="form-label">Percorso Database</label>
+                                    <label for="migrate_target_db_path" class="form-label">{{ _('Database Path') }}</label>
                                     <input type="text" class="form-control form-control-sm"
                                            id="migrate_target_db_path" placeholder="my_migrated_db.db">
                                 </div>
@@ -404,11 +403,11 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="migrate_overwrite">
                                     <label class="form-check-label" for="migrate_overwrite">
-                                        Sovrascrivi se esiste
+                                        {{ _('Overwrite if exists') }}
                                     </label>
                                     <div class="form-text text-warning">
                                         <i class="fas fa-exclamation-triangle me-1"></i>
-                                        Attenzione: Cancella il database esistente!
+                                        {{ _('Warning: Deletes existing database!') }}
                                     </div>
                                 </div>
                             </div>
@@ -417,7 +416,7 @@
 
                     <div class="d-grid mt-3">
                         <button type="button" class="btn btn-warning btn-lg" id="migrate_db_btn">
-                            <i class="fas fa-exchange-alt me-2"></i>Avvia Migrazione
+                            <i class="fas fa-exchange-alt me-2"></i>{{ _('Start Migration') }}
                         </button>
                     </div>
 
@@ -433,18 +432,18 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="fas fa-bookmark"></i> Connessioni Salvate</h5>
+                    <h5 class="mb-0"><i class="fas fa-bookmark"></i> {{ _('Saved Connections') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead>
                                 <tr>
-                                    <th>Nome</th>
-                                    <th>Tipo</th>
-                                    <th>Descrizione</th>
-                                    <th>Origine</th>
-                                    <th>Azioni</th>
+                                    <th>{{ _('Name') }}</th>
+                                    <th>{{ _('Type') }}</th>
+                                    <th>{{ _('Description') }}</th>
+                                    <th>{{ _('Source') }}</th>
+                                    <th>{{ _('Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -454,7 +453,7 @@
                                         <strong>{{ name }}</strong>
                                         {% if conn.url == db_info.url %}
                                             <span class="badge bg-success ms-2">
-                                                <i class="fas fa-check-circle"></i> Attivo
+                                                <i class="fas fa-check-circle"></i> {{ _('Active') }}
                                             </span>
                                         {% endif %}
                                     </td>
@@ -468,25 +467,36 @@
                                     <td>{{ conn.description or '-' }}</td>
                                     <td>
                                         {% if conn.uploaded %}
-                                            <span class="badge bg-primary">Caricato</span>
+                                            <span class="badge bg-primary">{{ _('Uploaded') }}</span>
                                         {% else %}
                                             <span class="badge bg-info">Default</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if conn.url == db_info.url %}
-                                            <button class="btn btn-sm btn-success" disabled>
-                                                <i class="fas fa-check-circle"></i> In Uso
-                                            </button>
-                                        {% else %}
-                                            <form method="POST" action="{{ url_for('switch_database', connection_name=name) }}" style="display: inline;">
+                                        <div class="btn-group" role="group">
+                                            {% if conn.url == db_info.url %}
+                                                <button class="btn btn-sm btn-success" disabled>
+                                                    <i class="fas fa-check-circle"></i> {{ _('In Use') }}
+                                                </button>
+                                            {% else %}
+                                                <form method="POST" action="{{ url_for('switch_database', connection_name=name) }}" style="display: inline;">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                    <button type="submit" class="btn btn-sm btn-primary"
+                                                            onclick="return confirm('{{ _('Switch to database') }}: {{ name }}?')">
+                                                        <i class="fas fa-exchange-alt"></i> {{ _('Switch') }}
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+
+                                            <form method="POST" action="{{ url_for('remove_connection', connection_name=name) }}" style="display: inline;">
                                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                                <button type="submit" class="btn btn-sm btn-primary"
-                                                        onclick="return confirm('Cambiare database a: {{ name }}?')">
-                                                    <i class="fas fa-exchange-alt"></i> Cambia
+                                                <button type="submit" class="btn btn-sm btn-danger"
+                                                        {% if conn.url == db_info.url %}disabled title="{{ _('Cannot delete active connection') }}"{% endif %}
+                                                        onclick="return confirm('{{ _('Delete connection') }}: {{ name }}? {{ _('This action cannot be undone') }}.')">
+                                                    <i class="fas fa-trash-alt"></i> {{ _('Delete') }}
                                                 </button>
                                             </form>
-                                        {% endif %}
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -504,29 +514,26 @@
         <div class="col-md-12">
             <div class="card border-info">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-question-circle"></i> Guida</h5>
+                    <h5 class="mb-0"><i class="fas fa-question-circle"></i> {{ _('Help') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4">
-                            <h6><i class="fas fa-upload text-primary"></i> Carica Database SQLite</h6>
+                            <h6><i class="fas fa-upload text-primary"></i> {{ _('Upload SQLite Database') }}</h6>
                             <p class="small">
-                                Carica un file .db esistente dal desktop PyArchInit o da altre fonti.
-                                Il file viene validato e salvato nella cartella databases.
+                                {{ _('Upload an existing .db file from PyArchInit desktop or other sources. The file is validated and saved in the databases folder.') }}
                             </p>
                         </div>
                         <div class="col-md-4">
-                            <h6><i class="fas fa-plug text-success"></i> Connetti Database</h6>
+                            <h6><i class="fas fa-plug text-success"></i> {{ _('Connect Database') }}</h6>
                             <p class="small">
-                                Connetti a un database PostgreSQL remoto o a un file SQLite locale.
-                                La connessione viene testata prima di essere salvata.
+                                {{ _('Connect to a remote PostgreSQL database or a local SQLite file. The connection is tested before being saved.') }}
                             </p>
                         </div>
                         <div class="col-md-4">
-                            <h6><i class="fas fa-shield-alt text-warning"></i> Sicurezza</h6>
+                            <h6><i class="fas fa-shield-alt text-warning"></i> {{ _('Security') }}</h6>
                             <p class="small">
-                                Le credenziali di connessione sono memorizzate solo in sessione.
-                                Per connessioni permanenti, usa le variabili d'ambiente.
+                                {{ _('Connection credentials are stored only in session. For permanent connections, use environment variables.') }}
                             </p>
                         </div>
                     </div>

@@ -5002,3 +5002,109 @@ msgstr "Configuration"
 msgid "Thesaurus ICCD"
 msgstr "ICCD Thesaurus"
 
+
+# Database Management translations
+msgid "Current Database"
+msgstr "Current Database"
+
+msgid "Default Database"
+msgstr "Default Database"
+
+msgid "Connected Database"
+msgstr "Connected Database"
+
+msgid "Saved Connections"
+msgstr "Saved Connections"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "In Use"
+msgstr "In Use"
+
+msgid "Switch"
+msgstr "Switch"
+
+msgid "Switch to database"
+msgstr "Switch to database"
+
+msgid "Delete connection"
+msgstr "Delete connection"
+
+msgid "Cannot delete active connection"
+msgstr "Cannot delete active connection"
+
+msgid "This action cannot be undone"
+msgstr "This action cannot be undone"
+
+msgid "Uploaded"
+msgstr "Uploaded"
+
+msgid "Source"
+msgstr "Source"
+
+
+# Additional Database Management translations
+msgid "Database Operations"
+msgstr "Database Operations"
+
+msgid "Upload SQLite Database"
+msgstr "Upload SQLite Database"
+
+msgid "Upload an existing SQLite .db file"
+msgstr "Upload an existing SQLite .db file"
+
+msgid "Connect to PostgreSQL or local SQLite"
+msgstr "Connect to PostgreSQL or local SQLite"
+
+msgid "Database Info"
+msgstr "Database Info"
+
+msgid "View tables and detailed statistics"
+msgstr "View tables and detailed statistics"
+
+msgid "Data Migration (SQLite ↔ PostgreSQL)"
+msgstr "Data Migration (SQLite ↔ PostgreSQL)"
+
+msgid "Migrate all data from source database to target database. Supports bidirectional migration between SQLite and PostgreSQL."
+msgstr "Migrate all data from source database to target database. Supports bidirectional migration between SQLite and PostgreSQL."
+
+msgid "Custom Database"
+msgstr "Custom Database"
+
+msgid "Source Database Type"
+msgstr "Source Database Type"
+
+msgid "Database Path"
+msgstr "Database Path"
+
+msgid "Target Database"
+msgstr "Target Database"
+
+msgid "Target Database Type"
+msgstr "Target Database Type"
+
+msgid "Overwrite if exists"
+msgstr "Overwrite if exists"
+
+msgid "Warning: Deletes existing database!"
+msgstr "Warning: Deletes existing database!"
+
+msgid "Start Migration"
+msgstr "Start Migration"
+
+msgid "Help"
+msgstr "Help"
+
+msgid "Upload an existing .db file from PyArchInit desktop or other sources. The file is validated and saved in the databases folder."
+msgstr "Upload an existing .db file from PyArchInit desktop or other sources. The file is validated and saved in the databases folder."
+
+msgid "Connect to a remote PostgreSQL database or a local SQLite file. The connection is tested before being saved."
+msgstr "Connect to a remote PostgreSQL database or a local SQLite file. The connection is tested before being saved."
+
+msgid "Security"
+msgstr "Security"
+
+msgid "Connection credentials are stored only in session. For permanent connections, use environment variables."
+msgstr "Connection credentials are stored only in session. For permanent connections, use environment variables."
+

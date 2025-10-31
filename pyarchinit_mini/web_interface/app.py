@@ -421,6 +421,25 @@ def create_app():
         'is_active': database_url == f'sqlite:///{package_db_path}'
     }
 
+    # Save active default database to ConnectionManager for persistence
+    from pyarchinit_mini.config.connection_manager import get_connection_manager
+    conn_manager = get_connection_manager()
+
+    # Find and save the active default database
+    for db_name, db_config in app.config['DATABASE_CONNECTIONS'].items():
+        if db_config.get('is_active', False) and not db_config.get('uploaded', False):
+            # Check if already exists before adding
+            existing = conn_manager.get_connection(db_name)
+            if not existing:
+                conn_manager.add_connection(
+                    name=db_name,
+                    db_type=db_config['type'],
+                    connection_string=db_config['url'],
+                    description=db_config.get('description', 'Default database')
+                )
+                print(f"[FLASK] Added default database '{db_name}' to saved connections")
+            break
+
     # Initialize services
     site_service = SiteService(db_manager)
     us_service = USService(db_manager)
@@ -3536,6 +3555,40 @@ def create_app():
 
         except Exception as e:
             flash(f'Errore cambio database: {str(e)}', 'error')
+
+        return redirect(url_for('admin_database'))
+
+    @app.route('/admin/database/remove/<connection_name>', methods=['POST'])
+    @login_required
+    def remove_connection(connection_name):
+        """Remove a saved connection"""
+        try:
+            # Check if trying to remove active connection
+            current_url = app.config.get('CURRENT_DATABASE_URL')
+            connections = app.config.get('DATABASE_CONNECTIONS', {})
+
+            if connection_name in connections:
+                if connections[connection_name]['url'] == current_url:
+                    flash('Non puoi eliminare la connessione attualmente in uso', 'error')
+                    return redirect(url_for('admin_database'))
+
+            # Remove from ConnectionManager
+            from pyarchinit_mini.config.connection_manager import get_connection_manager
+            conn_manager = get_connection_manager()
+            result = conn_manager.remove_connection(connection_name)
+
+            if result['success']:
+                # Also remove from app.config
+                if connection_name in connections:
+                    del connections[connection_name]
+                    app.config['DATABASE_CONNECTIONS'] = connections
+
+                flash(f'Connessione "{connection_name}" eliminata con successo', 'success')
+            else:
+                flash(f'Errore: {result["message"]}', 'error')
+
+        except Exception as e:
+            flash(f'Errore eliminazione connessione: {str(e)}', 'error')
 
         return redirect(url_for('admin_database'))
 
