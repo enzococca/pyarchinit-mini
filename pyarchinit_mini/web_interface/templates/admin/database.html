@@ -141,17 +141,60 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted">
-                        Create a new empty database with full PyArchInit-Mini schema in the default data folder.
+                        Create a new empty database with full PyArchInit-Mini schema.
                     </p>
 
                     <div class="row">
                         <div class="col-md-6">
+                            <!-- Database Type Selection -->
                             <div class="mb-3">
-                                <label for="create_db_name" class="form-label">Database Name</label>
-                                <input type="text" class="form-control" id="create_db_name"
-                                       placeholder="my_project" value="pyarchinit_empty">
-                                <div class="form-text">
-                                    Database file will be created as: <code>~/.pyarchinit_mini/data/[name].db</code>
+                                <label class="form-label"><strong>Database Type</strong></label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="create_db_type" id="create_db_type_sqlite" value="sqlite" checked>
+                                    <label class="btn btn-outline-primary" for="create_db_type_sqlite">
+                                        <i class="fas fa-file-alt me-1"></i>SQLite
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="create_db_type" id="create_db_type_postgres" value="postgresql">
+                                    <label class="btn btn-outline-success" for="create_db_type_postgres">
+                                        <i class="fas fa-server me-1"></i>PostgreSQL
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- SQLite Fields -->
+                            <div id="sqlite_fields">
+                                <div class="mb-3">
+                                    <label for="create_db_name" class="form-label">Database Name</label>
+                                    <input type="text" class="form-control" id="create_db_name"
+                                           placeholder="my_project" value="pyarchinit_empty">
+                                    <div class="form-text">
+                                        Database file will be created as: <code>~/.pyarchinit_mini/data/[name].db</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PostgreSQL Fields -->
+                            <div id="postgres_fields" style="display: none;">
+                                <div class="mb-2">
+                                    <label for="pg_host" class="form-label">Host</label>
+                                    <input type="text" class="form-control" id="pg_host" value="localhost" placeholder="localhost">
+                                </div>
+                                <div class="mb-2">
+                                    <label for="pg_port" class="form-label">Port</label>
+                                    <input type="number" class="form-control" id="pg_port" value="5432" placeholder="5432">
+                                </div>
+                                <div class="mb-2">
+                                    <label for="pg_database" class="form-label">Database Name</label>
+                                    <input type="text" class="form-control" id="pg_database" placeholder="pyarchinit_db">
+                                </div>
+                                <div class="mb-2">
+                                    <label for="pg_user" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="pg_user" placeholder="postgres">
+                                </div>
+                                <div class="mb-2">
+                                    <label for="pg_password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="pg_password">
                                 </div>
                             </div>
 
@@ -316,21 +359,64 @@
 </div>
 
 <script>
+// Toggle database type fields
+document.querySelectorAll('input[name="create_db_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const sqliteFields = document.getElementById('sqlite_fields');
+        const postgresFields = document.getElementById('postgres_fields');
+
+        if (this.value === 'sqlite') {
+            sqliteFields.style.display = 'block';
+            postgresFields.style.display = 'none';
+        } else {
+            sqliteFields.style.display = 'none';
+            postgresFields.style.display = 'block';
+        }
+    });
+});
+
 // Create Empty Database functionality
 document.getElementById('create_empty_db_btn').addEventListener('click', function() {
-    const dbName = document.getElementById('create_db_name').value.trim();
+    const dbType = document.querySelector('input[name="create_db_type"]:checked').value;
     const overwrite = document.getElementById('create_overwrite_db').checked;
     const statusEl = document.getElementById('create_db_status');
     const btn = this;
+    let requestData = {
+        db_type: dbType,
+        overwrite: overwrite
+    };
 
-    if (!dbName) {
-        statusEl.style.display = 'block';
-        statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please provide a database name</div>';
-        return;
+    // Validate and prepare data based on database type
+    if (dbType === 'sqlite') {
+        const dbName = document.getElementById('create_db_name').value.trim();
+        if (!dbName) {
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please provide a database name</div>';
+            return;
+        }
+        const dbFileName = dbName.endsWith('.db') ? dbName : dbName + '.db';
+        requestData.db_path = dbFileName;
+        requestData.use_default_path = true;
+    } else {
+        // PostgreSQL
+        const pgHost = document.getElementById('pg_host').value.trim();
+        const pgPort = document.getElementById('pg_port').value.trim();
+        const pgDatabase = document.getElementById('pg_database').value.trim();
+        const pgUser = document.getElementById('pg_user').value.trim();
+        const pgPassword = document.getElementById('pg_password').value;
+
+        if (!pgHost || !pgPort || !pgDatabase || !pgUser) {
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please fill all PostgreSQL connection fields</div>';
+            return;
+        }
+
+        requestData.pg_host = pgHost;
+        requestData.pg_port = pgPort;
+        requestData.pg_database = pgDatabase;
+        requestData.pg_user = pgUser;
+        requestData.pg_password = pgPassword;
     }
-
-    // Ensure .db extension
-    const dbFileName = dbName.endsWith('.db') ? dbName : dbName + '.db';
 
     // Show loading status
     statusEl.style.display = 'block';
@@ -345,12 +431,7 @@ document.getElementById('create_empty_db_btn').addEventListener('click', functio
     fetch('/pyarchinit-import-export/api/pyarchinit/create-database', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            db_type: 'sqlite',
-            db_path: dbFileName,  // Just the filename, backend will use default path
-            overwrite: overwrite,
-            use_default_path: true  // Tell backend to use default path
-        })
+        body: JSON.stringify(requestData)
     })
     .then(response => response.json())
     .then(result => {
