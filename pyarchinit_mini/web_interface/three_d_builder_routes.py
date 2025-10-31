@@ -5,7 +5,7 @@ API endpoints for 3D stratigraphic model generation and manipulation.
 Integrates with MCP server, Blender client, and GraphML parser.
 """
 
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, render_template
 from flask_login import login_required, current_user
 import logging
 import uuid
@@ -16,14 +16,58 @@ from ...mcp_server.graphml_parser import GraphMLParser
 from ...mcp_server.proxy_generator import ProxyGenerator
 from ...mcp_server.blender_client import BlenderClient, BlenderConnectionError
 from ...models.extended_matrix import ExtendedMatrix
+from ...models.site import Site
+from ...models.us import US
 
 logger = logging.getLogger(__name__)
 
-# Create blueprint
+# Create blueprints
 three_d_builder_bp = Blueprint('three_d_builder', __name__, url_prefix='/api/3d-builder')
+three_d_builder_ui_bp = Blueprint('three_d_builder_ui', __name__, url_prefix='/3d-builder')
 
 # In-memory storage for build sessions (TODO: Move to database/Redis)
 build_sessions: Dict[str, Dict[str, Any]] = {}
+
+
+# ============================================================================
+# UI Routes
+# ============================================================================
+
+@three_d_builder_ui_bp.route('/')
+@login_required
+def index():
+    """
+    3D Builder main page
+    """
+    db_session = get_db_session()
+
+    try:
+        # Get all sites
+        sites = db_session.query(Site).all()
+
+        # Get all GraphML files
+        graphml_files = db_session.query(ExtendedMatrix).order_by(
+            ExtendedMatrix.id.desc()
+        ).limit(20).all()
+
+        # Get total US count
+        total_us = db_session.query(US).count()
+
+        return render_template(
+            '3d_builder/index.html',
+            sites=sites,
+            graphml_files=graphml_files,
+            total_us=total_us
+        )
+
+    except Exception as e:
+        logger.error(f"Error loading 3D Builder page: {e}", exc_info=True)
+        return render_template(
+            '3d_builder/index.html',
+            sites=[],
+            graphml_files=[],
+            total_us=0
+        )
 
 
 # ============================================================================

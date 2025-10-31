@@ -55,7 +55,7 @@ from pyarchinit_mini.web_interface.excel_import_routes import excel_import_bp
 from pyarchinit_mini.web_interface.em_node_config_routes import em_node_config_bp
 
 # Import 3D Builder routes
-from pyarchinit_mini.web_interface.three_d_builder_routes import three_d_builder_bp
+from pyarchinit_mini.web_interface.three_d_builder_routes import three_d_builder_bp, three_d_builder_ui_bp
 
 # Import WebSocket events
 from pyarchinit_mini.web_interface.socketio_events import (
@@ -492,8 +492,9 @@ def create_app():
     # Register EM Node Configuration blueprint
     app.register_blueprint(em_node_config_bp)
 
-    # Register 3D Builder blueprint
-    app.register_blueprint(three_d_builder_bp)
+    # Register 3D Builder blueprints
+    app.register_blueprint(three_d_builder_bp)  # API routes
+    app.register_blueprint(three_d_builder_ui_bp)  # UI routes
 
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
     csrf.exempt(pyarchinit_import_export_bp)
