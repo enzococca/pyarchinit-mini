@@ -249,6 +249,184 @@
         </div>
     </div>
 
+    <!-- Data Migration (SQLite ↔ PostgreSQL) -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-exchange-alt"></i> Migrazione Dati (SQLite ↔ PostgreSQL)</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Migra tutti i dati dal database di origine al database di destinazione.
+                        Supporta migrazione bidirezionale tra SQLite e PostgreSQL.
+                    </p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Source Database -->
+                            <h6 class="mb-3"><strong>Database Origine</strong></h6>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="migrate_source_type"
+                                           id="migrate_source_current" value="current" checked>
+                                    <label class="form-check-label" for="migrate_source_current">
+                                        <i class="fas fa-database me-1"></i>Database Corrente
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="migrate_source_type"
+                                           id="migrate_source_custom" value="custom">
+                                    <label class="form-check-label" for="migrate_source_custom">
+                                        <i class="fas fa-cog me-1"></i>Database Personalizzato
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Custom Source Fields (hidden by default) -->
+                            <div id="migrate_custom_source_fields" style="display: none;">
+                                <div class="mb-2">
+                                    <label class="form-label">Tipo Database Origine</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="migrate_source_db_type"
+                                               id="migrate_source_sqlite" value="sqlite" checked>
+                                        <label class="btn btn-outline-primary btn-sm" for="migrate_source_sqlite">
+                                            <i class="fas fa-file-alt me-1"></i>SQLite
+                                        </label>
+                                        <input type="radio" class="btn-check" name="migrate_source_db_type"
+                                               id="migrate_source_postgres" value="postgresql">
+                                        <label class="btn btn-outline-success btn-sm" for="migrate_source_postgres">
+                                            <i class="fas fa-server me-1"></i>PostgreSQL
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Source SQLite Fields -->
+                                <div id="migrate_source_sqlite_fields">
+                                    <div class="mb-2">
+                                        <label for="migrate_source_db_path" class="form-label">Percorso Database</label>
+                                        <input type="text" class="form-control form-control-sm"
+                                               id="migrate_source_db_path" placeholder="/path/to/source.db">
+                                    </div>
+                                </div>
+
+                                <!-- Source PostgreSQL Fields -->
+                                <div id="migrate_source_pg_fields" style="display: none;">
+                                    <div class="mb-2">
+                                        <label class="form-label">Host</label>
+                                        <input type="text" class="form-control form-control-sm"
+                                               id="migrate_source_pg_host" value="localhost">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Port</label>
+                                        <input type="number" class="form-control form-control-sm"
+                                               id="migrate_source_pg_port" value="5432">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Database</label>
+                                        <input type="text" class="form-control form-control-sm"
+                                               id="migrate_source_pg_database">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Username</label>
+                                        <input type="text" class="form-control form-control-sm"
+                                               id="migrate_source_pg_user">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" class="form-control form-control-sm"
+                                               id="migrate_source_pg_password">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- Target Database -->
+                            <h6 class="mb-3"><strong>Database Destinazione</strong></h6>
+
+                            <div class="mb-2">
+                                <label class="form-label">Tipo Database Destinazione</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="migrate_target_db_type"
+                                           id="migrate_target_sqlite" value="sqlite" checked>
+                                    <label class="btn btn-outline-primary btn-sm" for="migrate_target_sqlite">
+                                        <i class="fas fa-file-alt me-1"></i>SQLite
+                                    </label>
+                                    <input type="radio" class="btn-check" name="migrate_target_db_type"
+                                           id="migrate_target_postgres" value="postgresql">
+                                    <label class="btn btn-outline-success btn-sm" for="migrate_target_postgres">
+                                        <i class="fas fa-server me-1"></i>PostgreSQL
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Target SQLite Fields -->
+                            <div id="migrate_target_sqlite_fields">
+                                <div class="mb-2">
+                                    <label for="migrate_target_db_path" class="form-label">Percorso Database</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           id="migrate_target_db_path" placeholder="my_migrated_db.db">
+                                </div>
+                            </div>
+
+                            <!-- Target PostgreSQL Fields -->
+                            <div id="migrate_target_pg_fields" style="display: none;">
+                                <div class="mb-2">
+                                    <label class="form-label">Host</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           id="migrate_target_pg_host" value="localhost">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Port</label>
+                                    <input type="number" class="form-control form-control-sm"
+                                           id="migrate_target_pg_port" value="5432">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Database</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           id="migrate_target_pg_database">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                           id="migrate_target_pg_user">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control form-control-sm"
+                                           id="migrate_target_pg_password">
+                                </div>
+                            </div>
+
+                            <div class="mb-3 mt-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="migrate_overwrite">
+                                    <label class="form-check-label" for="migrate_overwrite">
+                                        Sovrascrivi se esiste
+                                    </label>
+                                    <div class="form-text text-warning">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        Attenzione: Cancella il database esistente!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-3">
+                        <button type="button" class="btn btn-warning btn-lg" id="migrate_db_btn">
+                            <i class="fas fa-exchange-alt me-2"></i>Avvia Migrazione
+                        </button>
+                    </div>
+
+                    <div id="migrate_db_status" class="mt-3" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Saved Connections -->
     {% if connections %}
     <div class="row mb-4">
@@ -455,6 +633,199 @@ document.getElementById('create_empty_db_btn').addEventListener('click', functio
             }, 2000);
         } else {
             statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>' + result.message + '</div>';
+        }
+    })
+    .catch(error => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Error: ' + error.message + '</div>';
+    });
+});
+
+// Database Migration functionality
+// Toggle source type (current vs custom)
+document.querySelectorAll('input[name="migrate_source_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const customSourceFields = document.getElementById('migrate_custom_source_fields');
+        if (this.value === 'custom') {
+            customSourceFields.style.display = 'block';
+        } else {
+            customSourceFields.style.display = 'none';
+        }
+    });
+});
+
+// Toggle source database type fields (SQLite vs PostgreSQL)
+document.querySelectorAll('input[name="migrate_source_db_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const sqliteFields = document.getElementById('migrate_source_sqlite_fields');
+        const postgresFields = document.getElementById('migrate_source_pg_fields');
+
+        if (this.value === 'sqlite') {
+            sqliteFields.style.display = 'block';
+            postgresFields.style.display = 'none';
+        } else {
+            sqliteFields.style.display = 'none';
+            postgresFields.style.display = 'block';
+        }
+    });
+});
+
+// Toggle target database type fields (SQLite vs PostgreSQL)
+document.querySelectorAll('input[name="migrate_target_db_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const sqliteFields = document.getElementById('migrate_target_sqlite_fields');
+        const postgresFields = document.getElementById('migrate_target_pg_fields');
+
+        if (this.value === 'sqlite') {
+            sqliteFields.style.display = 'block';
+            postgresFields.style.display = 'none';
+        } else {
+            sqliteFields.style.display = 'none';
+            postgresFields.style.display = 'block';
+        }
+    });
+});
+
+// Database Migration button handler
+document.getElementById('migrate_db_btn').addEventListener('click', function() {
+    const sourceType = document.querySelector('input[name="migrate_source_type"]:checked').value;
+    const targetDbType = document.querySelector('input[name="migrate_target_db_type"]:checked').value;
+    const overwrite = document.getElementById('migrate_overwrite').checked;
+    const statusEl = document.getElementById('migrate_db_status');
+    const btn = this;
+
+    let requestData = {
+        source_type: sourceType,
+        target_db_type: targetDbType,
+        overwrite_target: overwrite
+    };
+
+    // Build source database connection
+    if (sourceType === 'custom') {
+        const sourceDbType = document.querySelector('input[name="migrate_source_db_type"]:checked').value;
+        requestData.source_db_type = sourceDbType;
+
+        if (sourceDbType === 'sqlite') {
+            const sourcePath = document.getElementById('migrate_source_db_path').value.trim();
+            if (!sourcePath) {
+                statusEl.style.display = 'block';
+                statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please provide source database path</div>';
+                return;
+            }
+            requestData.source_db_path = sourcePath;
+        } else {
+            const host = document.getElementById('migrate_source_pg_host').value.trim();
+            const port = document.getElementById('migrate_source_pg_port').value.trim();
+            const database = document.getElementById('migrate_source_pg_database').value.trim();
+            const user = document.getElementById('migrate_source_pg_user').value.trim();
+            const password = document.getElementById('migrate_source_pg_password').value;
+
+            if (!host || !port || !database || !user) {
+                statusEl.style.display = 'block';
+                statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please fill all source PostgreSQL fields</div>';
+                return;
+            }
+
+            requestData.source_pg_host = host;
+            requestData.source_pg_port = port;
+            requestData.source_pg_database = database;
+            requestData.source_pg_user = user;
+            requestData.source_pg_password = password;
+        }
+    }
+
+    // Build target database connection
+    if (targetDbType === 'sqlite') {
+        const targetPath = document.getElementById('migrate_target_db_path').value.trim();
+        if (!targetPath) {
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please provide target database path</div>';
+            return;
+        }
+        requestData.target_db_path = targetPath;
+        requestData.use_default_path = true;
+    } else {
+        const host = document.getElementById('migrate_target_pg_host').value.trim();
+        const port = document.getElementById('migrate_target_pg_port').value.trim();
+        const database = document.getElementById('migrate_target_pg_database').value.trim();
+        const user = document.getElementById('migrate_target_pg_user').value.trim();
+        const password = document.getElementById('migrate_target_pg_password').value;
+
+        if (!host || !port || !database || !user) {
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Please fill all target PostgreSQL fields</div>';
+            return;
+        }
+
+        requestData.target_pg_host = host;
+        requestData.target_pg_port = port;
+        requestData.target_pg_database = database;
+        requestData.target_pg_user = user;
+        requestData.target_pg_password = password;
+    }
+
+    // Show loading status
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = '<div class="alert alert-info mb-0"><i class="fas fa-spinner fa-spin me-2"></i>Migrating database... This may take a few minutes.</div>';
+
+    // Disable button
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Migrating...';
+
+    // Call migration API
+    fetch('/pyarchinit-import-export/api/pyarchinit/migrate-database', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+
+        if (result.success) {
+            let message = '<div class="alert alert-success mb-0">';
+            message += '<i class="fas fa-check-circle me-2"></i><strong>Migration Successful!</strong><br>';
+            message += result.message + '<br>';
+            message += '<small>Tables migrated: ' + result.tables_migrated + '</small><br>';
+            message += '<small>Total rows copied: ' + result.total_rows_copied + '</small><br>';
+            message += '<small>Duration: ' + result.duration_seconds.toFixed(2) + ' seconds</small>';
+
+            if (result.rows_per_table && Object.keys(result.rows_per_table).length > 0) {
+                message += '<br><details class="mt-2"><summary>Tables Details</summary><ul class="small">';
+                for (const [table, rows] of Object.entries(result.rows_per_table)) {
+                    message += '<li>' + table + ': ' + rows + ' rows</li>';
+                }
+                message += '</ul></details>';
+            }
+
+            if (result.errors && result.errors.length > 0) {
+                message += '<br><div class="text-warning"><strong>Warnings:</strong><ul class="small">';
+                result.errors.forEach(function(error) {
+                    message += '<li>' + error + '</li>';
+                });
+                message += '</ul></div>';
+            }
+
+            message += '</div>';
+            statusEl.innerHTML = message;
+        } else {
+            let message = '<div class="alert alert-danger mb-0">';
+            message += '<i class="fas fa-exclamation-circle me-2"></i><strong>Migration Failed</strong><br>';
+            message += result.message;
+
+            if (result.errors && result.errors.length > 0) {
+                message += '<br><strong>Errors:</strong><ul class="small">';
+                result.errors.forEach(function(error) {
+                    message += '<li>' + error + '</li>';
+                });
+                message += '</ul>';
+            }
+
+            message += '</div>';
+            statusEl.innerHTML = message;
         }
     })
     .catch(error => {

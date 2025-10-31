@@ -1672,3 +1672,210 @@ class ImportExportService:
             raise
         finally:
             mini_session.close()
+
+    # ============================================================================
+    # DATABASE MIGRATION (SQLite ↔ PostgreSQL)
+    # ============================================================================
+
+    @staticmethod
+    def migrate_database(source_db_url: str, target_db_url: str,
+                        create_target: bool = True,
+                        overwrite_target: bool = False) -> Dict[str, Any]:
+        """
+        Migrate all data from source database to target database
+
+        Supports:
+        - SQLite → PostgreSQL
+        - PostgreSQL → SQLite
+        - SQLite → SQLite (copy/backup)
+        - PostgreSQL → PostgreSQL (copy/backup)
+
+        Args:
+            source_db_url: Source database connection string
+            target_db_url: Target database connection string
+            create_target: If True, create target database with schema if it doesn't exist
+            overwrite_target: If True and create_target=True, overwrite existing target database
+
+        Returns:
+            Dictionary with migration statistics
+        """
+        stats = {
+            'success': False,
+            'tables_migrated': 0,
+            'total_rows_copied': 0,
+            'rows_per_table': {},
+            'errors': [],
+            'duration_seconds': 0
+        }
+
+        import time
+        start_time = time.time()
+
+        try:
+            # Create target database with schema if requested
+            if create_target:
+                logger.info(f"Creating target database with schema...")
+                from pyarchinit_mini.database.database_creator import create_empty_database
+
+                # Determine target database type
+                if target_db_url.startswith('sqlite:///'):
+                    # Extract path from SQLite URL
+                    db_path = target_db_url.replace('sqlite:///', '')
+                    if not db_path.startswith('/'):
+                        db_path = '/' + db_path
+
+                    create_result = create_empty_database('sqlite', db_path, overwrite=overwrite_target)
+                    if not create_result['success']:
+                        raise RuntimeError(f"Failed to create target SQLite database: {create_result['message']}")
+
+                elif target_db_url.startswith('postgresql'):
+                    # Parse PostgreSQL URL: postgresql://user:pass@host:port/database
+                    from sqlalchemy.engine.url import make_url
+                    url = make_url(target_db_url)
+
+                    pg_config = {
+                        'host': url.host or 'localhost',
+                        'port': url.port or 5432,
+                        'database': url.database,
+                        'username': url.username,
+                        'password': url.password or ''
+                    }
+
+                    create_result = create_empty_database('postgresql', pg_config, overwrite=overwrite_target)
+                    if not create_result['success']:
+                        raise RuntimeError(f"Failed to create target PostgreSQL database: {create_result['message']}")
+                else:
+                    raise ValueError(f"Unsupported target database type: {target_db_url}")
+
+                logger.info(f"Target database created with {create_result['tables_created']} tables")
+
+            # Connect to both databases
+            source_engine = create_engine(source_db_url)
+            target_engine = create_engine(target_db_url)
+
+            source_session_maker = sessionmaker(bind=source_engine)
+            target_session_maker = sessionmaker(bind=target_engine)
+
+            # Get list of tables to migrate (in correct order to handle foreign keys)
+            # Order matters: create tables without dependencies first
+            tables_order = [
+                'users_table',
+                'site_table',
+                'datazioni_table',
+                'us_table',
+                'us_relationships_table',
+                'periodizzazione_table',
+                'inventario_materiali_table',
+                'pyarchinit_thesaurus_sigle',
+                'media_table',
+                'harris_matrix_table',
+                'periods_table',
+                'extended_matrix_nodes_table'
+            ]
+
+            # Migrate each table
+            for table_name in tables_order:
+                try:
+                    rows_copied = ImportExportService._migrate_table(
+                        table_name,
+                        source_session_maker,
+                        target_session_maker
+                    )
+
+                    if rows_copied > 0:
+                        stats['tables_migrated'] += 1
+                        stats['total_rows_copied'] += rows_copied
+                        stats['rows_per_table'][table_name] = rows_copied
+                        logger.info(f"✓ Migrated {table_name}: {rows_copied} rows")
+                    else:
+                        logger.info(f"○ Skipped {table_name}: empty or not found")
+
+                except Exception as e:
+                    error_msg = f"Error migrating table {table_name}: {str(e)}"
+                    logger.error(error_msg)
+                    stats['errors'].append(error_msg)
+                    # Continue with other tables even if one fails
+
+            stats['success'] = stats['tables_migrated'] > 0
+            stats['duration_seconds'] = time.time() - start_time
+
+            logger.info(f"Migration complete: {stats['tables_migrated']} tables, {stats['total_rows_copied']} rows in {stats['duration_seconds']:.2f}s")
+
+            return stats
+
+        except Exception as e:
+            logger.error(f"Database migration failed: {str(e)}")
+            stats['errors'].append(str(e))
+            stats['duration_seconds'] = time.time() - start_time
+            return stats
+
+    @staticmethod
+    def _migrate_table(table_name: str, source_session_maker, target_session_maker) -> int:
+        """
+        Migrate data from one table to another
+
+        Args:
+            table_name: Name of the table to migrate
+            source_session_maker: Source database session maker
+            target_session_maker: Target database session maker
+
+        Returns:
+            Number of rows copied
+        """
+        source_session = source_session_maker()
+        target_session = target_session_maker()
+
+        rows_copied = 0
+
+        try:
+            # Check if table exists in source
+            try:
+                source_session.execute(text(f"SELECT 1 FROM {table_name} LIMIT 1"))
+            except Exception:
+                # Table doesn't exist in source, skip it
+                return 0
+
+            # Get all rows from source table
+            result = source_session.execute(text(f"SELECT * FROM {table_name}"))
+            rows = result.fetchall()
+
+            if not rows:
+                return 0
+
+            # Get column names
+            column_names = list(rows[0]._mapping.keys())
+
+            # Insert rows into target table
+            for row in rows:
+                row_data = dict(row._mapping)
+
+                # Build INSERT query
+                columns = ', '.join(column_names)
+                placeholders = ', '.join([f':{col}' for col in column_names])
+
+                insert_query = text(f"""
+                    INSERT INTO {table_name} ({columns})
+                    VALUES ({placeholders})
+                """)
+
+                try:
+                    target_session.execute(insert_query, row_data)
+                    rows_copied += 1
+                except Exception as e:
+                    # Log error but continue with other rows
+                    logger.warning(f"Failed to insert row in {table_name}: {str(e)}")
+                    target_session.rollback()
+                    continue
+
+            # Commit all inserts for this table
+            target_session.commit()
+
+            return rows_copied
+
+        except Exception as e:
+            target_session.rollback()
+            logger.error(f"Error migrating table {table_name}: {str(e)}")
+            raise
+        finally:
+            source_session.close()
+            target_session.close()
