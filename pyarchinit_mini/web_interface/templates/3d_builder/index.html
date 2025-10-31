@@ -2,6 +2,55 @@
 
 {% block title %}3D Builder - PyArchInit-Mini{% endblock %}
 
+{% block extra_head %}
+<!-- Three.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+
+<!-- 3D Viewer CSS -->
+<style>
+    #viewerContainer {
+        width: 100%;
+        height: 500px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    #viewerContainer canvas {
+        display: block;
+    }
+
+    .viewer-overlay {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+        font-size: 12px;
+        z-index: 10;
+    }
+
+    .viewer-controls {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        z-index: 10;
+    }
+
+    .viewer-controls button {
+        margin: 2px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
     <div class="row mb-4">
@@ -219,16 +268,34 @@
                         </div>
                     </div>
 
-                    <!-- 3D Viewer Placeholder -->
-                    <div class="card bg-light mb-3">
-                        <div class="card-body text-center py-5">
-                            <i class="fas fa-cube fa-3x text-muted mb-3"></i>
-                            <h5>3D Viewer</h5>
-                            <p class="text-muted">
-                                Interactive 3D viewer will be implemented in Task #12
-                            </p>
-                            <div id="viewerPlaceholder" style="min-height: 400px; border: 2px dashed #dee2e6; border-radius: 8px;">
-                                <!-- Three.js viewer will be inserted here -->
+                    <!-- 3D Viewer -->
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cube"></i> 3D Stratigraphic Viewer
+                            </h6>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-secondary" id="toggleGridBtn" title="Toggle Grid">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="toggleAxesBtn" title="Toggle Axes">
+                                    <i class="fas fa-arrows-alt"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="toggleLabelsBtn" title="Toggle Labels">
+                                    <i class="fas fa-tag"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="centerCameraBtn" title="Center Camera">
+                                    <i class="fas fa-compress"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="viewerContainer">
+                                <!-- Three.js will render here -->
+                                <div class="viewer-overlay" id="viewerInfo">
+                                    <div><strong>Proxies:</strong> <span id="proxyCount">0</span></div>
+                                    <div><strong>Selected:</strong> <span id="selectedProxy">None</span></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -318,10 +385,15 @@
     </div>
 </div>
 
+<!-- 3D Viewer Module -->
+<script src="{{ url_for('static', filename='js/three-d-viewer.js') }}"></script>
+
 <!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let currentSessionId = null;
+    let viewer3D = null;
+    let currentProxies = [];
 
     // Form submission
     document.getElementById('generate3DForm').addEventListener('submit', async function(e) {
@@ -367,9 +439,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.success) {
                 currentSessionId = data.session_id;
-                showSessionResults(data);
-                showAlert('3D model generated successfully!', 'success');
-                loadActiveSessions();
+
+                // Load session proxies
+                loadSessionProxies(data.session_id).then(() => {
+                    showSessionResults(data);
+                    showAlert('3D model generated successfully!', 'success');
+                    loadActiveSessions();
+                });
             } else {
                 showAlert('Error: ' + data.error, 'danger');
             }
@@ -446,7 +522,98 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('transparencyValue').textContent = this.value + '%';
     });
 
+    // Viewer control buttons
+    document.getElementById('toggleGridBtn')?.addEventListener('click', function() {
+        if (viewer3D) {
+            const currentState = viewer3D.settings.showGrid;
+            viewer3D.toggleGrid(!currentState);
+            this.classList.toggle('active');
+        }
+    });
+
+    document.getElementById('toggleAxesBtn')?.addEventListener('click', function() {
+        if (viewer3D) {
+            const currentState = viewer3D.settings.showAxes;
+            viewer3D.toggleAxes(!currentState);
+            this.classList.toggle('active');
+        }
+    });
+
+    document.getElementById('toggleLabelsBtn')?.addEventListener('click', function() {
+        if (viewer3D) {
+            const currentState = viewer3D.settings.showLabels;
+            viewer3D.toggleLabels(!currentState);
+            this.classList.toggle('active');
+        }
+    });
+
+    document.getElementById('centerCameraBtn')?.addEventListener('click', function() {
+        if (viewer3D) {
+            viewer3D.centerCameraOnProxies();
+        }
+    });
+
     // Helper functions
+    async function loadSessionProxies(sessionId) {
+        try {
+            const response = await fetch(`/api/3d-builder/session/${sessionId}`);
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error);
+            }
+
+            // Get full proxy data (session endpoint returns summary, we need individual proxies)
+            const proxiesResponse = await fetch(`/api/3d-builder/session/${sessionId}/proxies`);
+            if (proxiesResponse.ok) {
+                const proxiesData = await proxiesResponse.json();
+                currentProxies = proxiesData.proxies || [];
+            } else {
+                // Fallback: load proxies individually
+                currentProxies = [];
+                for (const usId of data.session.us_ids || []) {
+                    const proxyResp = await fetch(`/api/3d-builder/proxy/${usId}?session_id=${sessionId}`);
+                    if (proxyResp.ok) {
+                        const proxyData = await proxyResp.json();
+                        if (proxyData.success) {
+                            currentProxies.push(proxyData.proxy);
+                        }
+                    }
+                }
+            }
+
+            // Initialize viewer if not already done
+            if (!viewer3D) {
+                const container = document.getElementById('viewerContainer');
+                viewer3D = new StratigraphicViewer3D(container);
+
+                // Setup callbacks
+                viewer3D.onProxySelect = function(proxy) {
+                    if (proxy) {
+                        document.getElementById('selectedProxy').textContent = `US ${proxy.us_id}`;
+                        // TODO: Show proxy details panel (Task #15)
+                    } else {
+                        document.getElementById('selectedProxy').textContent = 'None';
+                    }
+                };
+
+                viewer3D.onProxyHover = function(proxy) {
+                    // Optional: Show tooltip on hover
+                };
+            }
+
+            // Load proxies into viewer
+            if (currentProxies.length > 0) {
+                viewer3D.loadProxies(currentProxies);
+                document.getElementById('proxyCount').textContent = currentProxies.length;
+            }
+
+        } catch (error) {
+            console.error('Error loading session proxies:', error);
+            showAlert('Error loading 3D viewer: ' + error.message, 'danger');
+        }
+    }
+
     function showSessionResults(data) {
         document.getElementById('sessionId').textContent = data.session_id;
         document.getElementById('proxiesCount').textContent = data.proxies_count;

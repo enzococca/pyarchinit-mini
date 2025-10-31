@@ -537,6 +537,44 @@ def get_session_info(session_id: str):
         }), 500
 
 
+@three_d_builder_bp.route('/session/<session_id>/proxies', methods=['GET'])
+@login_required
+def get_session_proxies(session_id: str):
+    """
+    Get all proxies for a session
+
+    GET /api/3d-builder/session/{session_id}/proxies
+
+    Returns:
+    {
+        "success": true,
+        "proxies": [ ... full proxy metadata array ... ],
+        "count": 5
+    }
+    """
+    try:
+        if session_id not in build_sessions:
+            return jsonify({
+                'success': False,
+                'error': 'Session not found'
+            }), 404
+
+        session_data = build_sessions[session_id]
+
+        return jsonify({
+            'success': True,
+            'proxies': session_data['proxies'],
+            'count': len(session_data['proxies'])
+        })
+
+    except Exception as e:
+        logger.error(f\"Error getting session proxies: {e}\", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @three_d_builder_bp.route('/session/<session_id>', methods=['DELETE'])
 @login_required
 def delete_session(session_id: str):
