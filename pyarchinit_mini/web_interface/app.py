@@ -424,7 +424,7 @@ def create_app():
     relationship_sync_service = RelationshipSyncService(db_manager)
     datazione_service = DatazioneService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
-    export_import_service = ExportImportService(db_manager)
+    export_import_service = ImportExportService(db_manager)
     matrix_visualizer = MatrixVisualizer()
     graphviz_visualizer = PyArchInitMatrixVisualizer()  # Graphviz visualizer (desktop GUI style)
     pdf_generator = PDFGenerator()
@@ -3501,8 +3501,6 @@ def create_app():
         return jsonify([{'id': s.id_sito, 'name': s.sito} for s in sites])
 
     # ===== Export/Import Routes =====
-    from pyarchinit_mini.services.export_import_service import ExportImportService
-    export_import_service = ExportImportService(db_manager)
 
     @app.route('/export')
     @login_required
