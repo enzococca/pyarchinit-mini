@@ -568,7 +568,7 @@ def get_session_proxies(session_id: str):
         })
 
     except Exception as e:
-        logger.error(f\"Error getting session proxies: {e}\", exc_info=True)
+        logger.error(f"Error getting session proxies: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e)
