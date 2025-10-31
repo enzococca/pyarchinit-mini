@@ -3448,8 +3448,12 @@ def create_app():
             # Switch database
             app.config['CURRENT_DATABASE_URL'] = new_db_url
 
-            # Reinitialize database connection
+            # Close old database connection before switching
             global db_conn, db_manager
+            if db_conn:
+                db_conn.close()
+
+            # Reinitialize database connection
             db_conn = DatabaseConnection.from_url(new_db_url)
             db_manager = DatabaseManager(db_conn)
 
