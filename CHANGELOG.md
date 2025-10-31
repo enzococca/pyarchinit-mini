@@ -5,6 +5,22 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.4] - 2025-10-31
+
+### Fixed
+- **Windows bcrypt Compatibility**: Fixed bcrypt version incompatibility on Windows
+  - Changed from `passlib[bcrypt]>=1.7.4` to `passlib>=1.7.4` + `bcrypt>=4.0.0,<4.1.0`
+  - Resolves: `AttributeError: module 'bcrypt' has no attribute 'about'`
+  - Resolves: `ValueError: password cannot be longer than 72 bytes`
+  - Ensures bcrypt 4.0.x is installed (compatible with passlib 1.7.4)
+  - Updated in both `web` and `all` dependency groups
+
+### Technical Details
+- passlib 1.7.4 is not compatible with bcrypt 4.1.0+
+- On Windows, `passlib[bcrypt]` was installing bcrypt 4.1.x or 4.2.x
+- Explicit version constraint ensures compatible bcrypt version
+- Improves Windows installation reliability
+
 ## [1.8.3] - 2025-10-31
 
 ### Fixed
