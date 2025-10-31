@@ -11,7 +11,6 @@ import logging
 import uuid
 from typing import Dict, Any, Optional
 
-from pyarchinit_mini.database.manager import DatabaseManager
 from pyarchinit_mini.mcp_server.graphml_parser import GraphMLParser
 from pyarchinit_mini.mcp_server.proxy_generator import ProxyGenerator
 from pyarchinit_mini.mcp_server.blender_client import BlenderClient, BlenderConnectionError
@@ -39,26 +38,25 @@ def index():
     """
     3D Builder main page
     """
-    db_session = get_db_session()
-
     try:
-        # Get all sites
-        sites = db_session.query(Site).all()
+        with get_db_session() as db_session:
+            # Get all sites
+            sites = db_session.query(Site).all()
 
-        # Get all GraphML files
-        graphml_files = db_session.query(ExtendedMatrix).order_by(
-            ExtendedMatrix.id.desc()
-        ).limit(20).all()
+            # Get all GraphML files
+            graphml_files = db_session.query(ExtendedMatrix).order_by(
+                ExtendedMatrix.id.desc()
+            ).limit(20).all()
 
-        # Get total US count
-        total_us = db_session.query(US).count()
+            # Get total US count
+            total_us = db_session.query(US).count()
 
-        return render_template(
-            '3d_builder/index.html',
-            sites=sites,
-            graphml_files=graphml_files,
-            total_us=total_us
-        )
+            return render_template(
+                '3d_builder/index.html',
+                sites=sites,
+                graphml_files=graphml_files,
+                total_us=total_us
+            )
 
     except Exception as e:
         logger.error(f"Error loading 3D Builder page: {e}", exc_info=True)
@@ -77,8 +75,7 @@ def index():
 def get_db_session():
     """Get database session from app context"""
     from flask import current_app
-    db_manager = DatabaseManager(current_app.config.get('DATABASE_URL'))
-    return db_manager.get_session()
+    return current_app.db_manager.connection.get_session()
 
 
 def get_latest_graphml(db_session) -> Optional[ExtendedMatrix]:
@@ -135,72 +132,71 @@ def generate_3d_model():
         prompt = data.get('prompt', '')
 
         # Get database session
-        db_session = get_db_session()
+        with get_db_session() as db_session:
+            # Get GraphML file
+            if graphml_id:
+                graphml_record = db_session.query(ExtendedMatrix).filter(
+                    ExtendedMatrix.id == graphml_id
+                ).first()
+            else:
+                graphml_record = get_latest_graphml(db_session)
 
-        # Get GraphML file
-        if graphml_id:
-            graphml_record = db_session.query(ExtendedMatrix).filter(
-                ExtendedMatrix.id == graphml_id
-            ).first()
-        else:
-            graphml_record = get_latest_graphml(db_session)
+            if not graphml_record or not graphml_record.filepath:
+                return jsonify({
+                    'success': False,
+                    'error': 'GraphML file not found'
+                }), 404
 
-        if not graphml_record or not graphml_record.filepath:
+            # Load GraphML parser
+            parser = GraphMLParser(db_session)
+            if not parser.load_graphml(graphml_record.filepath):
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to load GraphML file'
+                }), 500
+
+            # Generate session ID
+            session_id = str(uuid.uuid4())
+
+            # Generate proxy metadata
+            generator = ProxyGenerator(
+                parser,
+                positioning=options.get('positioning', 'graphml'),
+                auto_color=options.get('auto_color', True),
+                auto_material=options.get('auto_material', True),
+            )
+
+            proxies = generator.generate_all_proxies(us_ids, session_id)
+
+            if not proxies:
+                return jsonify({
+                    'success': False,
+                    'error': 'No proxies generated'
+                }), 500
+
+            # Store session info
+            build_sessions[session_id] = {
+                'session_id': session_id,
+                'user_id': current_user.id,
+                'site_id': site_id,
+                'graphml_id': graphml_record.id,
+                'us_ids': us_ids,
+                'proxies': [p.to_dict() for p in proxies],
+                'status': 'ready',
+                'prompt': prompt,
+                'options': options,
+            }
+
+            logger.info(
+                f"Generated 3D model session {session_id} with {len(proxies)} proxies"
+            )
+
             return jsonify({
-                'success': False,
-                'error': 'GraphML file not found'
-            }), 404
-
-        # Load GraphML parser
-        parser = GraphMLParser(db_session)
-        if not parser.load_graphml(graphml_record.filepath):
-            return jsonify({
-                'success': False,
-                'error': 'Failed to load GraphML file'
-            }), 500
-
-        # Generate session ID
-        session_id = str(uuid.uuid4())
-
-        # Generate proxy metadata
-        generator = ProxyGenerator(
-            parser,
-            positioning=options.get('positioning', 'graphml'),
-            auto_color=options.get('auto_color', True),
-            auto_material=options.get('auto_material', True),
-        )
-
-        proxies = generator.generate_all_proxies(us_ids, session_id)
-
-        if not proxies:
-            return jsonify({
-                'success': False,
-                'error': 'No proxies generated'
-            }), 500
-
-        # Store session info
-        build_sessions[session_id] = {
-            'session_id': session_id,
-            'user_id': current_user.id,
-            'site_id': site_id,
-            'graphml_id': graphml_record.id,
-            'us_ids': us_ids,
-            'proxies': [p.to_dict() for p in proxies],
-            'status': 'ready',
-            'prompt': prompt,
-            'options': options,
-        }
-
-        logger.info(
-            f"Generated 3D model session {session_id} with {len(proxies)} proxies"
-        )
-
-        return jsonify({
-            'success': True,
-            'session_id': session_id,
-            'proxies_count': len(proxies),
-            'message': '3D model generation completed',
-        })
+                'success': True,
+                'session_id': session_id,
+                'proxies_count': len(proxies),
+                'message': '3D model generation completed',
+            })
 
     except Exception as e:
         logger.error(f"Error generating 3D model: {e}", exc_info=True)
