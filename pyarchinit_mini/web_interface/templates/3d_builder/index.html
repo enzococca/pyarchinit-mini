@@ -457,38 +457,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Apply filters
-    document.getElementById('applyFiltersBtn')?.addEventListener('click', async function() {
-        if (!currentSessionId) return;
+    document.getElementById('applyFiltersBtn')?.addEventListener('click', function() {
+        if (!viewer3D || currentProxies.length === 0) {
+            showAlert('No 3D model loaded', 'warning');
+            return;
+        }
 
-        const filters = {
-            period_range: {
-                start: parseInt(document.getElementById('dateStart').value) || null,
-                end: parseInt(document.getElementById('dateEnd').value) || null
-            },
-            transparency: parseFloat(document.getElementById('transparencySlider').value) / 100.0
-        };
+        applyFiltersToViewer();
+    });
 
-        try {
-            const response = await fetch('/api/3d-builder/filter', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    session_id: currentSessionId,
-                    filters: filters
-                })
-            });
+    // Reset filters
+    document.getElementById('resetFiltersBtn')?.addEventListener('click', function() {
+        if (!viewer3D) return;
 
-            const data = await response.json();
+        // Reset form values
+        document.getElementById('periodFilter').selectedIndex = -1;
+        document.getElementById('dateStart').value = '';
+        document.getElementById('dateEnd').value = '';
+        document.getElementById('transparencySlider').value = 100;
+        document.getElementById('transparencyValue').textContent = '100%';
 
-            if (data.success) {
-                showAlert(`Filters applied: ${data.visible_count} visible, ${data.hidden_count} hidden`, 'success');
-            } else {
-                showAlert('Error applying filters: ' + data.error, 'danger');
-            }
-        } catch (error) {
-            showAlert('Error: ' + error.message, 'danger');
+        // Reset viewer
+        currentProxies.forEach(proxy => {
+            viewer3D.updateProxyVisibility(proxy.us_id, true);
+            viewer3D.updateProxyTransparency(proxy.us_id, 1.0);
+        });
+
+        showAlert('Filters reset', 'success');
+    });
+
+    // Real-time transparency update
+    document.getElementById('transparencySlider')?.addEventListener('input', function() {
+        const opacity = parseFloat(this.value) / 100.0;
+        document.getElementById('transparencyValue').textContent = this.value + '%';
+
+        if (viewer3D && currentProxies.length > 0) {
+            viewer3D.updateAllTransparency(opacity);
         }
     });
 
@@ -517,10 +521,100 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Transparency slider
-    document.getElementById('transparencySlider').addEventListener('input', function() {
-        document.getElementById('transparencyValue').textContent = this.value + '%';
-    });
+    /**
+     * Apply all filters to viewer
+     */
+    function applyFiltersToViewer() {
+        if (!viewer3D || currentProxies.length === 0) return;
+
+        // Get filter values
+        const periodSelect = document.getElementById('periodFilter');
+        const selectedPeriods = Array.from(periodSelect.selectedOptions).map(opt => opt.value);
+
+        const dateStart = parseInt(document.getElementById('dateStart').value);
+        const dateEnd = parseInt(document.getElementById('dateEnd').value);
+
+        let visibleCount = 0;
+        let hiddenCount = 0;
+
+        currentProxies.forEach(proxy => {
+            let isVisible = true;
+
+            // Period filter
+            if (selectedPeriods.length > 0) {
+                const proxyPeriod = proxy.chronology?.period_name || 'Unknown';
+                if (!selectedPeriods.includes(proxyPeriod)) {
+                    isVisible = false;
+                }
+            }
+
+            // Date range filter
+            if (!isNaN(dateStart) || !isNaN(dateEnd)) {
+                const datingStart = proxy.chronology?.dating_start;
+                const datingEnd = proxy.chronology?.dating_end;
+
+                if (datingStart !== null && datingStart !== undefined &&
+                    datingEnd !== null && datingEnd !== undefined) {
+
+                    // Check if proxy date range overlaps with filter range
+                    const filterStart = isNaN(dateStart) ? -Infinity : dateStart;
+                    const filterEnd = isNaN(dateEnd) ? Infinity : dateEnd;
+
+                    // No overlap if proxy ends before filter starts OR proxy starts after filter ends
+                    if (datingEnd < filterStart || datingStart > filterEnd) {
+                        isVisible = false;
+                    }
+                } else {
+                    // No dating info - hide if date filter is active
+                    if (!isNaN(dateStart) || !isNaN(dateEnd)) {
+                        isVisible = false;
+                    }
+                }
+            }
+
+            // Apply visibility
+            viewer3D.updateProxyVisibility(proxy.us_id, isVisible);
+
+            if (isVisible) {
+                visibleCount++;
+            } else {
+                hiddenCount++;
+            }
+        });
+
+        showAlert(`Filters applied: ${visibleCount} visible, ${hiddenCount} hidden`, 'success');
+    }
+
+    /**
+     * Populate period filter with unique periods from loaded proxies
+     */
+    function populatePeriodFilter() {
+        const periodSelect = document.getElementById('periodFilter');
+        if (!periodSelect || currentProxies.length === 0) return;
+
+        // Clear existing options
+        periodSelect.innerHTML = '';
+
+        // Extract unique periods
+        const periodsSet = new Set();
+        currentProxies.forEach(proxy => {
+            const period = proxy.chronology?.period_name || 'Unknown';
+            periodsSet.add(period);
+        });
+
+        // Sort periods
+        const periods = Array.from(periodsSet).sort();
+
+        // Add options
+        periods.forEach(period => {
+            const option = document.createElement('option');
+            option.value = period;
+            option.textContent = period;
+            periodSelect.appendChild(option);
+        });
+
+        console.log(`Populated period filter with ${periods.length} periods`);
+    }
 
     // Viewer control buttons
     document.getElementById('toggleGridBtn')?.addEventListener('click', function() {
@@ -606,6 +700,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentProxies.length > 0) {
                 viewer3D.loadProxies(currentProxies);
                 document.getElementById('proxyCount').textContent = currentProxies.length;
+
+                // Populate period filter with available periods
+                populatePeriodFilter();
             }
 
         } catch (error) {
