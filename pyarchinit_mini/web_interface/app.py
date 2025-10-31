@@ -345,6 +345,13 @@ class GraphMLExportForm(FlaskForm):
 
 # Flask App Setup
 def create_app():
+    # Declare global variables for database and services
+    # This allows switch_database() to access and modify them
+    global db_conn, db_manager
+    global site_service, us_service, inventario_service, thesaurus_service
+    global user_service, analytics_service, relationship_sync_service, datazione_service
+    global matrix_generator, export_import_service, media_service
+
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'your-secret-key-here'
     app.config['UPLOAD_FOLDER'] = 'web_interface/static/uploads'
