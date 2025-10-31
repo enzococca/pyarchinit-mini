@@ -219,14 +219,11 @@ def save_matrix():
                     us.fase_iniziale = node_data.get('phase', '') if node_data.get('phase') else None
                     us.file_path = node_data.get('file_path', '') if node_data.get('file_path') else None
                 else:
-                    # Create new US - NOTE: id_us is VARCHAR in database, not autoincrement
+                    # Create new US - id_us is auto-incremented by database
                     nodes_created += 1
-                    # Generate id_us as string: sito__area__us
-                    area_str = node_data.get('area', '') or ''
-                    id_us = f"{site_name}__{area_str}__{us_number}"
 
                     us_create_data = {
-                        'id_us': id_us,  # Manually set id_us as VARCHAR
+                        # Do NOT set id_us - it's auto-incremented by the database
                         'sito': site_name,
                         'us': us_number,
                         'unita_tipo': node_data.get('unit_type', 'US'),
