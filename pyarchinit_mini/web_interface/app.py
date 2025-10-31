@@ -424,7 +424,7 @@ def create_app():
     relationship_sync_service = RelationshipSyncService(db_manager)
     datazione_service = DatazioneService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
-    export_import_service = ImportExportService(db_manager)
+    export_import_service = ImportExportService(db_manager.connection.connection_string)
     matrix_visualizer = MatrixVisualizer()
     graphviz_visualizer = PyArchInitMatrixVisualizer()  # Graphviz visualizer (desktop GUI style)
     pdf_generator = PDFGenerator()
@@ -3467,7 +3467,7 @@ def create_app():
             relationship_sync_service = RelationshipSyncService(db_manager)
             datazione_service = DatazioneService(db_manager)
             matrix_generator = HarrisMatrixGenerator(db_manager, us_service)
-            export_import_service = ExportImportService(db_manager)
+            export_import_service = ImportExportService(db_manager.connection.connection_string)
 
             # Update app stored services (ALL of them to ensure switch works)
             app.db_manager = db_manager
