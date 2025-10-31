@@ -30,6 +30,7 @@ from pyarchinit_mini.services.analytics_service import AnalyticsService
 from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
 from pyarchinit_mini.services.datazione_service import DatazioneService
 from pyarchinit_mini.services.media_service import MediaService
+from pyarchinit_mini.services.import_export_service import ImportExportService
 from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
 from pyarchinit_mini.harris_matrix.matrix_visualizer import MatrixVisualizer
 from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
@@ -423,6 +424,7 @@ def create_app():
     relationship_sync_service = RelationshipSyncService(db_manager)
     datazione_service = DatazioneService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
+    export_import_service = ExportImportService(db_manager)
     matrix_visualizer = MatrixVisualizer()
     graphviz_visualizer = PyArchInitMatrixVisualizer()  # Graphviz visualizer (desktop GUI style)
     pdf_generator = PDFGenerator()
