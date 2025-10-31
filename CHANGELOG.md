@@ -5,6 +5,59 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.6] - 2025-10-31
+
+### Added
+- **Comprehensive Database Migration Conflict Resolution System**
+  - **Automatic Backup System**: Creates timestamped backups before migration
+    - SQLite: File copy with timestamp
+    - PostgreSQL: Uses `pg_dump` for SQL backup
+    - Configurable via `auto_backup` parameter (default: True)
+
+  - **Conflict Detection**: Analyzes source and target databases for ID conflicts
+    - Automatic primary key detection per table (handles id_sito, id_us, id_invmat, etc.)
+    - Identifies conflicting IDs (exist in both databases)
+    - Identifies new records (only in source)
+    - Returns detailed statistics per table
+
+  - **Three Merge Strategies**:
+    - **Skip** (default): Skips records with conflicting IDs, preserves target data
+    - **Overwrite**: Updates existing records with source data
+    - **Renumber**: Generates new sequential IDs for conflicts, preserves all data
+
+  - **New API Endpoints**:
+    - `POST /api/pyarchinit/preview-migration-conflicts` - Preview conflicts before migration
+    - Updated `/api/pyarchinit/migrate-database` - Now supports `merge_strategy` and `auto_backup` parameters
+
+  - **Comprehensive Documentation**: Added `docs/DATABASE_MIGRATION_CONFLICTS.md`
+    - API usage examples
+    - Python code examples
+    - Best practices and troubleshooting
+    - Complete test coverage documentation
+
+### Changed
+- `ImportExportService.migrate_database()` signature updated with new parameters:
+  - `merge_strategy`: `'skip'`, `'overwrite'`, or `'renumber'` (default: `'skip'`)
+  - `auto_backup`: Boolean to enable/disable automatic backups (default: `True`)
+- `ImportExportService._migrate_table()` completely rewritten to support conflict resolution strategies
+- Migration response now includes backup information (path, size, status)
+
+### Improved
+- Database migration now provides detailed conflict analysis before proceeding
+- Migration success rate improved with automatic conflict handling
+- Data safety enhanced with automatic pre-migration backups
+- Better error handling and logging for migration operations
+
+### Technical Details
+- Added `_create_backup()` static method (lines 1820-1953 in import_export_service.py)
+- Added `_detect_conflicts()` static method (lines 1955-2082 in import_export_service.py)
+- Updated `_migrate_table()` with conflict resolution logic (lines 2197-2381)
+- New test files with 100% pass rate:
+  - `test_backup_system.py` (3/3 tests passing)
+  - `test_conflict_detection.py` (comprehensive scenarios)
+  - `test_conflict_detection_simple.py` (real database testing, 3/3 passing)
+  - `test_merge_strategies.py` (3/3 tests passing)
+
 ## [1.8.5] - 2025-10-31
 
 ### Added
