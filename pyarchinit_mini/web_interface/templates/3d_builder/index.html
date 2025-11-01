@@ -1257,12 +1257,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let reconnectTimeout = null;
 
     function connectEventStream(sessionId) {
-        """
-        Connect to SSE event stream for real-time updates from Blender
+        // Connect to SSE event stream for real-time updates from Blender
+        // sessionId: Session ID to filter events (optional)
 
-        Args:
-            sessionId: Session ID to filter events (optional)
-        """
         // Disconnect existing connection
         disconnectEventStream();
 
@@ -1396,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function disconnectEventStream() {
-        """Disconnect from SSE event stream"""
+        // Disconnect from SSE event stream
         if (reconnectTimeout) {
             clearTimeout(reconnectTimeout);
             reconnectTimeout = null;
