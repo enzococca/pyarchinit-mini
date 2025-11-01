@@ -14,6 +14,7 @@ from typing import Dict, Any, Optional
 from pyarchinit_mini.mcp_server.graphml_parser import GraphMLParser
 from pyarchinit_mini.mcp_server.proxy_generator import ProxyGenerator
 from pyarchinit_mini.mcp_server.blender_client import BlenderClient, BlenderConnectionError
+from pyarchinit_mini.mcp_server.event_stream import get_event_stream
 from pyarchinit_mini.models.extended_matrix import ExtendedMatrix
 from pyarchinit_mini.models.site import Site
 from pyarchinit_mini.models.us import US
@@ -699,3 +700,76 @@ def test_blender_connection():
             'success': False,
             'error': str(e)
         }), 500
+
+
+# ============================================================================
+# Real-time Event Stream (SSE)
+# ============================================================================
+
+@three_d_builder_bp.route('/events')
+@login_required
+def event_stream():
+    """
+    Server-Sent Events endpoint for real-time Blender updates
+
+    Query params:
+        session_id: Optional session filter (only receive events for this session)
+
+    Returns:
+        SSE stream with events:
+        - proxy_created
+        - proxy_updated
+        - visibility_changed
+        - transparency_changed
+        - material_applied
+        - scene_cleared
+        - export_complete
+        - batch_complete
+        - error
+    """
+    from flask import Response, stream_with_context
+
+    session_id = request.args.get('session_id')
+    event_stream_instance = get_event_stream()
+
+    # Register client
+    client_id = event_stream_instance.add_client(session_id=session_id)
+    logger.info(f"SSE client {client_id} connected (session: {session_id})")
+
+    def generate():
+        """Generate SSE events"""
+        try:
+            for event in event_stream_instance.stream_events(client_id):
+                yield event
+        except GeneratorExit:
+            logger.info(f"SSE client {client_id} disconnected")
+        except Exception as e:
+            logger.error(f"Error streaming events to client {client_id}: {e}", exc_info=True)
+        finally:
+            event_stream_instance.remove_client(client_id)
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',
+            'Connection': 'keep-alive'
+        }
+    )
+
+
+@three_d_builder_bp.route('/events/stats')
+@login_required
+def event_stream_stats():
+    """
+    Get event stream statistics
+
+    Returns:
+        JSON with connected clients count and details
+    """
+    stats = get_event_stream().get_stats()
+    return jsonify({
+        'success': True,
+        'stats': stats
+    })
