@@ -5,10 +5,13 @@ API endpoints for 3D stratigraphic model generation and manipulation.
 Integrates with MCP server, Blender client, and GraphML parser.
 """
 
-from flask import Blueprint, request, jsonify, session, render_template
+from flask import Blueprint, request, jsonify, session, render_template, current_app
 from flask_login import login_required, current_user
 import logging
 import uuid
+import os
+import tempfile
+from datetime import datetime
 from typing import Dict, Any, Optional
 
 from pyarchinit_mini.mcp_server.graphml_parser import GraphMLParser
@@ -18,6 +21,7 @@ from pyarchinit_mini.mcp_server.event_stream import get_event_stream
 from pyarchinit_mini.models.extended_matrix import ExtendedMatrix
 from pyarchinit_mini.models.site import Site
 from pyarchinit_mini.models.us import US
+from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -84,9 +88,118 @@ def get_latest_graphml(db_session) -> Optional[ExtendedMatrix]:
     return db_session.query(ExtendedMatrix).order_by(ExtendedMatrix.id.desc()).first()
 
 
+def generate_graphml_for_site(db_session, site_name: str) -> Optional[str]:
+    """
+    Generate GraphML file for a site and save it
+
+    Args:
+        db_session: Database session
+        site_name: Name of the site
+
+    Returns:
+        Path to generated GraphML file, or None if failed
+    """
+    try:
+        logger.info(f"Auto-generating GraphML for site: {site_name}")
+
+        # Get matrix generator from current_app
+        matrix_generator = HarrisMatrixGenerator(current_app.db_manager)
+
+        # Generate Harris Matrix graph
+        graph = matrix_generator.generate_matrix(site_name)
+        if not graph or graph.number_of_nodes() == 0:
+            logger.warning(f"No nodes found for site {site_name}")
+            return None
+
+        # Create temp file for GraphML
+        temp_file = tempfile.NamedTemporaryFile(
+            mode='w',
+            suffix='.graphml',
+            delete=False,
+            dir='/tmp'
+        )
+        temp_path = temp_file.name
+        temp_file.close()
+
+        # Export to GraphML
+        result_path = matrix_generator.export_to_graphml(
+            graph=graph,
+            output_path=temp_path,
+            site_name=site_name,
+            title=f"{site_name} - Harris Matrix (Auto-generated)",
+            reverse_epochs=True
+        )
+
+        if not result_path or not os.path.exists(result_path):
+            logger.error(f"GraphML export failed for site {site_name}")
+            return None
+
+        logger.info(f"GraphML generated successfully: {result_path}")
+        return result_path
+
+    except Exception as e:
+        logger.error(f"Error generating GraphML for site {site_name}: {e}", exc_info=True)
+        return None
+
+
 # ============================================================================
 # API Endpoints
 # ============================================================================
+
+@three_d_builder_bp.route('/sites/<int:site_id>/us', methods=['GET'])
+@login_required
+def get_site_us(site_id):
+    """
+    Get all US for a specific site
+
+    GET /api/3d-builder/sites/<site_id>/us
+
+    Returns:
+    {
+        "success": true,
+        "site_id": 1,
+        "site_name": "Ancient Harbor",
+        "us": [
+            {"id_us": 5, "us": 5, "d_stratigr": "Layer", ...},
+            ...
+        ]
+    }
+    """
+    try:
+        with get_db_session() as db_session:
+            # Get site
+            site = db_session.query(Site).filter(Site.id_sito == site_id).first()
+            if not site:
+                return jsonify({
+                    'success': False,
+                    'error': 'Site not found'
+                }), 404
+
+            # Get all US for site
+            us_list = db_session.query(US).filter(US.sito == site.sito).order_by(US.us).all()
+
+            return jsonify({
+                'success': True,
+                'site_id': site.id_sito,
+                'site_name': site.sito,
+                'us': [
+                    {
+                        'id_us': u.id_us,
+                        'us': u.us,
+                        'd_stratigr': u.d_stratigr,
+                        'descrizione_us': u.descrizione_us
+                    }
+                    for u in us_list
+                ]
+            })
+
+    except Exception as e:
+        logger.error(f"Error getting site US: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 
 @three_d_builder_bp.route('/generate', methods=['POST'])
 @login_required
@@ -134,6 +247,13 @@ def generate_3d_model():
 
         # Get database session
         with get_db_session() as db_session:
+            # Get site name if site_id provided
+            site_name = None
+            if site_id:
+                site = db_session.query(Site).filter(Site.id_sito == site_id).first()
+                if site:
+                    site_name = site.sito
+
             # Get GraphML file
             if graphml_id:
                 graphml_record = db_session.query(ExtendedMatrix).filter(
@@ -142,15 +262,28 @@ def generate_3d_model():
             else:
                 graphml_record = get_latest_graphml(db_session)
 
+            # If no GraphML found and we have a site, generate it automatically
+            graphml_filepath = None
             if not graphml_record or not graphml_record.filepath:
-                return jsonify({
-                    'success': False,
-                    'error': 'GraphML file not found'
-                }), 404
+                if site_name:
+                    logger.info(f"No GraphML found, generating automatically for site: {site_name}")
+                    graphml_filepath = generate_graphml_for_site(db_session, site_name)
+                    if not graphml_filepath:
+                        return jsonify({
+                            'success': False,
+                            'error': f'Failed to generate GraphML for site {site_name}'
+                        }), 500
+                else:
+                    return jsonify({
+                        'success': False,
+                        'error': 'GraphML file not found. Please specify a site_id to auto-generate.'
+                    }), 404
+            else:
+                graphml_filepath = graphml_record.filepath
 
             # Load GraphML parser
             parser = GraphMLParser(db_session)
-            if not parser.load_graphml(graphml_record.filepath):
+            if not parser.load_graphml(graphml_filepath):
                 return jsonify({
                     'success': False,
                     'error': 'Failed to load GraphML file'
@@ -180,7 +313,8 @@ def generate_3d_model():
                 'session_id': session_id,
                 'user_id': current_user.id,
                 'site_id': site_id,
-                'graphml_id': graphml_record.id,
+                'graphml_id': graphml_record.id if graphml_record else None,
+                'graphml_filepath': graphml_filepath,
                 'us_ids': us_ids,
                 'proxies': [p.to_dict() for p in proxies],
                 'status': 'ready',

@@ -624,9 +624,19 @@ class PureNetworkXExporter:
             Tuple for sorting, handling empty strings as ZZZ for sorting last
         """
         periodo, fase = periodo_fase_tuple
-        # Convert to float, use ZZZ for empty (sorts last)
-        periodo_val = float(periodo) if periodo else float('inf')
-        fase_val = float(fase) if fase else float('inf')
+
+        # Try to convert to float for numeric periods, fallback to string for textual periods
+        try:
+            periodo_val = float(periodo) if periodo else float('inf')
+        except (ValueError, TypeError):
+            # For textual periods (e.g., "Hellenistic", "Medieval"), use string sorting
+            periodo_val = periodo if periodo else 'zzz'
+
+        try:
+            fase_val = float(fase) if fase else float('inf')
+        except (ValueError, TypeError):
+            fase_val = fase if fase else 'zzz'
+
         return (periodo_val, fase_val)
 
     @staticmethod
