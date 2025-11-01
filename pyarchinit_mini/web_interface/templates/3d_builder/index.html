@@ -745,6 +745,56 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Site selection handler - auto-populate US IDs
+    document.getElementById('siteSelect')?.addEventListener('change', async function(e) {
+        const siteId = this.value;
+        const usIdsInput = document.getElementById('usIds');
+
+        if (!siteId) {
+            usIdsInput.value = '';
+            usIdsInput.placeholder = 'Enter US IDs (comma-separated): 5, 6, 7, 8';
+            return;
+        }
+
+        try {
+            usIdsInput.placeholder = 'Loading US for this site...';
+            usIdsInput.disabled = true;
+
+            const response = await fetch(`/api/3d-builder/sites/${siteId}/us`);
+            const data = await response.json();
+
+            if (data.success && data.us && data.us.length > 0) {
+                // Auto-populate with all US IDs for this site
+                const usIds = data.us.map(u => u.id_us).join(', ');
+                usIdsInput.value = usIds;
+                usIdsInput.placeholder = `${data.us.length} US found for ${data.site_name}`;
+                showAlert(`Loaded ${data.us.length} US for site "${data.site_name}"`, 'success');
+            } else {
+                usIdsInput.value = '';
+                usIdsInput.placeholder = 'No US found for this site';
+                showAlert(`No US found for site "${data.site_name}"`, 'warning');
+            }
+        } catch (error) {
+            console.error('Error loading site US:', error);
+            usIdsInput.value = '';
+            usIdsInput.placeholder = 'Error loading US';
+            showAlert('Error loading US for site', 'danger');
+        } finally {
+            usIdsInput.disabled = false;
+        }
+    });
+
+    // Select all US button
+    document.getElementById('selectAllUS')?.addEventListener('click', function() {
+        const siteSelect = document.getElementById('siteSelect');
+        if (!siteSelect.value) {
+            showAlert('Please select a site first', 'warning');
+            return;
+        }
+        // Trigger the change event to reload all US
+        siteSelect.dispatchEvent(new Event('change'));
+    });
+
     // Apply filters
     document.getElementById('applyFiltersBtn')?.addEventListener('click', function() {
         if (!viewer3D || currentProxies.length === 0) {

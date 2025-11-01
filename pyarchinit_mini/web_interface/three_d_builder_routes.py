@@ -108,8 +108,20 @@ def generate_graphml_for_site(db_session, site_name: str) -> Optional[str]:
         # Generate Harris Matrix graph
         graph = matrix_generator.generate_matrix(site_name)
         if not graph or graph.number_of_nodes() == 0:
-            logger.warning(f"No nodes found for site {site_name}")
-            return None
+            logger.warning(f"No stratigraphic relationships found for site {site_name}, creating minimal GraphML")
+            # Create a minimal GraphML with just the nodes (no relationships)
+            import networkx as nx
+            graph = nx.DiGraph()
+
+            # Add nodes from US table (without relationships)
+            from pyarchinit_mini.models.us import US as USModel
+            us_records = db_session.query(USModel).filter(USModel.sito == site_name).all()
+            for us in us_records:
+                graph.add_node(str(us.us))
+
+            if graph.number_of_nodes() == 0:
+                logger.error(f"No US records found for site {site_name}")
+                return None
 
         # Create temp file for GraphML
         temp_file = tempfile.NamedTemporaryFile(
