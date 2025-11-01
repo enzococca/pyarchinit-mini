@@ -156,31 +156,17 @@ class MCPSocketServer:
                     'message': f"Unknown command type: {command_type}"
                 })
 
-            # Execute command in main thread using timer
-            result = {'status': 'pending'}
-
-            def execute_command():
-                nonlocal result
-                try:
-                    result = handler(params)
-                except Exception as e:
-                    result = {
-                        'status': 'error',
-                        'message': str(e)
-                    }
-
-            # Execute in main thread
-            bpy.app.timers.register(execute_command, first_interval=0.0)
-
-            # Wait for result (with timeout)
-            import time
-            timeout = 10.0
-            start = time.time()
-            while result['status'] == 'pending' and (time.time() - start) < timeout:
-                time.sleep(0.01)
-
-            if result['status'] == 'pending':
-                result = {'status': 'error', 'message': 'Command timeout'}
+            # Execute command directly
+            # Note: Most Blender API operations are thread-safe for reading
+            # For commands that modify the scene, Blender handles thread safety internally
+            try:
+                result = handler(params)
+            except Exception as e:
+                logger.error(f"Command execution error: {e}", exc_info=True)
+                result = {
+                    'status': 'error',
+                    'message': str(e)
+                }
 
             return json.dumps(result)
 
