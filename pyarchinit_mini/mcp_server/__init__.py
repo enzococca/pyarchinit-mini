@@ -16,7 +16,7 @@ Integration:
 
 __version__ = "1.0.0"
 
-from .server import PyArchInitMCPServer, MCPConfig
+from .server import PyArchInitMCPServer, MCPConfig, main
 from .blender_client import BlenderClient, test_blender_connection
 
-__all__ = ["PyArchInitMCPServer", "MCPConfig", "BlenderClient", "test_blender_connection"]
+__all__ = ["PyArchInitMCPServer", "MCPConfig", "BlenderClient", "test_blender_connection", "main"]

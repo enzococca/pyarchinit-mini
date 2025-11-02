@@ -23,7 +23,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "pyarchinit": {
       "command": "uvx",
-      "args": ["pyarchinit-mini-mcp"]
+      "args": ["--from", "pyarchinit-mini", "pyarchinit-mini-mcp"]
     }
   }
 }
@@ -134,7 +134,7 @@ If you need custom database or settings, you can still use environment variables
   "mcpServers": {
     "pyarchinit": {
       "command": "uvx",
-      "args": ["pyarchinit-mini-mcp"],
+      "args": ["--from", "pyarchinit-mini", "pyarchinit-mini-mcp"],
       "env": {
         "DATABASE_URL": "sqlite:////path/to/custom.db",
         "LOG_LEVEL": "DEBUG"
