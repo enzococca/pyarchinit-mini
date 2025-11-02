@@ -50,8 +50,8 @@ def _get_default_database_url() -> str:
     except Exception as e:
         logger.warning(f"Could not load from ConnectionManager: {e}")
 
-    # 3. Create default database in ~/.pyarchinit-mini/
-    home_dir = Path.home() / '.pyarchinit-mini'
+    # 3. Create default database in ~/.pyarchinit_mini/
+    home_dir = Path.home() / '.pyarchinit_mini'
     db_dir = home_dir / 'databases'
     db_dir.mkdir(parents=True, exist_ok=True)
 

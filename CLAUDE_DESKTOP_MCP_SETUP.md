@@ -42,9 +42,9 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 ### Automatic Configuration
 
 The MCP server automatically:
-- Creates default database at `~/.pyarchinit-mini/databases/default.db`
-- Saves connection info to `~/.pyarchinit-mini/connections.json`
-- Sets up export directory at `~/.pyarchinit-mini/exports/`
+- Creates default database at `~/.pyarchinit_mini/databases/default.db`
+- Saves connection info to `~/.pyarchinit_mini/connections.json`
+- Sets up export directory at `~/.pyarchinit_mini/exports/`
 
 ### Available Tools
 
@@ -95,7 +95,7 @@ Claude: [Uses manage_database_connections with action: "current"]
 After first run, you'll have:
 
 ```
-~/.pyarchinit-mini/
+~/.pyarchinit_mini/
 ├── databases/
 │   └── default.db          # Default SQLite database
 ├── connections.json        # Saved database connections
@@ -164,7 +164,7 @@ But for most users, the zero-config setup is recommended.
 
 ### Database location
 
-Default database is at: `~/.pyarchinit-mini/databases/default.db`
+Default database is at: `~/.pyarchinit_mini/databases/default.db`
 
 To use a different database:
 1. Create it via web interface or CLI
@@ -173,10 +173,10 @@ To use a different database:
 
 ### Permission errors
 
-If you see permission errors for `~/.pyarchinit-mini/`:
+If you see permission errors for `~/.pyarchinit_mini/`:
 
 ```bash
-chmod -R u+w ~/.pyarchinit-mini
+chmod -R u+w ~/.pyarchinit_mini
 ```
 
 ## Comparison with Manual Setup
@@ -185,7 +185,7 @@ chmod -R u+w ~/.pyarchinit-mini
 |--------|-----------|--------------|
 | Configuration | 3 lines JSON | 15+ lines JSON |
 | Path management | Automatic | Manual absolute paths |
-| Database location | `~/.pyarchinit-mini/` | User-specified |
+| Database location | `~/.pyarchinit_mini/` | User-specified |
 | Environment vars | None needed | DATABASE_URL, PYTHONPATH, etc. |
 | Updates | `uvx` auto-updates | Manual reinstall |
 | Multi-user | Works everywhere | Breaks on path changes |

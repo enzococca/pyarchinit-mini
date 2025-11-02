@@ -4,6 +4,7 @@ Flask Web Interface for PyArchInit-Mini
 """
 
 import os
+from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
@@ -359,8 +360,10 @@ def create_app():
 
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'your-secret-key-here'
-    app.config['UPLOAD_FOLDER'] = 'web_interface/static/uploads'
-    app.config['DATABASE_FOLDER'] = 'databases'  # Folder for uploaded databases
+    # Use centralized ~/.pyarchinit_mini directory
+    pyarchinit_home = Path.home() / '.pyarchinit_mini'
+    app.config['UPLOAD_FOLDER'] = str(pyarchinit_home / 'web_interface' / 'static' / 'uploads')
+    app.config['DATABASE_FOLDER'] = str(pyarchinit_home / 'databases')
 
     # Initialize CSRF protection
     csrf = CSRFProtect(app)
@@ -2664,8 +2667,9 @@ def create_app():
         from flask import send_from_directory
         import os
 
-        # Get the media directory path (relative to project root)
-        media_dir = os.path.join(os.getcwd(), 'media')
+        # Get the media directory path from centralized location
+        from pathlib import Path
+        media_dir = str(Path.home() / '.pyarchinit_mini' / 'media')
         return send_from_directory(media_dir, filepath)
 
     @app.route('/media/delete/<int:media_id>', methods=['POST'])

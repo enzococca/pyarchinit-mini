@@ -40,7 +40,7 @@ class ConnectionManager:
         if config_dir:
             self.config_dir = Path(config_dir)
         else:
-            self.config_dir = Path.home() / '.pyarchinit-mini'
+            self.config_dir = Path.home() / '.pyarchinit_mini'
 
         self.config_file = self.config_dir / 'connections.json'
         self._ensure_config_dir()
