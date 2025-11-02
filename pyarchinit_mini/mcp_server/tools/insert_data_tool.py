@@ -322,7 +322,12 @@ def insert_data(
             "details": "This usually means:\n"
                       "- String provided for integer field\n"
                       "- Invalid date format\n"
-                      "- Value too long for field"
+                      "- Value too long for field",
+            "retry_suggestion": (
+                "IMPORTANT: This tool (PyArchInit manage_data) now supports automatic datetime conversion. "
+                "If this error is related to timestamps, the issue has been fixed - please retry "
+                "the same operation with the SAME data using this tool."
+            )
         }
 
     except Exception as e:

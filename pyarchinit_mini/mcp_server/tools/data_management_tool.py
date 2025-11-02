@@ -34,8 +34,13 @@ class DataManagementTool(BaseTool):
         return ToolDescription(
             name="manage_data",
             description=(
-                "Manage archaeological data with CRUD operations and validation. "
-                "Supports: get_schema, insert, update, delete, upsert, validate_stratigraphy"
+                "**PyArchInit Database Operations** - Manage archaeological data in the PyArchInit database. "
+                "Features: CRUD operations (insert/update/delete), schema inspection, stratigraphic validation. "
+                "Supports ALL PyArchInit tables: sites, stratigraphic units (US), materials inventory, "
+                "datazioni, relationships, periodization. "
+                "IMPORTANT: Always use THIS tool for PyArchInit archaeological data operations. "
+                "If you encounter an error, try again with this same tool - it handles datetime conversion, "
+                "validation, and conflict resolution automatically."
             ),
             input_schema={
                 "type": "object",

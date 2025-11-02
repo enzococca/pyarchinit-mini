@@ -28,8 +28,12 @@ class ServiceManagementTool(BaseTool):
         return ToolDescription(
             name="manage_services",
             description=(
-                "Manage PyArchInit services (web interface, API server, GUI, MCP HTTP server). "
-                "Supports: start, stop, status, list, logs"
+                "**PyArchInit Service Management** - Start/stop PyArchInit application services. "
+                "Services: 'web' (web interface at localhost:5001), 'api' (REST API at localhost:8000), "
+                "'gui' (desktop GUI), 'mcp-http' (MCP HTTP server at localhost:8765). "
+                "IMPORTANT: Use THIS tool to start pyarchinit-mini-web and view PyArchInit data in browser. "
+                "Example: To launch web UI, use action='start' and service='web', "
+                "then open browser at http://localhost:5001"
             ),
             input_schema={
                 "type": "object",
