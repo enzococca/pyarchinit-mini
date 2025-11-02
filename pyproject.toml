@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.9.1"
+version = "1.9.2"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, Heriverse/ATON export integration, and 3D CRUD viewer"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -74,6 +74,9 @@ dependencies = [
     "bcrypt>=4.0.0,<4.1.0",
     "python-jose[cryptography]>=3.3.0",
     "flask-login>=0.6.3",
+    # Harris Matrix visualization (required by CLI)
+    "matplotlib>=3.7.0",
+    "graphviz>=0.20.0",
 ]
 
 [project.optional-dependencies]
@@ -85,11 +88,8 @@ web = []
 gui = [
     "pillow>=10.0.0",
 ]
-# Full Harris Matrix visualization
-harris = [
-    "matplotlib>=3.7.0",
-    "graphviz>=0.20.0",
-]
+# Full Harris Matrix visualization (now in core, kept for backward compatibility)
+harris = []
 # PDF export with advanced features
 pdf = [
     "weasyprint>=60.0.0",
@@ -111,10 +111,8 @@ auth = []
 mcp = [
     "mcp>=0.1.0",
 ]
-# All optional features (CLI and Web are now in core)
+# All optional features (CLI, Web, and Harris are now in core)
 all = [
-    "matplotlib>=3.7.0",
-    "graphviz>=0.20.0",
     "weasyprint>=60.0.0",
     "python-magic>=0.4.0",
     "moviepy>=1.0.0",
