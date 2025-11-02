@@ -56,6 +56,7 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
 
 ### 🤖 AI Integration & MCP (Model Context Protocol)
 - **Claude Desktop Integration**: Natural language queries and 3D model generation via MCP
+- **Auto-Configuration** (NEW in v1.9.14): One-command setup with `pyarchinit-mini-configure-claude`
 - **ChatGPT Integration**: Web-based AI access to archaeological data via HTTP/SSE
 - **5 MCP Tools**: build_3d, filter, export, position, material
 - **5 MCP Resources**: graphml, us, periods, relationships, sites

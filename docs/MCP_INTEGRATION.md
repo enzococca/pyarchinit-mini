@@ -150,6 +150,60 @@ pwd  # Shows current directory, e.g., /Users/enzo/Documents/pyarchinit-mini-desk
 
 ### Step 4: Configure Claude Desktop
 
+**Choose one of these methods:**
+
+#### Method A: Automatic Configuration (Recommended - New in v1.9.14!)
+
+The easiest way to configure Claude Desktop is to use the automatic configuration command:
+
+```bash
+# After installing PyArchInit-Mini with pip
+pip install pyarchinit-mini
+pyarchinit-mini-configure-claude
+```
+
+This command will:
+- ✅ Check if Claude Desktop and uvx are installed
+- ✅ Locate the Claude Desktop configuration file
+- ✅ Add PyArchInit MCP configuration
+- ✅ Preserve your existing MCP servers (Blender, Memory, etc.)
+- ✅ Create a backup before making changes
+
+**Example output:**
+```
+======================================================================
+Configurazione Claude Desktop per PyArchInit-Mini MCP
+======================================================================
+
+1. Controllo installazione Claude Desktop...
+  ✓ Claude Desktop installato
+
+2. Controllo installazione uvx...
+  ✓ uvx installato
+
+3. Configurazione file di config...
+  • File di config: /Users/user/Library/Application Support/Claude/claude_desktop_config.json
+  ✓ Backup creato
+  ✓ Configurazione salvata
+
+======================================================================
+✓ Configurazione completata con successo!
+======================================================================
+
+Prossimi passi:
+  1. Riavvia Claude Desktop
+  2. Apri una nuova conversazione
+  3. PyArchInit-Mini MCP sarà disponibile automaticamente
+```
+
+**Options:**
+- `--silent`: No output messages
+- `--force`: Overwrite existing configuration
+
+**Skip to Step 5** if you use this method!
+
+#### Method B: Manual Configuration
+
 1. **Locate the config file:**
    - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
    - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
