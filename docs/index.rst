@@ -44,6 +44,9 @@ Quick Links
 -----------
 
 - :doc:`installation/quickstart` - Get started in 5 minutes
+- :doc:`MCP_INTEGRATION` - AI Integration with Claude Desktop & ChatGPT (NEW!)
+- :doc:`3D_VIEWER_GUIDE` - Interactive 3D visualization in browser (NEW!)
+- :doc:`BLENDER_INTEGRATION` - Professional 3D modeling with Blender (NEW!)
 - :doc:`python-api/overview` - Python API with integration examples
 - :doc:`features/pyarchinit-import-export` - Import/Export from PyArchInit
 - :doc:`features/extended-matrix-framework` - Extended Matrix 14 unit types
@@ -165,6 +168,16 @@ Harris Matrix & Visualization
    features/graphml_export
    features/graphml-export-technical
    features/s3dgraphy
+
+AI Integration & 3D Visualization
+----------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   MCP_INTEGRATION
+   3D_VIEWER_GUIDE
+   BLENDER_INTEGRATION
 
 Import/Export & Integration
 ----------------------------

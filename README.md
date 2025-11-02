@@ -54,6 +54,34 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
   - **Two-Step Selection**: Intuitive table → field selection for thesaurus management
   - **Full i18n Support**: English and Italian translations for all interfaces
 
+### 🤖 AI Integration & MCP (Model Context Protocol)
+- **Claude Desktop Integration**: Natural language queries and 3D model generation via MCP
+- **ChatGPT Integration**: Web-based AI access to archaeological data via HTTP/SSE
+- **5 MCP Tools**: build_3d, filter, export, position, material
+- **5 MCP Resources**: graphml, us, periods, relationships, sites
+- **3 MCP Prompts**: Stratigraphic Model, Period Visualization, US Description
+- **Zero-Config Setup**: Works with `uvx` for instant Claude Desktop access
+- 📖 **Complete Guide**: [MCP Integration Guide](docs/MCP_INTEGRATION.md)
+
+### 🎨 3D Visualization & Blender Integration
+- **Web 3D Viewer**: Interactive Three.js-based stratigraphic visualization in browser
+  - Natural language commands via chat interface
+  - Automatic positioning from Harris Matrix
+  - Color-coding by period or unit type
+  - Real-time updates from Blender
+- **Blender Integration**: Professional 3D model creation
+  - Real geometry based on US type (layers, structures, cuts, fills)
+  - Realistic materials from archaeological data
+  - Real-time streaming to web viewer
+  - Export to .blend, .glb, .fbx, .obj formats
+- **AI-Powered Reconstruction**: Use Claude/ChatGPT to automate 3D reconstruction
+  - Specialized AI agents (Architect, Validator, Texturizer, Reconstructor)
+  - Complete site reconstruction from archaeological data
+  - Automatic prompt generation for any site
+- 📖 **Complete Guides**:
+  - [3D Viewer Guide](docs/3D_VIEWER_GUIDE.md)
+  - [Blender Integration Guide](docs/BLENDER_INTEGRATION.md)
+
 ### 🖥️ Multiple User Interfaces
 - **Web Interface (Flask)**: Modern Bootstrap 5 UI, responsive design
 - **Desktop GUI (Tkinter)**: Complete native application
@@ -1880,11 +1908,39 @@ pyarchinit-api
 - [x] **Session-Based Filters** - Filter persistence across navigation for consistent workflow
 - [x] **Smart Export Buttons** - Context-aware buttons with filter badges showing filtered record count
 
+### Completed in v1.9.10+ (November 2025)
+- [x] **Model Context Protocol (MCP) Server** - AI integration for Claude Desktop and ChatGPT
+- [x] **3D Web Viewer** - Interactive Three.js visualization with chat interface
+- [x] **Blender Integration** - Real-time streaming and professional 3D model creation
+- [x] **AI-Powered Reconstruction** - Automated site reconstruction with specialized agents
+- [x] **Natural Language Commands** - Chat-based 3D model generation and filtering
+- [x] **MCP Tools & Resources** - 5 tools, 5 resources, 3 prompts for AI assistants
+- [x] **Comprehensive Documentation** - Step-by-step guides for MCP, 3D Viewer, and Blender
+
 ### Upcoming Features
-- [ ] Docker containerization
-- [ ] Cloud deployment guides
-- [ ] Offline mode support
-- [ ] Advanced search for Inventory module (following US implementation pattern)
+- [ ] **3D Viewer Enhancements**:
+  - [ ] Advanced camera controls (fly mode, walk mode)
+  - [ ] Section cutting/clipping planes
+  - [ ] Measurement tools
+  - [ ] VR/AR support for immersive viewing
+  - [ ] Collaborative 3D viewing (multi-user)
+- [ ] **Blender Interoperability**:
+  - [ ] Bidirectional sync (edit in Blender, update PyArchInit)
+  - [ ] Texture baking from archaeological photos
+  - [ ] Animation export for presentations
+  - [ ] USD format support for universal interchange
+- [ ] **MCP Tools Expansion**:
+  - [ ] Relationship analysis tool
+  - [ ] Chronology validation tool
+  - [ ] Bulk operations tool
+  - [ ] Search and query tool
+  - [ ] Statistics and reporting tool
+- [ ] **General Improvements**:
+  - [ ] Docker containerization
+  - [ ] Cloud deployment guides (AWS, Azure, GCP)
+  - [ ] Offline mode support
+  - [ ] Advanced search for Inventory module (following US implementation pattern)
+  - [ ] Mobile app (iOS/Android) for field data entry
 
 ---
 
