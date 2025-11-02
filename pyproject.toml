@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.9.11"
+version = "1.9.12"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, Heriverse/ATON export integration, and 3D CRUD viewer"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -88,6 +88,8 @@ dependencies = [
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",
     "python-docx>=1.0.0",
+    # Process management for service control
+    "psutil>=5.9.0",
 ]
 
 [project.optional-dependencies]
