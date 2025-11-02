@@ -9,11 +9,13 @@ Features:
 - Transaction safety (rollback on error)
 - Works with both SQLite and PostgreSQL
 - Detailed error messages for troubleshooting
+- Automatic datetime conversion from ISO strings
 """
 
 import logging
 import os
-from sqlalchemy import Table, MetaData, inspect
+from datetime import datetime
+from sqlalchemy import Table, MetaData, inspect, DateTime
 from sqlalchemy.exc import IntegrityError, DataError
 from typing import Dict, Any, Optional
 from pyarchinit_mini.database.connection import DatabaseConnection
@@ -236,9 +238,52 @@ def insert_data(
                 "data": data
             }
 
-        # Insert data
+        # Convert datetime strings to datetime objects
+        # SQLAlchemy requires Python datetime objects for DateTime columns
+        converted_data = {}
+        for field_name, value in data.items():
+            if field_name in column_info:
+                col_type = column_info[field_name]['type']
+
+                # Check if this is a DateTime column
+                if isinstance(col_type, DateTime):
+                    if isinstance(value, str) and value:
+                        # Try to parse ISO format datetime string
+                        try:
+                            # Support common ISO formats
+                            # 2025-11-02T10:00:00, 2025-11-02 10:00:00, 2025-11-02T10:00:00Z
+                            value_clean = value.replace('Z', '').replace('T', ' ').strip()
+
+                            # Try parsing with different formats
+                            for fmt in [
+                                '%Y-%m-%d %H:%M:%S.%f',  # With microseconds
+                                '%Y-%m-%d %H:%M:%S',     # Without microseconds
+                                '%Y-%m-%d',              # Date only
+                            ]:
+                                try:
+                                    converted_data[field_name] = datetime.strptime(value_clean, fmt)
+                                    break
+                                except ValueError:
+                                    continue
+                            else:
+                                # If no format matched, leave as is (will fail later with clear error)
+                                converted_data[field_name] = value
+                        except Exception:
+                            # If conversion fails, leave as is
+                            converted_data[field_name] = value
+                    else:
+                        # Already a datetime object or None
+                        converted_data[field_name] = value
+                else:
+                    # Not a datetime column, use as is
+                    converted_data[field_name] = value
+            else:
+                # Unknown column (already validated), use as is
+                converted_data[field_name] = value
+
+        # Insert data with converted datetime values
         with engine.begin() as conn:  # Transaction automatically commits or rolls back
-            result = conn.execute(table_obj.insert().values(**data))
+            result = conn.execute(table_obj.insert().values(**converted_data))
 
             # Get the inserted ID
             inserted_id = result.inserted_primary_key[0] if result.inserted_primary_key else None
