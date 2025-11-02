@@ -15,20 +15,30 @@ class MediaHandler:
     Handles media file operations, storage, and organization
     """
     
-    def __init__(self, base_media_path: str = "media"):
+    def __init__(self, base_media_path: str = None):
+        # Use centralized media directory by default
+        if base_media_path is None:
+            base_media_path = str(Path.home() / '.pyarchinit_mini' / 'media')
+
         self.base_media_path = Path(base_media_path)
-        self.base_media_path.mkdir(exist_ok=True)
-        
-        # Create subdirectories
+        self.base_media_path.mkdir(parents=True, exist_ok=True)
+
+        # Create subdirectories for media types
         self.images_path = self.base_media_path / "images"
         self.documents_path = self.base_media_path / "documents"
         self.videos_path = self.base_media_path / "videos"
         self.models_path = self.base_media_path / "3d_models"
         self.thumbnails_path = self.base_media_path / "thumbnails"
 
+        # Create subdirectories for system operations
+        self.logs_path = self.base_media_path / "logs"
+        self.backup_path = self.base_media_path / "backup"
+        self.export_path = self.base_media_path / "export"
+
         for path in [self.images_path, self.documents_path, self.videos_path,
-                     self.models_path, self.thumbnails_path]:
-            path.mkdir(exist_ok=True)
+                     self.models_path, self.thumbnails_path, self.logs_path,
+                     self.backup_path, self.export_path]:
+            path.mkdir(parents=True, exist_ok=True)
     
     def store_file(self, file_path: str, entity_type: str, entity_id: int,
                    description: str = "", tags: str = "", author: str = "") -> Dict[str, Any]:
