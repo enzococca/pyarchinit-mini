@@ -1,0 +1,289 @@
+"""
+Insert Data Tool - Database Record Insertion for MCP
+
+This tool enables AI assistants to insert new archaeological records into the database.
+Features:
+- Support for all PyArchInit tables (sites, US, inventario, datazioni, relationships)
+- Automatic field validation (required fields, data types, constraints)
+- Foreign key validation
+- Transaction safety (rollback on error)
+- Works with both SQLite and PostgreSQL
+- Detailed error messages for troubleshooting
+"""
+
+import logging
+import os
+from sqlalchemy import Table, MetaData, inspect
+from sqlalchemy.exc import IntegrityError, DataError
+from typing import Dict, Any, Optional
+from pyarchinit_mini.database.connection import DatabaseConnection
+from pyarchinit_mini.database.manager import DatabaseManager
+
+logger = logging.getLogger(__name__)
+
+
+def insert_data(
+    table: str,
+    data: Dict[str, Any],
+    validate_only: bool = False
+) -> dict:
+    """
+    Insert a new record into a PyArchInit table.
+
+    Args:
+        table: Table name to insert into.
+               Valid values: "site_table", "us_table", "inventario_materiali_table",
+               "datazioni_table", "us_relationships_table"
+        data: Dictionary of field_name -> value pairs.
+              Do NOT include auto-increment primary key fields (like "id").
+              Example: {"sito": "Pompei", "area": 1, "us": 100, "unita_tipo": "US"}
+        validate_only: If True, only validate data without inserting (dry-run mode)
+
+    Returns:
+        dict: Result with structure:
+        {
+            "success": True | False,
+            "message": "Success/error message",
+            "inserted_id": <new record ID> (only if success=True),
+            "validation_errors": [...] (only if validation failed),
+            "data": {...} (echoed data if validate_only=True)
+        }
+
+    Examples:
+        # Insert a new site
+        result = insert_data(
+            table="site_table",
+            data={
+                "sito": "Tempio della Fortuna",
+                "location": "Palestrina",
+                "nazione": "Italia",
+                "tipologia": "Santuario"
+            }
+        )
+
+        # Insert a new US (Stratigraphic Unit)
+        result = insert_data(
+            table="us_table",
+            data={
+                "sito": "Pompei",
+                "area": 1,
+                "us": 150,
+                "unita_tipo": "US",
+                "definizione_stratigrafica": "Strato",
+                "descrizione": "Strato di crollo",
+                "periodo": "Romano"
+            }
+        )
+
+        # Validate without inserting
+        result = insert_data(
+            table="us_table",
+            data={"sito": "Test", "area": 1, "us": 200},
+            validate_only=True
+        )
+
+    Notes:
+        - Auto-increment fields (like "id") are generated automatically - do NOT include them
+        - Required fields must be provided (check schema first with get_schema tool)
+        - Foreign keys are validated (e.g., "sito" in us_table must exist in site_table)
+        - For SQLite: INTEGER PRIMARY KEY is auto-increment
+        - For PostgreSQL: SERIAL fields are auto-increment
+    """
+    try:
+        # Validate table name
+        valid_tables = [
+            "site_table", "us_table", "inventario_materiali_table",
+            "datazioni_table", "us_relationships_table"
+        ]
+        if table not in valid_tables:
+            return {
+                "success": False,
+                "error": f"Invalid table name: {table}",
+                "message": f"Table must be one of: {', '.join(valid_tables)}"
+            }
+
+        # Get database connection
+        database_url = os.getenv("DATABASE_URL", "sqlite:///./pyarchinit_mini.db")
+        db_connection = DatabaseConnection(database_url)
+        db_manager = DatabaseManager(db_connection)
+        engine = db_connection.engine
+        metadata = MetaData()
+        inspector = inspect(engine)
+
+        # Detect database type
+        db_type = "sqlite" if "sqlite" in str(engine.url) else "postgresql"
+
+        # Reflect table structure
+        table_obj = Table(table, metadata, autoload_with=engine)
+
+        # Validate data
+        validation_errors = []
+
+        # Get primary key columns
+        pk_constraint = inspector.get_pk_constraint(table)
+        pk_columns = pk_constraint.get('constrained_columns', []) if pk_constraint else []
+
+        # Get column information
+        columns = inspector.get_columns(table)
+        column_info = {col['name']: col for col in columns}
+
+        # Check for auto-increment primary keys in data (should NOT be provided)
+        for col_name in pk_columns:
+            if col_name in data:
+                col = column_info.get(col_name)
+                if col:
+                    is_autoincrement = False
+                    if db_type == "sqlite":
+                        # SQLite: INTEGER PRIMARY KEY is auto-increment
+                        is_autoincrement = "INTEGER" in str(col['type']).upper()
+                    else:  # postgresql
+                        # PostgreSQL: SERIAL or has default sequence
+                        is_autoincrement = (
+                            col.get('autoincrement', False) or
+                            'SERIAL' in str(col['type']).upper() or
+                            (col.get('default', '') or '').startswith('nextval')
+                        )
+
+                    if is_autoincrement:
+                        validation_errors.append({
+                            "field": col_name,
+                            "error": "auto_increment_field_provided",
+                            "message": f"Field '{col_name}' is auto-increment - do NOT provide it in data"
+                        })
+
+        # Check required fields
+        for col_name, col_info in column_info.items():
+            is_required = not col_info.get('nullable', True)
+            is_pk = col_name in pk_columns
+            has_default = col_info.get('default') is not None
+
+            # Skip auto-increment primary keys
+            if is_pk:
+                col_type = str(col_info['type'])
+                is_autoincrement = False
+                if db_type == "sqlite":
+                    is_autoincrement = "INTEGER" in col_type.upper()
+                else:  # postgresql
+                    is_autoincrement = (
+                        col_info.get('autoincrement', False) or
+                        'SERIAL' in col_type.upper() or
+                        (col_info.get('default', '') or '').startswith('nextval')
+                    )
+
+                if is_autoincrement:
+                    continue
+
+            # Field is required if: NOT NULL, no default, and not auto-increment
+            if is_required and not has_default and col_name not in data:
+                validation_errors.append({
+                    "field": col_name,
+                    "error": "required_field_missing",
+                    "message": f"Required field '{col_name}' is missing"
+                })
+
+        # Check for unknown fields
+        for field_name in data.keys():
+            if field_name not in column_info:
+                validation_errors.append({
+                    "field": field_name,
+                    "error": "unknown_field",
+                    "message": f"Field '{field_name}' does not exist in table '{table}'"
+                })
+
+        # Check foreign key constraints
+        foreign_keys = inspector.get_foreign_keys(table)
+        for fk in foreign_keys:
+            constrained_cols = fk.get('constrained_columns', [])
+            referred_table = fk.get('referred_table')
+            referred_cols = fk.get('referred_columns', [])
+
+            for i, col_name in enumerate(constrained_cols):
+                if col_name in data:
+                    value = data[col_name]
+                    if value is not None:  # NULL is allowed for optional foreign keys
+                        # Check if referenced value exists
+                        referred_col = referred_cols[i] if i < len(referred_cols) else 'id'
+                        ref_table = Table(referred_table, MetaData(), autoload_with=engine)
+
+                        with engine.connect() as conn:
+                            result = conn.execute(
+                                ref_table.select().where(
+                                    getattr(ref_table.c, referred_col) == value
+                                )
+                            ).fetchone()
+
+                            if not result:
+                                validation_errors.append({
+                                    "field": col_name,
+                                    "error": "foreign_key_violation",
+                                    "message": f"Value '{value}' for field '{col_name}' does not exist in {referred_table}.{referred_col}"
+                                })
+
+        # If validation errors, return them
+        if validation_errors:
+            return {
+                "success": False,
+                "error": "validation_failed",
+                "message": f"Data validation failed with {len(validation_errors)} error(s)",
+                "validation_errors": validation_errors
+            }
+
+        # If validate_only mode, return success without inserting
+        if validate_only:
+            return {
+                "success": True,
+                "message": "Data validation passed - ready to insert",
+                "data": data
+            }
+
+        # Insert data
+        with engine.begin() as conn:  # Transaction automatically commits or rolls back
+            result = conn.execute(table_obj.insert().values(**data))
+
+            # Get the inserted ID
+            inserted_id = result.inserted_primary_key[0] if result.inserted_primary_key else None
+
+            return {
+                "success": True,
+                "message": f"Record inserted successfully into {table}",
+                "inserted_id": inserted_id,
+                "data": data
+            }
+
+    except IntegrityError as e:
+        # Database constraint violation (unique, foreign key, etc.)
+        error_msg = str(e.orig) if hasattr(e, 'orig') else str(e)
+        logger.error(f"Integrity error inserting into {table}: {error_msg}", exc_info=True)
+
+        return {
+            "success": False,
+            "error": "integrity_error",
+            "message": f"Database constraint violation: {error_msg}",
+            "details": "This usually means:\n"
+                      "- Duplicate value in unique field\n"
+                      "- Foreign key reference doesn't exist\n"
+                      "- NOT NULL constraint violated"
+        }
+
+    except DataError as e:
+        # Data type mismatch
+        error_msg = str(e.orig) if hasattr(e, 'orig') else str(e)
+        logger.error(f"Data type error inserting into {table}: {error_msg}", exc_info=True)
+
+        return {
+            "success": False,
+            "error": "data_type_error",
+            "message": f"Data type mismatch: {error_msg}",
+            "details": "This usually means:\n"
+                      "- String provided for integer field\n"
+                      "- Invalid date format\n"
+                      "- Value too long for field"
+        }
+
+    except Exception as e:
+        logger.error(f"Error inserting data into {table}: {str(e)}", exc_info=True)
+        return {
+            "success": False,
+            "error": str(e),
+            "message": f"Failed to insert data into {table}: {str(e)}"
+        }

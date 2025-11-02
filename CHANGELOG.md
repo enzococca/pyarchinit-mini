@@ -5,6 +5,69 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.11] - 2025-11-02
+
+### Added - CRUD + Validation Tools
+- **Complete Data Management System**
+  - Unified `manage_data` MCP tool with 6 operations
+  - `get_schema`: Database schema inspector with constraints and sample values
+  - `insert`: Create new archaeological records with full validation
+  - `update`: Modify existing records by ID or filters
+  - `delete`: Safe deletion with dry-run and cascade warnings
+  - `upsert`: Intelligent conflict resolution (insert or update)
+  - `validate_stratigraphy`: Stratigraphic relationship validator with auto-fix
+
+- **Database Operations**
+  - Field validation (required fields, data types, constraints)
+  - Foreign key validation and referential integrity checks
+  - Auto-increment field detection (SQLite and PostgreSQL)
+  - Transaction safety with automatic rollback on errors
+  - Partial updates (only modify specified fields)
+  - Dry-run modes for all destructive operations
+
+- **Stratigraphic Validation**
+  - Paradox detection (contradictory relationships)
+  - Cycle detection in Harris Matrix (temporal paradoxes)
+  - Missing reciprocal relationship detection
+  - Chronological consistency validation with periodization data
+  - Auto-fix for missing reciprocals
+  - Error categorization (paradoxes, cycles, chronology, other)
+  - Re-validation after auto-fixes with improvement metrics
+  - Support for Italian and English relationship types
+
+- **Conflict Resolution (UPSERT)**
+  - Detect duplicates by composite keys
+  - 4 resolution strategies: detect, skip, update, upsert
+  - 3 merge strategies: prefer_new, prefer_existing, replace_all
+  - Atomic operations (no race conditions)
+  - Intelligent data merging
+
+- **Documentation**
+  - `CRUD_TOOLS.md`: Comprehensive guide (500+ lines)
+  - Complete API reference for all 6 operations
+  - Best practices and error handling
+  - Usage examples and common patterns
+  - Architecture documentation
+
+- **Testing**
+  - `test_crud_tools.py`: Full test suite (330 lines)
+  - 11 test operations covering all functionality
+  - All tests passing (59 US validated, 0 errors)
+  - Dry-run and actual execution tests
+  - Foreign key and constraint validation tests
+
+### Fixed
+- **Database Connection**
+  - Fixed DatabaseManager initialization in all CRUD tools
+  - Proper DatabaseConnection object creation
+  - Correct engine reference pattern
+
+### Changed
+- **MCP Server**
+  - Updated from 13 to 14 MCP tools
+  - Added `manage_data` to tool registry
+  - Updated server documentation
+
 ## [1.9.10] - 2025-11-02
 
 ### Added - AI Integration & 3D Visualization

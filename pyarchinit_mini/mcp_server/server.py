@@ -68,6 +68,7 @@ from .tools.pyarchinit_sync_tool import PyArchInitSyncTool
 from .tools.chatgpt_search_tool import ChatGPTSearchTool
 from .tools.chatgpt_fetch_tool import ChatGPTFetchTool
 from .tools.database_manager_tool import DatabaseManagerTool
+from .tools.data_management_tool import DataManagementTool
 
 from .prompts.stratigraphic_model_prompt import StratigraphicModelPrompt
 from .prompts.period_visualization_prompt import PeriodVisualizationPrompt
@@ -83,8 +84,9 @@ class PyArchInitMCPServer:
 
     Exposes:
     - 5 Resources (GraphML, US, Periods, Relationships, Sites)
-    - 13 Tools (build_3d, filter, export, position, material, import_excel, create_harris_matrix,
-                configure_em_nodes, create_database, pyarchinit_sync, search, fetch, manage_database_connections)
+    - 14 Tools (build_3d, filter, export, position, material, import_excel, create_harris_matrix,
+                configure_em_nodes, create_database, pyarchinit_sync, search, fetch,
+                manage_database_connections, manage_data)
     - 3 Prompts (stratigraphic_model, period_visualization, us_description)
 
     Architecture:
@@ -249,6 +251,12 @@ class PyArchInitMCPServer:
 
         # Database Manager Tool
         self.tools["manage_database_connections"] = DatabaseManagerTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Data Management Tool (CRUD + Validation)
+        self.tools["manage_data"] = DataManagementTool(
             db_session=self.db_session,
             config=self.config,
         )
