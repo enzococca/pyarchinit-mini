@@ -32,8 +32,9 @@ def insert_data(
 
     Args:
         table: Table name to insert into.
-               Valid values: "site_table", "us_table", "inventario_materiali_table",
-               "datazioni_table", "us_relationships_table"
+               Supports ALL database tables including: site_table, us_table,
+               inventario_materiali_table, datazioni_table, us_relationships_table,
+               periodizzazione tables, media tables, thesaurus tables, users table, etc.
         data: Dictionary of field_name -> value pairs.
               Do NOT include auto-increment primary key fields (like "id").
               Example: {"sito": "Pompei", "area": 1, "us": 100, "unita_tipo": "US"}
@@ -90,18 +91,6 @@ def insert_data(
         - For PostgreSQL: SERIAL fields are auto-increment
     """
     try:
-        # Validate table name
-        valid_tables = [
-            "site_table", "us_table", "inventario_materiali_table",
-            "datazioni_table", "us_relationships_table"
-        ]
-        if table not in valid_tables:
-            return {
-                "success": False,
-                "error": f"Invalid table name: {table}",
-                "message": f"Table must be one of: {', '.join(valid_tables)}"
-            }
-
         # Get database connection - use config default if DATABASE_URL not set
         from pyarchinit_mini.mcp_server.config import _get_default_database_url
         database_url = os.getenv("DATABASE_URL") or _get_default_database_url()
@@ -113,6 +102,16 @@ def insert_data(
 
         # Detect database type
         db_type = "sqlite" if "sqlite" in str(engine.url) else "postgresql"
+
+        # Validate table exists in database
+        all_tables = inspector.get_table_names()
+        if table not in all_tables:
+            return {
+                "success": False,
+                "error": "table_not_found",
+                "message": f"Table '{table}' does not exist in database",
+                "available_tables": all_tables
+            }
 
         # Reflect table structure
         table_obj = Table(table, metadata, autoload_with=engine)

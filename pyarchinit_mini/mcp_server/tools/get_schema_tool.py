@@ -32,8 +32,9 @@ def get_schema(
 
     Args:
         table: Specific table name (None = all tables).
-               Valid values: "site_table", "us_table", "inventario_materiali_table",
-               "datazioni_table", "us_relationships_table"
+               Supports ALL database tables including: site_table, us_table,
+               inventario_materiali_table, datazioni_table, us_relationships_table,
+               periodizzazione tables, media tables, thesaurus tables, users table, etc.
         include_constraints: Include foreign keys, unique constraints, etc.
         include_sample_values: Include example values for specific fields
 
@@ -82,16 +83,22 @@ def get_schema(
         # Detect database type
         db_type = "sqlite" if "sqlite" in str(engine.url) else "postgresql"
 
-        # Get all tables or specific table
-        tables_to_inspect = [table] if table else inspector.get_table_names()
+        # Get all available tables in the database
+        all_tables = inspector.get_table_names()
 
-        # Filter to only PyArchInit tables
-        pyarchinit_tables = [
-            "site_table", "us_table", "inventario_materiali_table",
-            "datazioni_table", "us_relationships_table", "users",
-            "thesaurus_table"
-        ]
-        tables_to_inspect = [t for t in tables_to_inspect if t in pyarchinit_tables]
+        # If specific table requested, validate it exists
+        if table:
+            if table not in all_tables:
+                return {
+                    "success": False,
+                    "error": "table_not_found",
+                    "message": f"Table '{table}' does not exist in database",
+                    "available_tables": all_tables
+                }
+            tables_to_inspect = [table]
+        else:
+            # Return all tables
+            tables_to_inspect = all_tables
 
         result = {
             "database_type": db_type,

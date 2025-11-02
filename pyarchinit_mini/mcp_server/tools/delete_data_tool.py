@@ -37,8 +37,9 @@ def delete_data(
 
     Args:
         table: Table name to delete from.
-               Valid values: "site_table", "us_table", "inventario_materiali_table",
-               "datazioni_table", "us_relationships_table"
+               Supports ALL database tables including: site_table, us_table,
+               inventario_materiali_table, datazioni_table, us_relationships_table,
+               periodizzazione tables, media tables, thesaurus tables, users table, etc.
         record_id: Primary key ID of specific record to delete.
                    If provided, deletes only this record.
                    Cannot be used together with filters.
@@ -97,18 +98,6 @@ def delete_data(
         - Transaction is rolled back if any error occurs
     """
     try:
-        # Validate table name
-        valid_tables = [
-            "site_table", "us_table", "inventario_materiali_table",
-            "datazioni_table", "us_relationships_table"
-        ]
-        if table not in valid_tables:
-            return {
-                "success": False,
-                "error": f"Invalid table name: {table}",
-                "message": f"Table must be one of: {', '.join(valid_tables)}"
-            }
-
         # Validate that either record_id or filters is provided
         if record_id is None and filters is None:
             return {
@@ -132,6 +121,16 @@ def delete_data(
         engine = db_connection.engine
         metadata = MetaData()
         inspector = inspect(engine)
+
+        # Validate table exists in database
+        all_tables = inspector.get_table_names()
+        if table not in all_tables:
+            return {
+                "success": False,
+                "error": "table_not_found",
+                "message": f"Table '{table}' does not exist in database",
+                "available_tables": all_tables
+            }
 
         # Reflect table structure
         table_obj = Table(table, metadata, autoload_with=engine)

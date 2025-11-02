@@ -38,8 +38,9 @@ def resolve_conflicts(
 
     Args:
         table: Table name to work with.
-               Valid values: "site_table", "us_table", "inventario_materiali_table",
-               "datazioni_table", "us_relationships_table"
+               Supports ALL database tables including: site_table, us_table,
+               inventario_materiali_table, datazioni_table, us_relationships_table,
+               periodizzazione tables, media tables, thesaurus tables, users table, etc.
         data: Dictionary of field_name -> value pairs to insert/update.
               Example: {"sito": "Pompei", "area": 1, "us": 100, "descrizione": "New"}
         conflict_keys: List of field names that define uniqueness.
@@ -101,18 +102,6 @@ def resolve_conflicts(
         - Transaction is rolled back if any error occurs
     """
     try:
-        # Validate table name
-        valid_tables = [
-            "site_table", "us_table", "inventario_materiali_table",
-            "datazioni_table", "us_relationships_table"
-        ]
-        if table not in valid_tables:
-            return {
-                "success": False,
-                "error": f"Invalid table name: {table}",
-                "message": f"Table must be one of: {', '.join(valid_tables)}"
-            }
-
         # Validate resolution strategy
         valid_resolutions = ["detect", "skip", "update", "upsert"]
         if resolution not in valid_resolutions:
@@ -150,6 +139,16 @@ def resolve_conflicts(
 
         # Detect database type
         db_type = "sqlite" if "sqlite" in str(engine.url) else "postgresql"
+
+        # Validate table exists in database
+        all_tables = inspector.get_table_names()
+        if table not in all_tables:
+            return {
+                "success": False,
+                "error": "table_not_found",
+                "message": f"Table '{table}' does not exist in database",
+                "available_tables": all_tables
+            }
 
         # Reflect table structure
         table_obj = Table(table, metadata, autoload_with=engine)
