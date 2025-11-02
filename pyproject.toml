@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.9.0"
+version = "1.9.1"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, Heriverse/ATON export integration, and 3D CRUD viewer"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -41,8 +41,9 @@ classifiers = [
     "Framework :: FastAPI",
 ]
 requires-python = ">=3.8,<3.15"
-# Core dependencies - API only
+# Core dependencies - includes CLI, Web GUI, and API
 dependencies = [
+    # API dependencies
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
     "sqlalchemy>=2.0.0",
@@ -56,17 +57,11 @@ dependencies = [
     "reportlab>=4.0.0",
     "pillow>=10.0.0",
     "s3dgraphy>=0.1.13",
-]
-
-[project.optional-dependencies]
-# CLI interface dependencies
-cli = [
+    # CLI interface dependencies
     "click>=8.1.0",
     "rich>=13.0.0",
     "inquirer>=3.0.0",
-]
-# Web interface dependencies
-web = [
+    # Web interface dependencies
     "flask>=3.0.0",
     "flask-wtf>=1.2.0",
     "wtforms>=3.1.0",
@@ -80,6 +75,12 @@ web = [
     "python-jose[cryptography]>=3.3.0",
     "flask-login>=0.6.3",
 ]
+
+[project.optional-dependencies]
+# CLI interface dependencies (now in core, kept for backward compatibility)
+cli = []
+# Web interface dependencies (now in core, kept for backward compatibility)
+web = []
 # Desktop GUI dependencies (tkinter is stdlib, no external deps needed)
 gui = [
     "pillow>=10.0.0",
@@ -104,29 +105,14 @@ export = [
     "openpyxl>=3.1.0",
     "python-docx>=1.0.0",
 ]
-# Authentication and authorization
-auth = [
-    "passlib[bcrypt]>=1.7.4",
-    "python-jose[cryptography]>=3.3.0",
-    "flask-login>=0.6.3",
-]
+# Authentication and authorization (now in core, kept for backward compatibility)
+auth = []
 # MCP Server (Model Context Protocol) for Claude AI integration
 mcp = [
     "mcp>=0.1.0",
 ]
-# All interfaces
+# All optional features (CLI and Web are now in core)
 all = [
-    "click>=8.1.0",
-    "rich>=13.0.0",
-    "inquirer>=3.0.0",
-    "flask>=3.0.0",
-    "flask-wtf>=1.2.0",
-    "wtforms>=3.1.0",
-    "jinja2>=3.1.0",
-    "flask-socketio>=5.3.0",
-    "python-socketio>=5.10.0",
-    "flask-babel>=3.1.0",
-    "babel>=2.12.0",
     "matplotlib>=3.7.0",
     "graphviz>=0.20.0",
     "weasyprint>=60.0.0",
@@ -135,10 +121,6 @@ all = [
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",
     "python-docx>=1.0.0",
-    "passlib>=1.7.4",
-    "bcrypt>=4.0.0,<4.1.0",
-    "python-jose[cryptography]>=3.3.0",
-    "flask-login>=0.6.3",
 ]
 # Development dependencies
 dev = [
