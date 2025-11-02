@@ -74,10 +74,54 @@ This guide explains how to integrate PyArchInit-Mini with AI assistants (Claude 
 
 **Difficulty:** Easy
 **Time:** 5 minutes
-**Requirements:** Python 3.8+, PyArchInit-Mini installed
+**Requirements:** Python 3.8+, uvx (package runner)
 
-### Step 1: Install PyArchInit-Mini
+### Step 1: Install uvx
 
+**uvx** is a package runner that makes it easy to run Python applications without manual installation.
+
+**macOS:**
+```bash
+# Using Homebrew (recommended)
+brew install uv
+
+# Or using the installer script
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Linux:**
+```bash
+# Using the installer script
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or using pip
+pip install uv
+```
+
+**Windows:**
+```powershell
+# Using PowerShell (run as Administrator)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or using pip
+pip install uv
+```
+
+**Verify installation:**
+```bash
+uvx --version
+# Should show version number
+```
+
+### Step 2: Install PyArchInit-Mini
+
+**Option A: Using uvx (Recommended)**
+```bash
+# PyArchInit-Mini will be automatically installed when Claude Desktop runs
+# No manual installation needed!
+```
+
+**Option B: Using pip**
 ```bash
 # Install with pip
 pip install pyarchinit-mini
@@ -87,20 +131,6 @@ git clone https://github.com/enzococca/pyarchinit-mini.git
 cd pyarchinit-mini
 pip install -e .
 ```
-
-### Step 2: Find Your Python Path
-
-```bash
-# Find the Python path
-which python3
-
-# Example output:
-# /usr/local/bin/python3
-# or
-# /Users/yourusername/.pyenv/versions/3.11.6/bin/python3
-```
-
-**Copy this path** - you'll need it in the next step.
 
 ### Step 3: Find Your Database Path
 
@@ -131,8 +161,8 @@ pwd  # Shows current directory, e.g., /Users/enzo/Documents/pyarchinit-mini-desk
 {
   "mcpServers": {
     "pyarchinit": {
-      "command": "/usr/local/bin/python3",
-      "args": ["-m", "pyarchinit_mini.mcp_server"],
+      "command": "uvx",
+      "args": ["--from", "pyarchinit-mini", "pyarchinit-mini-mcp"],
       "env": {
         "DATABASE_URL": "sqlite:////Users/enzo/Documents/pyarchinit-mini-desk/data/pyarchinit_tutorial.db"
       }
@@ -141,13 +171,14 @@ pwd  # Shows current directory, e.g., /Users/enzo/Documents/pyarchinit-mini-desk
 }
 ```
 
-**Important:** Replace these values:
-- `"/usr/local/bin/python3"` → Your Python path from Step 2
+**Important:** Replace the database path:
 - `"/Users/enzo/Documents/..."` → Your database path from Step 3
 
 **Database URL Format:**
 - SQLite: `sqlite:////absolute/path/to/database.db` (4 slashes!)
 - PostgreSQL: `postgresql://user:password@localhost/dbname`
+
+**Note:** `uvx` will automatically install PyArchInit-Mini from PyPI the first time Claude Desktop runs!
 
 ### Step 5: Restart Claude Desktop
 
@@ -474,14 +505,17 @@ optimized for yEd Graph Editor with:
 
 **Solution:**
 1. Check config file syntax (JSON must be valid)
-2. Verify Python path is correct
+2. Verify `uvx` is installed: `uvx --version`
 3. Verify database path is absolute and exists
 4. Restart Claude Desktop completely (quit and reopen)
 
 **Test config:**
 ```bash
-# Verify Python works
-/your/python/path -m pyarchinit_mini.mcp_server --help
+# Verify uvx works
+uvx --version
+
+# Test PyArchInit-Mini MCP server
+uvx --from pyarchinit-mini pyarchinit-mini-mcp --help
 
 # Should show MCP server help
 ```
@@ -580,8 +614,8 @@ Instead of SQLite, use PostgreSQL for better performance:
 {
   "mcpServers": {
     "pyarchinit": {
-      "command": "/usr/local/bin/python3",
-      "args": ["-m", "pyarchinit_mini.mcp_server"],
+      "command": "uvx",
+      "args": ["--from", "pyarchinit-mini", "pyarchinit-mini-mcp"],
       "env": {
         "DATABASE_URL": "postgresql://user:password@localhost/pyarchinit_db"
       }
@@ -627,6 +661,7 @@ python3 -m pyarchinit_mini.mcp_server.http_server
 - **MCP Protocol:** https://modelcontextprotocol.io/
 - **Claude Desktop:** https://claude.ai/download
 - **ChatGPT Developer Mode:** https://help.openai.com/
+- **uv/uvx Documentation:** https://docs.astral.sh/uv/
 - **PyArchInit-Mini:** https://github.com/enzococca/pyarchinit-mini
 
 ---
