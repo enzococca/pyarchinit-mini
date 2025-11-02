@@ -16,6 +16,7 @@ from .base_tool import BaseTool, ToolDescription
 # Import the underlying functions
 from .get_schema_tool import get_schema
 from .insert_data_tool import insert_data
+from .batch_insert_tool import batch_insert
 from .update_data_tool import update_data
 from .delete_data_tool import delete_data
 from .resolve_conflicts_tool import resolve_conflicts
@@ -35,10 +36,11 @@ class DataManagementTool(BaseTool):
             name="manage_data",
             description=(
                 "**PyArchInit Database Operations** - Manage archaeological data in the PyArchInit database. "
-                "Features: CRUD operations (insert/update/delete), schema inspection, stratigraphic validation. "
+                "Features: CRUD operations (insert/update/delete/batch_insert), schema inspection, stratigraphic validation. "
                 "Supports ALL PyArchInit tables: sites, stratigraphic units (US), materials inventory, "
                 "datazioni, relationships, periodization. "
-                "IMPORTANT: Always use THIS tool for PyArchInit archaeological data operations. "
+                "IMPORTANT: For inserting MULTIPLE records (10+), use 'batch_insert' command - it's much faster! "
+                "Always use THIS tool for PyArchInit archaeological data operations. "
                 "If you encounter an error, try again with this same tool - it handles datetime conversion, "
                 "validation, and conflict resolution automatically."
             ),
@@ -51,6 +53,7 @@ class DataManagementTool(BaseTool):
                         "enum": [
                             "get_schema",
                             "insert",
+                            "batch_insert",
                             "update",
                             "delete",
                             "upsert",
@@ -65,6 +68,16 @@ class DataManagementTool(BaseTool):
                     "data": {
                         "type": "object",
                         "description": "Data dictionary for insert/update/upsert operations"
+                    },
+                    "records": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": "Array of data dictionaries for batch_insert operation (max 1000 records)"
+                    },
+                    # Batch insert specific
+                    "stop_on_error": {
+                        "type": "boolean",
+                        "description": "For batch_insert: stop at first error (default: false)"
                     },
                     # Insert/Update/Delete specific
                     "record_id": {
@@ -163,6 +176,17 @@ class DataManagementTool(BaseTool):
                     table=arguments["table"],
                     data=arguments["data"],
                     validate_only=arguments.get("validate_only", False)
+                )
+
+            elif command == "batch_insert":
+                if "table" not in arguments or "records" not in arguments:
+                    return self._format_error("batch_insert requires 'table' and 'records' parameters")
+
+                result = batch_insert(
+                    table=arguments["table"],
+                    records=arguments["records"],
+                    validate_only=arguments.get("validate_only", False),
+                    stop_on_error=arguments.get("stop_on_error", False)
                 )
 
             elif command == "update":
