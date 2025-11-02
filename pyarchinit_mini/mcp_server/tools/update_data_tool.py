@@ -14,7 +14,8 @@ Features:
 
 import logging
 import os
-from sqlalchemy import Table, MetaData, inspect, and_
+from datetime import datetime, date
+from sqlalchemy import Table, MetaData, inspect, and_, DateTime, Date
 from sqlalchemy.exc import IntegrityError, DataError
 from typing import Dict, Any, Optional
 from pyarchinit_mini.database.connection import DatabaseConnection
@@ -253,10 +254,61 @@ def update_data(
                     "data": data
                 }
 
-        # Update data
+        # Convert datetime/date strings to Python objects
+        # SQLAlchemy requires Python datetime/date objects for DateTime/Date columns
+        converted_data = {}
+        for field_name, value in data.items():
+            if field_name in column_info:
+                col_type = column_info[field_name]['type']
+
+                # Handle DateTime fields (timestamp with time)
+                if isinstance(col_type, DateTime):
+                    if isinstance(value, str) and value:
+                        try:
+                            value_clean = value.replace('Z', '').replace('T', ' ').strip()
+                            for fmt in [
+                                '%Y-%m-%d %H:%M:%S.%f',
+                                '%Y-%m-%d %H:%M:%S',
+                                '%Y-%m-%d',
+                            ]:
+                                try:
+                                    converted_data[field_name] = datetime.strptime(value_clean, fmt)
+                                    break
+                                except ValueError:
+                                    continue
+                            else:
+                                converted_data[field_name] = value
+                        except Exception:
+                            converted_data[field_name] = value
+                    else:
+                        converted_data[field_name] = value
+
+                # Handle Date fields (date only, no time)
+                elif isinstance(col_type, Date):
+                    if isinstance(value, str) and value:
+                        try:
+                            value_clean = value.strip()
+                            for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y']:
+                                try:
+                                    converted_data[field_name] = datetime.strptime(value_clean, fmt).date()
+                                    break
+                                except ValueError:
+                                    continue
+                            else:
+                                converted_data[field_name] = value
+                        except Exception:
+                            converted_data[field_name] = value
+                    else:
+                        converted_data[field_name] = value
+                else:
+                    converted_data[field_name] = value
+            else:
+                converted_data[field_name] = value
+
+        # Update data with converted datetime/date values
         with engine.begin() as conn:  # Transaction automatically commits or rolls back
             result = conn.execute(
-                table_obj.update().where(where_clause).values(**data)
+                table_obj.update().where(where_clause).values(**converted_data)
             )
 
             rows_updated = result.rowcount
