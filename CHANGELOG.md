@@ -5,6 +5,141 @@ All notable changes to PyArchInit-Mini will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.10] - 2025-11-02
+
+### Added - AI Integration & 3D Visualization
+- **Model Context Protocol (MCP) Integration**
+  - Complete MCP server implementation for AI assistants (Claude Desktop, ChatGPT)
+  - 5 MCP tools: `build_3d`, `filter`, `export`, `position`, `material`
+  - 5 MCP resources: GraphML, US data, periods, relationships, sites
+  - 3 MCP prompts: Stratigraphic Model, Period Visualization, US Description
+  - HTTP/SSE transport for ChatGPT integration
+  - stdio transport for Claude Desktop integration
+  - Zero-config setup with `uvx` package runner
+  - Natural language interface to archaeological data
+
+- **3D Viewer (Browser-Based)**
+  - Interactive Three.js r150 WebGL viewer in browser
+  - Real-time 3D visualization of stratigraphic units
+  - Chat interface for natural language commands (Italian/English)
+  - Auto-populate US from site selection
+  - GraphML-based positioning with Harris Matrix relationships
+  - Color-coding by period, type, or custom colors
+  - OrbitControls for camera navigation (rotate, zoom, pan)
+  - View presets: Top, Front, Side, Isometric
+  - Object selection with metadata display
+  - Support for 3 positioning modes: GraphML, Simple, Grid
+  - Adjustable layer spacing for vertical positioning
+
+- **Blender Integration**
+  - Real-time streaming addon for Blender 3.0+ (Socket.IO WebSocket)
+  - Automatic 3D geometry generation based on US type
+  - Professional material application (earth, stone, brick textures)
+  - Color assignment by archaeological period
+  - Different geometry for each US type: layers, walls, cuts, fills
+  - Real-time sync between Blender and web viewer
+  - Export to multiple formats: .blend, .glb, .fbx, .obj
+  - AI-powered reconstruction with specialized agents
+  - 4 AI agents: Architect, Validator, Texturizer, Reconstructor
+  - Prompt generator for Claude AI site reconstruction
+
+- **Comprehensive Documentation**
+  - `docs/MCP_INTEGRATION.md` - Complete MCP setup guide (644 lines)
+  - `docs/3D_VIEWER_GUIDE.md` - Browser 3D viewer guide (646 lines)
+  - `docs/BLENDER_INTEGRATION.md` - Blender addon guide (645 lines)
+  - Step-by-step setup instructions for all platforms
+  - Multiple usage examples with screenshots
+  - Troubleshooting sections for common issues
+  - Complete API reference for developers
+
+### Changed
+- **MCP Configuration**: Switched from direct Python path to `uvx` package runner
+  - Simplified Claude Desktop setup (no need to find Python path)
+  - Auto-install PyArchInit-Mini on first run
+  - Cross-platform compatibility (macOS, Linux, Windows)
+  - Added `uvx` installation instructions for all platforms
+
+- **Documentation Structure**
+  - Updated `docs/index.rst` with new AI Integration & 3D Visualization section
+  - Added quick links to MCP, 3D Viewer, and Blender guides
+  - Integrated new documentation into ReadTheDocs
+  - Updated README.md with AI Integration and 3D Visualization sections
+
+- **Web Interface Enhancements**
+  - New `/3d-builder/` route for browser-based 3D viewer
+  - Socket.IO integration for real-time Blender streaming
+  - Auto-populate US endpoint: `GET /api/sites/<site_name>/us`
+  - Chat command parser for natural language queries
+  - MCP executor for tool invocation from web interface
+
+### Technical Details
+
+**Backend:**
+- New MCP server: `pyarchinit_mini/mcp_server/`
+  - `server.py` - stdio MCP server (Claude Desktop)
+  - `http_server.py` - HTTP/SSE MCP server (ChatGPT)
+  - `tools/` - 5 MCP tool implementations
+  - `proxy_generator.py` - 3D proxy object generation
+  - `graphml_parser.py` - GraphML positioning parser
+- New services:
+  - `command_parser.py` - Natural language command parsing
+  - `mcp_executor.py` - MCP tool execution from web interface
+
+**Frontend:**
+- New templates:
+  - `templates/3d_builder/index.html` - 3D viewer interface
+  - `templates/blender_viewer.html` - Blender real-time viewer
+- New JavaScript:
+  - `static/js/three-d-viewer.js` - Three.js viewer logic
+  - `static/js/three.min.js` - Three.js r150 library
+  - `static/js/OrbitControls.js` - Camera controls
+- Socket.IO client integration for WebSocket communication
+
+**Blender Addon:**
+- `blender_addons/pyarchinit_realtime_streamer.py` - Real-time streaming addon
+  - TCP socket listener (port 9876)
+  - WebSocket client (Socket.IO)
+  - Geometry generation based on US data
+  - Material and color management
+  - Real-time sync with web viewer
+
+**Entry Points:**
+- `pyarchinit-mini-mcp` - MCP server entry point (for uvx)
+- MCP server accessible via uvx without installation
+
+### Files Modified
+- `docs/index.rst` - Added new documentation sections
+- `docs/conf.py` - Verified Markdown support
+- `README.md` - Updated with new features and roadmap
+- `pyarchinit_mini/web_interface/app.py` - 3D builder routes, Socket.IO
+- `pyarchinit_mini/web_interface/socketio_events.py` - WebSocket handlers
+- `pyarchinit_mini/web_interface/three_d_builder_routes.py` - 3D viewer routes
+
+### Files Added
+- `docs/MCP_INTEGRATION.md` - MCP setup guide
+- `docs/3D_VIEWER_GUIDE.md` - 3D viewer user guide
+- `docs/BLENDER_INTEGRATION.md` - Blender integration guide
+- `pyarchinit_mini/mcp_server/__main__.py` - MCP server entry point
+- `pyarchinit_mini/services/command_parser.py` - Command parser
+- `pyarchinit_mini/services/mcp_executor.py` - MCP executor
+- `blender_addons/pyarchinit_realtime_streamer.py` - Blender addon
+- `scripts/generate_3d_with_claude.py` - AI prompt generator
+
+### Impact
+- **AI Integration**: Natural language interface to archaeological data via Claude Desktop and ChatGPT
+- **3D Visualization**: Interactive browser-based 3D viewer for stratigraphic units
+- **Professional 3D Modeling**: Real-time Blender integration with AI-powered reconstruction
+- **Zero-Config Setup**: uvx eliminates manual Python configuration
+- **Cross-Platform**: Works on macOS, Linux, Windows with consistent experience
+- **Real-Time Collaboration**: WebSocket streaming enables team collaboration
+- **Enhanced Documentation**: 1,900+ lines of new user guides and technical documentation
+
+### Upgrading from 1.8.6
+- Update to version 1.9.10: `pip install --upgrade pyarchinit-mini`
+- Install uvx: `brew install uv` (macOS) or see MCP_INTEGRATION.md
+- Configure Claude Desktop with uvx (see docs/MCP_INTEGRATION.md)
+- Install Blender addon (optional, see docs/BLENDER_INTEGRATION.md)
+
 ## [1.8.6] - 2025-10-31
 
 ### Added

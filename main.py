@@ -2,7 +2,6 @@
 """
 Main entry point for PyArchInit-Mini API server
 """
-
 import uvicorn
 from pyarchinit_mini.api import create_app
 from pyarchinit_mini.api.dependencies import init_database
