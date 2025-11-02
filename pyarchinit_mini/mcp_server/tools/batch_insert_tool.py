@@ -13,8 +13,8 @@ Features:
 
 import logging
 import os
-from datetime import datetime
-from sqlalchemy import Table, MetaData, inspect, DateTime
+from datetime import datetime, date
+from sqlalchemy import Table, MetaData, inspect, DateTime, Date
 from sqlalchemy.exc import IntegrityError, DataError
 from typing import Dict, Any, List
 from pyarchinit_mini.database.connection import DatabaseConnection
@@ -268,12 +268,13 @@ def batch_insert(
                 if stop_on_error:
                     break
             else:
-                # Convert datetime strings to datetime objects
+                # Convert datetime/date strings to datetime/date objects
                 converted_data = {}
                 for field_name, value in record_data.items():
                     if field_name in column_info:
                         col_type = column_info[field_name]['type']
 
+                        # Handle DateTime fields (timestamp with time)
                         if isinstance(col_type, DateTime):
                             if isinstance(value, str) and value:
                                 try:
@@ -285,6 +286,24 @@ def batch_insert(
                                     ]:
                                         try:
                                             converted_data[field_name] = datetime.strptime(value_clean, fmt)
+                                            break
+                                        except ValueError:
+                                            continue
+                                    else:
+                                        converted_data[field_name] = value
+                                except Exception:
+                                    converted_data[field_name] = value
+                            else:
+                                converted_data[field_name] = value
+                        # Handle Date fields (date only, no time)
+                        elif isinstance(col_type, Date):
+                            if isinstance(value, str) and value:
+                                try:
+                                    value_clean = value.strip()
+                                    # Try parsing as date-only string
+                                    for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y']:
+                                        try:
+                                            converted_data[field_name] = datetime.strptime(value_clean, fmt).date()
                                             break
                                         except ValueError:
                                             continue
