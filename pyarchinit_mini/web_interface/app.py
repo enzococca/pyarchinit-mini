@@ -363,7 +363,7 @@ def create_app():
     # Use centralized ~/.pyarchinit_mini directory
     pyarchinit_home = Path.home() / '.pyarchinit_mini'
     app.config['UPLOAD_FOLDER'] = str(pyarchinit_home / 'web_interface' / 'static' / 'uploads')
-    app.config['DATABASE_FOLDER'] = str(pyarchinit_home / 'databases')
+    app.config['DATABASE_FOLDER'] = str(pyarchinit_home / 'data')
 
     # Initialize CSRF protection
     csrf = CSRFProtect(app)
@@ -383,8 +383,8 @@ def create_app():
     os.makedirs(app.config['DATABASE_FOLDER'], exist_ok=True)
 
     # Initialize database
-    # Default to project root database, not current directory
-    default_db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'pyarchinit_mini.db')
+    # Use centralized ~/.pyarchinit_mini/data directory
+    default_db_path = str(pyarchinit_home / 'data' / 'pyarchinit_mini.db')
     default_db_url = f"sqlite:///{default_db_path}"
     database_url = os.getenv("DATABASE_URL", default_db_url)
     print(f"[FLASK] Current working directory: {os.getcwd()}")
