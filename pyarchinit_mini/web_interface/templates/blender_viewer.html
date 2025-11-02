@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyArchInit - Blender 3D Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+
+        #container {
+            display: flex;
+            height: 100vh;
+        }
+
+        #sidebar {
+            width: 350px;
+            background: #2a2a2a;
+            border-right: 1px solid #3a3a3a;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #viewer {
+            flex: 1;
+            position: relative;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .header {
+            padding: 20px;
+            background: #1f1f1f;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+
+        .status.connected {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .status.disconnected {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .controls {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #aaa;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        select, button, input {
+            width: 100%;
+            padding: 10px;
+            background: #1f1f1f;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:hover, button:hover, input:hover {
+            border-color: #4a4a4a;
+        }
+
+        select:focus, button:focus, input:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+
+        button {
+            background: #2196F3;
+            border-color: #2196F3;
+            color: white;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #1976D2;
+        }
+
+        button:disabled {
+            background: #3a3a3a;
+            border-color: #3a3a3a;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #1f1f1f;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+        }
+
+        .list-item {
+            padding: 10px;
+            border-bottom: 1px solid #2a2a2a;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 13px;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:hover {
+            background: #2a2a2a;
+        }
+
+        .list-item.selected {
+            background: rgba(33, 150, 243, 0.2);
+            border-left: 3px solid #2196F3;
+        }
+
+        .list-item-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .list-item-meta {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .info-panel {
+            background: #1f1f1f;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #3a3a3a;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #888;
+        }
+
+        .info-value {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        #stats {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: monospace;
+            color: #0f0;
+            pointer-events: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 13px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f1f1f;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4a4a4a;
+        }
+
+        /* CRUD UI Styles */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        .btn-edit {
+            background: #FF9800;
+            border-color: #FF9800;
+        }
+
+        .btn-edit:hover {
+            background: #F57C00;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            border-color: #f44336;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+        }
+
+        .btn-add {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .btn-add:hover {
+            background: #388E3C;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 20px;
+            background: #1f1f1f;
+            border-bottom: 1px solid #3a3a3a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px;
+            background: #1f1f1f;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            background: #1f1f1f;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            pointer-events: none;
+        }
+
+        .tab-group {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: #fff;
+        }
+
+        .tab.active {
+            color: #2196F3;
+            border-bottom-color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="sidebar">
+            <div class="header">
+                <h1>PyArchInit Viewer</h1>
+                <div class="subtitle">Real-time Blender Streaming</div>
+                <div class="status disconnected" id="blender-status">
+                    <span class="status-dot"></span>
+                    <span id="status-text">Waiting for Blender...</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">Query Archaeological Data</label>
+                    <button id="load-sites-btn">Load Sites</button>
+                </div>
+
+                <div class="control-group" id="sites-group" style="display: none;">
+                    <label class="control-label">Available Sites</label>
+                    <div class="list" id="sites-list">
+                        <div class="loading">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="control-group" id="us-group" style="display: none;">
+                    <label class="control-label">Stratigraphic Units (US)</label>
+                    <div class="search-box">
+                        <input type="text" id="us-search" class="search-input" placeholder="Search US...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <button id="add-us-btn" class="btn-add">+ Add New US/USM</button>
+                    <div class="list" id="us-list" style="margin-top: 10px;"></div>
+                </div>
+
+                <div class="control-group" id="info-group" style="display: none;">
+                    <label class="control-label">Unit Details</label>
+                    <div class="info-panel" id="unit-info"></div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Statistics</label>
+                    <div class="info-panel" id="stats-info">
+                        <div class="info-row">
+                            <span class="info-label">Objects in Scene:</span>
+                            <span class="info-value" id="object-count">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">From Blender:</span>
+                            <span class="info-value" id="blender-objects">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Database US:</span>
+                            <span class="info-value" id="db-us-count">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewer">
+            <div id="canvas-container"></div>
+            <div id="stats"></div>
+        </div>
+    </div>
+
+    <!-- Edit US Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit US/USM</h2>
+                <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-form">
+                    <div class="form-row">
+                        <label class="form-label">US Number</label>
+                        <input type="text" id="edit-us" class="form-input" readonly>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Area</label>
+                        <input type="text" id="edit-area" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Stratigraphic Description</label>
+                        <textarea id="edit-d-stratigrafica" class="form-textarea"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Interpretative Description</label>
+                        <textarea id="edit-d-interpretativa" class="form-textarea"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Color</label>
+                        <input type="text" id="edit-colore" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Consistency</label>
+                        <input type="text" id="edit-consistenza" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Length (m)</label>
+                        <input type="number" step="0.01" id="edit-length" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Width (m)</label>
+                        <input type="number" step="0.01" id="edit-width" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Height (m)</label>
+                        <input type="number" step="0.01" id="edit-height" class="form-input">
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" onclick="closeEditModal()" class="btn-small" style="background: #666;">Cancel</button>
+                        <button type="submit" class="btn-small btn-edit">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add US Modal -->
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New US/USM</h2>
+                <button class="modal-close" onclick="closeAddModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-group">
+                    <button class="tab active" onclick="switchTab('us')">US (Layer)</button>
+                    <button class="tab" onclick="switchTab('usm')">USM (Wall/Structure)</button>
+                </div>
+                <form id="add-form">
+                    <input type="hidden" id="add-type" value="us">
+                    <div class="form-row">
+                        <label class="form-label">US Number</label>
+                        <input type="text" id="add-us" class="form-input" required>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Area</label>
+                        <input type="text" id="add-area" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Stratigraphic Description</label>
+                        <textarea id="add-d-stratigrafica" class="form-textarea"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Interpretative Description</label>
+                        <textarea id="add-d-interpretativa" class="form-textarea"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Color</label>
+                        <input type="text" id="add-colore" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Consistency</label>
+                        <input type="text" id="add-consistenza" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Length (m)</label>
+                        <input type="number" step="0.01" id="add-length" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Width (m)</label>
+                        <input type="number" step="0.01" id="add-width" class="form-input">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Height (m)</label>
+                        <input type="number" step="0.01" id="add-height" class="form-input">
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" onclick="closeAddModal()" class="btn-small" style="background: #666;">Cancel</button>
+                        <button type="submit" class="btn-small btn-add">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // State
+        let scene, camera, renderer, controls;
+        let blenderObjects = {};
+        let archaeologicalData = null;
+        let selectedSite = null;
+
+        // Socket.IO
+        const socket = io();
+
+        // Initialize Three.js scene
+        function initScene() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a1a);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(5, 5, 5);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth - 350, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 10);
+            scene.add(directionalLight);
+
+            // Grid
+            const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+            scene.add(gridHelper);
+
+            // Axes
+            const axesHelper = new THREE.AxesHelper(5);
+            scene.add(axesHelper);
+
+            // Simple orbit controls (mouse drag to rotate)
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                isDragging = true;
+            });
+
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaMove = {
+                        x: e.offsetX - previousMousePosition.x,
+                        y: e.offsetY - previousMousePosition.y
+                    };
+
+                    const deltaRotationQuaternion = new THREE.Quaternion()
+                        .setFromEuler(new THREE.Euler(
+                            toRadians(deltaMove.y * 0.5),
+                            toRadians(deltaMove.x * 0.5),
+                            0,
+                            'XYZ'
+                        ));
+
+                    camera.quaternion.multiplyQuaternions(deltaRotationQuaternion, camera.quaternion);
+                }
+
+                previousMousePosition = {
+                    x: e.offsetX,
+                    y: e.offsetY
+                };
+            });
+
+            renderer.domElement.addEventListener('mouseup', (e) => {
+                isDragging = false;
+            });
+
+            // Zoom with mouse wheel
+            renderer.domElement.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY * 0.001;
+                camera.position.multiplyScalar(1 + delta);
+            });
+
+            window.addEventListener('resize', onWindowResize, false);
+
+            animate();
+        }
+
+        function toRadians(angle) {
+            return angle * (Math.PI / 180);
+        }
+
+        function onWindowResize() {
+            camera.aspect = (window.innerWidth - 350) / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth - 350, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+            updateStats();
+        }
+
+        function updateStats() {
+            const stats = document.getElementById('stats');
+            stats.innerHTML = `
+                Objects: ${Object.keys(blenderObjects).length}<br>
+                Camera: ${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)}
+            `;
+
+            document.getElementById('object-count').textContent = Object.keys(blenderObjects).length;
+            document.getElementById('blender-objects').textContent = Object.keys(blenderObjects).length;
+        }
+
+        // Socket.IO events
+        socket.on('blender_connected', (data) => {
+            console.log('[Blender] Connected:', data);
+            document.getElementById('blender-status').className = 'status connected';
+            document.getElementById('status-text').textContent = `Connected: Blender ${data.blender_version}`;
+        });
+
+        socket.on('blender_disconnected', () => {
+            console.log('[Blender] Disconnected');
+            document.getElementById('blender-status').className = 'status disconnected';
+            document.getElementById('status-text').textContent = 'Blender disconnected';
+        });
+
+        socket.on('blender_scene_update', (data) => {
+            console.log('[Blender] Scene update:', data);
+            data.objects.forEach(obj => {
+                console.log(`[Debug] Object ${obj.object_name}: type=${obj.object_type}, has_mesh_data=${!!obj.mesh_data}`);
+                if (obj.mesh_data) {
+                    console.log(`[Debug] Mesh data: ${obj.mesh_data.vertex_count} vertices, ${obj.mesh_data.face_count} faces`);
+                }
+                createOrUpdateBlenderObject(obj);
+            });
+        });
+
+        socket.on('blender_object_created', (data) => {
+            console.log('[Blender] Object created:', data.object_name);
+            createOrUpdateBlenderObject(data);
+        });
+
+        socket.on('blender_object_updated', (data) => {
+            console.log('[Blender] Object updated:', data.object_name);
+            updateBlenderObject(data);
+        });
+
+        socket.on('blender_object_deleted', (data) => {
+            console.log('[Blender] Object deleted:', data.object_name);
+            deleteBlenderObject(data.object_name);
+        });
+
+        // Request scene update from Blender
+        function requestSceneUpdate() {
+            socket.emit('blender_command', {
+                command: 'get_scene_info',
+                params: {}
+            });
+            console.log('[Viewer] Requested scene update from Blender');
+        }
+
+        // Auto-refresh every 5 seconds
+        let autoRefreshInterval = setInterval(requestSceneUpdate, 5000);
+        console.log('[Viewer] Auto-refresh enabled (every 5 seconds)');
+
+        function createMeshGeometry(data) {
+            // If we have real mesh data from Blender, use it
+            if (data.mesh_data && data.mesh_data.vertices && data.mesh_data.faces) {
+                const geometry = new THREE.BufferGeometry();
+
+                // Convert vertices array to Float32Array
+                // Blender coordinates are already in world space and converted to Three.js space
+                const vertices = [];
+                for (const v of data.mesh_data.vertices) {
+                    vertices.push(v[0], v[2], v[1]);  // Blender XYZ -> Three.js XZY (Y-up to Z-up)
+                }
+
+                // Convert faces (triangles) to indices
+                const indices = [];
+                for (const face of data.mesh_data.faces) {
+                    indices.push(face[0], face[1], face[2]);
+                }
+
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+                geometry.setIndex(indices);
+                geometry.computeVertexNormals();
+
+                console.log(`[Viewer] Created real mesh geometry: ${data.mesh_data.vertex_count} vertices, ${data.mesh_data.face_count} faces`);
+                return geometry;
+            }
+
+            // Fallback to cube proxy if no mesh data
+            if (data.object_type === 'MESH' && data.dimensions) {
+                return new THREE.BoxGeometry(
+                    data.dimensions[0] || 1,
+                    data.dimensions[2] || 1,
+                    data.dimensions[1] || 1
+                );
+            }
+
+            return new THREE.BoxGeometry(1, 1, 1);
+        }
+
+        function createOrUpdateBlenderObject(data) {
+            if (blenderObjects[data.object_name]) {
+                updateBlenderObject(data);
+                return;
+            }
+
+            // Create geometry from mesh data or fallback to proxy
+            const geometry = createMeshGeometry(data);
+
+            const material = new THREE.MeshPhongMaterial({
+                color: data.material && data.material.base_color
+                    ? new THREE.Color(
+                        data.material.base_color[0],
+                        data.material.base_color[1],
+                        data.material.base_color[2]
+                    )
+                    : 0x808080,
+                shininess: data.material?.metallic ? 100 : 30
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+
+            // If we used real mesh data, vertices are already in world space
+            // So we don't apply location/rotation/scale
+            if (!data.mesh_data) {
+                // Convert Blender coordinates (Y-up) to Three.js (Z-up)
+                if (data.location) {
+                    mesh.position.set(
+                        data.location[0],
+                        data.location[2],  // Blender Z -> Three.js Y
+                        data.location[1]   // Blender Y -> Three.js Z
+                    );
+                }
+
+                if (data.rotation) {
+                    mesh.rotation.set(
+                        data.rotation[0],
+                        data.rotation[2],
+                        data.rotation[1]
+                    );
+                }
+
+                if (data.scale) {
+                    mesh.scale.set(
+                        data.scale[0],
+                        data.scale[2],
+                        data.scale[1]
+                    );
+                }
+            }
+
+            mesh.name = data.object_name;
+            scene.add(mesh);
+            blenderObjects[data.object_name] = mesh;
+        }
+
+        function updateBlenderObject(data) {
+            const mesh = blenderObjects[data.object_name];
+            if (!mesh) return;
+
+            // If geometry data is updated, rebuild the entire mesh
+            if (data.mesh_data && data.changes && data.changes.includes('geometry')) {
+                console.log(`[Viewer] Updating geometry for ${data.object_name}`);
+
+                // Dispose old geometry
+                mesh.geometry.dispose();
+
+                // Create new geometry from mesh data
+                const newGeometry = createMeshGeometry(data);
+                mesh.geometry = newGeometry;
+
+                return;
+            }
+
+            // Otherwise, just update transforms
+            const updates = data.new_values || {};
+
+            if (updates.location) {
+                mesh.position.set(
+                    updates.location[0],
+                    updates.location[2],
+                    updates.location[1]
+                );
+            }
+
+            if (updates.rotation) {
+                mesh.rotation.set(
+                    updates.rotation[0],
+                    updates.rotation[2],
+                    updates.rotation[1]
+                );
+            }
+
+            if (updates.scale) {
+                mesh.scale.set(
+                    updates.scale[0],
+                    updates.scale[2],
+                    updates.scale[1]
+                );
+            }
+        }
+
+        function deleteBlenderObject(name) {
+            const mesh = blenderObjects[name];
+            if (mesh) {
+                scene.remove(mesh);
+                mesh.geometry.dispose();
+                mesh.material.dispose();
+                delete blenderObjects[name];
+            }
+        }
+
+        // Archaeological data loading
+        document.getElementById('load-sites-btn').addEventListener('click', loadArchaeologicalData);
+
+        async function loadArchaeologicalData() {
+            try {
+                document.getElementById('load-sites-btn').disabled = true;
+                document.getElementById('load-sites-btn').textContent = 'Loading...';
+
+                const response = await fetch('/api/3d-builder/archaeological-data');
+                const data = await response.json();
+
+                if (data.success) {
+                    archaeologicalData = data;
+                    displaySites(data.sites);
+                    document.getElementById('sites-group').style.display = 'block';
+                    document.getElementById('db-us-count').textContent = data.summary.total_us;
+                    document.getElementById('load-sites-btn').textContent = 'Reload Sites';
+                } else {
+                    alert('Error loading data: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error loading archaeological data:', error);
+                alert('Error loading data: ' + error.message);
+            } finally {
+                document.getElementById('load-sites-btn').disabled = false;
+            }
+        }
+
+        function displaySites(sites) {
+            const list = document.getElementById('sites-list');
+
+            if (sites.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏛</div><div>No sites found</div></div>';
+                return;
+            }
+
+            list.innerHTML = '';
+            sites.forEach(site => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <div class="list-item-title">${site.nome}</div>
+                    <div class="list-item-meta">${site.comune}, ${site.regione} - ${site.nazione}</div>
+                `;
+                item.addEventListener('click', () => selectSite(site));
+                list.appendChild(item);
+            });
+        }
+
+        function selectSite(site) {
+            selectedSite = site;
+
+            // Highlight selected
+            document.querySelectorAll('#sites-list .list-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            // Filter US data for this site
+            const usData = archaeologicalData.us_data.filter(us => us.sito === site.nome);
+            displayUSData(usData);
+            document.getElementById('us-group').style.display = 'block';
+        }
+
+        function displayUSData(usData) {
+            const list = document.getElementById('us-list');
+
+            if (usData.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div>No US data</div></div>';
+                return;
+            }
+
+            list.innerHTML = '';
+            usData.forEach(us => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <div class="list-item-title">US ${us.us}</div>
+                    <div class="list-item-meta">${us.d_stratigrafica || 'No description'}</div>
+                `;
+                item.addEventListener('click', () => showUSDetails(us));
+                list.appendChild(item);
+            });
+        }
+
+        let selectedUS = null;
+
+        function showUSDetails(us) {
+            selectedUS = us;
+            const infoPanel = document.getElementById('unit-info');
+
+            infoPanel.innerHTML = `
+                <div class="info-row">
+                    <span class="info-label">US:</span>
+                    <span class="info-value">${us.us}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Area:</span>
+                    <span class="info-value">${us.area || '-'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Type:</span>
+                    <span class="info-value">${us.d_stratigrafica || '-'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Interpretation:</span>
+                    <span class="info-value">${us.d_interpretativa || '-'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Color:</span>
+                    <span class="info-value">${us.colore || '-'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Consistency:</span>
+                    <span class="info-value">${us.consistenza || '-'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Dimensions:</span>
+                    <span class="info-value">${us.length || '-'}m × ${us.width || '-'}m × ${us.height || '-'}m</span>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-small btn-edit" onclick="openEditModal()">✏️ Edit</button>
+                    <button class="btn-small btn-delete" onclick="deleteUS()">🗑️ Delete</button>
+                </div>
+            `;
+
+            document.getElementById('info-group').style.display = 'block';
+        }
+
+        // CRUD Operations
+        function openEditModal() {
+            if (!selectedUS) return;
+
+            document.getElementById('edit-us').value = selectedUS.us;
+            document.getElementById('edit-area').value = selectedUS.area || '';
+            document.getElementById('edit-d-stratigrafica').value = selectedUS.d_stratigrafica || '';
+            document.getElementById('edit-d-interpretativa').value = selectedUS.d_interpretativa || '';
+            document.getElementById('edit-colore').value = selectedUS.colore || '';
+            document.getElementById('edit-consistenza').value = selectedUS.consistenza || '';
+            document.getElementById('edit-length').value = selectedUS.length || '';
+            document.getElementById('edit-width').value = selectedUS.width || '';
+            document.getElementById('edit-height').value = selectedUS.height || '';
+
+            document.getElementById('edit-modal').classList.add('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('show');
+        }
+
+        function openAddModal() {
+            if (!selectedSite) {
+                alert('Please select a site first');
+                return;
+            }
+
+            document.getElementById('add-form').reset();
+            document.getElementById('add-type').value = 'us';
+            document.getElementById('add-modal').classList.add('show');
+        }
+
+        function closeAddModal() {
+            document.getElementById('add-modal').classList.remove('show');
+        }
+
+        function switchTab(type) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('add-type').value = type;
+        }
+
+        async function handleEditSubmit(e) {
+            e.preventDefault();
+
+            const formData = {
+                sito: selectedUS.sito,
+                area: selectedUS.area,
+                us: selectedUS.us,
+                d_stratigrafica: document.getElementById('edit-d-stratigrafica').value,
+                d_interpretativa: document.getElementById('edit-d-interpretativa').value,
+                colore: document.getElementById('edit-colore').value,
+                consistenza: document.getElementById('edit-consistenza').value,
+                length: parseFloat(document.getElementById('edit-length').value) || null,
+                width: parseFloat(document.getElementById('edit-width').value) || null,
+                height: parseFloat(document.getElementById('edit-height').value) || null
+            };
+
+            try {
+                const response = await fetch('/api/3d-builder/update-us', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ US updated successfully!');
+                    closeEditModal();
+                    loadArchaeologicalData(); // Reload data
+                } else {
+                    alert('❌ Error: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating US:', error);
+                alert('❌ Error updating US: ' + error.message);
+            }
+        }
+
+        async function handleAddSubmit(e) {
+            e.preventDefault();
+
+            if (!selectedSite) {
+                alert('Please select a site first');
+                return;
+            }
+
+            const formData = {
+                sito: selectedSite.nome,
+                area: document.getElementById('add-area').value,
+                us: document.getElementById('add-us').value,
+                d_stratigrafica: document.getElementById('add-d-stratigrafica').value,
+                d_interpretativa: document.getElementById('add-d-interpretativa').value,
+                colore: document.getElementById('add-colore').value,
+                consistenza: document.getElementById('add-consistenza').value,
+                length: parseFloat(document.getElementById('add-length').value) || null,
+                width: parseFloat(document.getElementById('add-width').value) || null,
+                height: parseFloat(document.getElementById('add-height').value) || null,
+                tipo: document.getElementById('add-type').value
+            };
+
+            try {
+                const response = await fetch('/api/3d-builder/create-us', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ US created successfully!');
+                    closeAddModal();
+                    loadArchaeologicalData(); // Reload data
+                    selectSite(selectedSite); // Refresh US list for this site
+                } else {
+                    alert('❌ Error: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error creating US:', error);
+                alert('❌ Error creating US: ' + error.message);
+            }
+        }
+
+        async function deleteUS() {
+            if (!selectedUS) return;
+
+            if (!confirm(`Are you sure you want to delete US ${selectedUS.us}?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/3d-builder/delete-us', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sito: selectedUS.sito,
+                        area: selectedUS.area,
+                        us: selectedUS.us
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ US deleted successfully!');
+                    document.getElementById('info-group').style.display = 'none';
+                    selectedUS = null;
+                    loadArchaeologicalData(); // Reload data
+                    selectSite(selectedSite); // Refresh US list for this site
+                } else {
+                    alert('❌ Error: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error deleting US:', error);
+                alert('❌ Error deleting US: ' + error.message);
+            }
+        }
+
+        // Search functionality
+        let allUSData = [];
+
+        function setupSearchFilter() {
+            const searchInput = document.getElementById('us-search');
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                if (allUSData.length === 0) return;
+
+                const filtered = allUSData.filter(us => {
+                    return us.us.toString().includes(query) ||
+                           (us.d_stratigrafica && us.d_stratigrafica.toLowerCase().includes(query)) ||
+                           (us.d_interpretativa && us.d_interpretativa.toLowerCase().includes(query)) ||
+                           (us.area && us.area.toLowerCase().includes(query));
+                });
+
+                displayUSData(filtered);
+            });
+        }
+
+        // Event listeners
+        document.getElementById('add-us-btn').addEventListener('click', openAddModal);
+        document.getElementById('edit-form').addEventListener('submit', handleEditSubmit);
+        document.getElementById('add-form').addEventListener('submit', handleAddSubmit);
+
+        // Store all US data when site is selected for search
+        function selectSiteWithSearch(site) {
+            selectSite(site);
+            allUSData = archaeologicalData.us_data.filter(us => us.sito === site.nome);
+        }
+
+        // Update selectSite to use the new function
+        const originalSelectSite = selectSite;
+        selectSite = function(site) {
+            originalSelectSite(site);
+            allUSData = archaeologicalData.us_data.filter(us => us.sito === site.nome);
+        };
+
+        // Initialize
+        setupSearchFilter();
+        initScene();
+    </script>
+</body>
+</html>

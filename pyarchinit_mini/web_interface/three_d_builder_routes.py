@@ -11,6 +11,7 @@ import logging
 import uuid
 import os
 import tempfile
+import asyncio
 from datetime import datetime
 from typing import Dict, Any, Optional
 
@@ -22,6 +23,8 @@ from pyarchinit_mini.models.extended_matrix import ExtendedMatrix
 from pyarchinit_mini.models.site import Site
 from pyarchinit_mini.models.us import US
 from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
+from pyarchinit_mini.services.command_parser import CommandParser
+from pyarchinit_mini.services.mcp_executor import get_executor
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +110,8 @@ def generate_graphml_for_site(db_session, site_name: str) -> Optional[str]:
 
         # Generate Harris Matrix graph
         graph = matrix_generator.generate_matrix(site_name)
+        has_relationships = graph and graph.number_of_edges() > 0
+
         if not graph or graph.number_of_nodes() == 0:
             logger.warning(f"No stratigraphic relationships found for site {site_name}, creating minimal GraphML")
             # Create a minimal GraphML with just the nodes (no relationships)
@@ -117,11 +122,19 @@ def generate_graphml_for_site(db_session, site_name: str) -> Optional[str]:
             from pyarchinit_mini.models.us import US as USModel
             us_records = db_session.query(USModel).filter(USModel.sito == site_name).all()
             for us in us_records:
-                graph.add_node(str(us.us))
+                # Add node with basic attributes for compatibility
+                graph.add_node(
+                    str(us.us),
+                    label=f"US {us.us}",
+                    description=us.descrizione or "",
+                    unita_tipo=us.unita_tipo or "US"
+                )
 
             if graph.number_of_nodes() == 0:
                 logger.error(f"No US records found for site {site_name}")
                 return None
+
+            has_relationships = False
 
         # Create temp file for GraphML
         temp_file = tempfile.NamedTemporaryFile(
@@ -133,14 +146,21 @@ def generate_graphml_for_site(db_session, site_name: str) -> Optional[str]:
         temp_path = temp_file.name
         temp_file.close()
 
-        # Export to GraphML
-        result_path = matrix_generator.export_to_graphml(
-            graph=graph,
-            output_path=temp_path,
-            site_name=site_name,
-            title=f"{site_name} - Harris Matrix (Auto-generated)",
-            reverse_epochs=True
-        )
+        # Export to GraphML - use simple format for minimal graphs
+        if has_relationships:
+            # Use yEd exporter for full Harris Matrix with relationships
+            result_path = matrix_generator.export_to_graphml(
+                graph=graph,
+                output_path=temp_path,
+                site_name=site_name,
+                title=f"{site_name} - Harris Matrix (Auto-generated)",
+                reverse_epochs=True
+            )
+        else:
+            # Use basic NetworkX export for simple graphs (more compatible)
+            import networkx as nx
+            nx.write_graphml(graph, temp_path)
+            result_path = temp_path
 
         if not result_path or not os.path.exists(result_path):
             logger.error(f"GraphML export failed for site {site_name}")
@@ -198,8 +218,8 @@ def get_site_us(site_id):
                     {
                         'id_us': u.id_us,
                         'us': u.us,
-                        'd_stratigr': u.d_stratigr,
-                        'descrizione_us': u.descrizione_us
+                        'unita_tipo': u.unita_tipo,
+                        'descrizione': u.descrizione
                     }
                     for u in us_list
                 ]
@@ -347,6 +367,202 @@ def generate_3d_model():
 
     except Exception as e:
         logger.error(f"Error generating 3D model: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@three_d_builder_bp.route('/progress', methods=['GET'])
+@login_required
+def get_progress():
+    """
+    Get construction progress from Blender
+
+    GET /api/3d-builder/progress
+
+    Returns:
+    {
+        "success": true,
+        "messages": [
+            {"type": "progress", "action": "creating_geometry", "us_id": 1, ...},
+            ...
+        ],
+        "count": 5
+    }
+    """
+    try:
+        # Connect to Blender and request progress
+        blender_host = os.environ.get('BLENDER_HOST', 'localhost')
+        blender_port = int(os.environ.get('BLENDER_PORT', '9876'))
+
+        with BlenderClient(host=blender_host, port=blender_port, timeout=5) as client:
+            result = client.send_command("get_progress", {})
+
+            if result.status == "success":
+                return jsonify({
+                    'success': True,
+                    'messages': result.result.get('messages', []),
+                    'count': result.result.get('count', 0)
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': result.message,
+                    'messages': [],
+                    'count': 0
+                })
+
+    except BlenderConnectionError:
+        # Blender not available - return empty
+        return jsonify({
+            'success': False,
+            'error': 'Blender not connected',
+            'messages': [],
+            'count': 0
+        })
+    except Exception as e:
+        logger.error(f"Error getting progress: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'messages': [],
+            'count': 0
+        })
+
+
+@three_d_builder_bp.route('/chat', methods=['POST'])
+@login_required
+def chat_command():
+    """
+    Chat-based 3D model generation using natural language commands
+
+    POST /api/3d-builder/chat
+    {
+        "message": "Crea US 1,2,3",
+        "session_id": "uuid",  // optional - for existing session
+        "site_id": 1           // optional - for context
+    }
+
+    Returns:
+    {
+        "success": true,
+        "message": "Executed: build_3d",
+        "tool_calls": [
+            {
+                "tool": "build_3d",
+                "arguments": {"us_ids": [1,2,3], "mode": "selected"},
+                "result": { ... }
+            }
+        ],
+        "session_id": "uuid"
+    }
+    """
+    try:
+        data = request.get_json()
+
+        # Validate input
+        message = data.get('message', '').strip()
+        if not message:
+            return jsonify({
+                'success': False,
+                'error': 'message is required'
+            }), 400
+
+        session_id = data.get('session_id')
+        site_id = data.get('site_id')
+
+        # Initialize parser and executor
+        parser = CommandParser()
+        database_url = current_app.config.get('DATABASE_URL')
+        executor = get_executor(database_url)
+
+        # Parse command
+        tool_calls = parser.parse(message)
+
+        if not tool_calls:
+            # No pattern matched, return help
+            help_text = parser.get_help()
+            return jsonify({
+                'success': False,
+                'error': 'Command not recognized',
+                'help': help_text,
+                'message': 'Try commands like: "Crea US 1,2,3" or "Mostra solo periodo Romano"'
+            }), 400
+
+        # Execute tool calls
+        results = []
+        for tool_name, arguments in tool_calls:
+            try:
+                # Add site_id to build_3d arguments if missing and available
+                if tool_name == 'build_3d' and 'site_id' not in arguments and site_id:
+                    arguments['site_id'] = site_id
+                    logger.info(f"Auto-added site_id {site_id} to build_3d arguments")
+
+                # If still missing site_id for build_3d, try to get first site from database
+                if tool_name == 'build_3d' and 'site_id' not in arguments:
+                    with get_db_session() as db_session:
+                        first_site = db_session.query(Site).first()
+                        if first_site:
+                            arguments['site_id'] = first_site.id_sito
+                            logger.info(f"Auto-detected site_id {first_site.id_sito} (first site in database)")
+
+                # Execute tool asynchronously
+                result = asyncio.run(executor.execute_tool(tool_name, arguments))
+
+                # Unwrap nested result structure from BaseTool._format_success
+                # If result has structure {"success": True, "result": {...}}, unwrap it
+                tool_result = result
+                if isinstance(result, dict) and 'result' in result and 'success' in result:
+                    tool_result = result['result']  # Unwrap the inner result
+
+                results.append({
+                    'tool': tool_name,
+                    'arguments': arguments,
+                    'result': tool_result,
+                    'success': True
+                })
+                logger.info(f"Executed tool {tool_name} from chat: {arguments}")
+
+            except Exception as e:
+                logger.error(f"Error executing tool {tool_name}: {e}", exc_info=True)
+                results.append({
+                    'tool': tool_name,
+                    'arguments': arguments,
+                    'error': str(e),
+                    'success': False
+                })
+
+        # Generate or use existing session
+        if not session_id and results:
+            session_id = str(uuid.uuid4())
+
+        # Build response message
+        executed_tools = [r['tool'] for r in results if r['success']]
+        failed_tools = [r['tool'] for r in results if not r['success']]
+
+        response_message = ""
+        if executed_tools:
+            response_message = f"Executed: {', '.join(executed_tools)}"
+        if failed_tools:
+            if response_message:
+                response_message += f"; Failed: {', '.join(failed_tools)}"
+            else:
+                response_message = f"Failed: {', '.join(failed_tools)}"
+
+        return jsonify({
+            'success': len(executed_tools) > 0,
+            'message': response_message,
+            'tool_calls': results,
+            'session_id': session_id,
+            'parsed_command': {
+                'original': message,
+                'tool_calls_count': len(tool_calls)
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error processing chat command: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e)
@@ -919,3 +1135,420 @@ def event_stream_stats():
         'success': True,
         'stats': stats
     })
+
+
+# ============================================================================
+# PUBLIC VIEWER (No login required)
+# ============================================================================
+
+@three_d_builder_bp.route('/viewer', methods=['GET'])
+def blender_viewer():
+    """
+    Standalone Blender 3D Viewer
+
+    Real-time streaming from Blender with archaeological data query interface.
+    No authentication required - designed for Claude Desktop + Blender workflow.
+
+    Features:
+    - Real-time Socket.IO connection to Blender
+    - Query archaeological data via REST API
+    - Interactive 3D scene with Three.js
+    - Site and US data browser
+
+    GET /api/3d-builder/viewer
+
+    Returns:
+        HTML page with embedded viewer
+    """
+    return render_template('blender_viewer.html')
+
+
+# ============================================================================
+# PUBLIC API ENDPOINTS (For Claude Desktop / External Tools)
+# ============================================================================
+
+@three_d_builder_bp.route('/archaeological-data', methods=['GET'])
+def get_archaeological_data():
+    """
+    Get archaeological data from currently connected database
+
+    This endpoint is accessible without authentication to allow Claude Desktop
+    and other external tools to query the database via HTTP.
+
+    Query Parameters:
+        site (str): Site name to filter data (optional, returns all sites if not specified)
+        include_em (bool): Include Extended Matrix nodes (default: True)
+        include_dimensions (bool): Include dimensional data (default: True)
+
+    GET /api/3d-builder/archaeological-data?site=Tempio%20Fortuna&include_em=true
+
+    Returns:
+        JSON with complete archaeological dataset for 3D reconstruction:
+        {
+            "success": true,
+            "database": {
+                "type": "sqlite" | "postgresql",
+                "connected": true
+            },
+            "sites": [...],
+            "us_data": [...],
+            "em_nodes": [...],
+            "relationships": [...],
+            "dimensions": {...}
+        }
+    """
+    try:
+        # Get query parameters
+        site_filter = request.args.get('site', None)
+        include_em = request.args.get('include_em', 'true').lower() == 'true'
+        include_dimensions = request.args.get('include_dimensions', 'true').lower() == 'true'
+
+        with get_db_session() as db_session:
+            result = {
+                'success': True,
+                'database': {
+                    'type': current_app.config.get('DB_TYPE', 'sqlite'),
+                    'connected': True
+                },
+                'query_params': {
+                    'site_filter': site_filter,
+                    'include_em': include_em,
+                    'include_dimensions': include_dimensions
+                }
+            }
+
+            # Get sites
+            if site_filter:
+                sites = db_session.query(Site).filter(Site.sito == site_filter).all()
+            else:
+                sites = db_session.query(Site).all()
+
+            result['sites'] = [{
+                'id': site.id_sito,
+                'nome': site.sito,
+                'nazione': site.nazione,
+                'regione': site.regione,
+                'comune': site.comune,
+                'descrizione': site.descrizione
+            } for site in sites]
+
+            # Get US data with complete information
+            us_query = db_session.query(US)
+            if site_filter:
+                us_query = us_query.filter(US.sito == site_filter)
+
+            us_list = us_query.order_by(US.us).all()
+
+            result['us_data'] = [{
+                'id_us': us.id_us,
+                'sito': us.sito,
+                'area': us.area,
+                'us': us.us,
+                'unita_tipo': getattr(us, 'unita_tipo', None),
+                'descrizione': getattr(us, 'descrizione', None),
+                'interpretazione': getattr(us, 'interpretazione', None),
+                'd_stratigrafica': getattr(us, 'd_stratigrafica', None),
+                'd_interpretativa': getattr(us, 'd_interpretativa', None),
+                'unita_misura_lung': getattr(us, 'unita_misura_lung', None),
+                'lunghezza_max': float(us.lunghezza_max) if hasattr(us, 'lunghezza_max') and us.lunghezza_max else None,
+                'lunghezza_min': float(us.lunghezza_min) if hasattr(us, 'lunghezza_min') and us.lunghezza_min else None,
+                'larghezza_media': float(us.larghezza_media) if hasattr(us, 'larghezza_media') and us.larghezza_media else None,
+                'larghezza_max': float(us.larghezza_max) if hasattr(us, 'larghezza_max') and us.larghezza_max else None,
+                'larghezza_min': float(us.larghezza_min) if hasattr(us, 'larghezza_min') and us.larghezza_min else None,
+                'altezza_max': float(us.altezza_max) if hasattr(us, 'altezza_max') and us.altezza_max else None,
+                'altezza_min': float(us.altezza_min) if hasattr(us, 'altezza_min') and us.altezza_min else None,
+                'profondita_max': float(us.profondita_max) if hasattr(us, 'profondita_max') and us.profondita_max else None,
+                'profondita_min': float(us.profondita_min) if hasattr(us, 'profondita_min') and us.profondita_min else None,
+                'quota_relativa': float(us.quota_relativa) if hasattr(us, 'quota_relativa') and us.quota_relativa else None,
+                'quota_abs': float(us.quota_abs) if hasattr(us, 'quota_abs') and us.quota_abs else None,
+                'consistenza': getattr(us, 'consistenza', None),
+                'colore': getattr(us, 'colore', None),
+                'inclusi_materiali_usati': getattr(us, 'inclusi_materiali_usati', None),
+                'dati_strutturali': getattr(us, 'dati_strutturali', None),
+            } for us in us_list]
+
+            # Get Extended Matrix nodes if requested
+            if include_em:
+                em_query = db_session.query(ExtendedMatrix)
+                if site_filter:
+                    em_query = em_query.filter(ExtendedMatrix.sito == site_filter)
+
+                em_nodes = em_query.all()
+
+                result['em_nodes'] = [{
+                    'id': em.id,
+                    'sito': em.sito,
+                    'node_id': em.node_id,
+                    'node_type': em.node_type,
+                    'label': em.label,
+                    'description': em.description,
+                    'graphml_data': em.graphml_data if hasattr(em, 'graphml_data') else None,
+                    'created_at': em.created_at.isoformat() if hasattr(em, 'created_at') and em.created_at else None
+                } for em in em_nodes]
+
+            # Add summary statistics
+            result['summary'] = {
+                'total_sites': len(result['sites']),
+                'total_us': len(result['us_data']),
+                'total_em_nodes': len(result.get('em_nodes', [])),
+                'us_by_type': {}
+            }
+
+            # Count US by type
+            for us in us_list:
+                us_type = us.unita_tipo or 'Unknown'
+                if us_type not in result['summary']['us_by_type']:
+                    result['summary']['us_by_type'][us_type] = 0
+                result['summary']['us_by_type'][us_type] += 1
+
+            logger.info(f"Archaeological data request: site={site_filter}, returned {len(us_list)} US records")
+
+            return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Error retrieving archaeological data: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_type': type(e).__name__
+        }), 500
+
+
+# ============================================================================
+# CRUD Operations for US/USM
+# ============================================================================
+
+@three_d_builder_bp.route('/create-us', methods=['POST'])
+@login_required
+def create_us():
+    """
+    Create a new stratigraphic unit (US or USM)
+
+    POST /api/3d-builder/create-us
+    {
+        "sito": "Tempio Fortuna",
+        "area": "Area 1",
+        "us": "13",
+        "tipo": "us" | "usm",
+        "d_stratigrafica": "Foundation layer",
+        "d_interpretativa": "Temple foundation",
+        "colore": "Brown",
+        "consistenza": "Compact",
+        "length": 5.5,
+        "width": 3.2,
+        "height": 0.8
+    }
+    """
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        if not data.get('sito') or not data.get('us'):
+            return jsonify({
+                'success': False,
+                'error': 'Missing required fields: sito, us'
+            }), 400
+
+        with get_db_session() as db_session:
+            # Check if US already exists
+            existing = db_session.query(US).filter(
+                US.sito == data['sito'],
+                US.area == data.get('area', ''),
+                US.us == int(data['us'])
+            ).first()
+
+            if existing:
+                return jsonify({
+                    'success': False,
+                    'error': f'US {data["us"]} already exists for this site/area'
+                }), 400
+
+            # Create new US
+            new_us = US()
+            new_us.sito = data['sito']
+            new_us.area = data.get('area', '')
+            new_us.us = int(data['us'])
+            new_us.unita_tipo = 'USM' if data.get('tipo') == 'usm' else 'US'
+            new_us.d_stratigrafica = data.get('d_stratigrafica', '')
+            new_us.d_interpretativa = data.get('d_interpretativa', '')
+            new_us.colore = data.get('colore', '')
+            new_us.consistenza = data.get('consistenza', '')
+
+            # Set dimensions if provided
+            if data.get('length'):
+                new_us.length = float(data['length'])
+            if data.get('width'):
+                new_us.width = float(data['width'])
+            if data.get('height'):
+                new_us.height = float(data['height'])
+
+            db_session.add(new_us)
+            db_session.commit()
+
+            logger.info(f"Created new US: {data['sito']}/{data.get('area')}/US{data['us']}")
+
+            return jsonify({
+                'success': True,
+                'message': f'US {data["us"]} created successfully',
+                'id_us': new_us.id_us
+            })
+
+    except ValueError as e:
+        logger.error(f"Validation error creating US: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'Invalid data: {str(e)}'
+        }), 400
+    except Exception as e:
+        logger.error(f"Error creating US: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@three_d_builder_bp.route('/update-us', methods=['POST'])
+@login_required
+def update_us():
+    """
+    Update an existing stratigraphic unit
+
+    POST /api/3d-builder/update-us
+    {
+        "sito": "Tempio Fortuna",
+        "area": "Area 1",
+        "us": "13",
+        "d_stratigrafica": "Updated description",
+        "d_interpretativa": "Updated interpretation",
+        "colore": "Dark Brown",
+        "consistenza": "Very Compact",
+        "length": 5.8,
+        "width": 3.5,
+        "height": 0.9
+    }
+    """
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        if not data.get('sito') or not data.get('us'):
+            return jsonify({
+                'success': False,
+                'error': 'Missing required fields: sito, us'
+            }), 400
+
+        with get_db_session() as db_session:
+            # Find existing US
+            us_record = db_session.query(US).filter(
+                US.sito == data['sito'],
+                US.area == data.get('area', ''),
+                US.us == int(data['us'])
+            ).first()
+
+            if not us_record:
+                return jsonify({
+                    'success': False,
+                    'error': f'US {data["us"]} not found'
+                }), 404
+
+            # Update fields
+            if 'd_stratigrafica' in data:
+                us_record.d_stratigrafica = data['d_stratigrafica']
+            if 'd_interpretativa' in data:
+                us_record.d_interpretativa = data['d_interpretativa']
+            if 'colore' in data:
+                us_record.colore = data['colore']
+            if 'consistenza' in data:
+                us_record.consistenza = data['consistenza']
+
+            # Update dimensions if provided
+            if 'length' in data and data['length']:
+                us_record.length = float(data['length'])
+            if 'width' in data and data['width']:
+                us_record.width = float(data['width'])
+            if 'height' in data and data['height']:
+                us_record.height = float(data['height'])
+
+            db_session.commit()
+
+            logger.info(f"Updated US: {data['sito']}/{data.get('area')}/US{data['us']}")
+
+            return jsonify({
+                'success': True,
+                'message': f'US {data["us"]} updated successfully'
+            })
+
+    except ValueError as e:
+        logger.error(f"Validation error updating US: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'Invalid data: {str(e)}'
+        }), 400
+    except Exception as e:
+        logger.error(f"Error updating US: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@three_d_builder_bp.route('/delete-us', methods=['POST'])
+@login_required
+def delete_us():
+    """
+    Delete a stratigraphic unit
+
+    POST /api/3d-builder/delete-us
+    {
+        "sito": "Tempio Fortuna",
+        "area": "Area 1",
+        "us": "13"
+    }
+    """
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        if not data.get('sito') or not data.get('us'):
+            return jsonify({
+                'success': False,
+                'error': 'Missing required fields: sito, us'
+            }), 400
+
+        with get_db_session() as db_session:
+            # Find existing US
+            us_record = db_session.query(US).filter(
+                US.sito == data['sito'],
+                US.area == data.get('area', ''),
+                US.us == int(data['us'])
+            ).first()
+
+            if not us_record:
+                return jsonify({
+                    'success': False,
+                    'error': f'US {data["us"]} not found'
+                }), 404
+
+            # Delete the US
+            db_session.delete(us_record)
+            db_session.commit()
+
+            logger.info(f"Deleted US: {data['sito']}/{data.get('area')}/US{data['us']}")
+
+            return jsonify({
+                'success': True,
+                'message': f'US {data["us"]} deleted successfully'
+            })
+
+    except ValueError as e:
+        logger.error(f"Validation error deleting US: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'Invalid data: {str(e)}'
+        }), 400
+    except Exception as e:
+        logger.error(f"Error deleting US: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
