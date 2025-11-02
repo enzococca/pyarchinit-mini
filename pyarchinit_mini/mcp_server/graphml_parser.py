@@ -39,7 +39,7 @@ class GraphMLParser:
 
     def load_graphml(self, filepath: str) -> bool:
         """
-        Load GraphML file
+        Load GraphML file (supports both standard GraphML and yFiles format)
 
         Args:
             filepath: Path to GraphML file
@@ -52,16 +52,143 @@ class GraphMLParser:
                 logger.error(f"GraphML file not found: {filepath}")
                 return False
 
-            self.graph = nx.read_graphml(filepath)
+            # Try loading with NetworkX first
+            try:
+                self.graph = nx.read_graphml(filepath)
+                self.graphml_path = filepath
+                logger.info(
+                    f"Loaded GraphML (standard): {len(self.graph.nodes())} nodes, "
+                    f"{len(self.graph.edges())} edges"
+                )
+                return True
+            except nx.NetworkXError:
+                # If NetworkX fails, try parsing yFiles nested graph manually
+                logger.info("Standard GraphML read failed, trying yFiles format...")
+                return self._load_yfiles_graphml(filepath)
+
+        except Exception as e:
+            logger.error(f"Error loading GraphML: {e}", exc_info=True)
+            return False
+
+    def _load_yfiles_graphml(self, filepath: str) -> bool:
+        """
+        Load yFiles GraphML with nested graphs (TableNode format)
+
+        Args:
+            filepath: Path to yFiles GraphML file
+
+        Returns:
+            True if loaded successfully
+        """
+        import xml.etree.ElementTree as ET
+
+        try:
+            tree = ET.parse(filepath)
+            root = tree.getroot()
+
+            # Create empty graph
+            self.graph = nx.DiGraph()
+
+            # Find main graph and nested graph (namespace-agnostic)
+            main_graph = None
+            nested_graph = None
+
+            for child in list(root):
+                if 'graph' in child.tag and child.get('id') == 'G':
+                    main_graph = child
+
+                    # Look for table_node_group node with nested graph
+                    for node in list(main_graph):
+                        if 'node' in node.tag and node.get('id') == 'table_node_group':
+                            for subelem in list(node):
+                                if 'graph' in subelem.tag:
+                                    nested_graph = subelem
+                                    break
+                            break
+                    break
+
+            if nested_graph is None:
+                logger.error("No nested graph found in yFiles GraphML")
+                return False
+
+            # Key mapping for data attributes
+            node_key_map = {
+                'd4': 'label',
+                'd5': 'extended_label',
+                'd7': 'description',
+                'd8': 'period',
+                'd9': 'area',
+                'd10': 'formation',
+                'd11': 'unita_tipo',
+                'd12': 'interpretation'
+            }
+
+            edge_key_map = {
+                'd15': 'label',
+                'd16': 'relationship',
+                'd17': 'certainty',
+                'd18': 'url',
+                'd19': 'description'
+            }
+
+            # Extract nodes from nested graph
+            for node in list(nested_graph):
+                if 'node' not in node.tag:
+                    continue
+
+                node_id = node.get('id', '')
+                # Remove table_node_group:: prefix if present
+                clean_id = node_id.replace('table_node_group::', '')
+
+                # Extract data attributes
+                node_attrs = {}
+                for data in list(node):
+                    if 'data' not in data.tag:
+                        continue
+
+                    key = data.get('key', '')
+                    value = data.text or ''
+
+                    if key in node_key_map:
+                        node_attrs[node_key_map[key]] = value
+
+                # Add node to graph
+                self.graph.add_node(clean_id, **node_attrs)
+
+            # Extract edges from main graph (edges are at graph G level, not nested)
+            if main_graph is not None:
+                for edge in list(main_graph):
+                    if 'edge' not in edge.tag:
+                        continue
+
+                    source = edge.get('source', '').replace('table_node_group::', '')
+                    target = edge.get('target', '').replace('table_node_group::', '')
+
+                    # Extract edge attributes
+                    edge_attrs = {}
+                    for data in list(edge):
+                        if 'data' not in data.tag:
+                            continue
+
+                        key = data.get('key', '')
+                        value = data.text or ''
+
+                        if key in edge_key_map:
+                            edge_attrs[edge_key_map[key]] = value
+
+                    # Add edge to graph
+                    if source and target:
+                        self.graph.add_edge(source, target, **edge_attrs)
+
             self.graphml_path = filepath
             logger.info(
-                f"Loaded GraphML: {len(self.graph.nodes())} nodes, "
+                f"Loaded GraphML (yFiles): {len(self.graph.nodes())} nodes, "
                 f"{len(self.graph.edges())} edges"
             )
             return True
 
         except Exception as e:
-            logger.error(f"Error loading GraphML: {e}", exc_info=True)
+            logger.error(f"Error parsing yFiles GraphML: {e}", exc_info=True)
             return False
 
     def parse_node(self, node_id: str) -> Dict[str, Any]:
@@ -217,7 +344,8 @@ class GraphMLParser:
             Complete US data dict
         """
         # Query database for US record
-        us_record = self.db_session.query(US).filter(US.id_us == us_id).first()
+        # Note: US.us is the US number field (e.g., "1001"), not id_us (primary key)
+        us_record = self.db_session.query(US).filter(US.us == str(us_id)).first()
 
         if not us_record:
             logger.warning(f"US {us_id} not found in database")
@@ -376,7 +504,6 @@ class GraphMLParser:
             "descrizione": us_record.descrizione,
             "interpretazione": us_record.interpretazione,
             "formazione": us_record.formazione,
-            "modo_formazione": us_record.modo_formazione,
             "consistenza": us_record.consistenza,
             "colore": us_record.colore,
             "inclusi": us_record.inclusi,
@@ -384,8 +511,8 @@ class GraphMLParser:
             "settore": us_record.settore,
             "quad_par": us_record.quad_par,
             "ambient": us_record.ambient,
-            "quota_min": float(us_record.quota_min) if us_record.quota_min else None,
-            "quota_max": float(us_record.quota_max) if us_record.quota_max else None,
+            "quota_relativa": float(us_record.quota_relativa) if us_record.quota_relativa else None,
+            "quota_abs": float(us_record.quota_abs) if us_record.quota_abs else None,
             "lunghezza_max": (
                 float(us_record.lunghezza_max) if us_record.lunghezza_max else None
             ),

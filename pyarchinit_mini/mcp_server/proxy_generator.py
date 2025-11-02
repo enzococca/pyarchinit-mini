@@ -268,8 +268,9 @@ class ProxyGenerator:
     ) -> Tuple[float, float]:
         """Position from GraphML coordinates (scaled)"""
         # Scale GraphML coordinates (typically in pixels) to Blender units
-        x = graphml_position.get("x", 0) * 0.01  # 100 px = 1 Blender unit
-        y = graphml_position.get("y", 0) * 0.01
+        # Using smaller scale factor for yFiles/yEd coordinates which can be very large
+        x = graphml_position.get("x", 0) * 0.001  # 1000 px = 1 Blender unit
+        y = graphml_position.get("y", 0) * 0.001
         return (x, y)
 
     def _position_grid(self, us_id: int) -> Tuple[float, float]:
@@ -281,7 +282,9 @@ class ProxyGenerator:
         except ValueError:
             index = us_id  # Fallback
 
-        cols = math.ceil(math.sqrt(len(topo_order)))
+        # Ensure we have at least 1 column to avoid division by zero
+        num_items = max(len(topo_order), 1)
+        cols = max(math.ceil(math.sqrt(num_items)), 1)
 
         x = (index % cols) * self.grid_spacing
         y = (index // cols) * self.grid_spacing

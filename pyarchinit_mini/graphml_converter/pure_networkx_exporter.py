@@ -353,15 +353,22 @@ class PureNetworkXExporter:
             start_date = period_data[3] if len(period_data) > 3 else None
             periodo_fase = period_data[2] if len(period_data) > 2 else ('', '')
 
-            # Primary sort: by end_date (use start_date as fallback)
-            # If no dates, fall back to numeric periodo/fase for backward compatibility
+            # Return a 3-tuple to ensure consistent sorting:
+            # (has_date, date_value, periodo_val, fase_val)
+            # This ensures all keys have same structure for comparison
             if end_date is not None:
-                return (end_date,)
+                return (1, end_date, 0, 0)
             elif start_date is not None:
-                return (start_date,)
+                return (1, start_date, 0, 0)
             else:
-                # Fallback to numeric sort if no dates available
-                return self._period_sort_key_numeric(periodo_fase)
+                # No date available, use periodo/fase for sorting
+                # Put periods without dates AFTER those with dates (0 < 1)
+                periodo_val, fase_val = self._period_sort_key_numeric(periodo_fase)
+                # Ensure periodo_val and fase_val are comparable types
+                # Convert to tuple of (0, inf, periodo_val, fase_val)
+                # Using float('inf') for date position to sort after dated periods
+                return (0, float('inf'), periodo_val if isinstance(periodo_val, (int, float)) else 0,
+                        fase_val if isinstance(fase_val, (int, float)) else 0)
 
         sorted_periods = sorted(period_groups.keys(), key=chronological_sort_key)
 
@@ -459,12 +466,22 @@ class PureNetworkXExporter:
             start_date = period_data[3] if len(period_data) > 3 else None
             periodo_fase = period_data[2] if len(period_data) > 2 else ('', '')
 
+            # Return a 4-tuple to ensure consistent sorting:
+            # (has_date, date_value, periodo_val, fase_val)
+            # This ensures all keys have same structure for comparison
             if end_date is not None:
-                return (end_date,)
+                return (1, end_date, 0, 0)
             elif start_date is not None:
-                return (start_date,)
+                return (1, start_date, 0, 0)
             else:
-                return self._period_sort_key_numeric(periodo_fase)
+                # No date available, use periodo/fase for sorting
+                # Put periods without dates AFTER those with dates (0 < 1)
+                periodo_val, fase_val = self._period_sort_key_numeric(periodo_fase)
+                # Ensure periodo_val and fase_val are comparable types
+                # Convert to tuple of (0, inf, periodo_val, fase_val)
+                # Using float('inf') for date position to sort after dated periods
+                return (0, float('inf'), periodo_val if isinstance(periodo_val, (int, float)) else 0,
+                        fase_val if isinstance(fase_val, (int, float)) else 0)
 
         sorted_periods = sorted(period_groups.keys(), key=chronological_sort_key)
         if reverse_epochs:

@@ -16,10 +16,10 @@ if (this_directory / "requirements.txt").exists():
 
 setup(
     name="pyarchinit-mini",
-    version="1.8.5",
+    version="1.9.0.dev0",
     author="PyArchInit Team",
     author_email="enzo.ccc@gmail.com",
-    description="Lightweight archaeological data management system with multi-user authentication, real-time collaboration, and analytics dashboard",
+    description="Lightweight archaeological data management system with multi-user authentication, real-time collaboration, analytics dashboard, and 3D CRUD viewer",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/enzococca/pyarchinit-mini",
@@ -30,7 +30,7 @@ setup(
     },
     packages=find_packages(exclude=["docs*", "examples*"]),
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: GIS",
         "Topic :: Database :: Database Engines/Servers",

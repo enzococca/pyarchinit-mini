@@ -277,8 +277,14 @@ class StratigraphicViewer3D {
      * @param {Object} proxyData - Proxy metadata
      */
     createProxy(proxyData) {
+        console.log('Creating proxy:', proxyData);
+
         const blenderProps = proxyData.blender_properties;
         const visualization = proxyData.visualization;
+
+        console.log('Blender properties:', blenderProps);
+        console.log('Location:', blenderProps.location);
+        console.log('Scale:', blenderProps.scale);
 
         // Create geometry
         const geometry = new THREE.BoxGeometry(
@@ -552,7 +558,12 @@ class StratigraphicViewer3D {
      * Center camera on all proxies
      */
     centerCameraOnProxies() {
-        if (this.proxies.size === 0) return;
+        if (this.proxies.size === 0) {
+            console.log('No proxies to center on');
+            return;
+        }
+
+        console.log(`Centering camera on ${this.proxies.size} proxies`);
 
         // Calculate bounding box
         const box = new THREE.Box3();
@@ -565,10 +576,15 @@ class StratigraphicViewer3D {
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
 
+        console.log('Bounding box center:', center);
+        console.log('Bounding box size:', size);
+
         // Calculate camera distance
         const maxDim = Math.max(size.x, size.y, size.z);
         const fov = this.camera.fov * (Math.PI / 180);
         const cameraDistance = Math.abs(maxDim / Math.sin(fov / 2)) * 1.5;
+
+        console.log('Camera distance:', cameraDistance);
 
         // Position camera
         this.camera.position.set(
@@ -576,6 +592,8 @@ class StratigraphicViewer3D {
             center.y + cameraDistance * 0.7,
             center.z + cameraDistance * 0.7
         );
+
+        console.log('Camera position:', this.camera.position);
 
         this.camera.lookAt(center);
         this.controls.target.copy(center);

@@ -316,6 +316,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.2.0/dist/css/glightbox.min.css">
 
     {% block extra_css %}{% endblock %}
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
@@ -381,8 +382,8 @@
                             <li><a class="dropdown-item" href="{{ url_for('harris_creator.index') }}">
                                 <i class="fas fa-project-diagram"></i> {{ _('Harris Matrix Creator') }}
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('three_d_builder_ui.index') }}">
-                                <i class="fas fa-cube"></i> {{ _('3D Builder') }}
+                            <li><a class="dropdown-item" href="{{ url_for('three_d_builder.blender_viewer') }}">
+                                <i class="fas fa-cube"></i> {{ _('Blender 3D Viewer') }}
                             </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('export_harris_graphml') }}">
                                 <i class="fas fa-sitemap"></i> {{ _('Harris Matrix Export') }}

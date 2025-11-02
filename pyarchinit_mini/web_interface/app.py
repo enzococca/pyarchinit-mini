@@ -60,6 +60,7 @@ from pyarchinit_mini.web_interface.three_d_builder_routes import three_d_builder
 # Import WebSocket events
 from pyarchinit_mini.web_interface.socketio_events import (
     init_socketio_events,
+    init_blender_socketio_events,
     broadcast_site_created,
     broadcast_site_updated,
     broadcast_site_deleted,
@@ -68,7 +69,8 @@ from pyarchinit_mini.web_interface.socketio_events import (
     broadcast_us_deleted,
     broadcast_inventario_created,
     broadcast_inventario_updated,
-    broadcast_inventario_deleted
+    broadcast_inventario_deleted,
+    broadcast_blender_command
 )
 
 # Forms
@@ -508,6 +510,7 @@ def create_app():
 
     # Initialize WebSocket event handlers
     init_socketio_events(socketio)
+    init_blender_socketio_events(socketio)  # Real-time Blender streaming
 
     # Store socketio in app for access in routes
     app.socketio = socketio
