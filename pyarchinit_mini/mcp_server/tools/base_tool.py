@@ -100,15 +100,20 @@ class BaseTool(ABC):
         """
         return {"success": True, "message": message, "result": result}
 
-    def _format_error(self, error_type: str, message: str) -> Dict[str, Any]:
+    def _format_error(self, error_type_or_message: str, message: str = None) -> Dict[str, Any]:
         """
         Format error response
 
         Args:
-            error_type: Type of error
-            message: Error message
+            error_type_or_message: Error type if message is provided, otherwise the error message
+            message: Error message (optional, if not provided, error_type_or_message is used as message)
 
         Returns:
             Error dict
         """
-        return {"success": False, "error": {"type": error_type, "message": message}}
+        if message is None:
+            # Single argument: use as message, set type to "error"
+            return {"success": False, "error": {"type": "error", "message": error_type_or_message}}
+        else:
+            # Two arguments: first is type, second is message
+            return {"success": False, "error": {"type": error_type_or_message, "message": message}}
