@@ -64,44 +64,43 @@ class ChatGPTFetchTool(BaseTool):
 
         try:
             site_id = int(doc_id.replace("site-", ""))
-            with self.db_session as session:
-                site = session.query(Site).filter_by(id_sito=site_id).first()
+            site = self.db_session.query(Site).filter_by(id_sito=site_id).first()
 
-                if not site:
-                    return None
+            if not site:
+                return None
 
-                # Build full text
-                text_parts = [f"Site: {site.sito}"]
+            # Build full text
+            text_parts = [f"Site: {site.sito}"]
 
-                if site.definizione_sito:
-                    text_parts.append(f"Definition: {site.definizione_sito}")
+            if site.definizione_sito:
+                text_parts.append(f"Definition: {site.definizione_sito}")
 
-                if site.descrizione:
-                    text_parts.append(f"Description: {site.descrizione}")
+            if site.descrizione:
+                text_parts.append(f"Description: {site.descrizione}")
 
-                if site.nazione:
-                    text_parts.append(f"Nation: {site.nazione}")
+            if site.nazione:
+                text_parts.append(f"Nation: {site.nazione}")
 
-                if site.comune:
-                    text_parts.append(f"Municipality: {site.comune}")
+            if site.comune:
+                text_parts.append(f"Municipality: {site.comune}")
 
-                if site.provincia:
-                    text_parts.append(f"Province: {site.provincia}")
+            if site.provincia:
+                text_parts.append(f"Province: {site.provincia}")
 
-                text = "\n\n".join(text_parts)
+            text = "\n\n".join(text_parts)
 
-                return {
-                    "id": doc_id,
-                    "title": f"Site: {site.sito}",
-                    "text": text,
-                    "url": f"pyarchinit://site/{site.id_sito}",
-                    "metadata": {
-                        "type": "site",
-                        "nation": site.nazione or "",
-                        "municipality": site.comune or "",
-                        "province": site.provincia or ""
-                    }
+            return {
+                "id": doc_id,
+                "title": f"Site: {site.sito}",
+                "text": text,
+                "url": f"pyarchinit://site/{site.id_sito}",
+                "metadata": {
+                    "type": "site",
+                    "nation": site.nazione or "",
+                    "municipality": site.comune or "",
+                    "province": site.provincia or ""
                 }
+            }
         except Exception as e:
             logger.error(f"Fetch site error: {e}")
             return None
@@ -112,49 +111,48 @@ class ChatGPTFetchTool(BaseTool):
 
         try:
             us_id = int(doc_id.replace("us-", ""))
-            with self.db_session as session:
-                us = session.query(US).filter_by(id_us=us_id).first()
+            us = self.db_session.query(US).filter_by(id_us=us_id).first()
 
-                if not us:
-                    return None
+            if not us:
+                return None
 
-                # Build full text
-                text_parts = [f"Stratigraphic Unit: {us.us}"]
-                text_parts.append(f"Site: {us.sito}")
+            # Build full text
+            text_parts = [f"Stratigraphic Unit: {us.us}"]
+            text_parts.append(f"Site: {us.sito}")
 
-                if us.unita_tipo:
-                    text_parts.append(f"Unit Type: {us.unita_tipo}")
+            if us.unita_tipo:
+                text_parts.append(f"Unit Type: {us.unita_tipo}")
 
-                if us.d_stratigrafica:
-                    text_parts.append(f"Stratigraphic Description: {us.d_stratigrafica}")
+            if us.d_stratigrafica:
+                text_parts.append(f"Stratigraphic Description: {us.d_stratigrafica}")
 
-                if us.area:
-                    text_parts.append(f"Area: {us.area}")
+            if us.area:
+                text_parts.append(f"Area: {us.area}")
 
-                if us.periodo_iniziale:
-                    text_parts.append(f"Period: {us.periodo_iniziale}")
+            if us.periodo_iniziale:
+                text_parts.append(f"Period: {us.periodo_iniziale}")
 
-                if us.fase_iniziale:
-                    text_parts.append(f"Phase: {us.fase_iniziale}")
+            if us.fase_iniziale:
+                text_parts.append(f"Phase: {us.fase_iniziale}")
 
-                if us.rapporti:
-                    text_parts.append(f"Relationships: {us.rapporti}")
+            if us.rapporti:
+                text_parts.append(f"Relationships: {us.rapporti}")
 
-                text = "\n\n".join(text_parts)
+            text = "\n\n".join(text_parts)
 
-                return {
-                    "id": doc_id,
-                    "title": f"US {us.us} ({us.sito})",
-                    "text": text,
-                    "url": f"pyarchinit://us/{us.id_us}",
-                    "metadata": {
-                        "type": "stratigraphic_unit",
-                        "site": us.sito,
-                        "unit_type": us.unita_tipo or "",
-                        "area": us.area or "",
-                        "period": us.periodo_iniziale or ""
-                    }
+            return {
+                "id": doc_id,
+                "title": f"US {us.us} ({us.sito})",
+                "text": text,
+                "url": f"pyarchinit://us/{us.id_us}",
+                "metadata": {
+                    "type": "stratigraphic_unit",
+                    "site": us.sito,
+                    "unit_type": us.unita_tipo or "",
+                    "area": us.area or "",
+                    "period": us.periodo_iniziale or ""
                 }
+            }
         except Exception as e:
             logger.error(f"Fetch US error: {e}")
             return None

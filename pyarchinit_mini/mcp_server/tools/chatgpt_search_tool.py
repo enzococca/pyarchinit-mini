@@ -67,20 +67,19 @@ class ChatGPTSearchTool(BaseTool):
 
         results = []
         try:
-            with self.db_session as session:
-                query_lower = query.lower()
-                sites = session.query(Site).filter(
-                    Site.sito.ilike(f"%{query_lower}%") |
-                    Site.definizione_sito.ilike(f"%{query_lower}%") |
-                    Site.descrizione.ilike(f"%{query_lower}%")
-                ).limit(5).all()
+            query_lower = query.lower()
+            sites = self.db_session.query(Site).filter(
+                Site.sito.ilike(f"%{query_lower}%") |
+                Site.definizione_sito.ilike(f"%{query_lower}%") |
+                Site.descrizione.ilike(f"%{query_lower}%")
+            ).limit(5).all()
 
-                for site in sites:
-                    results.append({
-                        "id": f"site-{site.id_sito}",
-                        "title": f"Site: {site.sito}",
-                        "url": f"pyarchinit://site/{site.id_sito}"
-                    })
+            for site in sites:
+                results.append({
+                    "id": f"site-{site.id_sito}",
+                    "title": f"Site: {site.sito}",
+                    "url": f"pyarchinit://site/{site.id_sito}"
+                })
         except Exception as e:
             logger.error(f"Site search error: {e}")
 
@@ -92,25 +91,24 @@ class ChatGPTSearchTool(BaseTool):
 
         results = []
         try:
-            with self.db_session as session:
-                query_lower = query.lower()
-                units = session.query(US).filter(
-                    US.sito.ilike(f"%{query_lower}%") |
-                    US.us.ilike(f"%{query_lower}%") |
-                    US.d_stratigrafica.ilike(f"%{query_lower}%") |
-                    US.unita_tipo.ilike(f"%{query_lower}%")
-                ).limit(5).all()
+            query_lower = query.lower()
+            units = self.db_session.query(US).filter(
+                US.sito.ilike(f"%{query_lower}%") |
+                US.us.ilike(f"%{query_lower}%") |
+                US.d_stratigrafica.ilike(f"%{query_lower}%") |
+                US.unita_tipo.ilike(f"%{query_lower}%")
+            ).limit(5).all()
 
-                for unit in units:
-                    title = f"US {unit.us} ({unit.sito})"
-                    if unit.unita_tipo:
-                        title += f" - {unit.unita_tipo}"
+            for unit in units:
+                title = f"US {unit.us} ({unit.sito})"
+                if unit.unita_tipo:
+                    title += f" - {unit.unita_tipo}"
 
-                    results.append({
-                        "id": f"us-{unit.id_us}",
-                        "title": title,
-                        "url": f"pyarchinit://us/{unit.id_us}"
-                    })
+                results.append({
+                    "id": f"us-{unit.id_us}",
+                    "title": title,
+                    "url": f"pyarchinit://us/{unit.id_us}"
+                })
         except Exception as e:
             logger.error(f"US search error: {e}")
 
