@@ -11,21 +11,24 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 
 try:
-    from mcp import Server, Resource, Tool
-    from mcp.server import stdio_server
+    from mcp.server import Server
+    from mcp.server.stdio import stdio_server
     from mcp.server.models import InitializationOptions
-    from mcp.types import TextContent, ImageContent, EmbeddedResource
+    from mcp.types import (
+        TextContent,
+        ImageContent,
+        EmbeddedResource,
+        ServerCapabilities,
+        Tool,
+        Resource,
+    )
+    MCP_AVAILABLE = True
 except ImportError:
     # MCP SDK not installed - provide stub for development
     logging.warning("MCP SDK not installed. Server functionality will be limited.")
+    MCP_AVAILABLE = False
 
     class Server:  # type: ignore
-        pass
-
-    class Resource:  # type: ignore
-        pass
-
-    class Tool:  # type: ignore
         pass
 
     stdio_server = None  # type: ignore
@@ -33,9 +36,13 @@ except ImportError:
     TextContent = None  # type: ignore
     ImageContent = None  # type: ignore
     EmbeddedResource = None  # type: ignore
+    ServerCapabilities = None  # type: ignore
+    Tool = None  # type: ignore
+    Resource = None  # type: ignore
 
 
 from .config import MCPConfig
+from ..database.connection import DatabaseConnection
 from ..database.manager import DatabaseManager
 from ..services.site_service import SiteService
 from ..services.us_service import USService
@@ -53,6 +60,14 @@ from .tools.filter_tool import FilterTool
 from .tools.export_tool import ExportTool
 from .tools.position_tool import PositionTool
 from .tools.material_tool import MaterialTool
+from .tools.import_excel_tool import ImportExcelTool
+from .tools.create_harris_matrix_tool import CreateHarrisMatrixTool
+from .tools.configure_em_nodes_tool import ConfigureEMNodesTool
+from .tools.create_database_tool import CreateDatabaseTool
+from .tools.pyarchinit_sync_tool import PyArchInitSyncTool
+from .tools.chatgpt_search_tool import ChatGPTSearchTool
+from .tools.chatgpt_fetch_tool import ChatGPTFetchTool
+from .tools.database_manager_tool import DatabaseManagerTool
 
 from .prompts.stratigraphic_model_prompt import StratigraphicModelPrompt
 from .prompts.period_visualization_prompt import PeriodVisualizationPrompt
@@ -68,11 +83,12 @@ class PyArchInitMCPServer:
 
     Exposes:
     - 5 Resources (GraphML, US, Periods, Relationships, Sites)
-    - 5 Tools (build_3d, filter, export, position, material)
+    - 13 Tools (build_3d, filter, export, position, material, import_excel, create_harris_matrix,
+                configure_em_nodes, create_database, pyarchinit_sync, search, fetch, manage_database_connections)
     - 3 Prompts (stratigraphic_model, period_visualization, us_description)
 
     Architecture:
-        Claude AI ↔ PyArchInit MCP Server ↔ Blender MCP Addon
+        Claude AI / ChatGPT ↔ PyArchInit MCP Server ↔ Blender MCP Addon
     """
 
     def __init__(self, config: Optional[MCPConfig] = None):
@@ -86,12 +102,12 @@ class PyArchInitMCPServer:
         self._setup_logging()
 
         # Database and services
-        self.db_manager = DatabaseManager(self.config.database_url)
-        self.site_service = SiteService(self.db_manager.get_session())
-        self.us_service = USService(self.db_manager.get_session())
-        self.periodizzazione_service = PeriodizzazioneService(
-            self.db_manager.get_session()
-        )
+        db_connection = DatabaseConnection(self.config.database_url)
+        self.db_manager = DatabaseManager(db_connection)
+        self.db_session = db_connection.SessionLocal()  # Create session for resources/tools
+        self.site_service = SiteService(self.db_manager)
+        self.us_service = USService(self.db_manager)
+        self.periodizzazione_service = PeriodizzazioneService(self.db_manager)
 
         # MCP Server instance
         self.server = Server(self.config.mcp_server_name)
@@ -125,7 +141,7 @@ class PyArchInitMCPServer:
 
         # GraphML Resource
         self.resources["graphml"] = GraphMLResource(
-            db_session=self.db_manager.get_session(),
+            db_session=self.db_session,
             config=self.config,
         )
 
@@ -143,7 +159,7 @@ class PyArchInitMCPServer:
 
         # Relationships Resource
         self.resources["relationships"] = RelationshipsResource(
-            db_session=self.db_manager.get_session(),
+            db_session=self.db_session,
             config=self.config,
         )
 
@@ -161,31 +177,79 @@ class PyArchInitMCPServer:
 
         # Build 3D Tool
         self.tools["build_3d"] = Build3DTool(
-            db_session=self.db_manager.get_session(),
+            db_session=self.db_session,
             config=self.config,
         )
 
         # Filter Tool
         self.tools["filter"] = FilterTool(
-            db_session=self.db_manager.get_session(),
+            db_session=self.db_session,
             config=self.config,
         )
 
         # Export Tool
         self.tools["export"] = ExportTool(
-            db_session=self.db_manager.get_session(),
+            db_session=self.db_session,
             config=self.config,
         )
 
         # Position Tool
         self.tools["position"] = PositionTool(
-            db_session=self.db_manager.get_session(),
+            db_session=self.db_session,
             config=self.config,
         )
 
         # Material Tool
         self.tools["material"] = MaterialTool(
-            db_session=self.db_manager.get_session(),
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Import Excel Tool
+        self.tools["import_excel"] = ImportExcelTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Create Harris Matrix Tool
+        self.tools["create_harris_matrix"] = CreateHarrisMatrixTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Configure EM Nodes Tool
+        self.tools["configure_em_nodes"] = ConfigureEMNodesTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Create Database Tool
+        self.tools["create_database"] = CreateDatabaseTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # PyArchInit Sync Tool (Import/Export)
+        self.tools["pyarchinit_sync"] = PyArchInitSyncTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # ChatGPT Search Tool
+        self.tools["search"] = ChatGPTSearchTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # ChatGPT Fetch Tool
+        self.tools["fetch"] = ChatGPTFetchTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Database Manager Tool
+        self.tools["manage_database_connections"] = DatabaseManagerTool(
+            db_session=self.db_session,
             config=self.config,
         )
 
@@ -197,13 +261,13 @@ class PyArchInitMCPServer:
 
         # Stratigraphic Model Prompt
         self.prompts["stratigraphic_model"] = StratigraphicModelPrompt(
-            db_session=self.db_manager.get_session(),
+            db_session=self.db_session,
             config=self.config,
         )
 
         # Period Visualization Prompt
         self.prompts["period_visualization"] = PeriodVisualizationPrompt(
-            db_session=self.db_manager.get_session(),
+            db_session=self.db_session,
             config=self.config,
         )
 
@@ -233,10 +297,18 @@ class PyArchInitMCPServer:
             @self.server.list_resources()
             async def handle_list_resources():
                 """List available resources"""
-                return [
-                    resource.to_resource_description()
-                    for resource in self.resources.values()
-                ]
+                resources = []
+                for resource in self.resources.values():
+                    desc = resource.to_resource_description()
+                    resources.append(
+                        Resource(
+                            uri=desc.uri,
+                            name=desc.name,
+                            description=desc.description,
+                            mimeType=desc.mime_type,
+                        )
+                    )
+                return resources
 
             @self.server.read_resource()
             async def handle_read_resource(uri: str):
@@ -254,7 +326,17 @@ class PyArchInitMCPServer:
             @self.server.list_tools()
             async def handle_list_tools():
                 """List available tools"""
-                return [tool.to_tool_description() for tool in self.tools.values()]
+                tools = []
+                for tool in self.tools.values():
+                    desc = tool.to_tool_description()
+                    tools.append(
+                        Tool(
+                            name=desc.name,
+                            description=desc.description,
+                            inputSchema=desc.input_schema,
+                        )
+                    )
+                return tools
 
             @self.server.call_tool()
             async def handle_call_tool(name: str, arguments: Dict[str, Any]):
@@ -286,10 +368,7 @@ class PyArchInitMCPServer:
                 await self.server.run(
                     read_stream,
                     write_stream,
-                    InitializationOptions(
-                        server_name=self.config.mcp_server_name,
-                        server_version=self.config.mcp_server_version,
-                    ),
+                    self._create_init_options(),
                 )
 
         elif self.config.mcp_transport == "tcp":
@@ -299,12 +378,32 @@ class PyArchInitMCPServer:
         else:
             raise ValueError(f"Invalid transport: {self.config.mcp_transport}")
 
+    def _create_init_options(self):
+        """
+        Create initialization options for MCP server
+
+        Returns:
+            InitializationOptions with server name, version, and capabilities
+        """
+        if InitializationOptions is None:
+            raise RuntimeError("MCP SDK not installed")
+
+        return InitializationOptions(
+            server_name=self.config.mcp_server_name,
+            server_version=self.config.mcp_server_version,
+            capabilities=ServerCapabilities(
+                resources={},
+                tools={},
+                prompts={},
+            ),
+        )
+
     def stop(self):
         """Stop the MCP server"""
         logger.info("Stopping MCP Server...")
         # Cleanup resources
-        if hasattr(self, "db_manager"):
-            self.db_manager.close()
+        if hasattr(self, "db_session"):
+            self.db_session.close()
 
 
 # Convenience function to run server

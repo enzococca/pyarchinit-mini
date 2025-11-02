@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.8.6"
-description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, and Heriverse/ATON export integration"
+version = "1.9.0.dev0"
+description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, Heriverse/ATON export integration, and 3D CRUD viewer"
 readme = "README.md"
 license = {text = "GPL-2.0"}
 authors = [
@@ -24,7 +24,7 @@ keywords = [
     "finds inventory"
 ]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: GIS",
     "Topic :: Database :: Database Engines/Servers",
@@ -170,6 +170,8 @@ pyarchinit-mini-api = "pyarchinit_mini.api:run_server"
 pyarchinit-mini-web = "pyarchinit_mini.web_interface.app:main"
 pyarchinit-mini-gui = "pyarchinit_mini.desktop_gui.gui_app:main"
 pyarchinit-mini-setup = "pyarchinit_mini.scripts.setup_user_env:main"
+pyarchinit-mini-mcp = "pyarchinit_mini.mcp_server:main"
+pyarchinit-mini-mcp-http = "pyarchinit_mini.mcp_server.http_server:main"
 pyarchinit-mini-init = "pyarchinit_mini.scripts.create_admin_user:main"
 pyarchinit-export-import = "pyarchinit_mini.cli.export_import_cli:export_import"
 pyarchinit-graphml = "pyarchinit_mini.cli.graphml_cli:main"
@@ -177,7 +179,8 @@ pyarchinit-mini-import = "pyarchinit_mini.cli.pyarchinit_import_export_cli:pyarc
 pyarchinit-harris-import = "pyarchinit_mini.cli.harris_import:import_harris_matrix"
 pyarchinit-harris-template = "pyarchinit_mini.cli.harris_template:generate_template"
 pyarchinit-mini-migrate = "pyarchinit_mini.cli.migrate:cli"
-pyarchinit-mcp-server = "pyarchinit_mini.mcp_server.server:main"
+pyarchinit-mcp-server = "pyarchinit_mini.mcp_server.__main__:main"
+pyarchinit-mcp-http = "pyarchinit_mini.mcp_server.http_server:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

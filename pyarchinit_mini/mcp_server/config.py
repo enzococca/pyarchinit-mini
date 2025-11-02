@@ -6,7 +6,75 @@ Configuration dataclass for PyArchInit MCP Server.
 
 from dataclasses import dataclass, field
 from typing import Optional
+from pathlib import Path
 import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _get_default_database_url() -> str:
+    """
+    Get default database URL from ConnectionManager or create default database
+
+    Priority:
+    1. DATABASE_URL environment variable (for backward compatibility)
+    2. Active connection from ConnectionManager
+    3. Default database in ~/.pyarchinit-mini/databases/default.db
+
+    Returns:
+        Database URL string
+    """
+    # 1. Check environment variable first (backward compatibility)
+    env_db = os.getenv("DATABASE_URL")
+    if env_db:
+        logger.info(f"Using DATABASE_URL from environment: {env_db}")
+        return env_db
+
+    try:
+        # 2. Try to get from ConnectionManager
+        from pyarchinit_mini.config.connection_manager import get_connection_manager
+
+        conn_manager = get_connection_manager()
+        connections = conn_manager.list_connections()
+
+        # Find active/default connection
+        if connections:
+            # Use first connection as default
+            first_conn = connections[0]
+            db_url = conn_manager.get_connection_string(first_conn['name'])
+            if db_url:
+                logger.info(f"Using database from ConnectionManager: {first_conn['name']}")
+                return db_url
+
+    except Exception as e:
+        logger.warning(f"Could not load from ConnectionManager: {e}")
+
+    # 3. Create default database in ~/.pyarchinit-mini/
+    home_dir = Path.home() / '.pyarchinit-mini'
+    db_dir = home_dir / 'databases'
+    db_dir.mkdir(parents=True, exist_ok=True)
+
+    default_db_path = db_dir / 'default.db'
+    db_url = f"sqlite:///{default_db_path}"
+
+    logger.info(f"Using default database: {db_url}")
+
+    # Save to ConnectionManager for future use
+    try:
+        from pyarchinit_mini.config.connection_manager import get_connection_manager
+        conn_manager = get_connection_manager()
+        conn_manager.add_connection(
+            name="Default Database",
+            db_type="sqlite",
+            connection_string=db_url,
+            description="Default PyArchInit database in user home directory"
+        )
+        logger.info("Saved default database to ConnectionManager")
+    except Exception as e:
+        logger.warning(f"Could not save to ConnectionManager: {e}")
+
+    return db_url
 
 
 @dataclass
@@ -14,11 +82,7 @@ class MCPConfig:
     """Configuration for PyArchInit MCP Server"""
 
     # Database
-    database_url: str = field(
-        default_factory=lambda: os.getenv(
-            "DATABASE_URL", "sqlite:///data/pyarchinit_mini.db"
-        )
-    )
+    database_url: str = field(default_factory=_get_default_database_url)
 
     # Blender Connection
     blender_host: str = field(
@@ -38,9 +102,13 @@ class MCPConfig:
     # MCP Server
     mcp_server_name: str = "pyarchinit-mini"
     mcp_server_version: str = "1.0.0"
-    mcp_transport: str = "stdio"  # or "tcp"
-    mcp_host: Optional[str] = None
-    mcp_port: Optional[int] = None
+    mcp_transport: str = "stdio"  # "stdio" | "tcp" | "sse" | "http"
+    mcp_host: str = field(
+        default_factory=lambda: os.getenv("MCP_HOST", "0.0.0.0")
+    )
+    mcp_port: int = field(
+        default_factory=lambda: int(os.getenv("MCP_PORT", "8765"))
+    )
 
     # 3D Builder Settings
     default_positioning: str = "graphml"  # "graphml" | "grid" | "force_directed"
@@ -87,18 +155,18 @@ class MCPConfig:
             )
 
         # Validate MCP transport
-        valid_transports = ["stdio", "tcp"]
+        valid_transports = ["stdio", "tcp", "sse", "http"]
         if self.mcp_transport not in valid_transports:
             raise ValueError(
                 f"Invalid MCP transport: {self.mcp_transport}. "
                 f"Must be one of {valid_transports}"
             )
 
-        # If TCP transport, ensure host and port are set
-        if self.mcp_transport == "tcp":
+        # If network transport (tcp/sse/http), ensure host and port are set
+        if self.mcp_transport in ["tcp", "sse", "http"]:
             if not self.mcp_host or not self.mcp_port:
                 raise ValueError(
-                    "MCP host and port must be set when using TCP transport"
+                    f"MCP host and port must be set when using {self.mcp_transport} transport"
                 )
 
 
