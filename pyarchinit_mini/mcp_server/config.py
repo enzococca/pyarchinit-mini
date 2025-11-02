@@ -52,10 +52,10 @@ def _get_default_database_url() -> str:
 
     # 3. Create default database in ~/.pyarchinit_mini/
     home_dir = Path.home() / '.pyarchinit_mini'
-    db_dir = home_dir / 'databases'
+    db_dir = home_dir / 'data'
     db_dir.mkdir(parents=True, exist_ok=True)
 
-    default_db_path = db_dir / 'default.db'
+    default_db_path = db_dir / 'pyarchinit_mini.db'
     db_url = f"sqlite:///{default_db_path}"
 
     logger.info(f"Using default database: {db_url}")
