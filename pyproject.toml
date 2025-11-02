@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.9.6"
+version = "1.9.7"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, Heriverse/ATON export integration, and 3D CRUD viewer"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -79,6 +79,15 @@ dependencies = [
     "graphviz>=0.20.0",
     # MCP Server (Model Context Protocol) for Claude AI integration
     "mcp>=0.1.0",
+    # PDF export with advanced features
+    "weasyprint>=60.0.0",
+    # Media processing
+    "python-magic>=0.4.0",
+    "moviepy>=1.0.0",
+    # Excel/CSV/DOCX export and import
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
+    "python-docx>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -86,40 +95,22 @@ dependencies = [
 cli = []
 # Web interface dependencies (now in core, kept for backward compatibility)
 web = []
-# Desktop GUI dependencies (tkinter is stdlib, no external deps needed)
-gui = [
-    "pillow>=10.0.0",
-]
+# Desktop GUI dependencies (now in core, kept for backward compatibility)
+gui = []
 # Full Harris Matrix visualization (now in core, kept for backward compatibility)
 harris = []
-# PDF export with advanced features
-pdf = [
-    "weasyprint>=60.0.0",
-]
-# Media processing
-media = [
-    "python-magic>=0.4.0",
-    "moviepy>=1.0.0",
-]
-# Excel/CSV/DOCX export and import
-export = [
-    "pandas>=2.0.0",
-    "openpyxl>=3.1.0",
-    "python-docx>=1.0.0",
-]
+# PDF export (now in core, kept for backward compatibility)
+pdf = []
+# Media processing (now in core, kept for backward compatibility)
+media = []
+# Excel/CSV/DOCX export and import (now in core, kept for backward compatibility)
+export = []
 # Authentication and authorization (now in core, kept for backward compatibility)
 auth = []
 # MCP Server (now in core, kept for backward compatibility)
 mcp = []
-# All optional features (CLI, Web, and Harris are now in core)
-all = [
-    "weasyprint>=60.0.0",
-    "python-magic>=0.4.0",
-    "moviepy>=1.0.0",
-    "pandas>=2.0.0",
-    "openpyxl>=3.1.0",
-    "python-docx>=1.0.0",
-]
+# All optional features (everything now in core, kept for backward compatibility)
+all = []
 # Development dependencies
 dev = [
     "pytest>=7.0.0",
