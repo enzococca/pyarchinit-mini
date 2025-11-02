@@ -48,6 +48,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Best practices and error handling
   - Usage examples and common patterns
   - Architecture documentation
+  - `MCP_TOOLS_REFERENCE.md`: Complete MCP tools reference (1465 lines, 41KB)
+  - Documentation for all 14 MCP tools
+  - Parameter specifications and return values
+  - Usage examples for each tool
+  - Best practices and troubleshooting
+  - Tool categorization and quick reference table
+  - Updated `docs/MCP_INTEGRATION.md` with links to tool reference
 
 - **Testing**
   - `test_crud_tools.py`: Full test suite (330 lines)

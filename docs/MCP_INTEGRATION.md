@@ -337,81 +337,65 @@ ChatGPT should connect to your server and display the sites!
 
 ## Available Tools
 
-PyArchInit MCP provides **5 main tools** for working with archaeological data:
+PyArchInit MCP provides **14 tools** for working with archaeological data:
 
-### 1. build_3d
-**Purpose:** Create 3D models from stratigraphic data
+**For complete documentation of all 14 tools, see [MCP_TOOLS_REFERENCE.md](../MCP_TOOLS_REFERENCE.md)**
 
-**Usage:**
+### Tool Categories
+
+**3D Visualization (5 tools)**
+- `build_3d_from_us` - Generate 3D models from US data
+- `calculate_positions` - Calculate spatial positions
+- `assign_materials` - Apply materials and colors
+- `filter_proxies` - Filter visible units
+- `export_3d_model` - Export to glTF/glB formats
+
+**Data Management (1 unified tool with 6 operations)**
+- `manage_data` - Insert, update, delete, upsert, get schema, validate stratigraphy
+  - See [CRUD_TOOLS.md](../CRUD_TOOLS.md) for detailed documentation
+
+**Data Import/Export (2 tools)**
+- `import_excel` - Import from Excel (Harris Matrix or Extended Matrix)
+- `create_harris_matrix` - Interactive Harris Matrix creation
+
+**Search & Query (2 tools)**
+- `search` - Search sites and US units
+- `fetch` - Fetch complete record details
+
+**Database Operations (2 tools)**
+- `create_database` - Create new PyArchInit databases
+- `manage_database_connections` - Switch between databases
+
+**Configuration (2 tools)**
+- `configure_em_nodes` - Manage Extended Matrix node types
+- `pyarchinit_sync` - Synchronize data
+
+### Quick Examples
+
+**3D Model Creation:**
 ```
 Create a 3D model for US 1, 2, 3
-Build 3D visualization for site "Pompei"
-Generate 3D model with GraphML positioning
 ```
 
-**Parameters:**
-- `us_ids`: List of US IDs to include
-- `mode`: "selected" | "all" | "site"
-- `positioning`: "graphml" | "simple" | "grid"
-- `site_id`: Site ID (when mode="site")
-
-### 2. filter
-**Purpose:** Filter stratigraphic units by criteria
-
-**Usage:**
+**Data Management:**
 ```
-Show only US from Roman period
-Filter US by area "Sector A"
-Show structures (USM) only
+Insert a new US with validation
+Get database schema for us_table
+Validate stratigraphic relationships
 ```
 
-**Parameters:**
-- `periodo`: Filter by archaeological period
-- `area`: Filter by excavation area
-- `unita_tipo`: Filter by unit type (US, USM, USD, etc.)
-
-### 3. export
-**Purpose:** Export data in various formats
-
-**Usage:**
+**Import Data:**
 ```
-Export site data to GraphML
-Export US as CSV
-Generate Harris Matrix PDF for site "Tempio"
+Import Extended Matrix from Excel file
 ```
 
-**Parameters:**
-- `format`: "graphml" | "csv" | "json" | "pdf"
-- `data_type`: "sites" | "us" | "relationships"
-- `site_id`: Site ID to export
-
-### 4. position
-**Purpose:** Calculate 3D positions for US
-
-**Usage:**
+**Database Operations:**
 ```
-Calculate positions using GraphML layout
-Position US with 0.8m layer spacing
+Create a new database for site "Pompeii"
+Switch to tutorial database
 ```
 
-**Parameters:**
-- `method`: "graphml" | "simple"
-- `layer_spacing`: Vertical spacing between layers
-- `us_ids`: US to position
-
-### 5. material
-**Purpose:** Apply materials to 3D models
-
-**Usage:**
-```
-Color US 3 red
-Apply stone material to USM 5
-```
-
-**Parameters:**
-- `us_id`: US to modify
-- `color`: Color name or hex code
-- `material_type`: "earth" | "stone" | "brick"
+For complete parameter lists, usage examples, and best practices for all 14 tools, see **[MCP_TOOLS_REFERENCE.md](../MCP_TOOLS_REFERENCE.md)**
 
 ---
 
