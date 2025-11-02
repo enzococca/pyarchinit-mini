@@ -139,8 +139,9 @@ def resolve_conflicts(
                 "message": "conflict_keys must be provided (at least one field)"
             }
 
-        # Get database connection
-        database_url = os.getenv("DATABASE_URL", "sqlite:///./pyarchinit_mini.db")
+        # Get database connection - use config default if DATABASE_URL not set
+        from pyarchinit_mini.mcp_server.config import _get_default_database_url
+        database_url = os.getenv("DATABASE_URL") or _get_default_database_url()
         db_connection = DatabaseConnection(database_url)
         db_manager = DatabaseManager(db_connection)
         engine = db_connection.engine
