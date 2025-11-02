@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.9.5"
+version = "1.9.6"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, Heriverse/ATON export integration, and 3D CRUD viewer"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -77,6 +77,8 @@ dependencies = [
     # Harris Matrix visualization (required by CLI)
     "matplotlib>=3.7.0",
     "graphviz>=0.20.0",
+    # MCP Server (Model Context Protocol) for Claude AI integration
+    "mcp>=0.1.0",
 ]
 
 [project.optional-dependencies]
@@ -107,10 +109,8 @@ export = [
 ]
 # Authentication and authorization (now in core, kept for backward compatibility)
 auth = []
-# MCP Server (Model Context Protocol) for Claude AI integration
-mcp = [
-    "mcp>=0.1.0",
-]
+# MCP Server (now in core, kept for backward compatibility)
+mcp = []
 # All optional features (CLI, Web, and Harris are now in core)
 all = [
     "weasyprint>=60.0.0",
