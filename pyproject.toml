@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "1.9.23"
+version = "1.9.24"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, Heriverse/ATON export integration, and 3D CRUD viewer"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -24,7 +24,7 @@ keywords = [
     "finds inventory"
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: GIS",
     "Topic :: Database :: Database Engines/Servers",

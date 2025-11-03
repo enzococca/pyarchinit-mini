@@ -84,7 +84,7 @@ msgstr "Regione:"
 #: pyarchinit_mini/desktop_gui/dialogs.py:171
 #: pyarchinit_mini/pdf_export/pdf_generator.py:160
 msgid "Municipality:"
-msgstr "Municipality:"
+msgstr "Comune:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:176
 #: pyarchinit_mini/pdf_export/pdf_generator.py:161
@@ -116,7 +116,7 @@ msgstr "Descrizione sito:"
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:438
 #: web_interface/templates/base.html:375
 msgid "Media"
-msgstr "Media"
+msgstr "Multimedia"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:210
 msgid "Add Media"
@@ -243,7 +243,7 @@ msgstr "Sito *:"
 #: pyarchinit_mini/desktop_gui/dialogs.py:743
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:126
 msgid "Area:"
-msgstr "Area:"
+msgstr "Settore:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:573
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:131
@@ -364,7 +364,7 @@ msgstr "Definizione:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:755
 msgid "Weight (g):"
-msgstr "Weight (g):"
+msgstr "Peso (g):"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:761
 #: pyarchinit_mini/desktop_gui/dialogs.py:1845
@@ -408,7 +408,7 @@ msgstr "Chiudi"
 #: pyarchinit_mini/desktop_gui/dialogs.py:885
 #: pyarchinit_mini/desktop_gui/dialogs.py:1330
 msgid "Select Site:"
-msgstr "ha eliminato il sito"
+msgstr "Seleziona Sito:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:893
 msgid "Generate Matrix"
@@ -430,7 +430,7 @@ msgstr "Visualizzazione Matrix:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:915
 msgid "Layout:"
-msgstr "Layout:"
+msgstr "Disposizione:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:960
 msgid ""
@@ -456,7 +456,7 @@ msgstr "Selezione"
 #: pyarchinit_mini/desktop_gui/dialogs.py:979
 #: pyarchinit_mini/desktop_gui/dialogs.py:1401
 msgid "Select a site"
-msgstr "ha eliminato il sito"
+msgstr "Seleziona un sito"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:985
 #, fuzzy, python-brace-format
@@ -499,11 +499,11 @@ msgstr "Sì"
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:157
 #: pyarchinit_mini/pdf_export/pdf_generator.py:408
 msgid "No"
-msgstr "No"
+msgstr "Nessuno"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1022
 msgid "⚠️ WARNING: The matrix contains cycles or logical errors\n"
-msgstr "⚠️ WARNING: The matrix contains cycles or logical errors\n"
+msgstr "⚠️ ATTENZIONE: La matrice contiene cicli o errori logici\n"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1031
 msgid ""
@@ -571,7 +571,7 @@ msgstr ""
 #: pyarchinit_mini/desktop_gui/dialogs.py:1268
 #, fuzzy, python-brace-format
 msgid "Error during export: {}"
-msgstr "Errore durante l'export GraphML"
+msgstr "Errore durante l'esportazione: {}"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1277
 msgid "Services not available for advanced editor"
@@ -652,7 +652,7 @@ msgstr "Salva report PDF"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1405
 msgid "Output File"
-msgstr "Output File"
+msgstr "File di Output"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1405
 msgid "Specify the output file"
@@ -761,7 +761,7 @@ msgstr "Configurazione PostgreSQL"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1592
 msgid "Host:"
-msgstr "Host:"
+msgstr "Server:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1597
 msgid "Port:"
@@ -773,11 +773,11 @@ msgstr "Database"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1607
 msgid "Username:"
-msgstr "Username:"
+msgstr "Nome Utente:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1612
 msgid "Password:"
-msgstr "Password:"
+msgstr "Parola d'Ordine:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1617
 msgid "Test Connection"
@@ -913,7 +913,7 @@ msgstr "Errore caricamento file"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1826
 msgid "File:"
-msgstr "File:"
+msgstr "Archivio:"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1836
 msgid "Entity Type:"
@@ -953,7 +953,7 @@ msgstr "Visualizza US"
 #: pyarchinit_mini/desktop_gui/dialogs.py:1885
 #: pyarchinit_mini/desktop_gui/main_window.py:143
 msgid "File"
-msgstr "File"
+msgstr "Archivio"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1885
 msgid "Select a file to upload"
@@ -1231,7 +1231,7 @@ msgstr "Modifica"
 #: pyarchinit_mini/desktop_gui/main_window.py:477
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:91
 msgid "Delete"
-msgstr "ha eliminato US"
+msgstr "Elimina"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:375
 #: pyarchinit_mini/desktop_gui/main_window.py:425
@@ -1388,7 +1388,7 @@ msgstr "aggiornato con successo"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:848
 msgid "Select an artifact to edit"
-msgstr "ha eliminato reperto"
+msgstr "Seleziona un reperto da modificare"
 
 #: pyarchinit_mini/desktop_gui/main_window.py:863
 msgid "Select an artifact to delete"
@@ -1659,7 +1659,7 @@ msgstr "Harris Matrix"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:409
 msgid "Isolated US:"
-msgstr "ha eliminato US"
+msgstr "US Isolate:"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:424
 msgid "Harris Matrix Diagram"
@@ -2031,7 +2031,7 @@ msgstr "Errore durante la conversione a GraphML"
 
 #: pyarchinit_mini/web_interface/app.py:1653
 msgid "Error during GraphML export"
-msgstr "Errore durante l'export GraphML"
+msgstr "Errore durante l'esportazione GraphML"
 
 #: pyarchinit_mini/web_interface/app.py:1723
 msgid "Validation error"
@@ -2047,7 +2047,7 @@ msgstr "Esporta PDF"
 
 #: pyarchinit_mini/web_interface/app.py:1861
 msgid "Error exporting Harris Matrix PDF"
-msgstr "Errore export PDF Harris Matrix"
+msgstr "Errore durante l'esportazione del PDF della Matrice di Harris"
 
 #: pyarchinit_mini/web_interface/app.py:1900
 #: pyarchinit_mini/web_interface/app.py:1934
@@ -2202,7 +2202,7 @@ msgstr "ha modificato il sito"
 
 #: web_interface/templates/base.html:538
 msgid "deleted site"
-msgstr "ha eliminato il sito"
+msgstr "Dettagli Siti"
 
 #: web_interface/templates/base.html:539
 msgid "created US"
@@ -2242,7 +2242,7 @@ msgstr "Siti archeologici"
 
 #: web_interface/templates/dashboard.html:66
 msgid "Recent Sites"
-msgstr "ha eliminato il sito"
+msgstr "Siti Recenti"
 
 #: web_interface/templates/dashboard.html:78
 #: web_interface/templates/harris_matrix/viewer_3d_integrated.html:293
@@ -2274,7 +2274,7 @@ msgstr "Azioni"
 
 #: web_interface/templates/dashboard.html:162
 msgid "System"
-msgstr "US per Sito"
+msgstr "Info"
 
 #: web_interface/templates/dashboard.html:167
 msgid "Version"
@@ -2375,11 +2375,11 @@ msgstr "Errore caricamento dashboard"
 #: web_interface/templates/harris_matrix/graphml_export.html:3
 #: web_interface/templates/harris_matrix/graphml_export.html:7
 msgid "Export Harris Matrix to GraphML (yEd)"
-msgstr "Errore export PDF Harris Matrix"
+msgstr "Esporta Matrice di Harris in GraphML (yEd)"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:11
 msgid "GraphML Export"
-msgstr "Errore durante l'export GraphML"
+msgstr "Esportazione GraphML"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:12
 msgid ""
@@ -2428,7 +2428,7 @@ msgstr ""
 
 #: web_interface/templates/harris_matrix/graphml_export.html:57
 msgid "Export to GraphML"
-msgstr "Export to GraphML"
+msgstr "Esporta in GraphML"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:67
 msgid "Export s3Dgraphy (Extended Matrix)"
