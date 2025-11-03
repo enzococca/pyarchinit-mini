@@ -61,6 +61,7 @@ from .tools.export_tool import ExportTool
 from .tools.position_tool import PositionTool
 from .tools.material_tool import MaterialTool
 from .tools.import_excel_tool import ImportExcelTool
+from .tools.upload_file_tool import UploadFileTool
 from .tools.create_harris_matrix_tool import CreateHarrisMatrixTool
 from .tools.configure_em_nodes_tool import ConfigureEMNodesTool
 from .tools.create_database_tool import CreateDatabaseTool
@@ -220,6 +221,12 @@ class PyArchInitMCPServer:
 
         # Import Excel Tool
         self.tools["import_excel"] = ImportExcelTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Upload File Tool
+        self.tools["upload_file"] = UploadFileTool(
             db_session=self.db_session,
             config=self.config,
         )

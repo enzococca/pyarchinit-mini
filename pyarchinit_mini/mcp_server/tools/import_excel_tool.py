@@ -35,30 +35,11 @@ class ImportExcelTool(BaseTool):
         return ToolDescription(
             name="import_excel",
             description=(
-                "⚠️ SPECIALIZED HARRIS MATRIX EXCEL IMPORT - Use this tool ONLY for these two specific Excel formats:\n\n"
-                "📊 **Format 1: 'harris_template'** - Multi-sheet Excel with:\n"
-                "   ✓ NODES sheet (columns: us_number, unit_type, description, area, period, phase, file_path)\n"
-                "   ✓ RELATIONSHIPS sheet (columns: from_us, to_us, relationship, notes)\n"
-                "   ✓ Optional INSTRUCTIONS sheet\n"
-                "   ✓ Generate template with: pyarchinit-harris-template CLI command\n\n"
-                "📊 **Format 2: 'extended_matrix'** - Single sheet with inline relationships:\n"
-                "   ✓ Columns: ID, DEFINITION, LONG_DESCRIPTION, PHASE, NOTES\n"
-                "   ✓ Relationship columns: is_before, covers, is_covered_by, cuts, is_cut_by, leans_on, equals, fills\n"
-                "   ✓ Each relationship column contains comma-separated US IDs\n"
-                "   ✓ Example: Metro C excavation files (Unita_Stratigrafiche_MetroC_*.xlsx)\n\n"
-                "❌ **DO NOT USE for**:\n"
-                "   • Generic Excel/CSV data files → Use 'import_data' tool instead\n"
-                "   • PyArchInit database files (.db) → Use PyArchInit import tool\n"
-                "   • Inventory/finds lists → Use 'import_data' tool\n"
-                "   • Site lists → Use 'import_data' tool\n\n"
-                "✅ **This tool automatically**:\n"
-                "   1. Creates/updates US records in database\n"
-                "   2. Creates stratigraphic relationships\n"
-                "   3. Optionally generates GraphML for Extended Matrix visualization (yEd, Gephi)\n"
-                "   4. Updates rapporti field with relationship summaries\n\n"
-                "💡 **How to recognize the correct format**:\n"
-                "   • harris_template: Multiple sheets named NODES and RELATIONSHIPS\n"
-                "   • extended_matrix: Single sheet with relationship columns (is_before, covers, etc.)\n"
+                "⚡ IMMEDIATE ACTION: Import Harris Matrix stratigraphic data from Excel. "
+                "Automatically creates US records, relationships, and GraphML visualization. "
+                "Supports 'harris_template' (NODES/RELATIONSHIPS sheets) and 'extended_matrix' (single sheet with relationship columns). "
+                "DO NOT analyze or validate - call immediately. "
+                "Use file_id from upload_file tool OR excel_base64 directly."
             ),
             input_schema={
                 "type": "object",
@@ -66,35 +47,36 @@ class ImportExcelTool(BaseTool):
                     "format": {
                         "type": "string",
                         "enum": ["harris_template", "extended_matrix"],
-                        "description": (
-                            "'harris_template' = Multi-sheet format with NODES/RELATIONSHIPS sheets\n"
-                            "'extended_matrix' = Single sheet with inline relationship columns (ID, DEFINITION, is_before, covers, etc.)"
-                        )
+                        "description": "Excel format: 'harris_template' or 'extended_matrix'"
                     },
                     "site_name": {
                         "type": "string",
-                        "description": "Archaeological site name (e.g., 'Metro C - Amba Aradam', 'Pompei Area 1')"
+                        "description": "Site name"
                     },
                     "excel_base64": {
                         "type": "string",
-                        "description": "Base64-encoded Excel file content (.xlsx, .xls, or .csv)"
+                        "description": "Base64-encoded Excel file (or use file_id)"
+                    },
+                    "file_id": {
+                        "type": "string",
+                        "description": "File ID from upload_file tool (or use excel_base64)"
                     },
                     "filename": {
                         "type": "string",
-                        "description": "Original filename (e.g., 'Unita_Stratigrafiche_MetroC.xlsx')"
+                        "description": "Filename"
                     },
                     "generate_graphml": {
                         "type": "boolean",
-                        "description": "Generate GraphML file for Extended Matrix visualization (default: true)",
+                        "description": "Generate GraphML (default: true)",
                         "default": True
                     },
                     "reverse_edges": {
                         "type": "boolean",
-                        "description": "Reverse edge direction in GraphML (for different visualization layouts, default: false)",
+                        "description": "Reverse edges (default: false)",
                         "default": False
                     }
                 },
-                "required": ["format", "site_name", "excel_base64", "filename"],
+                "required": ["format", "site_name"],
             },
         )
 
@@ -104,31 +86,47 @@ class ImportExcelTool(BaseTool):
             import_format = arguments.get("format")
             site_name = arguments.get("site_name")
             excel_base64 = arguments.get("excel_base64")
+            file_id = arguments.get("file_id")
             filename = arguments.get("filename", "import.xlsx")
             generate_graphml = arguments.get("generate_graphml", True)
             reverse_edges = arguments.get("reverse_edges", False)
 
             # Validate inputs
-            if not all([import_format, site_name, excel_base64]):
-                return self._format_error("Missing required parameters")
+            if not import_format or not site_name:
+                return self._format_error("Missing required parameters: format and site_name")
+
+            if not excel_base64 and not file_id:
+                return self._format_error("Must provide either excel_base64 or file_id")
 
             if import_format not in ["harris_template", "extended_matrix"]:
                 return self._format_error("Invalid format. Use 'harris_template' or 'extended_matrix'")
 
-            # Decode base64 Excel file
-            try:
-                excel_data = base64.b64decode(excel_base64)
-            except Exception as e:
-                return self._format_error(f"Failed to decode Excel file: {str(e)}")
+            # Get file data from file_id or base64
+            if file_id:
+                # Use uploaded file
+                from .upload_file_tool import get_uploaded_file_path
+                filepath = get_uploaded_file_path(file_id)
+                if not filepath or not os.path.exists(filepath):
+                    return self._format_error(f"File not found for file_id: {file_id}")
 
-            # Create temp directory and save file
-            temp_dir = tempfile.mkdtemp()
-            filepath = os.path.join(temp_dir, filename)
+                # File already exists, just use it
+                temp_dir = os.path.dirname(filepath)
+                logger.info(f"Excel import using file_id: {file_id}, format={import_format}, site={site_name}")
+            else:
+                # Decode base64 Excel file
+                try:
+                    excel_data = base64.b64decode(excel_base64)
+                except Exception as e:
+                    return self._format_error(f"Failed to decode Excel file: {str(e)}")
 
-            with open(filepath, 'wb') as f:
-                f.write(excel_data)
+                # Create temp directory and save file
+                temp_dir = tempfile.mkdtemp()
+                filepath = os.path.join(temp_dir, filename)
 
-            logger.info(f"Excel import: format={import_format}, site={site_name}, file={filename}, reverse_edges={reverse_edges}")
+                with open(filepath, 'wb') as f:
+                    f.write(excel_data)
+
+                logger.info(f"Excel import from base64: format={import_format}, site={site_name}, file={filename}, reverse_edges={reverse_edges}")
 
             # Perform import based on format
             if import_format == "harris_template":
@@ -136,11 +134,16 @@ class ImportExcelTool(BaseTool):
             else:  # extended_matrix
                 result = self._import_extended_matrix(filepath, site_name, generate_graphml, reverse_edges, temp_dir)
 
-            # Cleanup temp file
-            try:
-                os.remove(filepath)
-            except:
-                pass
+            # Cleanup temp file (only if we created it)
+            if not file_id:
+                try:
+                    os.remove(filepath)
+                except:
+                    pass
+            else:
+                # Cleanup uploaded file
+                from .upload_file_tool import cleanup_uploaded_file
+                cleanup_uploaded_file(file_id)
 
             return self._format_success(
                 result,
@@ -161,7 +164,7 @@ class ImportExcelTool(BaseTool):
         import os
 
         # Get database connection from config
-        db_url = self.db_manager.connection.url if hasattr(self, 'db_manager') else os.getenv('DATABASE_URL')
+        db_url = self.db_manager.connection.connection_string if hasattr(self, 'db_manager') else os.getenv('DATABASE_URL')
 
         if not db_url:
             return {'success': False, 'message': 'Database URL not configured'}
@@ -235,7 +238,7 @@ class ImportExcelTool(BaseTool):
         import os
 
         # Get database URL
-        db_url = self.db_manager.connection.url if hasattr(self, 'db_manager') else os.getenv('DATABASE_URL')
+        db_url = self.db_manager.connection.connection_string if hasattr(self, 'db_manager') else os.getenv('DATABASE_URL')
 
         if not db_url:
             return {'success': False, 'message': 'Database URL not configured'}
