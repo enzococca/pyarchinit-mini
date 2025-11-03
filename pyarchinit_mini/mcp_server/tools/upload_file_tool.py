@@ -26,19 +26,22 @@ class UploadFileTool(BaseTool):
         return ToolDescription(
             name="upload_file",
             description=(
-                "Upload a file to temporary storage. Returns a file_id for use in other tools. "
-                "Use this BEFORE import_excel to avoid passing large base64 data directly."
+                "🔴 STEP 1 OF 2: Upload Excel file. "
+                "ALWAYS use this FIRST when importing Excel files. "
+                "Returns file_id (36 chars) to use in STEP 2 (import_excel). "
+                "NEVER pass large base64 directly to import_excel - causes UI freeze! "
+                "Workflow: upload_file → get file_id → import_excel with file_id."
             ),
             input_schema={
                 "type": "object",
                 "properties": {
                     "filename": {
                         "type": "string",
-                        "description": "Filename"
+                        "description": "Excel filename (e.g., 'data.xlsx')"
                     },
                     "content_base64": {
                         "type": "string",
-                        "description": "Base64-encoded file content"
+                        "description": "Base64-encoded Excel file content"
                     },
                 },
                 "required": ["filename", "content_base64"],

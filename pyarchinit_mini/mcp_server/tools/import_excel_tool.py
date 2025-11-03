@@ -35,11 +35,11 @@ class ImportExcelTool(BaseTool):
         return ToolDescription(
             name="import_excel",
             description=(
-                "⚡ IMMEDIATE ACTION: Import Harris Matrix stratigraphic data from Excel. "
-                "Automatically creates US records, relationships, and GraphML visualization. "
-                "Supports 'harris_template' (NODES/RELATIONSHIPS sheets) and 'extended_matrix' (single sheet with relationship columns). "
-                "DO NOT analyze or validate - call immediately. "
-                "Use file_id from upload_file tool OR excel_base64 directly."
+                "🔴 STEP 2 OF 2: Import Excel stratigraphic data using file_id. "
+                "REQUIRED: Use file_id from upload_file (STEP 1). "
+                "Supports 'harris_template' (NODES/RELATIONSHIPS sheets) and 'extended_matrix' (inline relationships). "
+                "Creates US records + relationships + GraphML visualization. "
+                "⚠️ DO NOT use excel_base64 parameter - causes UI freeze! Use file_id only."
             ),
             input_schema={
                 "type": "object",
@@ -51,32 +51,32 @@ class ImportExcelTool(BaseTool):
                     },
                     "site_name": {
                         "type": "string",
-                        "description": "Site name"
-                    },
-                    "excel_base64": {
-                        "type": "string",
-                        "description": "Base64-encoded Excel file (or use file_id)"
+                        "description": "Archaeological site name"
                     },
                     "file_id": {
                         "type": "string",
-                        "description": "File ID from upload_file tool (or use excel_base64)"
+                        "description": "🔴 REQUIRED: File ID from upload_file tool (STEP 1)"
+                    },
+                    "excel_base64": {
+                        "type": "string",
+                        "description": "⚠️ DEPRECATED: DO NOT USE - causes UI freeze. Use file_id instead."
                     },
                     "filename": {
                         "type": "string",
-                        "description": "Filename"
+                        "description": "Optional filename (used only with excel_base64)"
                     },
                     "generate_graphml": {
                         "type": "boolean",
-                        "description": "Generate GraphML (default: true)",
+                        "description": "Generate GraphML visualization (default: true)",
                         "default": True
                     },
                     "reverse_edges": {
                         "type": "boolean",
-                        "description": "Reverse edges (default: false)",
+                        "description": "Reverse stratigraphic edges (default: false)",
                         "default": False
                     }
                 },
-                "required": ["format", "site_name"],
+                "required": ["format", "site_name", "file_id"],
             },
         )
 
