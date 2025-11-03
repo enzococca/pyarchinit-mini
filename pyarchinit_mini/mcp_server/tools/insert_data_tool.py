@@ -115,6 +115,38 @@ def insert_data(
                 "available_tables": all_tables
             }
 
+        # ⚠️ BLOCK DIRECT MEDIA TABLE INSERTS - Use manage_media tool instead
+        MEDIA_TABLES = ["media_table", "media_thumb_table"]
+        if table in MEDIA_TABLES:
+            return {
+                "success": False,
+                "error": "use_manage_media_tool",
+                "message": (
+                    f"❌ Direct insert into '{table}' is not allowed. "
+                    f"Media files must be uploaded using the 'manage_media' tool "
+                    f"to ensure proper file storage and path management. "
+                    f"\n\n📋 How to use manage_media:\n"
+                    f"1. Upload file with operation='upload'\n"
+                    f"2. Provide entity_type ('site', 'us', or 'inventario')\n"
+                    f"3. Provide entity_id (site name, US id, or inventario id)\n"
+                    f"4. Either provide file_path on server OR file_content_base64\n"
+                    f"5. The tool will copy files to ~/.pyarchinit_mini/media/ and create DB record\n\n"
+                    f"Example:\n"
+                    f"{{\n"
+                    f"  'operation': 'upload',\n"
+                    f"  'entity_type': 'site',\n"
+                    f"  'entity_id': 'Pompei',\n"
+                    f"  'file_content_base64': '<base64-encoded-content>',\n"
+                    f"  'filename': 'site_photo.jpg',\n"
+                    f"  'description': 'Site overview'\n"
+                    f"}}\n\n"
+                    f"This ensures files are stored permanently in the correct location, "
+                    f"not in temporary directories like /tmp/ where they will be lost."
+                ),
+                "correct_tool": "manage_media",
+                "tool_operations": ["upload", "get", "list", "update", "delete", "statistics", "set_primary"]
+            }
+
         # Reflect table structure
         table_obj = Table(table, metadata, autoload_with=engine)
 

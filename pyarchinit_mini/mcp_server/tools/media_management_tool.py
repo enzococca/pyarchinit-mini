@@ -29,11 +29,20 @@ class MediaManagementTool(BaseTool):
         return ToolDescription(
             name="manage_media",
             description=(
-                "Comprehensive media file management tool. "
+                "⚠️ REQUIRED FOR ALL MEDIA OPERATIONS - This is the ONLY correct way to upload media files. "
+                "DO NOT use 'insert_data' tool for media_table - it will fail. "
+                "\n\n"
+                "Comprehensive media file management tool: "
                 "Upload, retrieve, update, and delete media files (images, documents, videos, 3D models). "
                 "Associate media with entities: site, us, inventario. "
                 "Supports base64-encoded content or file paths. "
-                "Get media statistics and summaries."
+                "Automatically handles: "
+                "1) File storage in permanent location (~/.pyarchinit_mini/media/) "
+                "2) Unique filename generation with hash "
+                "3) Database record creation with correct relative paths "
+                "4) Thumbnail generation for images "
+                "\n\n"
+                "Files are stored permanently, NOT in /tmp/ where they would be lost on reboot."
             ),
             input_schema={
                 "type": "object",
