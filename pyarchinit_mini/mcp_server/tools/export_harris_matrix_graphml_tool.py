@@ -18,16 +18,18 @@ class ExportHarrisMatrixGraphMLTool(BaseTool):
     """Auto-export Harris Matrix to GraphML format"""
 
     def __init__(self, db_session, config):
-        """Initialize with db_session and config, create db_manager"""
+        """Initialize with db_session and config, create db_manager and services"""
         super().__init__(db_session, config)
         # Create db_manager from session's bind (engine)
         from pyarchinit_mini.database.manager import DatabaseManager
         from pyarchinit_mini.database.connection import DatabaseConnection
+        from pyarchinit_mini.services.us_service import USService
         # Get database URL from config or environment
         import os
         db_url = getattr(config, 'database_url', None) or os.getenv('DATABASE_URL', 'sqlite:///pyarchinit_mini.db')
         connection = DatabaseConnection.from_url(db_url)
         self.db_manager = DatabaseManager(connection)
+        self.us_service = USService(self.db_manager)
 
     def to_tool_description(self) -> ToolDescription:
         return ToolDescription(
@@ -115,7 +117,7 @@ class ExportHarrisMatrixGraphMLTool(BaseTool):
         reverse_epochs: bool = True
     ) -> Optional[str]:
         """
-        Generate GraphML file for a site
+        Generate GraphML file for a site using PureNetworkXExporter
 
         Args:
             site_name: Name of the site
@@ -128,42 +130,21 @@ class ExportHarrisMatrixGraphMLTool(BaseTool):
         """
         try:
             from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
-            from pyarchinit_mini.models.us import US as USModel
-            import networkx as nx
+            from pathlib import Path
 
-            # Get matrix generator
-            matrix_generator = HarrisMatrixGenerator(self.db_manager)
+            # Create matrix generator with db_manager and us_service
+            matrix_generator = HarrisMatrixGenerator(self.db_manager, self.us_service)
 
-            # Generate Harris Matrix graph
+            # Generate Harris Matrix graph from database
             graph = matrix_generator.generate_matrix(site_name)
-            has_relationships = graph and graph.number_of_edges() > 0
 
             if not graph or graph.number_of_nodes() == 0:
-                logger.warning(f"No stratigraphic relationships found for site {site_name}, creating minimal GraphML")
-                # Create a minimal GraphML with just the nodes (no relationships)
-                graph = nx.DiGraph()
-
-                # Add nodes from US table (without relationships)
-                us_records = self.db_session.query(USModel).filter(USModel.sito == site_name).all()
-                for us in us_records:
-                    # Add node with basic attributes for compatibility
-                    graph.add_node(
-                        str(us.us),
-                        label=f"US {us.us}",
-                        description=us.descrizione or "",
-                        unita_tipo=us.unita_tipo or "US"
-                    )
-
-                if graph.number_of_nodes() == 0:
-                    logger.error(f"No US records found for site {site_name}")
-                    return None
-
-                has_relationships = False
+                logger.error(f"No stratigraphic units found for site {site_name}")
+                return None
 
             # Determine output path
             if not output_path:
                 # Create default output directory
-                from pathlib import Path
                 home_dir = Path.home() / '.pyarchinit_mini' / 'graphml'
                 home_dir.mkdir(parents=True, exist_ok=True)
 
@@ -179,20 +160,17 @@ class ExportHarrisMatrixGraphMLTool(BaseTool):
                 output_path = temp_file.name
                 temp_file.close()
 
-            # Export to GraphML
-            if has_relationships:
-                # Use yEd exporter for full Harris Matrix with relationships
-                result_path = matrix_generator.export_to_graphml(
-                    graph=graph,
-                    output_path=output_path,
-                    site_name=site_name,
-                    title=title or f"{site_name} - Harris Matrix (Auto-generated)",
-                    reverse_epochs=reverse_epochs
-                )
-            else:
-                # Use basic NetworkX export for simple graphs (more compatible)
-                nx.write_graphml(graph, output_path)
-                result_path = output_path
+            # Export to GraphML using PureNetworkXExporter (no Graphviz required)
+            result_path = matrix_generator.export_to_graphml(
+                graph=graph,
+                output_path=output_path,
+                site_name=site_name,
+                title=title or f"{site_name} - Harris Matrix",
+                use_extended_labels=True,
+                include_periods=True,
+                reverse_epochs=reverse_epochs,
+                use_graphviz=False  # Use pure NetworkX (documented approach)
+            )
 
             if not result_path or not os.path.exists(result_path):
                 logger.error(f"GraphML export failed for site {site_name}")
