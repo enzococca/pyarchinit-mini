@@ -238,7 +238,8 @@ class HarrisMatrixImporter:
     def import_matrix(self, file_path: str, site_name: str,
                      export_graphml: bool = False,
                      export_dot: bool = False,
-                     output_dir: Optional[str] = None) -> bool:
+                     output_dir: Optional[str] = None,
+                     reverse_edges: bool = False) -> bool:
         """
         Import complete Harris Matrix from file
 
@@ -248,6 +249,7 @@ class HarrisMatrixImporter:
             export_graphml: Export to GraphML format after import
             export_dot: Export to DOT format after import
             output_dir: Directory for exports (default: current directory)
+            reverse_edges: Reverse edge direction in GraphML (default: False)
 
         Returns:
             True if successful, False otherwise
@@ -430,11 +432,11 @@ class HarrisMatrixImporter:
         # Export if requested
         if export_graphml or export_dot:
             click.echo(f"\n📤 Exporting...")
-            self._export_matrix(site_name, export_graphml, export_dot, output_dir)
+            self._export_matrix(site_name, export_graphml, export_dot, output_dir, reverse_edges)
 
         return True
 
-    def _export_matrix(self, site_name: str, export_graphml: bool, export_dot: bool, output_dir: Optional[str]):
+    def _export_matrix(self, site_name: str, export_graphml: bool, export_dot: bool, output_dir: Optional[str], reverse_edges: bool = False):
         """Export matrix to GraphML and/or DOT formats"""
         if output_dir is None:
             output_dir = '.'
@@ -467,7 +469,8 @@ class HarrisMatrixImporter:
                     output_path=graphml_path,
                     use_extended_labels=True,
                     site_name=site_name,
-                    include_periods=True
+                    include_periods=True,
+                    reverse_epochs=reverse_edges
                 )
                 if result_path:
                     click.echo(f"   ✓ GraphML: {graphml_path}")

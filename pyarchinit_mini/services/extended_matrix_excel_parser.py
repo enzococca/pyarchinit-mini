@@ -516,12 +516,13 @@ class ExtendedMatrixExcelParser:
             self.statistics['errors'].append(error_msg)
             print(f"✗ {error_msg}")
 
-    def generate_graphml(self, output_path: Optional[str] = None) -> str:
+    def generate_graphml(self, output_path: Optional[str] = None, reverse_edges: bool = False) -> str:
         """
         Generate GraphML file for Extended Matrix visualization.
 
         Args:
             output_path: Optional output path for GraphML file
+            reverse_edges: Reverse edge direction in GraphML (default: False)
 
         Returns:
             Path to generated GraphML file
@@ -561,7 +562,8 @@ class ExtendedMatrixExcelParser:
                 output_path=output_path,
                 use_extended_labels=True,
                 site_name=self.site_name,
-                include_periods=True
+                include_periods=True,
+                reverse_epochs=reverse_edges
             )
 
             if result_path:
@@ -579,12 +581,14 @@ class ExtendedMatrixExcelParser:
             print(f"✗ {error_msg}")
             raise
 
-    def run(self, generate_graphml: bool = True) -> Dict:
+    def run(self, generate_graphml: bool = True, output_dir: Optional[str] = None, reverse_edges: bool = False) -> Dict:
         """
         Run complete import process.
 
         Args:
             generate_graphml: Whether to generate GraphML file (default: True)
+            output_dir: Output directory for GraphML file (optional)
+            reverse_edges: Reverse edge direction in GraphML (default: False)
 
         Returns:
             Dictionary with import statistics
@@ -618,7 +622,14 @@ class ExtendedMatrixExcelParser:
             # Step 6: Generate GraphML (optional)
             graphml_path = None
             if generate_graphml:
-                graphml_path = self.generate_graphml()
+                # Build output path
+                if output_dir:
+                    os.makedirs(output_dir, exist_ok=True)
+                    output_path = os.path.join(output_dir, f"{self.site_name.replace(' ', '_')}_extended_matrix.graphml")
+                else:
+                    output_path = None
+
+                graphml_path = self.generate_graphml(output_path=output_path, reverse_edges=reverse_edges)
                 self.statistics['graphml_path'] = graphml_path
 
             # Print summary
@@ -651,8 +662,11 @@ class ExtendedMatrixExcelParser:
 def import_extended_matrix_excel(
     excel_path: str,
     site_name: str,
+    db_url: str = None,
     generate_graphml: bool = True,
-    db_connection: Optional[DatabaseConnection] = None
+    db_connection: Optional[DatabaseConnection] = None,
+    output_dir: Optional[str] = None,
+    reverse_edges: bool = False
 ) -> Dict:
     """
     Convenience function to import Extended Matrix Excel file.
@@ -660,8 +674,11 @@ def import_extended_matrix_excel(
     Args:
         excel_path: Path to Excel file
         site_name: Archaeological site name
+        db_url: Database URL string (optional, for backwards compatibility)
         generate_graphml: Whether to generate GraphML (default: True)
         db_connection: Database connection (optional)
+        output_dir: Output directory for GraphML file (optional)
+        reverse_edges: Reverse edge direction in GraphML (default: False)
 
     Returns:
         Dictionary with import statistics
@@ -670,13 +687,22 @@ def import_extended_matrix_excel(
         >>> stats = import_extended_matrix_excel(
         ...     excel_path='data/MetroC_AmbaAradam.xlsx',
         ...     site_name='Metro C - Amba Aradam',
-        ...     generate_graphml=True
+        ...     generate_graphml=True,
+        ...     reverse_edges=False
         ... )
         >>> print(f"Imported {stats['us_created']} US records")
     """
+    # Handle db_url for backwards compatibility
+    if db_url and not db_connection:
+        db_connection = DatabaseConnection.from_url(db_url)
+
     parser = ExtendedMatrixExcelParser(
         excel_path=excel_path,
         site_name=site_name,
         db_connection=db_connection
     )
-    return parser.run(generate_graphml=generate_graphml)
+    return parser.run(
+        generate_graphml=generate_graphml,
+        output_dir=output_dir,
+        reverse_edges=reverse_edges
+    )

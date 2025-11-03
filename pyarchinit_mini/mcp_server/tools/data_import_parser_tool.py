@@ -64,11 +64,28 @@ class DataImportParserTool(BaseTool):
         return ToolDescription(
             name="import_data",
             description=(
-                "Automatic data import parser with format detection and field mapping. "
-                "Import archaeological data from CSV, Excel (XLS, XLSX), JSON, or XML files. "
-                "Automatically detects field mappings, validates data, handles errors, "
-                "and provides detailed statistics. Supports base64-encoded content or file paths. "
-                "Use for bulk importing sites, US, inventario, and other archaeological data."
+                "✅ GENERIC DATA IMPORT PARSER - Use this tool for generic Excel/CSV/JSON/XML files with AUTO field mapping.\n\n"
+                "📋 **Use this tool for**:\n"
+                "   • Generic Excel/CSV files with site data (columns: sito, nazione, comune, etc.)\n"
+                "   • Generic US data files (columns: sito, area, us, unita_tipo, descrizione)\n"
+                "   • Inventory/finds lists (columns: numero_inventario, tipo_reperto, materiale)\n"
+                "   • Any archaeological data file where columns can be auto-mapped to database fields\n\n"
+                "❌ **DO NOT USE for**:\n"
+                "   • Harris Matrix Template Excel (multi-sheet with NODES/RELATIONSHIPS) → Use 'import_excel' tool with format='harris_template'\n"
+                "   • Extended Matrix Excel (single sheet with relationship columns: is_before, covers, etc.) → Use 'import_excel' tool with format='extended_matrix'\n"
+                "   • Metro C excavation files → Use 'import_excel' tool with format='extended_matrix'\n\n"
+                "🔄 **This tool automatically**:\n"
+                "   1. Detects file format (CSV, Excel, JSON, XML)\n"
+                "   2. Auto-maps column headers to database fields (e.g., 'site' → 'sito', 'description' → 'descrizione')\n"
+                "   3. Validates data before import\n"
+                "   4. Imports records into appropriate table (site_table, us_table, inventario_materiali_table)\n"
+                "   5. Provides detailed statistics and error reports\n\n"
+                "💡 **Supported operations**:\n"
+                "   • 'parse' = Analyze file structure and detect mappings\n"
+                "   • 'validate' = Check data validity without importing\n"
+                "   • 'preview' = Preview first N rows with detected mappings\n"
+                "   • 'analyze' = Get file statistics and column analysis\n"
+                "   • 'import' = Parse and import data into database\n"
             ),
             input_schema={
                 "type": "object",
