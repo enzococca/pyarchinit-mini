@@ -406,6 +406,7 @@ class PyArchInitMCPServer:
             @self.server.list_tools()
             async def handle_list_tools():
                 """List available tools"""
+                logger.info(f"🔍 MCP: list_tools() called - returning {len(self.tools)} tools")
                 tools = []
                 for tool in self.tools.values():
                     desc = tool.to_tool_description()
@@ -416,15 +417,21 @@ class PyArchInitMCPServer:
                             inputSchema=desc.input_schema,
                         )
                     )
+                    logger.debug(f"  - Tool: {desc.name}")
+                logger.info(f"✓ MCP: Tools returned: {[t.name for t in tools]}")
                 return tools
 
             @self.server.call_tool()
             async def handle_call_tool(name: str, arguments: Dict[str, Any]):
                 """Call a tool"""
+                logger.info(f"🔧 MCP: call_tool() called - tool={name}, args={list(arguments.keys())}")
                 if name not in self.tools:
+                    logger.error(f"✗ MCP: Unknown tool: {name}")
                     raise ValueError(f"Unknown tool: {name}")
 
-                return await self.tools[name].execute(arguments)
+                result = await self.tools[name].execute(arguments)
+                logger.info(f"✓ MCP: Tool {name} executed successfully")
+                return result
 
             @self.server.list_prompts()
             async def handle_list_prompts():

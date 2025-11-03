@@ -77,9 +77,7 @@ class ImportExcelTool(BaseTool):
         try:
             import_format = arguments.get("format")
             site_name = arguments.get("site_name")
-            excel_base64 = arguments.get("excel_base64")
             file_id = arguments.get("file_id")
-            filename = arguments.get("filename", "import.xlsx")
             generate_graphml = arguments.get("generate_graphml", True)
             reverse_edges = arguments.get("reverse_edges", False)
 
@@ -87,38 +85,21 @@ class ImportExcelTool(BaseTool):
             if not import_format or not site_name:
                 return self._format_error("Missing required parameters: format and site_name")
 
-            if not excel_base64 and not file_id:
-                return self._format_error("Must provide either excel_base64 or file_id")
+            if not file_id:
+                return self._format_error("file_id is required. Use upload_file tool first to upload Excel file and get file_id.")
 
             if import_format not in ["harris_template", "extended_matrix"]:
                 return self._format_error("Invalid format. Use 'harris_template' or 'extended_matrix'")
 
-            # Get file data from file_id or base64
-            if file_id:
-                # Use uploaded file
-                from .upload_file_tool import get_uploaded_file_path
-                filepath = get_uploaded_file_path(file_id)
-                if not filepath or not os.path.exists(filepath):
-                    return self._format_error(f"File not found for file_id: {file_id}")
+            # Get file from file_id
+            from .upload_file_tool import get_uploaded_file_path
+            filepath = get_uploaded_file_path(file_id)
+            if not filepath or not os.path.exists(filepath):
+                return self._format_error(f"File not found for file_id: {file_id}")
 
-                # File already exists, just use it
-                temp_dir = os.path.dirname(filepath)
-                logger.info(f"Excel import using file_id: {file_id}, format={import_format}, site={site_name}")
-            else:
-                # Decode base64 Excel file
-                try:
-                    excel_data = base64.b64decode(excel_base64)
-                except Exception as e:
-                    return self._format_error(f"Failed to decode Excel file: {str(e)}")
-
-                # Create temp directory and save file
-                temp_dir = tempfile.mkdtemp()
-                filepath = os.path.join(temp_dir, filename)
-
-                with open(filepath, 'wb') as f:
-                    f.write(excel_data)
-
-                logger.info(f"Excel import from base64: format={import_format}, site={site_name}, file={filename}, reverse_edges={reverse_edges}")
+            # File already exists, just use it
+            temp_dir = os.path.dirname(filepath)
+            logger.info(f"Excel import using file_id: {file_id}, format={import_format}, site={site_name}")
 
             # Perform import based on format
             if import_format == "harris_template":
@@ -126,16 +107,9 @@ class ImportExcelTool(BaseTool):
             else:  # extended_matrix
                 result = self._import_extended_matrix(filepath, site_name, generate_graphml, reverse_edges, temp_dir)
 
-            # Cleanup temp file (only if we created it)
-            if not file_id:
-                try:
-                    os.remove(filepath)
-                except:
-                    pass
-            else:
-                # Cleanup uploaded file
-                from .upload_file_tool import cleanup_uploaded_file
-                cleanup_uploaded_file(file_id)
+            # Cleanup uploaded file
+            from .upload_file_tool import cleanup_uploaded_file
+            cleanup_uploaded_file(file_id)
 
             return self._format_success(
                 result,

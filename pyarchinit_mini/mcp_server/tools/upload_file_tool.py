@@ -29,7 +29,8 @@ class UploadFileTool(BaseTool):
                 "🔴 STEP 1 OF 2: Upload Excel file. "
                 "ALWAYS use this FIRST when importing Excel files. "
                 "Returns file_id (36 chars) to use in STEP 2 (import_excel). "
-                "NEVER pass large base64 directly to import_excel - causes UI freeze! "
+                "⚡ FASTEST: Use 'file_path' parameter with absolute path to Excel file. "
+                "Alternative: Use 'content_base64' parameter (slower). "
                 "Workflow: upload_file → get file_id → import_excel with file_id."
             ),
             input_schema={
@@ -37,14 +38,18 @@ class UploadFileTool(BaseTool):
                 "properties": {
                     "filename": {
                         "type": "string",
-                        "description": "Excel filename (e.g., 'data.xlsx')"
+                        "description": "Excel filename (e.g., 'data.xlsx'). Optional if file_path is provided."
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "description": "⚡ FASTEST: Absolute path to Excel file on filesystem (e.g., '/Users/name/Downloads/data.xlsx')"
                     },
                     "content_base64": {
                         "type": "string",
-                        "description": "Base64-encoded Excel file content"
+                        "description": "Base64-encoded Excel file content (alternative to file_path, slower)"
                     },
                 },
-                "required": ["filename", "content_base64"],
+                "required": [],
             },
         )
 
@@ -52,16 +57,51 @@ class UploadFileTool(BaseTool):
         """Execute file upload"""
         try:
             filename = arguments.get("filename")
+            file_path = arguments.get("file_path")
             content_base64 = arguments.get("content_base64")
 
-            if not filename or not content_base64:
-                return self._format_error("Missing required parameters")
+            # Require at least one input method
+            if not file_path and not content_base64:
+                return self._format_error("Must provide either 'file_path' or 'content_base64'")
 
-            # Decode base64
-            try:
-                file_data = base64.b64decode(content_base64)
-            except Exception as e:
-                return self._format_error(f"Failed to decode file: {str(e)}")
+            # Option 1: Direct file path (FASTEST)
+            if file_path:
+                # Security validation
+                file_path = os.path.abspath(file_path)
+
+                # Check file exists
+                if not os.path.exists(file_path):
+                    return self._format_error(f"File not found: {file_path}")
+
+                # Check it's a file, not a directory
+                if not os.path.isfile(file_path):
+                    return self._format_error(f"Path is not a file: {file_path}")
+
+                # Extract filename if not provided
+                if not filename:
+                    filename = os.path.basename(file_path)
+
+                # Read file directly
+                try:
+                    with open(file_path, 'rb') as f:
+                        file_data = f.read()
+                except Exception as e:
+                    return self._format_error(f"Failed to read file: {str(e)}")
+
+                logger.info(f"⚡ File uploaded via path: {filename} ({len(file_data)} bytes)")
+
+            # Option 2: Base64 encoded content (SLOWER, fallback)
+            else:
+                if not filename:
+                    return self._format_error("filename is required when using content_base64")
+
+                # Decode base64
+                try:
+                    file_data = base64.b64decode(content_base64)
+                except Exception as e:
+                    return self._format_error(f"Failed to decode file: {str(e)}")
+
+                logger.info(f"File uploaded via base64: {filename} ({len(file_data)} bytes)")
 
             # Generate unique file_id
             file_id = str(uuid.uuid4())
@@ -79,8 +119,6 @@ class UploadFileTool(BaseTool):
 
             # Store in global registry
             _uploaded_files[file_id] = filepath
-
-            logger.info(f"File uploaded: {filename} → {file_id} ({len(file_data)} bytes)")
 
             return self._format_success(
                 {

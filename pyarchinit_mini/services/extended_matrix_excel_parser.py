@@ -25,11 +25,17 @@ from typing import Dict, List, Tuple, Optional, Set
 from pathlib import Path
 import re
 import os
+import sys
+import logging
+import warnings
 from datetime import datetime
+from io import StringIO
 
 from pyarchinit_mini.models.us import US
 from pyarchinit_mini.models.site import Site
 from pyarchinit_mini.database.connection import DatabaseConnection
+
+logger = logging.getLogger(__name__)
 
 
 def safe_int(value) -> Optional[int]:
@@ -217,7 +223,10 @@ class ExtendedMatrixExcelParser:
         try:
             self.df = pd.read_excel(self.excel_path)
             self.statistics['total_rows'] = len(self.df)
+
+            logger.info(f"✓ Loaded {len(self.df)} rows from {self.excel_path.name}")
             print(f"✓ Loaded {len(self.df)} rows from {self.excel_path.name}")
+            sys.stdout.flush()
             return self.df
         except Exception as e:
             error_msg = f"Error loading Excel: {e}"
@@ -269,7 +278,12 @@ class ExtendedMatrixExcelParser:
 
     def import_us_records(self):
         """Import US records from Excel to database."""
+        logger.info(f"📦 Importing US records...")
         print(f"\n📦 Importing US records...")
+        sys.stdout.flush()
+
+        us_counter = 0
+        progress_interval = 10
 
         for idx, row in self.df.iterrows():
             try:
@@ -282,6 +296,7 @@ class ExtendedMatrixExcelParser:
 
                     # Process each US ID
                     for us_id in us_ids:
+                        us_counter += 1
                         us_number = self.extract_us_number(us_id)
                         unit_type = self.determine_unit_type(us_id)
 
@@ -337,7 +352,12 @@ class ExtendedMatrixExcelParser:
                                 existing_us.larghezza_media = safe_float(row.get('larghezza_media'))
 
                             self.statistics['us_updated'] += 1
-                            print(f"  ↻ Updated {unit_type} {us_number}")
+                            # Progress logging every 10 US
+                            if us_counter % progress_interval == 0:
+                                progress_msg = f"⏳ Progress: {us_counter}/{self.statistics['total_rows']} US processed..."
+                                logger.info(progress_msg)
+                                print(progress_msg)
+                                sys.stdout.flush()
                         else:
                             # Create new US (id_us will be auto-generated)
                             new_us = US(
@@ -368,7 +388,12 @@ class ExtendedMatrixExcelParser:
                             )
                             session.add(new_us)
                             self.statistics['us_created'] += 1
-                            print(f"  + Created {unit_type} {us_number}")
+                            # Progress logging every 10 US
+                            if us_counter % progress_interval == 0:
+                                progress_msg = f"⏳ Progress: {us_counter}/{self.statistics['total_rows']} US processed..."
+                                logger.info(progress_msg)
+                                print(progress_msg)
+                                sys.stdout.flush()
 
                         # Create or update periodizzazione record if period/fase specified
                         if period or fase:
@@ -414,9 +439,14 @@ class ExtendedMatrixExcelParser:
 
     def import_relationships(self):
         """Import stratigraphic relationships from Excel."""
+        logger.info(f"🔗 Importing relationships...")
         print(f"\n🔗 Importing relationships...")
+        sys.stdout.flush()
 
         from pyarchinit_mini.models.harris_matrix import USRelationships
+
+        rel_counter = 0
+        progress_interval = 50  # More frequent for relationships since there are more
 
         for idx, row in self.df.iterrows():
             try:
@@ -453,7 +483,14 @@ class ExtendedMatrixExcelParser:
                                     )
                                     session.add(new_rel)
                                     self.statistics['relationships_created'] += 1
-                                    print(f"  + Created: {source_us_number} {pyarch_rel} {target_us_number}")
+                                    rel_counter += 1
+
+                                    # Progress logging every N relationships
+                                    if rel_counter % progress_interval == 0:
+                                        progress_msg = f"⏳ Relationship progress: {rel_counter} relationships created..."
+                                        logger.info(progress_msg)
+                                        print(progress_msg)
+                                        sys.stdout.flush()
 
                     # Commit is done automatically by context manager
 
@@ -599,40 +636,61 @@ class ExtendedMatrixExcelParser:
         print(f"File: {self.excel_path.name}")
         print(f"Site: {self.site_name}")
         print(f"{'='*60}\n")
+        sys.stdout.flush()
+
+        # Redirect ONLY stderr to suppress pandas/openpyxl warnings (keep stdout for progress messages)
+        import tempfile
+        null_fd = os.open(os.devnull, os.O_RDWR)
+        old_stderr_fd = os.dup(2)
 
         try:
-            # Step 1: Initialize database
-            self.init_database()
+            # Suppress Python warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
 
-            # Step 2: Load Excel
-            self.load_excel()
+                # Redirect ONLY stderr at OS level (for C library warnings from pandas/openpyxl)
+                # Keep stdout open for progress messages
+                os.dup2(null_fd, 2)
 
-            # Step 3: Ensure site exists
-            self.ensure_site_exists()
+                try:
+                    # Step 1: Initialize database
+                    self.init_database()
 
-            # Step 3: Import US records
-            self.import_us_records()
+                    # Step 2: Load Excel
+                    self.load_excel()
 
-            # Step 4: Import relationships
-            self.import_relationships()
+                    # Step 3: Ensure site exists
+                    self.ensure_site_exists()
 
-            # Step 5: Update rapporti field in US records
-            self.update_rapporti_field()
+                    # Step 3: Import US records
+                    self.import_us_records()
 
-            # Step 6: Generate GraphML (optional)
-            graphml_path = None
-            if generate_graphml:
-                # Build output path
-                if output_dir:
-                    os.makedirs(output_dir, exist_ok=True)
-                    output_path = os.path.join(output_dir, f"{self.site_name.replace(' ', '_')}_extended_matrix.graphml")
-                else:
-                    output_path = None
+                    # Step 4: Import relationships
+                    self.import_relationships()
 
-                graphml_path = self.generate_graphml(output_path=output_path, reverse_edges=reverse_edges)
-                self.statistics['graphml_path'] = graphml_path
+                    # Step 5: Update rapporti field in US records
+                    self.update_rapporti_field()
 
-            # Print summary
+                    # Step 6: Generate GraphML (optional)
+                    graphml_path = None
+                    if generate_graphml:
+                        # Build output path
+                        if output_dir:
+                            os.makedirs(output_dir, exist_ok=True)
+                            output_path = os.path.join(output_dir, f"{self.site_name.replace(' ', '_')}_extended_matrix.graphml")
+                        else:
+                            output_path = None
+
+                        graphml_path = self.generate_graphml(output_path=output_path, reverse_edges=reverse_edges)
+                        self.statistics['graphml_path'] = graphml_path
+
+                finally:
+                    # Restore stderr
+                    os.dup2(old_stderr_fd, 2)
+                    os.close(old_stderr_fd)
+                    os.close(null_fd)
+
+            # Print summary (after restoring stderr)
             print(f"\n{'='*60}")
             print(f"Import Summary")
             print(f"{'='*60}")
@@ -651,11 +709,20 @@ class ExtendedMatrixExcelParser:
                 print(f"\n✓ Import completed successfully!")
 
             print(f"{'='*60}\n")
+            sys.stdout.flush()
 
             return self.statistics
 
         except Exception as e:
+            # Restore stderr in case of exception
+            try:
+                os.dup2(old_stderr_fd, 2)
+                os.close(old_stderr_fd)
+                os.close(null_fd)
+            except:
+                pass
             print(f"\n✗ Import failed: {e}")
+            sys.stdout.flush()
             raise
 
 
