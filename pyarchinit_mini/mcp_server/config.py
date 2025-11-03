@@ -34,17 +34,24 @@ def _get_default_database_url() -> str:
     try:
         # 2. Try to get from ConnectionManager
         from pyarchinit_mini.config.connection_manager import get_connection_manager
+        from datetime import datetime
 
         conn_manager = get_connection_manager()
         connections = conn_manager.list_connections()
 
-        # Find active/default connection
+        # Find most recently used connection based on last_used timestamp
         if connections:
-            # Use first connection as default
-            first_conn = connections[0]
-            db_url = conn_manager.get_connection_string(first_conn['name'])
+            # Sort by last_used timestamp (most recent first)
+            sorted_connections = sorted(
+                connections,
+                key=lambda x: datetime.fromisoformat(x.get('last_used', '1970-01-01T00:00:00')),
+                reverse=True
+            )
+
+            most_recent_conn = sorted_connections[0]
+            db_url = conn_manager.get_connection_string(most_recent_conn['name'])
             if db_url:
-                logger.info(f"Using database from ConnectionManager: {first_conn['name']}")
+                logger.info(f"Using most recently used database from ConnectionManager: {most_recent_conn['name']} (last used: {most_recent_conn.get('last_used', 'unknown')})")
                 return db_url
 
     except Exception as e:

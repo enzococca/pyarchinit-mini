@@ -55,10 +55,16 @@ PyArchInit-Mini is a standalone, modular version of PyArchInit focused on core a
   - **Full i18n Support**: English and Italian translations for all interfaces
 
 ### 🤖 AI Integration & MCP (Model Context Protocol)
-- **Claude Desktop Integration**: Natural language queries and 3D model generation via MCP
+- **Claude Desktop Integration**: Natural language queries and AI-powered archaeological workflows
 - **Auto-Configuration** (NEW in v1.9.14): One-command setup with `pyarchinit-mini-configure-claude`
 - **ChatGPT Integration**: Web-based AI access to archaeological data via HTTP/SSE
-- **5 MCP Tools**: build_3d, filter, export, position, material
+- **23 MCP Tools** (v1.9.23+):
+  - **Data Management (8)**: search, fetch, filter, manage_data, material, position, import_excel, import_data
+  - **Validation (3)**: validate_stratigraphic_relationships, validate_relationship_format, validate_relationship_integrity
+  - **Harris Matrix & 3D (4)**: create_harris_matrix, export_harris_matrix_graphml, configure_em_nodes, build_3d
+  - **Reports & Export (2)**: generate_report (5 types), export
+  - **Media & Thesaurus (2)**: manage_media (7 operations), manage_thesaurus (8 operations)
+  - **System (4)**: manage_database_connections, manage_services, pyarchinit_sync, create_database
 - **5 MCP Resources**: graphml, us, periods, relationships, sites
 - **3 MCP Prompts**: Stratigraphic Model, Period Visualization, US Description
 - **Zero-Config Setup**: Works with `uvx` for instant Claude Desktop access

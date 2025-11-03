@@ -391,38 +391,46 @@ ChatGPT should connect to your server and display the sites!
 
 ## Available Tools
 
-PyArchInit MCP provides **14 tools** for working with archaeological data:
+PyArchInit MCP provides **23 tools** for working with archaeological data:
 
-**For complete documentation of all 14 tools, see [MCP_TOOLS_REFERENCE.md](../MCP_TOOLS_REFERENCE.md)**
+**For complete documentation of all 23 tools, see [MCP_TOOLS_REFERENCE.md](../MCP_TOOLS_REFERENCE.md)**
 
 ### Tool Categories
 
-**3D Visualization (5 tools)**
-- `build_3d_from_us` - Generate 3D models from US data
-- `calculate_positions` - Calculate spatial positions
-- `assign_materials` - Apply materials and colors
-- `filter_proxies` - Filter visible units
-- `export_3d_model` - Export to glTF/glB formats
-
-**Data Management (1 unified tool with 6 operations)**
-- `manage_data` - Insert, update, delete, upsert, get schema, validate stratigraphy
-  - See [CRUD_TOOLS.md](../CRUD_TOOLS.md) for detailed documentation
-
-**Data Import/Export (2 tools)**
-- `import_excel` - Import from Excel (Harris Matrix or Extended Matrix)
-- `create_harris_matrix` - Interactive Harris Matrix creation
-
-**Search & Query (2 tools)**
-- `search` - Search sites and US units
+**Data Management (8 tools)**
+- `search` - Search sites and US units with advanced filters
 - `fetch` - Fetch complete record details
+- `filter` - Filter visible units and proxies
+- `manage_data` - Unified CRUD operations (insert, update, delete, upsert, get schema, validate)
+- `material` - Material and color assignment
+- `position` - Spatial position calculation
+- `import_excel` - Import from Excel (Harris Matrix or Extended Matrix)
+- `import_data` - Import data from various formats
 
-**Database Operations (2 tools)**
-- `create_database` - Create new PyArchInit databases
+**Validation (3 tools)**
+- `validate_stratigraphic_relationships` - Validate US relationships and detect cycles
+- `validate_relationship_format` - Check relationship format correctness
+- `validate_relationship_integrity` - Verify relationship data integrity
+
+**Harris Matrix & 3D (4 tools)**
+- `create_harris_matrix` - Interactive Harris Matrix creation
+- `export_harris_matrix_graphml` - Export Harris Matrix to GraphML format
+- `configure_em_nodes` - Manage Extended Matrix node types (14 types)
+- `build_3d` - Generate 3D models from US data with Blender integration
+
+**Reports & Export (2 tools)**
+- `generate_report` - Generate reports (PDF, Excel, CSV, JSON, GraphML)
+- `export` - Export data in various formats
+
+**Media & Thesaurus (2 tools)**
+- `manage_media` - Media management (7 operations: list, upload, download, delete, get_info, search, update_metadata)
+- `manage_thesaurus` - Thesaurus management (8 operations: list, get_values, add_entry, update_entry, delete_entry, search, export, import)
+
+**System (4 tools)**
 - `manage_database_connections` - Switch between databases
-
-**Configuration (2 tools)**
-- `configure_em_nodes` - Manage Extended Matrix node types
-- `pyarchinit_sync` - Synchronize data
+- `manage_services` - Control system services
+- `pyarchinit_sync` - Synchronize data between systems
+- `create_database` - Create new PyArchInit databases
 
 ### Quick Examples
 
@@ -713,4 +721,4 @@ python3 -m pyarchinit_mini.mcp_server.http_server
 ---
 
 **Last Updated:** November 2025
-**PyArchInit-Mini Version:** 1.9.10+
+**PyArchInit-Mini Version:** 1.9.23

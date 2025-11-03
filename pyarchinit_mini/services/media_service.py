@@ -35,20 +35,28 @@ class MediaService:
                                 description: str = "", tags: str = "", author: str = "",
                                 is_primary: bool = False) -> Media:
         """Store media file and register in database"""
-        
+
         # Store file using media handler
         metadata = self.media_handler.store_file(
             file_path, entity_type, entity_id, description, tags, author
         )
-        
+
+        # Remove thumbnail_path as it belongs to MediaThumb table, not Media table
+        thumbnail_path = metadata.pop('thumbnail_path', None)
+
         # Add database-specific fields
         metadata.update({
             'is_primary': is_primary,
             'is_public': True
         })
-        
+
         # Create database record
-        return self.create_media_record(metadata)
+        media = self.create_media_record(metadata)
+
+        # TODO: Create MediaThumb record if thumbnail_path exists
+        # For now, thumbnails are generated but not stored in MediaThumb table
+
+        return media
     
     def get_media_by_id(self, media_id: int) -> Optional[Media]:
         """Get media by ID"""
@@ -142,9 +150,7 @@ class MediaService:
                     # If media handler fails, try direct deletion
                     try:
                         os.remove(media.media_path)
-                        # Also try to remove thumbnails if they exist
-                        if media.thumbnail_path and os.path.exists(media.thumbnail_path):
-                            os.remove(media.thumbnail_path)
+                        # Note: Thumbnails are handled by media_handler.delete_file()
                     except Exception:
                         pass  # Continue with database deletion even if file deletion fails
             

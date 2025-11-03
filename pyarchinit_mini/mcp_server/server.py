@@ -71,6 +71,13 @@ from .tools.database_manager_tool import DatabaseManagerTool
 from .tools.data_management_tool import DataManagementTool
 from .tools.service_management_tool import ServiceManagementTool
 from .tools.export_harris_matrix_graphml_tool import ExportHarrisMatrixGraphMLTool
+from .tools.validate_stratigraphic_relationships_tool import ValidateStratigraphicRelationshipsTool
+from .tools.validate_relationship_format_tool import ValidateRelationshipFormatTool
+from .tools.generate_report_tool import GenerateReportTool
+from .tools.validate_relationship_integrity_tool import ValidateRelationshipIntegrityTool
+from .tools.media_management_tool import MediaManagementTool
+from .tools.thesaurus_management_tool import ThesaurusManagementTool
+from .tools.data_import_parser_tool import DataImportParserTool
 
 from .prompts.stratigraphic_model_prompt import StratigraphicModelPrompt
 from .prompts.period_visualization_prompt import PeriodVisualizationPrompt
@@ -86,9 +93,11 @@ class PyArchInitMCPServer:
 
     Exposes:
     - 5 Resources (GraphML, US, Periods, Relationships, Sites)
-    - 16 Tools (build_3d, filter, export, position, material, import_excel, create_harris_matrix,
+    - 23 Tools (build_3d, filter, export, position, material, import_excel, create_harris_matrix,
                 configure_em_nodes, create_database, pyarchinit_sync, search, fetch,
-                manage_database_connections, manage_data, manage_services, export_harris_matrix_graphml)
+                manage_database_connections, manage_data, manage_services, export_harris_matrix_graphml,
+                validate_stratigraphic_relationships, validate_relationship_format, generate_report,
+                validate_relationship_integrity, manage_media, manage_thesaurus, import_data)
     - 3 Prompts (stratigraphic_model, period_visualization, us_description)
 
     Architecture:
@@ -271,6 +280,48 @@ class PyArchInitMCPServer:
 
         # Export Harris Matrix GraphML Tool (Auto-export from database)
         self.tools["export_harris_matrix_graphml"] = ExportHarrisMatrixGraphMLTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Validate Stratigraphic Relationships Tool (Data integrity)
+        self.tools["validate_stratigraphic_relationships"] = ValidateStratigraphicRelationshipsTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Validate Relationship Format Tool (Symbols vs Textual)
+        self.tools["validate_relationship_format"] = ValidateRelationshipFormatTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Generate Report Tool (Comprehensive reports and summaries)
+        self.tools["generate_report"] = GenerateReportTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Validate Relationship Integrity Tool (Bidirectional integrity checks)
+        self.tools["validate_relationship_integrity"] = ValidateRelationshipIntegrityTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Media Management Tool (Upload and manage media files)
+        self.tools["manage_media"] = MediaManagementTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Thesaurus Management Tool (Controlled vocabularies)
+        self.tools["manage_thesaurus"] = ThesaurusManagementTool(
+            db_session=self.db_session,
+            config=self.config,
+        )
+
+        # Data Import Parser Tool (Automatic data import from CSV, Excel, JSON, XML)
+        self.tools["import_data"] = DataImportParserTool(
             db_session=self.db_session,
             config=self.config,
         )

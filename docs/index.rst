@@ -55,6 +55,23 @@ Quick Links
 What's New
 ----------
 
+Version 1.9.23 - MCP Tools Expansion & AI Integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. versionadded:: 1.9.23
+
+   **MCP (Model Context Protocol) Integration**:
+
+   - ✨ **23 MCP Tools** for Claude Desktop & ChatGPT integration (expanded from 5)
+   - ✨ **6 Tool Categories**: Data Management (8), Validation (3), Harris Matrix & 3D (4), Reports & Export (2), Media & Thesaurus (2), System (4)
+   - ✨ **Advanced Validation**: Stratigraphic relationship validation with cycle detection
+   - ✨ **Media Management**: 7 operations (list, upload, download, delete, get_info, search, update_metadata)
+   - ✨ **Thesaurus Management**: 8 operations (list, get_values, add/update/delete, search, import/export)
+   - ✨ **5 Resources**: GraphML, US, Periods, Relationships, Sites
+   - ✨ **3 Prompts**: Stratigraphic Model, Period Visualization, US Description
+
+   See :doc:`MCP_INTEGRATION` for complete AI integration guide.
+
 Version 1.8.5 - Database Creation & Chronological Management
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
