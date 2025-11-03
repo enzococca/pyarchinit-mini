@@ -57,14 +57,6 @@ class ImportExcelTool(BaseTool):
                         "type": "string",
                         "description": "🔴 REQUIRED: File ID from upload_file tool (STEP 1)"
                     },
-                    "excel_base64": {
-                        "type": "string",
-                        "description": "⚠️ DEPRECATED: DO NOT USE - causes UI freeze. Use file_id instead."
-                    },
-                    "filename": {
-                        "type": "string",
-                        "description": "Optional filename (used only with excel_base64)"
-                    },
                     "generate_graphml": {
                         "type": "boolean",
                         "description": "Generate GraphML visualization (default: true)",
