@@ -1497,6 +1497,227 @@ The Analytics Dashboard provides comprehensive data visualization with 8 differe
 
 ---
 
+## 🖥️ Complete Command Reference
+
+PyArchInit-Mini provides 17 specialized commands for different tasks. Use `pyarchinit-mini --list-commands` to see this reference anytime.
+
+### Interfaces
+
+#### `pyarchinit-mini`
+Interactive CLI with menu-driven interface
+```bash
+pyarchinit-mini [-d DATABASE_URL] [--version] [--list-commands]
+
+# Examples
+pyarchinit-mini  # Start with default database
+pyarchinit-mini -d "postgresql://user:pass@localhost/db"
+```
+
+#### `pyarchinit-mini-api`
+REST API server (default port: 8000)
+```bash
+# Configuration via environment variables
+PYARCHINIT_API_HOST=0.0.0.0  # Default: 0.0.0.0
+PYARCHINIT_API_PORT=8000      # Default: 8000
+PYARCHINIT_API_RELOAD=false   # Default: false
+
+# Example
+PYARCHINIT_API_PORT=5000 pyarchinit-mini-api
+```
+
+#### `pyarchinit-mini-web`
+Web interface (default port: 5001)
+```bash
+# Configuration via environment variables
+PYARCHINIT_WEB_HOST=0.0.0.0   # Default: 0.0.0.0
+PYARCHINIT_WEB_PORT=5001      # Default: 5001
+PYARCHINIT_WEB_DEBUG=true     # Default: true
+
+# Example
+PYARCHINIT_WEB_PORT=8080 PYARCHINIT_WEB_DEBUG=false pyarchinit-mini-web
+```
+
+#### `pyarchinit-mini-gui`
+Desktop GUI application (requires PyQt5)
+```bash
+pyarchinit-mini-gui
+```
+
+### Setup & Configuration
+
+#### `pyarchinit-mini-setup`
+Setup user environment in ~/.pyarchinit_mini
+```bash
+pyarchinit-mini-setup
+
+# Creates: data/, media/, export/, backup/, config/, logs/
+# Copies sample database and default configuration
+```
+
+#### `pyarchinit-mini-init`
+Initialize database and create admin user
+```bash
+pyarchinit-mini-init                    # Interactive setup
+pyarchinit-mini-init --non-interactive  # Use defaults (admin/admin)
+```
+
+#### `pyarchinit-mini-configure-claude`
+Configure Claude Desktop MCP integration (requires uvx)
+```bash
+pyarchinit-mini-configure-claude
+pyarchinit-mini-configure-claude --force   # Force reconfigure
+pyarchinit-mini-configure-claude --silent  # No output
+```
+
+#### `pyarchinit-mini-migrate`
+Run database migrations
+```bash
+pyarchinit-mini-migrate --database-url "sqlite:///my_db.db"
+```
+
+### MCP Servers
+
+#### `pyarchinit-mini-mcp` / `pyarchinit-mcp-server`
+MCP server (stdio transport) for Claude Desktop
+```bash
+# Configured automatically via pyarchinit-mini-configure-claude
+pyarchinit-mini-mcp
+```
+
+#### `pyarchinit-mini-mcp-http` / `pyarchinit-mcp-http`
+MCP server (HTTP transport) for ChatGPT and web clients
+```bash
+# Configuration via environment variables
+MCP_HOST=localhost    # Default: localhost
+MCP_PORT=8080         # Default: 8080
+MCP_TRANSPORT=sse     # Default: sse
+
+# Example
+MCP_PORT=9000 pyarchinit-mini-mcp-http
+```
+
+### Data Import/Export
+
+#### `pyarchinit-export-import`
+Export/import data to/from Excel and CSV
+```bash
+# Subcommands: export-sites, export-us, export-inventario
+
+# Export sites to Excel
+pyarchinit-export-import export-sites -f excel -o sites.xlsx
+
+# Export US to CSV for specific site
+pyarchinit-export-import export-us -f csv -o us.csv -s "Pompei"
+
+# Export inventory
+pyarchinit-export-import export-inventario -f excel -o inventory.xlsx
+
+# Options:
+#   -f, --format [excel|csv]   Output format (default: csv)
+#   -o, --output PATH          Output file path (required)
+#   -s, --site TEXT            Filter by site name
+#   -d, --database-url TEXT    Database connection
+```
+
+#### `pyarchinit-graphml`
+Convert Graphviz DOT files to yEd GraphML format
+```bash
+# Subcommands: convert, template
+
+# Convert DOT to GraphML
+pyarchinit-graphml convert harris.dot output.graphml -t "Pompei"
+
+# Download yEd template
+pyarchinit-graphml template my_palette.graphml
+
+# Options (convert):
+#   -t, --title TEXT      Diagram title
+#   --reverse-epochs      Reverse epoch ordering
+#   -v, --verbose         Verbose output
+```
+
+#### `pyarchinit-mini-import`
+Import from PyArchInit (full version) database
+```bash
+# Import all data from PyArchInit SQLite
+pyarchinit-mini-import import-from-pyarchinit \
+  -s sqlite:////path/to/pyarchinit.db
+
+# Import specific tables with filters
+pyarchinit-mini-import import-from-pyarchinit \
+  -s postgresql://user:pass@host/db \
+  -T sites -T us --sites "Pompei" --dry-run
+
+# Options:
+#   -s, --source-db TEXT       Source database URL (required)
+#   -t, --target-db TEXT       Target database URL
+#   -T, --tables [sites|us|inventario|periodizzazione|thesaurus|all]
+#                              Tables to import (multiple allowed)
+#   --sites TEXT               Filter by site names (multiple allowed)
+#   --import-relationships     Import US relationships (default: yes)
+#   --dry-run                  Preview without changes
+```
+
+#### `pyarchinit-harris-import`
+Import Harris Matrix from Excel/CSV files
+```bash
+# Import Harris Matrix
+pyarchinit-harris-import matrix.xlsx -s "Pompei"
+
+# Import with GraphML and DOT export
+pyarchinit-harris-import matrix.csv -s "Rome" -g -d -o ./exports
+
+# Arguments:
+#   FILE_PATH                  Excel or CSV file
+
+# Options:
+#   -s, --site TEXT            Site name (required)
+#   -g, --export-graphml       Export to GraphML format
+#   -d, --export-dot           Export to DOT format
+#   -o, --output-dir TEXT      Output directory (default: current)
+#   --db TEXT                  Database URL
+
+# File Structure Required:
+#   Sheet 1 (NODES):         us_number, unit_type, description, area, period, phase
+#   Sheet 2 (RELATIONSHIPS): from_us, to_us, relationship
+```
+
+#### `pyarchinit-harris-template`
+Generate Harris Matrix Excel/CSV template
+```bash
+# Generate template (creates harris_matrix_template.xlsx)
+pyarchinit-harris-template
+
+# Custom filename and format
+pyarchinit-harris-template -f xlsx -o metro_c_template
+
+# Options:
+#   -f, --format [xlsx|csv]    Template format (default: xlsx)
+#   -o, --output TEXT          Filename WITHOUT extension (default: harris_matrix_template)
+#   -e, --with-examples        Include example data (default: yes)
+
+# Complete Workflow:
+#   1. Generate template:      pyarchinit-harris-template -o my_template
+#   2. Fill in your data:      Edit my_template.xlsx with your US data
+#   3. Import to database:     pyarchinit-harris-import my_template.xlsx -s "Site Name"
+```
+
+### Getting Help
+
+View complete command reference anytime:
+```bash
+pyarchinit-mini --list-commands
+```
+
+View help for specific commands:
+```bash
+pyarchinit-export-import --help
+pyarchinit-harris-import --help
+pyarchinit-graphml --help
+```
+
+---
+
 ## 📚 Dependencies Structure
 
 ### Core (Always Installed)
