@@ -579,43 +579,156 @@ def main(database_url, version, list_commands):
         return
 
     if list_commands:
-        console.print(f"\n[bold blue]PyArchInit-Mini v{__version__} - Available Commands[/bold blue]\n")
+        console.print(f"\n[bold blue]PyArchInit-Mini v{__version__} - Complete Command Reference[/bold blue]\n")
 
-        commands = [
-            ("INTERFACES", [
-                ("pyarchinit-mini", "Interactive CLI"),
-                ("pyarchinit-mini-api", "REST API server"),
-                ("pyarchinit-mini-web", "Web interface"),
-                ("pyarchinit-mini-gui", "Desktop GUI application"),
-            ]),
-            ("SETUP & CONFIGURATION", [
-                ("pyarchinit-mini-setup", "Setup user environment"),
-                ("pyarchinit-mini-init", "Initialize database and create admin user"),
-                ("pyarchinit-mini-configure-claude", "Configure Claude Desktop MCP"),
-                ("pyarchinit-mini-migrate", "Run database migrations"),
-            ]),
-            ("MCP SERVERS", [
-                ("pyarchinit-mini-mcp", "MCP server (stdio)"),
-                ("pyarchinit-mini-mcp-http", "MCP server (HTTP)"),
-                ("pyarchinit-mcp-server", "MCP server (alias)"),
-                ("pyarchinit-mcp-http", "MCP HTTP server (alias)"),
-            ]),
-            ("DATA IMPORT/EXPORT", [
-                ("pyarchinit-export-import", "Export/import data to Excel/CSV"),
-                ("pyarchinit-graphml", "Export Harris Matrix to GraphML"),
-                ("pyarchinit-mini-import", "Import from PyArchInit v18+"),
-                ("pyarchinit-harris-import", "Import Harris Matrix from Excel"),
-                ("pyarchinit-harris-template", "Generate Harris Matrix Excel template"),
-            ]),
-        ]
+        # INTERFACES Section
+        console.print("[bold cyan]═══ INTERFACES ═══[/bold cyan]\n")
 
-        for category, cmds in commands:
-            console.print(f"[bold cyan]{category}[/bold cyan]")
-            for cmd, description in cmds:
-                console.print(f"  [green]{cmd:40}[/green] {description}")
-            console.print()
+        console.print("[green]pyarchinit-mini[/green]")
+        console.print("  Interactive CLI with menu-driven interface")
+        console.print("  [dim]Options:[/dim]")
+        console.print("    -d, --database-url TEXT    Database connection string")
+        console.print("    --version                  Show version")
+        console.print("    --list-commands            Show this help")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini -d \"postgresql://user:pass@localhost/db\"\n")
 
-        console.print("[dim]For detailed help on each command, use: <command> --help[/dim]")
+        console.print("[green]pyarchinit-mini-api[/green]")
+        console.print("  REST API server on port 8000")
+        console.print("  [dim]Options:[/dim]")
+        console.print("    --host TEXT                Host to bind (default: 0.0.0.0)")
+        console.print("    --port INTEGER             Port number (default: 8000)")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini-api --host localhost --port 5000\n")
+
+        console.print("[green]pyarchinit-mini-web[/green]")
+        console.print("  Web interface on port 5001")
+        console.print("  [dim]Options:[/dim]")
+        console.print("    --host TEXT                Host to bind (default: 0.0.0.0)")
+        console.print("    --port INTEGER             Port number (default: 5001)")
+        console.print("    --debug                    Enable debug mode")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini-web --port 8080 --debug\n")
+
+        console.print("[green]pyarchinit-mini-gui[/green]")
+        console.print("  Desktop GUI application (requires PyQt5)")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini-gui\n")
+
+        # SETUP & CONFIGURATION Section
+        console.print("[bold cyan]═══ SETUP & CONFIGURATION ═══[/bold cyan]\n")
+
+        console.print("[green]pyarchinit-mini-setup[/green]")
+        console.print("  Setup user environment in ~/.pyarchinit_mini")
+        console.print("  [dim]Creates directories:[/dim] data, media, export, backup, config, logs")
+        console.print("  [dim]Copies sample database and creates default configuration[/dim]")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini-setup\n")
+
+        console.print("[green]pyarchinit-mini-init[/green]")
+        console.print("  Initialize database and create admin user")
+        console.print("  [dim]Creates all required tables and default admin account[/dim]")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini-init\n")
+
+        console.print("[green]pyarchinit-mini-configure-claude[/green]")
+        console.print("  Configure Claude Desktop MCP integration")
+        console.print("  [dim]Automatically detects and configures Claude Desktop[/dim]")
+        console.print("  [dim]Requires uvx to be installed (pip install uv)[/dim]")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini-configure-claude\n")
+
+        console.print("[green]pyarchinit-mini-migrate[/green]")
+        console.print("  Run database migrations")
+        console.print("  [dim]Options:[/dim]")
+        console.print("    --database-url TEXT        Database connection string")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini-migrate --database-url \"sqlite:///my_db.db\"\n")
+
+        # MCP SERVERS Section
+        console.print("[bold cyan]═══ MCP SERVERS ═══[/bold cyan]\n")
+
+        console.print("[green]pyarchinit-mini-mcp[/green] / [green]pyarchinit-mcp-server[/green]")
+        console.print("  MCP server using stdio transport (for Claude Desktop)")
+        console.print("  [dim]Configured automatically via pyarchinit-mini-configure-claude[/dim]")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini-mcp\n")
+
+        console.print("[green]pyarchinit-mini-mcp-http[/green] / [green]pyarchinit-mcp-http[/green]")
+        console.print("  MCP server using HTTP transport")
+        console.print("  [dim]Options:[/dim]")
+        console.print("    --host TEXT                Host to bind (default: localhost)")
+        console.print("    --port INTEGER             Port number (default: 8080)")
+        console.print("  [dim]Example:[/dim] pyarchinit-mini-mcp-http --port 9000\n")
+
+        # DATA IMPORT/EXPORT Section
+        console.print("[bold cyan]═══ DATA IMPORT/EXPORT ═══[/bold cyan]\n")
+
+        console.print("[green]pyarchinit-export-import[/green]")
+        console.print("  Export/import data to/from Excel and CSV")
+        console.print("  [dim]Subcommands:[/dim]")
+        console.print("    export-sites               Export all sites")
+        console.print("    export-us                  Export stratigraphic units")
+        console.print("    export-inventario          Export inventory")
+        console.print("  [dim]Options (common):[/dim]")
+        console.print("    -f, --format [excel|csv]   Output format (default: csv)")
+        console.print("    -o, --output PATH          Output file path (required)")
+        console.print("    -s, --site TEXT            Filter by site name")
+        console.print("    -d, --database-url TEXT    Database connection")
+        console.print("  [dim]Examples:[/dim]")
+        console.print("    pyarchinit-export-import export-sites -f excel -o sites.xlsx")
+        console.print("    pyarchinit-export-import export-us -f csv -o us.csv -s \"Pompei\"\n")
+
+        console.print("[green]pyarchinit-graphml[/green]")
+        console.print("  Convert Graphviz DOT files to yEd GraphML format")
+        console.print("  [dim]Subcommands:[/dim]")
+        console.print("    convert INPUT OUTPUT       Convert DOT to GraphML")
+        console.print("    template OUTPUT            Download yEd template")
+        console.print("  [dim]Options (convert):[/dim]")
+        console.print("    -t, --title TEXT           Diagram title")
+        console.print("    --reverse-epochs           Reverse epoch ordering")
+        console.print("    -v, --verbose              Verbose output")
+        console.print("  [dim]Examples:[/dim]")
+        console.print("    pyarchinit-graphml convert harris.dot output.graphml -t \"Pompei\"")
+        console.print("    pyarchinit-graphml template my_palette.graphml\n")
+
+        console.print("[green]pyarchinit-mini-import[/green]")
+        console.print("  Import from PyArchInit (full version) database")
+        console.print("  [dim]Subcommands:[/dim]")
+        console.print("    import-from-pyarchinit     Import data from PyArchInit v18+")
+        console.print("  [dim]Options:[/dim]")
+        console.print("    -s, --source-db TEXT       Source database URL (required)")
+        console.print("    -t, --target-db TEXT       Target database URL")
+        console.print("    -T, --tables [sites|us|inventario|periodizzazione|thesaurus|all]")
+        console.print("                               Tables to import (multiple allowed)")
+        console.print("    --sites TEXT               Filter by site names (multiple allowed)")
+        console.print("    --import-relationships     Import US relationships (default: yes)")
+        console.print("    --dry-run                  Preview without changes")
+        console.print("  [dim]Examples:[/dim]")
+        console.print("    pyarchinit-mini-import import-from-pyarchinit \\")
+        console.print("      -s sqlite:////path/to/pyarchinit.db")
+        console.print("    pyarchinit-mini-import import-from-pyarchinit \\")
+        console.print("      -s postgresql://user:pass@host/db \\")
+        console.print("      -T sites -T us --sites \"Pompei\" --dry-run\n")
+
+        console.print("[green]pyarchinit-harris-import[/green]")
+        console.print("  Import Harris Matrix from Excel/CSV files")
+        console.print("  [dim]Arguments:[/dim]")
+        console.print("    INPUT_FILE                 Excel or CSV file with Harris Matrix data")
+        console.print("  [dim]Options:[/dim]")
+        console.print("    --site TEXT                Site name (required)")
+        console.print("    --export-graphml           Export to GraphML after import")
+        console.print("    --output PATH              GraphML output path")
+        console.print("    -d, --database-url TEXT    Database connection")
+        console.print("  [dim]File structure:[/dim]")
+        console.print("    Sheet 1 (NODES): us_number, unit_type, description, area, period")
+        console.print("    Sheet 2 (RELATIONSHIPS): from_us, to_us, relationship, notes")
+        console.print("  [dim]Examples:[/dim]")
+        console.print("    pyarchinit-harris-import matrix.xlsx --site \"Pompei\"")
+        console.print("    pyarchinit-harris-import matrix.csv --site \"Rome\" --export-graphml\n")
+
+        console.print("[green]pyarchinit-harris-template[/green]")
+        console.print("  Generate Harris Matrix Excel template")
+        console.print("  [dim]Options:[/dim]")
+        console.print("    --site TEXT                Site name for template")
+        console.print("    --output PATH              Output file path (default: harris_template.xlsx)")
+        console.print("    --format [excel|csv]       Template format")
+        console.print("  [dim]Example:[/dim] pyarchinit-harris-template --site \"My Site\" -o template.xlsx\n")
+
+        console.print("[bold]═══════════════════════════════════════════════════════════[/bold]")
+        console.print("[dim]For detailed help on any command, use: <command> --help[/dim]")
+        console.print("[dim]Documentation: https://github.com/enzococca/pyarchinit-mini[/dim]")
         return
 
     cli = PyArchInitCLI(database_url)
