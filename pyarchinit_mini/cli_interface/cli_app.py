@@ -514,14 +514,110 @@ Email: enzo.ccc@gmail.com
 @click.command()
 @click.option('--database-url', '-d', help='Database URL connection string')
 @click.option('--version', is_flag=True, help='Show version information')
-def main(database_url, version):
-    """PyArchInit-Mini Interactive CLI"""
-    
+@click.option('--list-commands', is_flag=True, help='List all available commands')
+def main(database_url, version, list_commands):
+    """PyArchInit-Mini Interactive CLI
+
+    This is the main interactive CLI for PyArchInit-Mini.
+
+    For other specialized commands, use:
+
+    \b
+    INTERFACES:
+      pyarchinit-mini              Interactive CLI (this command)
+      pyarchinit-mini-api          REST API server
+      pyarchinit-mini-web          Web interface
+      pyarchinit-mini-gui          Desktop GUI application
+
+    \b
+    SETUP & CONFIGURATION:
+      pyarchinit-mini-setup        Setup user environment
+      pyarchinit-mini-init         Initialize database and create admin user
+      pyarchinit-mini-configure-claude  Configure Claude Desktop MCP
+      pyarchinit-mini-migrate      Run database migrations
+
+    \b
+    MCP SERVERS:
+      pyarchinit-mini-mcp          MCP server (stdio)
+      pyarchinit-mini-mcp-http     MCP server (HTTP)
+      pyarchinit-mcp-server        MCP server (alias)
+      pyarchinit-mcp-http          MCP HTTP server (alias)
+
+    \b
+    DATA IMPORT/EXPORT:
+      pyarchinit-export-import     Export/import data to Excel/CSV
+      pyarchinit-graphml           Export Harris Matrix to GraphML
+      pyarchinit-mini-import       Import from PyArchInit v18+
+      pyarchinit-harris-import     Import Harris Matrix from Excel
+      pyarchinit-harris-template   Generate Harris Matrix Excel template
+
+    \b
+    EXAMPLES:
+      # Start interactive CLI with default database
+      pyarchinit-mini
+
+      # Connect to PostgreSQL database
+      pyarchinit-mini -d "postgresql://user:pass@localhost/pyarchinit"
+
+      # Start web interface
+      pyarchinit-mini-web
+
+      # Generate Harris Matrix template
+      pyarchinit-harris-template --site "My Site" --output template.xlsx
+
+      # Import from PyArchInit
+      pyarchinit-mini-import --input pyarchinit.db --output pyarchinit_mini.db
+
+    For detailed help on each command, use: <command> --help
+    """
+
     if version:
-        console.print(f"[bold blue]PyArchInit-Mini CLI v{__version__}[/bold blue]")
-        console.print("Archaeological Data Management System")
+        console.print(f"[bold blue]PyArchInit-Mini v{__version__}[/bold blue]")
+        console.print("Archaeological Data Management System\n")
+        console.print(f"[dim]Python Package: pyarchinit-mini[/dim]")
+        console.print(f"[dim]GitHub: https://github.com/enzococca/pyarchinit-mini[/dim]")
         return
-    
+
+    if list_commands:
+        console.print(f"\n[bold blue]PyArchInit-Mini v{__version__} - Available Commands[/bold blue]\n")
+
+        commands = [
+            ("INTERFACES", [
+                ("pyarchinit-mini", "Interactive CLI"),
+                ("pyarchinit-mini-api", "REST API server"),
+                ("pyarchinit-mini-web", "Web interface"),
+                ("pyarchinit-mini-gui", "Desktop GUI application"),
+            ]),
+            ("SETUP & CONFIGURATION", [
+                ("pyarchinit-mini-setup", "Setup user environment"),
+                ("pyarchinit-mini-init", "Initialize database and create admin user"),
+                ("pyarchinit-mini-configure-claude", "Configure Claude Desktop MCP"),
+                ("pyarchinit-mini-migrate", "Run database migrations"),
+            ]),
+            ("MCP SERVERS", [
+                ("pyarchinit-mini-mcp", "MCP server (stdio)"),
+                ("pyarchinit-mini-mcp-http", "MCP server (HTTP)"),
+                ("pyarchinit-mcp-server", "MCP server (alias)"),
+                ("pyarchinit-mcp-http", "MCP HTTP server (alias)"),
+            ]),
+            ("DATA IMPORT/EXPORT", [
+                ("pyarchinit-export-import", "Export/import data to Excel/CSV"),
+                ("pyarchinit-graphml", "Export Harris Matrix to GraphML"),
+                ("pyarchinit-mini-import", "Import from PyArchInit v18+"),
+                ("pyarchinit-harris-import", "Import Harris Matrix from Excel"),
+                ("pyarchinit-harris-template", "Generate Harris Matrix Excel template"),
+            ]),
+        ]
+
+        for category, cmds in commands:
+            console.print(f"[bold cyan]{category}[/bold cyan]")
+            for cmd, description in cmds:
+                console.print(f"  [green]{cmd:40}[/green] {description}")
+            console.print()
+
+        console.print("[dim]For detailed help on each command, use: <command> --help[/dim]")
+        return
+
     cli = PyArchInitCLI(database_url)
     cli.run()
 
