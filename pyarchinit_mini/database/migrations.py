@@ -238,6 +238,56 @@ class DatabaseMigrations:
             logger.error(f"Error during inventario extra migration: {e}")
             raise
 
+    def migrate_us_extra_columns(self):
+        """Add all missing pyarchinit US columns to us_table."""
+        try:
+            logger.info("Starting US extra columns migration...")
+            migrations_applied = 0
+            columns = [
+                ('elem_datanti', 'TEXT'), ('funz_statica', 'TEXT'),
+                ('lavorazione', 'TEXT'), ('spess_giunti', 'TEXT'),
+                ('letti_posa', 'TEXT'), ('alt_mod', 'TEXT'),
+                ('un_ed_riass', 'TEXT'), ('reimp', 'TEXT'),
+                ('posa_opera', 'TEXT'),
+                ('quota_min_usm', 'NUMERIC(6,2)'), ('quota_max_usm', 'NUMERIC(6,2)'),
+                ('cons_legante', 'TEXT'), ('col_legante', 'TEXT'),
+                ('aggreg_legante', 'TEXT'), ('con_text_mat', 'TEXT'),
+                ('col_materiale', 'TEXT'), ('inclusi_materiali_usm', 'TEXT'),
+                ('ref_tm', 'TEXT'), ('ref_ra', 'TEXT'), ('ref_n', 'TEXT'),
+                ('posizione', 'TEXT'), ('criteri_distinzione', 'TEXT'),
+                ('modo_formazione', 'TEXT'),
+                ('componenti_organici', 'TEXT'), ('componenti_inorganici', 'TEXT'),
+                ('quota_max_abs', 'NUMERIC(6,2)'), ('quota_max_rel', 'NUMERIC(6,2)'),
+                ('quota_min_abs', 'NUMERIC(6,2)'), ('quota_min_rel', 'NUMERIC(6,2)'),
+                ('cod_ente_schedatore', 'TEXT'),
+                ('data_rilevazione', 'VARCHAR(20)'), ('data_rielaborazione', 'VARCHAR(20)'),
+                ('lunghezza_usm', 'NUMERIC(6,2)'), ('altezza_usm', 'NUMERIC(6,2)'),
+                ('spessore_usm', 'NUMERIC(6,2)'),
+                ('tecnica_muraria_usm', 'TEXT'), ('modulo_usm', 'TEXT'),
+                ('campioni_malta_usm', 'TEXT'), ('campioni_mattone_usm', 'TEXT'),
+                ('campioni_pietra_usm', 'TEXT'),
+                ('provenienza_materiali_usm', 'TEXT'),
+                ('criteri_distinzione_usm', 'TEXT'), ('uso_primario_usm', 'TEXT'),
+                ('tipologia_opera', 'TEXT'), ('sezione_muraria', 'TEXT'),
+                ('superficie_analizzata', 'TEXT'), ('orientamento', 'TEXT'),
+                ('materiali_lat', 'TEXT'), ('lavorazione_lat', 'TEXT'),
+                ('consistenza_lat', 'TEXT'), ('forma_lat', 'TEXT'),
+                ('colore_lat', 'TEXT'), ('impasto_lat', 'TEXT'),
+                ('forma_p', 'TEXT'), ('colore_p', 'TEXT'),
+                ('taglio_p', 'TEXT'), ('posa_opera_p', 'TEXT'),
+                ('inerti_usm', 'TEXT'), ('tipo_legante_usm', 'TEXT'),
+                ('rifinitura_usm', 'TEXT'),
+                ('materiale_p', 'TEXT'), ('consistenza_p', 'TEXT'),
+                ('rapporti2', 'TEXT'), ('doc_usv', 'TEXT'),
+            ]
+            for col_name, col_type in columns:
+                if self.add_column_if_not_exists('us_table', col_name, col_type):
+                    migrations_applied += 1
+            return migrations_applied
+        except Exception as e:
+            logger.error(f"Error during US extra migration: {e}")
+            raise
+
     def migrate_all_tables(self):
         """Run all necessary migrations"""
         try:
@@ -261,6 +311,9 @@ class DatabaseMigrations:
 
             # Add missing inventario columns
             total_migrations += self.migrate_inventario_extra_columns()
+
+            # Add missing US columns
+            total_migrations += self.migrate_us_extra_columns()
 
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations
