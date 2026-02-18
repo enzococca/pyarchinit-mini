@@ -11,3 +11,4 @@ from .bundle_validator import BundleValidator, validate_bundle
 from .sync_state_machine import SyncState, SyncStateMachine
 from .sync_queue import SyncQueue, QueueEntry
 from .connectivity_monitor import ConnectivityMonitor
+from .sync_orchestrator import SyncOrchestrator
