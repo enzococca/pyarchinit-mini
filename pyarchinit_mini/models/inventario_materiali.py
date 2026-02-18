@@ -90,7 +90,13 @@ class InventarioMateriali(BaseModel):
     punto_rinv = Column(Text)  # Find point/location
     negativo_photo = Column(Text)  # Photo negative reference
     diapositiva = Column(Text)  # Slide reference
-    
+
+    # Additional fields from pyarchinit
+    quota_usm = Column(Numeric(10, 3))
+    unita_misura_quota = Column(String(20))
+    photo_id = Column(Text)
+    drawing_id = Column(Text)
+
     # Relationships
     site_ref = relationship("Site", foreign_keys=[sito],
                            primaryjoin="InventarioMateriali.sito == Site.sito")

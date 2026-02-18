@@ -165,6 +165,79 @@ class DatabaseMigrations:
             logger.error(f"Error during tipo_documento migration: {e}")
             raise
 
+    def migrate_concurrency_columns(self):
+        """Add concurrency tracking columns to all main tables."""
+        import uuid as uuid_mod
+        try:
+            logger.info("Starting concurrency columns migration...")
+            migrations_applied = 0
+
+            tables = [
+                'site_table', 'us_table', 'inventario_materiali_table',
+                'periodizzazione_table', 'media_table', 'media_thumb_table',
+                'documentazione_table',
+            ]
+
+            concurrency_columns = [
+                ('entity_uuid', 'TEXT'),
+                ('version_number', 'INTEGER', '1'),
+                ('last_modified_by', 'VARCHAR(100)'),
+                ('last_modified_timestamp', 'TIMESTAMP'),
+                ('sync_status', 'VARCHAR(20)', "'new'"),
+                ('editing_by', 'VARCHAR(100)'),
+                ('editing_since', 'TIMESTAMP'),
+            ]
+
+            for table in tables:
+                for col_def in concurrency_columns:
+                    col_name = col_def[0]
+                    col_type = col_def[1]
+                    default = col_def[2] if len(col_def) > 2 else None
+                    if self.add_column_if_not_exists(table, col_name, col_type, default):
+                        migrations_applied += 1
+
+            # Back-fill entity_uuid for existing rows that have NULL
+            for table in tables:
+                try:
+                    with self.connection.get_session() as session:
+                        from sqlalchemy import text
+                        rows = session.execute(
+                            text(f"SELECT rowid FROM {table} WHERE entity_uuid IS NULL")
+                        ).fetchall()
+                        for row in rows:
+                            new_uuid = str(uuid_mod.uuid4())
+                            session.execute(
+                                text(f"UPDATE {table} SET entity_uuid = :uuid WHERE rowid = :rid"),
+                                {"uuid": new_uuid, "rid": row[0]}
+                            )
+                        session.commit()
+                except Exception as e:
+                    logger.warning(f"UUID backfill for {table}: {e}")
+
+            logger.info(f"Concurrency migration done. {migrations_applied} columns added")
+            return migrations_applied
+        except Exception as e:
+            logger.error(f"Error during concurrency migration: {e}")
+            raise
+
+    def migrate_inventario_extra_columns(self):
+        """Add missing columns to inventario_materiali_table."""
+        try:
+            migrations_applied = 0
+            extra = [
+                ('quota_usm', 'NUMERIC(10,3)'),
+                ('unita_misura_quota', 'VARCHAR(20)'),
+                ('photo_id', 'TEXT'),
+                ('drawing_id', 'TEXT'),
+            ]
+            for col_name, col_type in extra:
+                if self.add_column_if_not_exists('inventario_materiali_table', col_name, col_type):
+                    migrations_applied += 1
+            return migrations_applied
+        except Exception as e:
+            logger.error(f"Error during inventario extra migration: {e}")
+            raise
+
     def migrate_all_tables(self):
         """Run all necessary migrations"""
         try:
@@ -182,6 +255,12 @@ class DatabaseMigrations:
             total_migrations += self.migrate_tipo_documento()
 
             # Add other table migrations here as needed
+
+            # Add concurrency columns to all tables
+            total_migrations += self.migrate_concurrency_columns()
+
+            # Add missing inventario columns
+            total_migrations += self.migrate_inventario_extra_columns()
 
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations
