@@ -175,11 +175,11 @@ class DatabaseMigrations:
             tables = [
                 'site_table', 'us_table', 'inventario_materiali_table',
                 'periodizzazione_table', 'media_table', 'media_thumb_table',
-                'documentazione_table',
+                'documentation_table',
             ]
 
             concurrency_columns = [
-                ('entity_uuid', 'TEXT'),
+                ('entity_uuid', 'VARCHAR(36)'),
                 ('version_number', 'INTEGER', '1'),
                 ('last_modified_by', 'VARCHAR(100)'),
                 ('last_modified_timestamp', 'TIMESTAMP'),
@@ -200,7 +200,6 @@ class DatabaseMigrations:
             for table in tables:
                 try:
                     with self.connection.get_session() as session:
-                        from sqlalchemy import text
                         rows = session.execute(
                             text(f"SELECT rowid FROM {table} WHERE entity_uuid IS NULL")
                         ).fetchall()
@@ -223,6 +222,7 @@ class DatabaseMigrations:
     def migrate_inventario_extra_columns(self):
         """Add missing columns to inventario_materiali_table."""
         try:
+            logger.info("Starting inventario extra columns migration...")
             migrations_applied = 0
             extra = [
                 ('quota_usm', 'NUMERIC(10,3)'),
