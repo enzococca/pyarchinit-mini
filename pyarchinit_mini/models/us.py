@@ -2,7 +2,7 @@
 Stratigraphic Unit (US) model
 """
 
-from sqlalchemy import Column, Integer, String, Text, Boolean, Date, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Boolean, Date, Float, Numeric, ForeignKey
 from sqlalchemy.orm import relationship
 from .base import BaseModel
 
@@ -83,7 +83,26 @@ class US(BaseModel):
     quad_par = Column(String(200))
     ambient = Column(String(200))
     saggio = Column(String(200))
-    
+
+    # USM masonry detail fields (from pyarchinit US_table.py)
+    elem_datanti = Column(Text)
+    funz_statica = Column(Text)
+    lavorazione = Column(Text)
+    spess_giunti = Column(Text)
+    letti_posa = Column(Text)
+    alt_mod = Column(Text)
+    un_ed_riass = Column(Text)
+    reimp = Column(Text)
+    posa_opera = Column(Text)
+    quota_min_usm = Column(Numeric(6, 2))
+    quota_max_usm = Column(Numeric(6, 2))
+    cons_legante = Column(Text)
+    col_legante = Column(Text)
+    aggreg_legante = Column(Text)
+    con_text_mat = Column(Text)
+    col_materiale = Column(Text)
+    inclusi_materiali_usm = Column(Text)
+
     # Additional ICCD alignment fields
     n_catalogo_generale = Column(String(25))
     n_catalogo_interno = Column(String(25))
@@ -93,13 +112,30 @@ class US(BaseModel):
     # Measurements
     quota_relativa = Column(Float)
     quota_abs = Column(Float)
+
+    # References and position
+    ref_tm = Column(Text)
+    ref_ra = Column(Text)
+    ref_n = Column(Text)
+    posizione = Column(Text)
+    criteri_distinzione = Column(Text)
+    modo_formazione = Column(Text)
+    componenti_organici = Column(Text)
+    componenti_inorganici = Column(Text)
+
     lunghezza_max = Column(Float)
     altezza_max = Column(Float)
     altezza_min = Column(Float)
     profondita_max = Column(Float)
     profondita_min = Column(Float)
     larghezza_media = Column(Float)
-    
+
+    # Extended quota measurements
+    quota_max_abs = Column(Numeric(6, 2))
+    quota_max_rel = Column(Numeric(6, 2))
+    quota_min_abs = Column(Numeric(6, 2))
+    quota_min_rel = Column(Numeric(6, 2))
+
     # Additional data (i18n for observations)
     # Legacy columns (kept for backward compatibility, map to IT)
     osservazioni = Column(Text)
@@ -112,7 +148,54 @@ class US(BaseModel):
 
     # English translations (new columns)
     osservazioni_en = Column(Text)
-    
+
+    # Administrative
+    cod_ente_schedatore = Column(Text)
+    data_rilevazione = Column(String(20))
+    data_rielaborazione = Column(String(20))
+
+    # USM extended measurements and details
+    lunghezza_usm = Column(Numeric(6, 2))
+    altezza_usm = Column(Numeric(6, 2))
+    spessore_usm = Column(Numeric(6, 2))
+    tecnica_muraria_usm = Column(Text)
+    modulo_usm = Column(Text)
+    campioni_malta_usm = Column(Text)
+    campioni_mattone_usm = Column(Text)
+    campioni_pietra_usm = Column(Text)
+    provenienza_materiali_usm = Column(Text)
+    criteri_distinzione_usm = Column(Text)
+    uso_primario_usm = Column(Text)
+    tipologia_opera = Column(Text)
+    sezione_muraria = Column(Text)
+    superficie_analizzata = Column(Text)
+    orientamento = Column(Text)
+
+    # Laterizio (brick) fields
+    materiali_lat = Column(Text)
+    lavorazione_lat = Column(Text)
+    consistenza_lat = Column(Text)
+    forma_lat = Column(Text)
+    colore_lat = Column(Text)
+    impasto_lat = Column(Text)
+
+    # Pietra (stone) fields
+    forma_p = Column(Text)
+    colore_p = Column(Text)
+    taglio_p = Column(Text)
+    posa_opera_p = Column(Text)
+
+    # Other USM fields
+    inerti_usm = Column(Text)
+    tipo_legante_usm = Column(Text)
+    rifinitura_usm = Column(Text)
+    materiale_p = Column(Text)
+    consistenza_p = Column(Text)
+
+    # Extended relationships and documentation
+    rapporti2 = Column(Text)
+    doc_usv = Column(Text)
+
     # Relationships
     site_ref = relationship("Site", foreign_keys=[sito], 
                            primaryjoin="US.sito == Site.sito")
