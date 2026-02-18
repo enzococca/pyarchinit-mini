@@ -165,6 +165,129 @@ class DatabaseMigrations:
             logger.error(f"Error during tipo_documento migration: {e}")
             raise
 
+    def migrate_concurrency_columns(self):
+        """Add concurrency tracking columns to all main tables."""
+        import uuid as uuid_mod
+        try:
+            logger.info("Starting concurrency columns migration...")
+            migrations_applied = 0
+
+            tables = [
+                'site_table', 'us_table', 'inventario_materiali_table',
+                'periodizzazione_table', 'media_table', 'media_thumb_table',
+                'documentation_table',
+            ]
+
+            concurrency_columns = [
+                ('entity_uuid', 'VARCHAR(36)'),
+                ('version_number', 'INTEGER', '1'),
+                ('last_modified_by', 'VARCHAR(100)'),
+                ('last_modified_timestamp', 'TIMESTAMP'),
+                ('sync_status', 'VARCHAR(20)', "'new'"),
+                ('editing_by', 'VARCHAR(100)'),
+                ('editing_since', 'TIMESTAMP'),
+            ]
+
+            for table in tables:
+                for col_def in concurrency_columns:
+                    col_name = col_def[0]
+                    col_type = col_def[1]
+                    default = col_def[2] if len(col_def) > 2 else None
+                    if self.add_column_if_not_exists(table, col_name, col_type, default):
+                        migrations_applied += 1
+
+            # Back-fill entity_uuid for existing rows that have NULL
+            for table in tables:
+                try:
+                    with self.connection.get_session() as session:
+                        rows = session.execute(
+                            text(f"SELECT rowid FROM {table} WHERE entity_uuid IS NULL")
+                        ).fetchall()
+                        for row in rows:
+                            new_uuid = str(uuid_mod.uuid4())
+                            session.execute(
+                                text(f"UPDATE {table} SET entity_uuid = :uuid WHERE rowid = :rid"),
+                                {"uuid": new_uuid, "rid": row[0]}
+                            )
+                        session.commit()
+                except Exception as e:
+                    logger.warning(f"UUID backfill for {table}: {e}")
+
+            logger.info(f"Concurrency migration done. {migrations_applied} columns added")
+            return migrations_applied
+        except Exception as e:
+            logger.error(f"Error during concurrency migration: {e}")
+            raise
+
+    def migrate_inventario_extra_columns(self):
+        """Add missing columns to inventario_materiali_table."""
+        try:
+            logger.info("Starting inventario extra columns migration...")
+            migrations_applied = 0
+            extra = [
+                ('quota_usm', 'NUMERIC(10,3)'),
+                ('unita_misura_quota', 'VARCHAR(20)'),
+                ('photo_id', 'TEXT'),
+                ('drawing_id', 'TEXT'),
+            ]
+            for col_name, col_type in extra:
+                if self.add_column_if_not_exists('inventario_materiali_table', col_name, col_type):
+                    migrations_applied += 1
+            return migrations_applied
+        except Exception as e:
+            logger.error(f"Error during inventario extra migration: {e}")
+            raise
+
+    def migrate_us_extra_columns(self):
+        """Add all missing pyarchinit US columns to us_table."""
+        try:
+            logger.info("Starting US extra columns migration...")
+            migrations_applied = 0
+            columns = [
+                ('elem_datanti', 'TEXT'), ('funz_statica', 'TEXT'),
+                ('lavorazione', 'TEXT'), ('spess_giunti', 'TEXT'),
+                ('letti_posa', 'TEXT'), ('alt_mod', 'TEXT'),
+                ('un_ed_riass', 'TEXT'), ('reimp', 'TEXT'),
+                ('posa_opera', 'TEXT'),
+                ('quota_min_usm', 'NUMERIC(6,2)'), ('quota_max_usm', 'NUMERIC(6,2)'),
+                ('cons_legante', 'TEXT'), ('col_legante', 'TEXT'),
+                ('aggreg_legante', 'TEXT'), ('con_text_mat', 'TEXT'),
+                ('col_materiale', 'TEXT'), ('inclusi_materiali_usm', 'TEXT'),
+                ('ref_tm', 'TEXT'), ('ref_ra', 'TEXT'), ('ref_n', 'TEXT'),
+                ('posizione', 'TEXT'), ('criteri_distinzione', 'TEXT'),
+                ('modo_formazione', 'TEXT'),
+                ('componenti_organici', 'TEXT'), ('componenti_inorganici', 'TEXT'),
+                ('quota_max_abs', 'NUMERIC(6,2)'), ('quota_max_rel', 'NUMERIC(6,2)'),
+                ('quota_min_abs', 'NUMERIC(6,2)'), ('quota_min_rel', 'NUMERIC(6,2)'),
+                ('cod_ente_schedatore', 'TEXT'),
+                ('data_rilevazione', 'VARCHAR(20)'), ('data_rielaborazione', 'VARCHAR(20)'),
+                ('lunghezza_usm', 'NUMERIC(6,2)'), ('altezza_usm', 'NUMERIC(6,2)'),
+                ('spessore_usm', 'NUMERIC(6,2)'),
+                ('tecnica_muraria_usm', 'TEXT'), ('modulo_usm', 'TEXT'),
+                ('campioni_malta_usm', 'TEXT'), ('campioni_mattone_usm', 'TEXT'),
+                ('campioni_pietra_usm', 'TEXT'),
+                ('provenienza_materiali_usm', 'TEXT'),
+                ('criteri_distinzione_usm', 'TEXT'), ('uso_primario_usm', 'TEXT'),
+                ('tipologia_opera', 'TEXT'), ('sezione_muraria', 'TEXT'),
+                ('superficie_analizzata', 'TEXT'), ('orientamento', 'TEXT'),
+                ('materiali_lat', 'TEXT'), ('lavorazione_lat', 'TEXT'),
+                ('consistenza_lat', 'TEXT'), ('forma_lat', 'TEXT'),
+                ('colore_lat', 'TEXT'), ('impasto_lat', 'TEXT'),
+                ('forma_p', 'TEXT'), ('colore_p', 'TEXT'),
+                ('taglio_p', 'TEXT'), ('posa_opera_p', 'TEXT'),
+                ('inerti_usm', 'TEXT'), ('tipo_legante_usm', 'TEXT'),
+                ('rifinitura_usm', 'TEXT'),
+                ('materiale_p', 'TEXT'), ('consistenza_p', 'TEXT'),
+                ('rapporti2', 'TEXT'), ('doc_usv', 'TEXT'),
+            ]
+            for col_name, col_type in columns:
+                if self.add_column_if_not_exists('us_table', col_name, col_type):
+                    migrations_applied += 1
+            return migrations_applied
+        except Exception as e:
+            logger.error(f"Error during US extra migration: {e}")
+            raise
+
     def migrate_all_tables(self):
         """Run all necessary migrations"""
         try:
@@ -182,6 +305,15 @@ class DatabaseMigrations:
             total_migrations += self.migrate_tipo_documento()
 
             # Add other table migrations here as needed
+
+            # Add concurrency columns to all tables
+            total_migrations += self.migrate_concurrency_columns()
+
+            # Add missing inventario columns
+            total_migrations += self.migrate_inventario_extra_columns()
+
+            # Add missing US columns
+            total_migrations += self.migrate_us_extra_columns()
 
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations

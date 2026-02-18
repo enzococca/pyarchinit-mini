@@ -3,11 +3,12 @@ Site API endpoints
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Header, Query
 from fastapi.responses import JSONResponse
 
 from .schemas import SiteCreate, SiteUpdate, SiteResponse, PaginatedResponse
-from .dependencies import get_site_service
+from .dependencies import get_site_service, get_database_connection
+from ..database.connection import DatabaseConnection
 from ..services.site_service import SiteService
 from ..utils.exceptions import ValidationError, RecordNotFoundError, DuplicateRecordError
 
@@ -117,23 +118,44 @@ async def create_site(
 async def update_site(
     site_id: int,
     site_data: SiteUpdate,
-    site_service: SiteService = Depends(get_site_service)
+    if_match: Optional[str] = Header(None, alias="If-Match"),
+    site_service: SiteService = Depends(get_site_service),
+    db_conn: DatabaseConnection = Depends(get_database_connection)
 ):
     """
     Update an existing site
     """
     try:
+        # Optimistic locking: check version if If-Match header provided
+        if if_match is not None:
+            from pyarchinit_mini.database.concurrency_manager import ConcurrencyManager
+            cm = ConcurrencyManager(db_conn)
+            conflict = cm.check_version_conflict('site_table', site_id, int(if_match))
+            if conflict:
+                raise HTTPException(status_code=409, detail={
+                    "message": "Version conflict",
+                    "current_version": conflict["current_version"],
+                    "your_version": int(if_match),
+                })
+
         # Only include non-None values in update
         update_data = {k: v for k, v in site_data.dict().items() if v is not None}
         site = site_service.update_site(site_id, update_data)
+
+        # Increment version after successful update
+        if if_match is not None:
+            cm.increment_version('site_table', site_id, "api_user")
+
         return SiteResponse.from_orm(site)
-    
+
     except RecordNotFoundError:
         raise HTTPException(status_code=404, detail="Site not found")
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except DuplicateRecordError as e:
         raise HTTPException(status_code=409, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

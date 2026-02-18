@@ -10,6 +10,7 @@ from .us import router as us_router
 from .inventario import router as inventario_router
 from .auth import router as auth_router
 from .graphml import router as graphml_router
+from .sync import router as sync_router
 
 def create_app(database_url: str = None) -> FastAPI:
     """
@@ -44,6 +45,7 @@ def create_app(database_url: str = None) -> FastAPI:
     app.include_router(us_router, prefix="/api/v1/us", tags=["stratigraphic-units"])
     app.include_router(inventario_router, prefix="/api/v1/inventario", tags=["inventory"])
     app.include_router(graphml_router, prefix="/api/graphml", tags=["graphml-converter"])
+    app.include_router(sync_router)  # Sync routes have prefix in router
     
     # Store database URL in app state
     if database_url:

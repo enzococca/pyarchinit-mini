@@ -3,10 +3,11 @@ Inventario Materiali API endpoints
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Header, Query
 
 from .schemas import InventarioCreate, InventarioUpdate, InventarioResponse, PaginatedResponse
-from .dependencies import get_inventario_service
+from .dependencies import get_inventario_service, get_database_connection
+from ..database.connection import DatabaseConnection
 from ..services.inventario_service import InventarioService
 from ..utils.exceptions import ValidationError, RecordNotFoundError
 
@@ -75,17 +76,38 @@ async def create_inventario_item(
 async def update_inventario_item(
     item_id: int,
     item_data: InventarioUpdate,
-    inventario_service: InventarioService = Depends(get_inventario_service)
+    if_match: Optional[str] = Header(None, alias="If-Match"),
+    inventario_service: InventarioService = Depends(get_inventario_service),
+    db_conn: DatabaseConnection = Depends(get_database_connection)
 ):
     """Update an existing inventory item"""
     try:
+        # Optimistic locking: check version if If-Match header provided
+        if if_match is not None:
+            from pyarchinit_mini.database.concurrency_manager import ConcurrencyManager
+            cm = ConcurrencyManager(db_conn)
+            conflict = cm.check_version_conflict('inventario_materiali_table', item_id, int(if_match))
+            if conflict:
+                raise HTTPException(status_code=409, detail={
+                    "message": "Version conflict",
+                    "current_version": conflict["current_version"],
+                    "your_version": int(if_match),
+                })
+
         update_data = {k: v for k, v in item_data.dict().items() if v is not None}
         item = inventario_service.update_inventario(item_id, update_data)
+
+        # Increment version after successful update
+        if if_match is not None:
+            cm.increment_version('inventario_materiali_table', item_id, "api_user")
+
         return InventarioResponse.from_orm(item)
     except RecordNotFoundError:
         raise HTTPException(status_code=404, detail="Inventory item not found")
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
