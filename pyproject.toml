@@ -155,6 +155,7 @@ pyarchinit-harris-template = "pyarchinit_mini.cli.harris_template:generate_templ
 pyarchinit-mini-migrate = "pyarchinit_mini.cli.migrate:cli"
 pyarchinit-mcp-server = "pyarchinit_mini.mcp_server.__main__:main"
 pyarchinit-mcp-http = "pyarchinit_mini.mcp_server.http_server:main"
+pyarchinit-mini-sync = "pyarchinit_mini.cli.sync_cli:sync"
 
 [tool.setuptools.packages.find]
 where = ["."]
