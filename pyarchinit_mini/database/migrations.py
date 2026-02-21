@@ -175,7 +175,7 @@ class DatabaseMigrations:
             tables = [
                 'site_table', 'us_table', 'inventario_materiali_table',
                 'periodizzazione_table', 'media_table', 'media_thumb_table',
-                'documentation_table',
+                'documentation_table', 'users',
             ]
 
             concurrency_columns = [

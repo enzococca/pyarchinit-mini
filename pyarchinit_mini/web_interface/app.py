@@ -399,6 +399,8 @@ def create_app():
     db_conn = DatabaseConnection.from_url(database_url)
     db_conn.create_tables()
     db_manager = DatabaseManager(db_conn)
+    # Run migrations to add any missing columns to existing databases
+    db_manager.run_migrations()
     print(f"[FLASK] Database connection initialized")
 
     # Store current database info in app config
