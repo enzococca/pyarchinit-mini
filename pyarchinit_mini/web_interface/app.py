@@ -554,6 +554,10 @@ def create_app():
             flash(f'Errore caricamento dashboard: {str(e)}', 'error')
             return render_template('dashboard.html', stats={})
 
+    @app.route('/docs')
+    def docs():
+        return render_template("docs/index.html")
+
     @app.route('/analytics')
     @login_required
     def analytics():

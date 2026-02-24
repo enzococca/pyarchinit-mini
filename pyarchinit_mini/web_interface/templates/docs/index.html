@@ -1,0 +1,1193 @@
+{% extends "base.html" %}
+{% block title %}Documentazione — PyArchInit-Mini{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Docs Layout ── */
+.docs-wrapper {
+  display: flex;
+  gap: 0;
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+/* ── Sticky TOC Sidebar ── */
+.docs-toc {
+  position: sticky;
+  top: var(--navbar-height);
+  width: 280px;
+  min-width: 280px;
+  height: calc(100vh - var(--navbar-height));
+  overflow-y: auto;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-color);
+  padding: 24px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+  transition: background-color var(--transition-speed) ease,
+              border-color var(--transition-speed) ease;
+}
+.docs-toc::-webkit-scrollbar { width: 5px; }
+.docs-toc::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+.docs-toc-header {
+  padding: 0 20px 16px;
+  border-bottom: 1px solid var(--border-color-lt);
+  margin-bottom: 12px;
+}
+.docs-toc-header h5 {
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+.docs-search {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.docs-search:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(196,91,40,0.15);
+}
+.docs-search-wrap {
+  position: relative;
+}
+.docs-search-wrap i {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.docs-toc-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.docs-toc-nav li a {
+  display: block;
+  padding: 7px 20px;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.docs-toc-nav li a:hover,
+.docs-toc-nav li a.active {
+  color: var(--accent-primary);
+  background: var(--bg-hover);
+  border-left-color: var(--accent-primary);
+}
+.docs-toc-nav li a i {
+  width: 20px;
+  text-align: center;
+  margin-right: 8px;
+  font-size: 0.8rem;
+}
+
+/* ── Docs Content ── */
+.docs-content {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 40px 80px;
+  max-width: 900px;
+}
+
+.docs-hero {
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid var(--border-color-lt);
+}
+.docs-hero h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+.docs-hero p {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+.docs-hero .badge {
+  font-size: 0.75rem;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+.docs-section {
+  margin-bottom: 48px;
+  scroll-margin-top: calc(var(--navbar-height) + 24px);
+}
+.docs-section h2 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.docs-section h2 i {
+  color: var(--accent-primary);
+  font-size: 1.1rem;
+}
+.docs-section h2 .badge {
+  font-size: 0.65rem;
+  vertical-align: middle;
+}
+.docs-section > .section-lead {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+/* Steps */
+.docs-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  counter-reset: step-counter;
+}
+.docs-steps li {
+  counter-increment: step-counter;
+  padding: 10px 0 10px 44px;
+  position: relative;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color-lt);
+}
+.docs-steps li:last-child { border-bottom: none; }
+.docs-steps li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tip callout */
+.docs-tip {
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-secondary);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.docs-tip strong {
+  color: var(--accent-secondary);
+}
+
+/* Warning callout */
+.docs-warning {
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-warning);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.docs-warning strong {
+  color: var(--accent-warning);
+}
+
+/* Troubleshooting accordion overrides */
+.docs-section .accordion {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.docs-section .accordion-item {
+  border: none;
+  border-bottom: 1px solid var(--border-color-lt);
+  background: var(--bg-surface);
+}
+.docs-section .accordion-item:last-child { border-bottom: none; }
+.docs-section .accordion-button {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 12px 16px;
+  box-shadow: none;
+}
+.docs-section .accordion-button:not(.collapsed) {
+  background: var(--bg-surface-alt);
+  color: var(--accent-primary);
+}
+.docs-section .accordion-button::after {
+  filter: var(--text-primary);
+}
+[data-theme="dark"] .docs-section .accordion-button::after {
+  filter: invert(1);
+}
+.docs-section .accordion-body {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.87rem;
+  line-height: 1.65;
+  padding: 14px 16px;
+}
+.docs-section .accordion-body code {
+  font-size: 0.82rem;
+}
+
+/* ── Table inside docs ── */
+.docs-section .table {
+  font-size: 0.87rem;
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+.docs-section .table thead th {
+  background: var(--bg-card-header);
+  border-color: var(--border-color);
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-secondary);
+}
+.docs-section .table td {
+  border-color: var(--border-color-lt);
+  vertical-align: middle;
+}
+
+/* No-results message */
+.docs-no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  display: none;
+}
+.docs-no-results i {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* ── Mobile responsive ── */
+@media (max-width: 991px) {
+  .docs-toc {
+    display: none;
+  }
+  .docs-content {
+    padding: 24px 20px 60px;
+  }
+}
+@media (min-width: 992px) {
+  .docs-mobile-search { display: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="docs-wrapper">
+
+  <!-- ═══ TOC SIDEBAR ═══ -->
+  <nav class="docs-toc" id="docs-toc">
+    <div class="docs-toc-header">
+      <h5><i class="fas fa-book-open me-1"></i> Documentazione</h5>
+      <div class="docs-search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" class="docs-search" id="docs-search" placeholder="Cerca nella guida..." autocomplete="off">
+      </div>
+    </div>
+    <ul class="docs-toc-nav" id="docs-toc-nav">
+      <li><a href="#introduzione"><i class="fas fa-info-circle"></i> Introduzione</a></li>
+      <li><a href="#dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="#siti"><i class="fas fa-map-marked-alt"></i> Siti Archeologici</a></li>
+      <li><a href="#us"><i class="fas fa-layer-group"></i> Unita Stratigrafiche</a></li>
+      <li><a href="#harris"><i class="fas fa-project-diagram"></i> Harris Matrix Creator</a></li>
+      <li><a href="#inventario"><i class="fas fa-archive"></i> Inventario Materiali</a></li>
+      <li><a href="#media"><i class="fas fa-images"></i> Media</a></li>
+      <li><a href="#import-pyarchinit"><i class="fas fa-exchange-alt"></i> Import da pyArchInit</a></li>
+      <li><a href="#import-excel"><i class="fas fa-file-excel"></i> Import Excel</a></li>
+      <li><a href="#export"><i class="fas fa-file-export"></i> Export / Import</a></li>
+      <li><a href="#periodi"><i class="fas fa-calendar-alt"></i> Periodi e Datazioni</a></li>
+      <li><a href="#thesaurus"><i class="fas fa-book"></i> Thesaurus ICCD</a></li>
+      <li><a href="#database"><i class="fas fa-database"></i> Database Management</a></li>
+      <li><a href="#utenti"><i class="fas fa-users-cog"></i> Utenti</a></li>
+      <li><a href="#troubleshooting"><i class="fas fa-bug"></i> Troubleshooting</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <div class="docs-content" id="docs-content">
+
+    <!-- Mobile search (visible < 992px) -->
+    <div class="docs-mobile-search mb-3">
+      <div class="docs-search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" class="docs-search" id="docs-search-mobile" placeholder="Cerca nella guida..." autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="docs-hero">
+      <h1><i class="fas fa-book-open me-2" style="color:var(--accent-primary)"></i>Documentazione PyArchInit-Mini <span class="badge bg-warning text-dark">v2.1.5</span></h1>
+      <p>Guida completa all'utilizzo del sistema di gestione dati archeologici. Questa documentazione copre tutte le funzionalita dell'applicazione, dalla configurazione iniziale alla risoluzione dei problemi.</p>
+    </div>
+
+    <div class="docs-no-results" id="docs-no-results">
+      <i class="fas fa-search"></i>
+      Nessun risultato trovato. Prova con un altro termine di ricerca.
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════
+         1. INTRODUZIONE
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="introduzione" data-search="introduzione cos'e requisiti avvio credenziali installazione">
+      <h2><i class="fas fa-info-circle"></i> 1. Introduzione</h2>
+      <p class="section-lead">
+        <strong>PyArchInit-Mini</strong> e un sistema leggero e modulare per la gestione dei dati archeologici,
+        derivato dal progetto PyArchInit. Supporta la gestione di siti, unita stratigrafiche,
+        inventario materiali, Harris Matrix, media, import/export e molto altro.
+      </p>
+
+      <h5 class="mt-4 mb-3">Requisiti di sistema</h5>
+      <ul class="docs-steps">
+        <li><strong>Python 3.8+</strong> — necessario per l'esecuzione dell'applicazione</li>
+        <li><strong>Browser moderno</strong> — Chrome, Firefox, Edge o Safari aggiornati</li>
+        <li><strong>Database</strong> — SQLite (default, incluso) oppure PostgreSQL per ambienti di produzione</li>
+      </ul>
+
+      <h5 class="mt-4 mb-3">Primo avvio</h5>
+      <ol class="docs-steps">
+        <li>Installa il pacchetto: <code>pip install pyarchinit-mini</code></li>
+        <li>Avvia il server: <code>pyarchinit-mini web</code> (oppure <code>python -m pyarchinit_mini web</code>)</li>
+        <li>Apri il browser all'indirizzo <code>http://localhost:5000</code></li>
+        <li>Effettua il login con le credenziali di default: <code>admin</code> / <code>admin</code></li>
+      </ol>
+
+      <div class="docs-warning">
+        <strong><i class="fas fa-exclamation-triangle me-1"></i> Importante:</strong>
+        Cambia immediatamente la password dell'utente admin dopo il primo accesso per motivi di sicurezza.
+      </div>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        Per avviare in modalita debug (sviluppo), usa <code>pyarchinit-mini web --debug</code>.
+        Per specificare una porta diversa: <code>pyarchinit-mini web --port 8080</code>.
+      </div>
+
+      <!-- Troubleshooting -->
+      <h5 class="mt-4 mb-2">Risoluzione problemi</h5>
+      <div class="accordion" id="acc-intro">
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-intro-1">Il server non si avvia</button></h2>
+          <div id="acc-intro-1" class="accordion-collapse collapse" data-bs-parent="#acc-intro">
+            <div class="accordion-body">
+              Verifica che Python 3.8+ sia installato (<code>python3 --version</code>). Controlla che la porta 5000 non sia gia in uso.
+              Su macOS 12+, AirPlay potrebbe occupare la porta 5000: usa <code>--port 5001</code>.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-intro-2"><code>ModuleNotFoundError: pyarchinit_mini</code></button></h2>
+          <div id="acc-intro-2" class="accordion-collapse collapse" data-bs-parent="#acc-intro">
+            <div class="accordion-body">
+              Assicurati di aver installato il pacchetto con <code>pip install pyarchinit-mini</code>. Se usi un virtual environment, verifica che sia attivo.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         2. DASHBOARD
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="dashboard" data-search="dashboard statistiche link rapidi home panoramica">
+      <h2><i class="fas fa-tachometer-alt"></i> 2. Dashboard</h2>
+      <p class="section-lead">
+        La Dashboard e la pagina principale dell'applicazione. Offre una panoramica rapida dei dati presenti nel database
+        e link rapidi per accedere alle funzionalita principali.
+      </p>
+
+      <h5 class="mt-4 mb-3">Statistiche mostrate</h5>
+      <ol class="docs-steps">
+        <li><strong>Siti totali</strong> — numero di siti archeologici registrati nel database</li>
+        <li><strong>US totali</strong> — numero complessivo di unita stratigrafiche</li>
+        <li><strong>Reperti totali</strong> — numero di record nell'inventario materiali</li>
+        <li><strong>Siti recenti</strong> — gli ultimi 5 siti creati o modificati</li>
+      </ol>
+
+      <h5 class="mt-4 mb-3">Link rapidi</h5>
+      <p>Dalla dashboard puoi accedere direttamente a:</p>
+      <ul>
+        <li>Creazione nuovo sito, nuova US, nuovo reperto</li>
+        <li>Pagina Analytics con grafici dettagliati</li>
+        <li>Harris Matrix Creator</li>
+        <li>Import/Export dati</li>
+      </ul>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        La sidebar laterale e sempre disponibile per la navigazione. Puoi chiuderla cliccando l'icona hamburger nella barra superiore.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         3. SITI ARCHEOLOGICI
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="siti" data-search="siti archeologici creare modificare sito nome univoco duplicato">
+      <h2><i class="fas fa-map-marked-alt"></i> 3. Siti Archeologici</h2>
+      <p class="section-lead">
+        I siti archeologici rappresentano l'entita principale del sistema. Ogni sito raggruppa unita stratigrafiche,
+        reperti e media collegati. Il campo <strong>sito</strong> (nome) deve essere univoco nel database.
+      </p>
+
+      <h5 class="mt-4 mb-3">Creare un nuovo sito</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Siti Archeologici</strong> dalla sidebar o dal menu rapido</li>
+        <li>Clicca <strong>Nuovo Sito</strong></li>
+        <li>Compila i campi richiesti: nome sito (univoco), nazione, regione, comune, descrizione</li>
+        <li>Clicca <strong>Salva</strong> per creare il sito</li>
+      </ol>
+
+      <h5 class="mt-4 mb-3">Modificare un sito</h5>
+      <ol class="docs-steps">
+        <li>Dalla lista siti, clicca sull'icona <i class="fas fa-edit"></i> del sito da modificare</li>
+        <li>Modifica i campi desiderati</li>
+        <li>Clicca <strong>Salva modifiche</strong></li>
+      </ol>
+
+      <div class="docs-warning">
+        <strong><i class="fas fa-exclamation-triangle me-1"></i> Importante:</strong>
+        Il campo <strong>sito</strong> (nome del sito) deve essere univoco. Se provi a creare un sito con un nome gia esistente,
+        riceverai un errore di duplicato. Modifica il nome o verifica se il sito esiste gia nella lista.
+      </div>
+
+      <h5 class="mt-4 mb-2">Risoluzione problemi</h5>
+      <div class="accordion" id="acc-siti">
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-siti-1">Errore "sito duplicato"</button></h2>
+          <div id="acc-siti-1" class="accordion-collapse collapse" data-bs-parent="#acc-siti">
+            <div class="accordion-body">
+              Il nome del sito deve essere univoco. Cerca il sito nella lista per verificare che non esista gia. Se stai importando da un altro database, verifica i nomi prima dell'importazione.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         4. UNITA STRATIGRAFICHE (US)
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="us" data-search="unita stratigrafiche us campi sito area d_stratigrafica d_interpretativa periodo fase rapporti varchar">
+      <h2><i class="fas fa-layer-group"></i> 4. Unita Stratigrafiche (US)</h2>
+      <p class="section-lead">
+        Le Unita Stratigrafiche (US) sono il cuore della documentazione archeologica. Ogni US e collegata a un sito
+        e contiene informazioni sulla stratigrafia, l'interpretazione e i rapporti con altre US.
+      </p>
+
+      <h5 class="mt-4 mb-3">Campi principali</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr><th>Campo</th><th>Tipo</th><th>Descrizione</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>sito</code></td><td>VARCHAR</td><td>Nome del sito (deve corrispondere a un sito esistente)</td></tr>
+            <tr><td><code>area</code></td><td>VARCHAR</td><td>Area di scavo</td></tr>
+            <tr><td><code>us</code></td><td>VARCHAR <span class="badge bg-warning text-dark">v2.0.2+</span></td><td>Numero dell'unita stratigrafica</td></tr>
+            <tr><td><code>d_stratigrafica</code></td><td>TEXT</td><td>Definizione stratigrafica (es. strato, taglio, riempimento)</td></tr>
+            <tr><td><code>d_interpretativa</code></td><td>TEXT</td><td>Definizione interpretativa (es. pavimento, fossa, muro)</td></tr>
+            <tr><td><code>periodo</code></td><td>INTEGER</td><td>Periodo cronologico (collegato alla tabella periodi)</td></tr>
+            <tr><td><code>fase</code></td><td>INTEGER</td><td>Fase all'interno del periodo</td></tr>
+            <tr><td><code>rapporti</code></td><td>TEXT</td><td>Rapporti stratigrafici con altre US (copre, coperto da, taglia, ecc.)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="docs-warning">
+        <strong><i class="fas fa-exclamation-triangle me-1"></i> Importante — us e VARCHAR:</strong>
+        A partire dalla versione <span class="badge bg-warning text-dark">v2.0.2+</span>, il campo <code>us</code> e di tipo
+        <strong>VARCHAR</strong> (stringa), non INTEGER. Questo permette di gestire numerazioni con suffissi
+        (es. "100a", "100b") e codici alfanumerici. Se il tuo database usa ancora INTEGER,
+        aggiorna a v2.0.2+ per la migrazione automatica.
+      </div>
+
+      <h5 class="mt-4 mb-3">Creare una nuova US</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Unita Stratigrafiche</strong> dalla sidebar</li>
+        <li>Clicca <strong>Nuova US</strong></li>
+        <li>Seleziona il <strong>sito</strong> di appartenenza dal menu a tendina</li>
+        <li>Compila area, numero US, definizioni stratigrafica e interpretativa</li>
+        <li>Aggiungi eventuali rapporti stratigrafici</li>
+        <li>Clicca <strong>Salva</strong></li>
+      </ol>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        I rapporti stratigrafici vengono usati per generare l'Harris Matrix. Compilali con attenzione
+        per ottenere diagrammi corretti.
+      </div>
+
+      <h5 class="mt-4 mb-2">Risoluzione problemi</h5>
+      <div class="accordion" id="acc-us">
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-us-1">Errore di tipo sul campo US (INTEGER vs VARCHAR)</button></h2>
+          <div id="acc-us-1" class="accordion-collapse collapse" data-bs-parent="#acc-us">
+            <div class="accordion-body">
+              Se ricevi errori come <code>character varying = integer</code> in PostgreSQL, il tuo database usa
+              ancora il vecchio tipo INTEGER per il campo <code>us</code>. Aggiorna a
+              <span class="badge bg-warning text-dark">v2.0.2+</span> per la migrazione automatica del tipo di colonna.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         5. HARRIS MATRIX CREATOR
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="harris" data-search="harris matrix creator diagramma nodi archi relazioni graphml png canvas editor workflow">
+      <h2><i class="fas fa-project-diagram"></i> 5. Harris Matrix Creator</h2>
+      <p class="section-lead">
+        L'Harris Matrix Creator e un editor visuale per costruire diagrammi stratigrafici direttamente nel browser.
+        Supporta creazione di nodi, archi con diversi tipi di relazione, salvataggio e export in formato GraphML e PNG.
+      </p>
+
+      <h5 class="mt-4 mb-3">Workflow completo</h5>
+      <ol class="docs-steps">
+        <li><strong>Seleziona il sito</strong> — dal menu a tendina in alto, scegli il sito su cui lavorare oppure crea una nuova matrice</li>
+        <li><strong>Apri l'editor</strong> — clicca su una matrice esistente per modificarla o crea una nuova matrice vuota</li>
+        <li><strong>Modalita Nodi</strong> — attiva la modalita "Nodi" dalla barra strumenti. Clicca sul canvas per aggiungere un nuovo nodo. Ogni nodo rappresenta una US</li>
+        <li><strong>Modalita Archi</strong> — attiva la modalita "Archi". Clicca su un nodo sorgente, poi su un nodo destinazione per creare una relazione</li>
+        <li><strong>Tipi di relazione</strong> — seleziona il tipo di relazione dal pannello: copre/coperto da, taglia/tagliato da, riempie/riempito da, si appoggia/gli si appoggia</li>
+        <li><strong>Stili visuali</strong> — le relazioni vengono visualizzate con stili diversi:
+          <ul class="mt-1">
+            <li><strong>Linea continua</strong> — relazione stratigrafica standard</li>
+            <li><strong>Linea tratteggiata</strong> — relazione negativa (es. taglia/tagliato da)</li>
+            <li><strong>Linea doppia</strong> — relazione di contemporaneita</li>
+          </ul>
+        </li>
+        <li><strong>Salva</strong> — clicca il pulsante "Save" per salvare la matrice nel database</li>
+        <li><strong>Export</strong> — usa i pulsanti "Export GraphML" o "Export PNG" per scaricare il diagramma</li>
+      </ol>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        Puoi spostare i nodi trascinandoli. Il layout automatico (dagre) riarrangia i nodi in ordine gerarchico
+        cliccando "Auto Layout". Usa la rotellina del mouse per lo zoom.
+      </div>
+
+      <h5 class="mt-4 mb-2">Risoluzione problemi</h5>
+      <div class="accordion" id="acc-harris">
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-harris-1">Il canvas non risponde ai click</button></h2>
+          <div id="acc-harris-1" class="accordion-collapse collapse" data-bs-parent="#acc-harris">
+            <div class="accordion-body">
+              Questo bug e stato risolto nella versione <span class="badge bg-warning text-dark">v2.1.3+</span>.
+              Il problema era causato dal canvas Cytoscape con altezza 0 all'interno di un layout flexbox.
+              <strong>Soluzione:</strong> aggiorna a v2.1.3 o successiva. Se sei gia aggiornato, prova a ridimensionare la finestra del browser.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-harris-2"><code>ModuleNotFoundError: create_harris_matrix_tool</code></button></h2>
+          <div id="acc-harris-2" class="accordion-collapse collapse" data-bs-parent="#acc-harris">
+            <div class="accordion-body">
+              Questo errore indica che mancano i file del tool Harris Matrix. Aggiorna a
+              <span class="badge bg-warning text-dark">v2.1.1+</span> che include tutti i file MCP tool necessari.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-harris-3"><code>OperationalError: no such column: entity_uuid</code></button></h2>
+          <div id="acc-harris-3" class="accordion-collapse collapse" data-bs-parent="#acc-harris">
+            <div class="accordion-body">
+              La tabella <code>us_relationships_table</code> non ha le colonne di concorrenza.
+              Aggiorna a <span class="badge bg-warning text-dark">v2.1.2+</span> — la migrazione automatica aggiunge
+              le colonne mancanti (<code>entity_uuid</code>, <code>version</code>, ecc.) all'avvio.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         6. INVENTARIO MATERIALI
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="inventario" data-search="inventario materiali reperti artefatti collegamento us catalogo">
+      <h2><i class="fas fa-archive"></i> 6. Inventario Materiali</h2>
+      <p class="section-lead">
+        L'inventario materiali permette di catalogare tutti i reperti trovati durante lo scavo.
+        Ogni reperto puo essere collegato a un sito e a una specifica unita stratigrafica.
+      </p>
+
+      <h5 class="mt-4 mb-3">Registrare un reperto</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Inventario Materiali</strong> dalla sidebar</li>
+        <li>Clicca <strong>Nuovo Reperto</strong></li>
+        <li>Seleziona il <strong>sito</strong> e l'<strong>area</strong> di provenienza</li>
+        <li>Inserisci il <strong>numero di inventario</strong> (univoco per sito)</li>
+        <li>Compila la <strong>US di provenienza</strong> per collegare il reperto alla stratigrafia</li>
+        <li>Aggiungi classe materiale, descrizione, dimensioni e tutti i campi necessari</li>
+        <li>Clicca <strong>Salva</strong></li>
+      </ol>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        Usa il Thesaurus ICCD per compilare i campi di classificazione con termini standardizzati.
+        Il sistema fornisce suggerimenti automatici durante la digitazione.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         7. MEDIA
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="media" data-search="media upload foto documenti immagini collegamento us siti fotografie">
+      <h2><i class="fas fa-images"></i> 7. Media</h2>
+      <p class="section-lead">
+        Il modulo Media permette di caricare fotografie, disegni e documenti e di collegarli
+        a siti e unita stratigrafiche specifiche.
+      </p>
+
+      <h5 class="mt-4 mb-3">Caricare un file</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Upload Media</strong> dalla sidebar (sezione Strumenti)</li>
+        <li>Trascina i file nell'area di upload oppure clicca per selezionarli</li>
+        <li>Seleziona il <strong>sito</strong> e opzionalmente la <strong>US</strong> da collegare</li>
+        <li>Aggiungi una descrizione per ogni file</li>
+        <li>Clicca <strong>Carica</strong> per completare l'upload</li>
+      </ol>
+
+      <h5 class="mt-4 mb-3">Gestire i media</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Media Files</strong> per visualizzare tutti i file caricati</li>
+        <li>Usa i filtri per cercare per sito, US o tipo di file</li>
+        <li>Clicca su un'immagine per visualizzarla a schermo intero (lightbox)</li>
+        <li>Usa l'icona <i class="fas fa-trash"></i> per eliminare un file</li>
+      </ol>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        Formati supportati: JPG, PNG, GIF, PDF, SVG. La dimensione massima e configurabile
+        nelle impostazioni del server.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         8. IMPORT DA PYARCHINIT
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="import-pyarchinit" data-search="import pyarchinit database connessione tabelle errori migrazione vecchio">
+      <h2><i class="fas fa-exchange-alt"></i> 8. Import da vecchio pyArchInit</h2>
+      <p class="section-lead">
+        Se hai dati in un database del vecchio pyArchInit (il plugin QGIS), puoi importarli
+        in pyArchInit-Mini tramite il modulo di importazione dedicato.
+      </p>
+
+      <h5 class="mt-4 mb-3">Procedura step by step</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>PyArchInit Import</strong> dal menu (sezione Strumenti)</li>
+        <li><strong>Seleziona il database</strong> sorgente — puo essere un file SQLite (<code>.sqlite</code>) o una connessione PostgreSQL</li>
+        <li>Clicca <strong>Test Connessione</strong> per verificare che il database sia accessibile e leggibile</li>
+        <li><strong>Seleziona le tabelle</strong> da importare — puoi scegliere singole tabelle (siti, US, inventario, periodi, ecc.) o tutte</li>
+        <li>Clicca <strong>Import</strong> per avviare l'importazione</li>
+        <li>Al termine, il sistema mostra un riepilogo: record importati con successo e eventuali errori</li>
+      </ol>
+
+      <div class="docs-warning">
+        <strong><i class="fas fa-exclamation-triangle me-1"></i> Importante:</strong>
+        L'importazione non sovrascrive dati esistenti. I record duplicati vengono ignorati.
+        Effettua sempre un backup prima di procedere con import massivi.
+      </div>
+
+      <h5 class="mt-4 mb-2">Risoluzione problemi</h5>
+      <div class="accordion" id="acc-import">
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-import-1">0 imported, N errors — nessun record importato</button></h2>
+          <div id="acc-import-1" class="accordion-collapse collapse" data-bs-parent="#acc-import">
+            <div class="accordion-body">
+              Espandi il <strong>log degli errori</strong> cliccando sulla sezione espandibile dopo l'import.
+              Gli errori piu comuni sono:
+              <ul class="mt-2">
+                <li><strong>Errore di tipo INTEGER/VARCHAR</strong>: il database sorgente usa INTEGER per il campo <code>us</code>, ma pyArchInit-Mini dalla v2.0.2 usa VARCHAR. Aggiorna a <span class="badge bg-warning text-dark">v2.0.2+</span></li>
+                <li><strong>Record duplicati</strong>: i record con chiave duplicata vengono saltati</li>
+                <li><strong>Campi mancanti</strong>: il database sorgente potrebbe avere uno schema diverso</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-import-2">112 errori sull'import delle US</button></h2>
+          <div id="acc-import-2" class="accordion-collapse collapse" data-bs-parent="#acc-import">
+            <div class="accordion-body">
+              Se ricevi un numero elevato di errori (es. 112) sull'importazione delle US, probabilmente il problema e il tipo di dato
+              del campo <code>us</code>. Il vecchio pyArchInit usava INTEGER, la nuova versione usa VARCHAR.
+              Aggiorna a <span class="badge bg-warning text-dark">v2.0.2+</span> per la compatibilita automatica.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         9. IMPORT EXCEL
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="import-excel" data-search="import excel xlsx csv formato colonne mapping batch">
+      <h2><i class="fas fa-file-excel"></i> 9. Import Excel</h2>
+      <p class="section-lead">
+        Puoi importare dati in massa da file Excel (.xlsx) o CSV. Il sistema mappa automaticamente
+        le colonne del file ai campi del database.
+      </p>
+
+      <h5 class="mt-4 mb-3">Formato atteso</h5>
+      <ol class="docs-steps">
+        <li><strong>Prima riga = intestazioni</strong> — le colonne devono avere nomi che corrispondono ai campi del database (es. <code>sito</code>, <code>area</code>, <code>us</code>, <code>d_stratigrafica</code>)</li>
+        <li><strong>Una riga = un record</strong> — ogni riga successiva rappresenta un record da importare</li>
+        <li><strong>Formati supportati</strong>: <code>.xlsx</code> (Excel), <code>.xls</code> (Excel legacy), <code>.csv</code> (separatore virgola o punto e virgola)</li>
+      </ol>
+
+      <h5 class="mt-4 mb-3">Procedura</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Excel Import</strong> dal menu Strumenti</li>
+        <li>Seleziona il <strong>tipo di dato</strong> da importare (siti, US, inventario)</li>
+        <li>Carica il file Excel/CSV</li>
+        <li>Verifica il <strong>mapping colonne</strong> — il sistema propone una corrispondenza automatica che puoi modificare</li>
+        <li>Clicca <strong>Import</strong> per avviare</li>
+      </ol>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        Scarica un file template dalla pagina di import per avere un esempio del formato atteso con tutte le colonne.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         10. EXPORT / IMPORT
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="export" data-search="export import formati backup csv json pdf excel scarica">
+      <h2><i class="fas fa-file-export"></i> 10. Export / Import</h2>
+      <p class="section-lead">
+        Il modulo Export/Import permette di esportare i dati in diversi formati e di creare backup completi del database.
+      </p>
+
+      <h5 class="mt-4 mb-3">Formati supportati</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr><th>Formato</th><th>Tipo</th><th>Descrizione</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>CSV</code></td><td>Export</td><td>Esportazione dati tabulari, compatibile con qualsiasi spreadsheet</td></tr>
+            <tr><td><code>Excel (.xlsx)</code></td><td>Export / Import</td><td>Formato nativo Excel con fogli multipli</td></tr>
+            <tr><td><code>PDF</code></td><td>Export</td><td>Report stampabili per siti, US, inventario e Harris Matrix</td></tr>
+            <tr><td><code>GraphML</code></td><td>Export</td><td>Harris Matrix in formato grafo (compatibile con yEd, Gephi)</td></tr>
+            <tr><td><code>PNG</code></td><td>Export</td><td>Harris Matrix come immagine</td></tr>
+            <tr><td><code>JSON</code></td><td>Export</td><td>Dati strutturati per integrazione con altri sistemi</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 class="mt-4 mb-3">Backup del database</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Export/Import</strong> dal menu</li>
+        <li>Seleziona le tabelle da esportare (o tutte per un backup completo)</li>
+        <li>Scegli il formato desiderato</li>
+        <li>Clicca <strong>Esporta</strong> per scaricare il file</li>
+      </ol>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        Effettua backup regolari! Per SQLite, puoi anche copiare direttamente il file <code>.sqlite</code>
+        dalla cartella dati dell'applicazione.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         11. PERIODI E DATAZIONI
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="periodi" data-search="periodi datazioni fasi cronologia periodizzazione">
+      <h2><i class="fas fa-calendar-alt"></i> 11. Periodi e Datazioni</h2>
+      <p class="section-lead">
+        Il sistema di periodizzazione permette di organizzare la cronologia del sito in periodi e fasi,
+        e di associare datazioni assolute e relative alle unita stratigrafiche.
+      </p>
+
+      <h5 class="mt-4 mb-3">Gestire i periodi</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Periodi di Datazione</strong> dalla sidebar (sezione Configurazione)</li>
+        <li>Clicca <strong>Nuovo Periodo</strong> per creare un periodo cronologico</li>
+        <li>Assegna un <strong>numero di periodo</strong>, una <strong>descrizione</strong> e le <strong>date</strong> (assolute o relative)</li>
+        <li>All'interno di ogni periodo, puoi creare <strong>fasi</strong> (sottodivisioni)</li>
+        <li>Associa i periodi alle US nella scheda di modifica dell'unita stratigrafica</li>
+      </ol>
+
+      <h5 class="mt-4 mb-3">Record di Periodizzazione</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Periodization Records</strong> per gestire le associazioni tra US e periodi</li>
+        <li>Ogni record collega una US a un periodo e una fase specifica</li>
+        <li>Questi dati vengono usati nell'Harris Matrix per raggruppare i nodi per periodo</li>
+      </ol>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        Nell'Harris Matrix Creator, i periodi possono essere visualizzati come gruppi colorati
+        che raggruppano le US appartenenti allo stesso periodo cronologico.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         12. THESAURUS ICCD
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="thesaurus" data-search="thesaurus iccd vocabolario controllato terminologia standardizzata">
+      <h2><i class="fas fa-book"></i> 12. Thesaurus ICCD</h2>
+      <p class="section-lead">
+        Il Thesaurus ICCD (Istituto Centrale per il Catalogo e la Documentazione) fornisce
+        vocabolari controllati per la catalogazione dei beni archeologici secondo gli standard italiani.
+      </p>
+
+      <h5 class="mt-4 mb-3">Cos'e il Thesaurus</h5>
+      <ol class="docs-steps">
+        <li>Il Thesaurus e un insieme di <strong>vocabolari controllati</strong> — liste di termini standardizzati per descrivere materiali, tecniche, forme e altri attributi</li>
+        <li>I termini sono organizzati in <strong>categorie</strong> (es. classe materiale, tecnica di lavorazione) e <strong>sigle</strong></li>
+        <li>Quando compili i campi dell'inventario, il sistema suggerisce termini dal Thesaurus per garantire uniformita nella catalogazione</li>
+      </ol>
+
+      <h5 class="mt-4 mb-3">Gestire il Thesaurus</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Thesaurus ICCD</strong> dalla sidebar (sezione Configurazione)</li>
+        <li>Visualizza le categorie e i termini esistenti</li>
+        <li>Puoi aggiungere nuovi termini o modificare quelli esistenti</li>
+        <li>I termini del Thesaurus vengono utilizzati come suggerimenti nel form dell'inventario</li>
+      </ol>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        L'uso del Thesaurus ICCD garantisce che i tuoi dati siano compatibili con il sistema nazionale
+        di catalogazione del patrimonio culturale italiano.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         13. DATABASE MANAGEMENT
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="database" data-search="database sqlite postgresql cambio backup migrazione gestione connessione">
+      <h2><i class="fas fa-database"></i> 13. Database Management</h2>
+      <p class="section-lead">
+        PyArchInit-Mini supporta SQLite (default, zero configurazione) e PostgreSQL (per ambienti multi-utente e di produzione).
+        La pagina Database Management permette di gestire le connessioni e le migrazioni.
+      </p>
+
+      <h5 class="mt-4 mb-3">SQLite vs PostgreSQL</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr><th>Caratteristica</th><th>SQLite</th><th>PostgreSQL</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Configurazione</td><td>Zero (file locale)</td><td>Server separato</td></tr>
+            <tr><td>Multi-utente</td><td>Limitato</td><td>Pieno supporto</td></tr>
+            <tr><td>Performance</td><td>Ottimo per piccoli/medi dataset</td><td>Ottimo per grandi dataset</td></tr>
+            <tr><td>Backup</td><td>Copia del file .sqlite</td><td>pg_dump / pg_restore</td></tr>
+            <tr><td>Ideale per</td><td>Singolo utente, sviluppo</td><td>Produzione, team</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 class="mt-4 mb-3">Cambiare database</h5>
+      <ol class="docs-steps">
+        <li>Vai a <strong>Database Management</strong> dalla sidebar o dalla navbar</li>
+        <li>Nella sezione connessione, scegli il tipo di database (SQLite o PostgreSQL)</li>
+        <li>Per PostgreSQL, inserisci host, porta, nome database, utente e password</li>
+        <li>Clicca <strong>Test Connessione</strong> per verificare</li>
+        <li>Clicca <strong>Salva</strong> per applicare la nuova configurazione</li>
+        <li>Riavvia l'applicazione per rendere effettive le modifiche</li>
+      </ol>
+
+      <h5 class="mt-4 mb-3">Backup</h5>
+      <ol class="docs-steps">
+        <li><strong>SQLite</strong>: copia il file <code>pyarchinit_mini.sqlite</code> dalla cartella dati</li>
+        <li><strong>PostgreSQL</strong>: usa <code>pg_dump nome_database &gt; backup.sql</code> dal terminale</li>
+        <li>Conserva sempre almeno un backup recente prima di aggiornamenti o importazioni</li>
+      </ol>
+
+      <div class="docs-warning">
+        <strong><i class="fas fa-exclamation-triangle me-1"></i> Importante:</strong>
+        Il cambio di database non migra automaticamente i dati. Usa Export/Import per trasferire dati tra database diversi.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         14. UTENTI
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="utenti" data-search="utenti ruoli admin operator viewer creare reset password autenticazione permessi">
+      <h2><i class="fas fa-users-cog"></i> 14. Utenti</h2>
+      <p class="section-lead">
+        Il sistema di autenticazione supporta tre ruoli con permessi diversi.
+        Solo gli utenti con ruolo Admin possono gestire gli account.
+      </p>
+
+      <h5 class="mt-4 mb-3">Ruoli disponibili</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr><th>Ruolo</th><th>Permessi</th><th>Uso tipico</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge bg-danger">Admin</span></td>
+              <td>Accesso completo: CRUD dati, gestione utenti, configurazione database, import/export</td>
+              <td>Responsabile del progetto, amministratore di sistema</td>
+            </tr>
+            <tr>
+              <td><span class="badge bg-primary">Operator</span></td>
+              <td>CRUD dati (siti, US, inventario, media), export, Harris Matrix — <strong>no</strong> gestione utenti e database</td>
+              <td>Archeologo operativo, ricercatore</td>
+            </tr>
+            <tr>
+              <td><span class="badge bg-secondary">Viewer</span></td>
+              <td>Solo lettura: visualizzazione dati, export — <strong>no</strong> creazione/modifica/eliminazione</td>
+              <td>Studente, collaboratore esterno, supervisore</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 class="mt-4 mb-3">Creare un nuovo utente</h5>
+      <ol class="docs-steps">
+        <li>Accedi come <strong>Admin</strong></li>
+        <li>Vai a <strong>Utenti</strong> (icona <i class="fas fa-users-cog"></i> nella navbar — visibile solo agli Admin)</li>
+        <li>Clicca <strong>Nuovo Utente</strong></li>
+        <li>Inserisci username, password e seleziona il ruolo</li>
+        <li>Clicca <strong>Crea</strong></li>
+      </ol>
+
+      <h5 class="mt-4 mb-3">Reset password</h5>
+      <ol class="docs-steps">
+        <li>Dalla lista utenti, clicca sull'icona di modifica dell'utente</li>
+        <li>Inserisci la nuova password</li>
+        <li>Clicca <strong>Salva</strong></li>
+      </ol>
+
+      <div class="docs-tip">
+        <strong><i class="fas fa-lightbulb me-1"></i> Suggerimento:</strong>
+        Le credenziali di default sono <code>admin</code> / <code>admin</code>.
+        Cambia la password al primo accesso! Il sistema supporta sessioni concorrenti
+        con notifiche in tempo reale tramite WebSocket.
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         15. TROUBLESHOOTING GENERALE
+         ════════════════════════════════════════════════════════════ -->
+    <section class="docs-section" id="troubleshooting" data-search="troubleshooting errori problemi operationalerror modulenotfounderror canvas varchar integer bug fix">
+      <h2><i class="fas fa-bug"></i> 15. Troubleshooting Generale</h2>
+      <p class="section-lead">
+        Tabella riassuntiva degli errori piu comuni e delle relative soluzioni. Per ogni errore
+        e indicata la versione minima che include la correzione.
+      </p>
+
+      <div class="table-responsive mb-4">
+        <table class="table table-bordered">
+          <thead>
+            <tr><th style="width:45%">Errore</th><th style="width:35%">Causa</th><th style="width:20%">Soluzione</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>OperationalError: no such column entity_uuid</code></td>
+              <td>Tabelle di concorrenza mancanti delle colonne <code>entity_uuid</code>, <code>version</code></td>
+              <td>Aggiornare a <span class="badge bg-warning text-dark">v2.1.2+</span></td>
+            </tr>
+            <tr>
+              <td><code>ModuleNotFoundError: create_harris_matrix_tool</code></td>
+              <td>File MCP tool mancanti nel pacchetto</td>
+              <td>Aggiornare a <span class="badge bg-warning text-dark">v2.1.1+</span></td>
+            </tr>
+            <tr>
+              <td>Canvas Harris Matrix non risponde ai click</td>
+              <td>Altezza del canvas Cytoscape = 0 in layout flexbox</td>
+              <td>Aggiornare a <span class="badge bg-warning text-dark">v2.1.3+</span></td>
+            </tr>
+            <tr>
+              <td>112 errori sull'import delle US</td>
+              <td>Mismatch tipo INTEGER/VARCHAR sul campo <code>us</code></td>
+              <td>Aggiornare a <span class="badge bg-warning text-dark">v2.0.2+</span></td>
+            </tr>
+            <tr>
+              <td><code>character varying = integer</code> (PostgreSQL)</td>
+              <td>Tipo di colonna <code>us</code> non migrato a VARCHAR</td>
+              <td>Aggiornare a <span class="badge bg-warning text-dark">v2.0.2+</span></td>
+            </tr>
+            <tr>
+              <td><code>/api/periods</code> restituisce errore 500</td>
+              <td><code>period_table</code> senza colonne BaseModel</td>
+              <td>Aggiornare a <span class="badge bg-warning text-dark">v2.1.4+</span></td>
+            </tr>
+            <tr>
+              <td>ELK CDN 404 nella console</td>
+              <td>CDN cytoscape-elk non piu disponibile (era inutilizzato)</td>
+              <td>Aggiornare a <span class="badge bg-warning text-dark">v2.1.4+</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5 class="mt-4 mb-2">Dettagli per errore</h5>
+      <div class="accordion" id="acc-trouble">
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-t-1"><code>OperationalError: no such column entity_uuid</code> <span class="badge bg-warning text-dark ms-2">v2.1.2+</span></button></h2>
+          <div id="acc-t-1" class="accordion-collapse collapse" data-bs-parent="#acc-trouble">
+            <div class="accordion-body">
+              <strong>Causa:</strong> Il database non ha le colonne di concorrenza (<code>entity_uuid</code>,
+              <code>version</code>, <code>created_at</code>, <code>updated_at</code>) su una o piu tabelle.
+              Questo accade con database creati prima della v2.1.0.<br>
+              <strong>Soluzione:</strong> Aggiorna a <span class="badge bg-warning text-dark">v2.1.2+</span>.
+              La migrazione automatica all'avvio aggiunge le colonne mancanti a tutte le tabelle,
+              inclusa <code>us_relationships_table</code>.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-t-2"><code>ModuleNotFoundError: create_harris_matrix_tool</code> <span class="badge bg-warning text-dark ms-2">v2.1.1+</span></button></h2>
+          <div id="acc-t-2" class="accordion-collapse collapse" data-bs-parent="#acc-trouble">
+            <div class="accordion-body">
+              <strong>Causa:</strong> I file del tool MCP per l'Harris Matrix non erano inclusi nel pacchetto distribuito.<br>
+              <strong>Soluzione:</strong> Aggiorna a <span class="badge bg-warning text-dark">v2.1.1+</span> che include tutti i file necessari.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-t-3">Canvas Harris Matrix non risponde <span class="badge bg-warning text-dark ms-2">v2.1.3+</span></button></h2>
+          <div id="acc-t-3" class="accordion-collapse collapse" data-bs-parent="#acc-trouble">
+            <div class="accordion-body">
+              <strong>Causa:</strong> Il contenitore Cytoscape (<code>#cy</code>) aveva altezza 0 all'interno del layout flexbox.
+              <code>height: 100%</code> senza <code>min-height: 0</code> sul genitore causava il collasso.<br>
+              <strong>Soluzione:</strong> Aggiorna a <span class="badge bg-warning text-dark">v2.1.3+</span>.
+              Il fix usa <code>position: absolute</code> per il canvas e <code>cy.resize()</code> su
+              <code>requestAnimationFrame</code>. Aggiunto anche handler per il ridimensionamento della finestra.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#acc-t-4">112 errori import US / <code>character varying = integer</code> <span class="badge bg-warning text-dark ms-2">v2.0.2+</span></button></h2>
+          <div id="acc-t-4" class="accordion-collapse collapse" data-bs-parent="#acc-trouble">
+            <div class="accordion-body">
+              <strong>Causa:</strong> Il campo <code>us</code> nel vecchio pyArchInit era di tipo INTEGER.
+              Dalla v2.0.2, pyArchInit-Mini usa VARCHAR per supportare codici alfanumerici (es. "100a", "100b").
+              L'import fallisce quando i tipi non corrispondono.<br>
+              <strong>Soluzione:</strong> Aggiorna a <span class="badge bg-warning text-dark">v2.0.2+</span>.
+              La migrazione automatica converte il campo da INTEGER a VARCHAR. Anche PostgreSQL e supportato.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="docs-tip mt-4">
+        <strong><i class="fas fa-lightbulb me-1"></i> Consiglio generale:</strong>
+        Mantieni sempre pyArchInit-Mini aggiornato all'ultima versione per beneficiare di tutte le
+        correzioni e migrazioni automatiche. Aggiorna con <code>pip install --upgrade pyarchinit-mini</code>.
+      </div>
+    </section>
+
+  </div><!-- /.docs-content -->
+</div><!-- /.docs-wrapper -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  /* ── Search ── */
+  var sections = document.querySelectorAll('.docs-section');
+  var tocLinks = document.querySelectorAll('#docs-toc-nav a');
+  var noResults = document.getElementById('docs-no-results');
+
+  function filterSections(query) {
+    query = query.toLowerCase().trim();
+    var visibleCount = 0;
+    sections.forEach(function(sec) {
+      var text = (sec.textContent + ' ' + (sec.dataset.search || '')).toLowerCase();
+      var match = !query || text.indexOf(query) !== -1;
+      sec.style.display = match ? '' : 'none';
+      if (match) visibleCount++;
+    });
+    /* Update TOC */
+    tocLinks.forEach(function(link) {
+      var href = link.getAttribute('href');
+      var target = document.querySelector(href);
+      if (target) {
+        link.parentElement.style.display = target.style.display === 'none' ? 'none' : '';
+      }
+    });
+    noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  var searchDesktop = document.getElementById('docs-search');
+  var searchMobile = document.getElementById('docs-search-mobile');
+
+  if (searchDesktop) {
+    searchDesktop.addEventListener('input', function() {
+      filterSections(this.value);
+      if (searchMobile) searchMobile.value = this.value;
+    });
+  }
+  if (searchMobile) {
+    searchMobile.addEventListener('input', function() {
+      filterSections(this.value);
+      if (searchDesktop) searchDesktop.value = this.value;
+    });
+  }
+
+  /* ── Active TOC link on scroll ── */
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var id = entry.target.id;
+        tocLinks.forEach(function(link) {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, {
+    rootMargin: '-80px 0px -60% 0px',
+    threshold: 0
+  });
+
+  sections.forEach(function(sec) { observer.observe(sec); });
+
+  /* ── Smooth scroll for TOC links ── */
+  tocLinks.forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', this.getAttribute('href'));
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

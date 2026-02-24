@@ -1,3 +1,12 @@
+## [2.1.5] - 2026-02-24
+
+### Added
+- Comprehensive in-app documentation/tutorial page at `/docs`
+  - Full Italian documentation covering all 15 sections of the app
+  - Sticky TOC sidebar with search, scrollable content area
+  - Troubleshooting accordions with version badges
+  - Fully consistent with dark/light theme system
+
 ## [2.1.4] - 2026-02-24
 
 ### Fixed
