@@ -16,6 +16,34 @@ let edgeSourceNode = null; // For edge creation
 let nodeIdCounter = 1;
 let selectedElement = null;
 
+// Edge category classification maps
+const NEGATIVE_RELATIONS = new Set([
+    'Tagliato da', 'Taglia', 'Si appoggia a', 'È appoggiato da',
+    'Copre obliquamente', 'È coperto obliquamente',
+    'Cut by', 'Cuts', 'Abuts', 'Abutted by',
+    'Obliquely covers', 'Obliquely covered by'
+]);
+
+const CONTEMPORARY_RELATIONS = new Set([
+    'Uguale a', 'Si lega a', 'Si lega a bilateralmente',
+    'Same as', 'Bonds with', 'Bonds bilaterally'
+]);
+
+/**
+ * Determine edge category based on relationship name
+ * @param {string} relationshipName - The relationship type name (Italian or English)
+ * @returns {string} 'negative', 'contemporary', or 'normal'
+ */
+function getEdgeCategory(relationshipName) {
+    if (NEGATIVE_RELATIONS.has(relationshipName)) {
+        return 'negative';
+    }
+    if (CONTEMPORARY_RELATIONS.has(relationshipName)) {
+        return 'contemporary';
+    }
+    return 'normal';
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     initializeEditor();
@@ -223,7 +251,7 @@ function initCytoscape() {
                     'border-color': '#007bff'
                 }
             },
-            // Edge styles
+            // Edge styles - default (normal stratigraphic)
             {
                 selector: 'edge',
                 style: {
@@ -246,7 +274,7 @@ function initCytoscape() {
                     'width': 3
                 }
             },
-            // Edge styles by type
+            // Edge styles by legacy data attributes
             {
                 selector: 'edge[style="dashed"]',
                 style: {
@@ -262,6 +290,24 @@ function initCytoscape() {
             {
                 selector: 'edge[arrow="none"]',
                 style: {
+                    'target-arrow-shape': 'none'
+                }
+            },
+            // Edge styles by relationship category
+            {
+                selector: 'edge[edgeCategory="negative"]',
+                style: {
+                    'line-style': 'dashed',
+                    'line-color': '#E74C3C',
+                    'target-arrow-color': '#E74C3C'
+                }
+            },
+            {
+                selector: 'edge[edgeCategory="contemporary"]',
+                style: {
+                    'width': 5,
+                    'line-color': '#2E86AB',
+                    'target-arrow-color': '#2E86AB',
                     'target-arrow-shape': 'none'
                 }
             }
@@ -309,7 +355,139 @@ function initCytoscape() {
         }
     });
 
+    // Tooltip on hover - show US details
+    cy.on('mouseover', 'node', function(event) {
+        const node = event.target;
+        const tooltip = document.getElementById('cy-tooltip');
+        if (!tooltip) return;
+
+        const usNumber = node.data('us_number') || '';
+        const unitType = node.data('unit_type') || '';
+        const description = node.data('description') || '';
+        const area = node.data('area') || '';
+        const period = node.data('period') || '';
+        const phase = node.data('phase') || '';
+
+        let html = '<strong>' + unitType + ' ' + usNumber + '</strong>';
+        if (description) html += '<br>Desc: ' + description;
+        if (area) html += '<br>Area: ' + area;
+        if (period) html += '<br>Period: ' + period;
+        if (phase) html += '<br>Phase: ' + phase;
+
+        tooltip.innerHTML = html;
+        tooltip.style.display = 'block';
+
+        // Position near cursor using rendered position
+        const renderedPos = node.renderedPosition();
+        const cyContainer = document.getElementById('cy');
+        const rect = cyContainer.getBoundingClientRect();
+        const canvasRect = document.getElementById('cy-canvas').getBoundingClientRect();
+
+        tooltip.style.left = (rect.left - canvasRect.left + renderedPos.x + 15) + 'px';
+        tooltip.style.top = (rect.top - canvasRect.top + renderedPos.y - 10) + 'px';
+    });
+
+    cy.on('mouseout', 'node', function() {
+        const tooltip = document.getElementById('cy-tooltip');
+        if (tooltip) {
+            tooltip.style.display = 'none';
+        }
+    });
+
     console.log('Cytoscape initialized');
+}
+
+/**
+ * Update canvas theme for dark/light mode
+ * Applies runtime style changes to Cytoscape elements and container
+ */
+function updateCanvasTheme() {
+    if (!cy) return;
+
+    const theme = document.documentElement.getAttribute('data-theme');
+    const isDark = theme === 'dark';
+    const cyContainer = document.getElementById('cy');
+
+    if (isDark) {
+        // Dark theme
+        cyContainer.style.backgroundColor = '#1C2030';
+        cy.style()
+            .selector('node')
+            .style({
+                'border-color': '#555',
+                'color': '#E8E0D8'
+            })
+            .selector('edge')
+            .style({
+                'line-color': '#888',
+                'target-arrow-color': '#888'
+            })
+            .selector('edge[edgeCategory="negative"]')
+            .style({
+                'line-color': '#E74C3C',
+                'target-arrow-color': '#E74C3C'
+            })
+            .selector('edge[edgeCategory="contemporary"]')
+            .style({
+                'line-color': '#2E86AB',
+                'target-arrow-color': '#2E86AB'
+            })
+            .selector('node:selected')
+            .style({
+                'border-color': '#007bff'
+            })
+            .selector('edge:selected')
+            .style({
+                'line-color': '#007bff',
+                'target-arrow-color': '#007bff'
+            })
+            .update();
+    } else {
+        // Light theme
+        cyContainer.style.backgroundColor = '#ffffff';
+        cy.style()
+            .selector('node')
+            .style({
+                'border-color': '#333',
+                'color': '#000'
+            })
+            .selector('edge')
+            .style({
+                'line-color': '#666',
+                'target-arrow-color': '#666'
+            })
+            .selector('edge[edgeCategory="negative"]')
+            .style({
+                'line-color': '#E74C3C',
+                'target-arrow-color': '#E74C3C'
+            })
+            .selector('edge[edgeCategory="contemporary"]')
+            .style({
+                'line-color': '#2E86AB',
+                'target-arrow-color': '#2E86AB'
+            })
+            .selector('node:selected')
+            .style({
+                'border-color': '#007bff'
+            })
+            .selector('edge:selected')
+            .style({
+                'line-color': '#007bff',
+                'target-arrow-color': '#007bff'
+            })
+            .update();
+    }
+}
+
+/**
+ * Export the Harris Matrix canvas as a PNG image
+ */
+function exportPNG() {
+    const png = cy.png({ full: true, scale: 2, bg: getComputedStyle(document.getElementById('cy')).backgroundColor });
+    const link = document.createElement('a');
+    link.href = png;
+    link.download = (document.getElementById('site-name').value || 'harris-matrix') + '.png';
+    link.click();
 }
 
 /**
@@ -388,6 +566,9 @@ function handleEdgeCreation(node) {
         // Get relationship type details
         const relType = relationshipTypes.find(r => r.value === selectedRelationshipType);
 
+        // Determine edge category from relationship name
+        const edgeCategory = getEdgeCategory(relType.symbol || selectedRelationshipType);
+
         // Create edge
         const edgeId = `edge_${Date.now()}`;
         cy.add({
@@ -398,6 +579,7 @@ function handleEdgeCreation(node) {
                 target: targetNode.id(),
                 label: relType.symbol,
                 relationship: selectedRelationshipType,
+                edgeCategory: edgeCategory,
                 style: relType.style,
                 arrow: relType.arrow
             }
@@ -564,6 +746,9 @@ function loadExistingData() {
                     r.symbol === relData.relationship || r.value === relData.relationship
                 ) || relationshipTypes[0];
 
+                // Determine edge category from the relationship name
+                const edgeCategory = getEdgeCategory(relData.relationship);
+
                 cy.add({
                     group: 'edges',
                     data: {
@@ -573,6 +758,7 @@ function loadExistingData() {
                         label: relType.symbol,
                         relationship: relData.relationship,
                         relationshipType: relType.value,  // Store English value for saving
+                        edgeCategory: edgeCategory,
                         style: relType.style,
                         arrow: relType.arrow
                     }
@@ -634,6 +820,28 @@ function setupEventListeners() {
     // Export buttons
     document.getElementById('export-graphml-btn').addEventListener('click', () => exportMatrix('graphml'));
     document.getElementById('export-dot-btn').addEventListener('click', () => exportMatrix('dot'));
+
+    // Export PNG button
+    const exportPngBtn = document.getElementById('export-png-btn');
+    if (exportPngBtn) {
+        exportPngBtn.addEventListener('click', exportPNG);
+    }
+
+    // Apply initial canvas theme
+    updateCanvasTheme();
+
+    // Observe theme changes via MutationObserver on html element
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                updateCanvasTheme();
+            }
+        });
+    });
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+    });
 }
 
 /**
@@ -711,6 +919,8 @@ function applyEdgeProperties() {
         edge.data('label', relType.symbol);
         edge.data('style', relType.style);
         edge.data('arrow', relType.arrow);
+        // Update edge category based on new relationship
+        edge.data('edgeCategory', getEdgeCategory(relType.symbol || relationship));
     }
 
     showNotification('Edge properties updated', 'success');

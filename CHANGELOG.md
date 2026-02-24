@@ -1,3 +1,22 @@
+## [2.1.0] - 2026-02-24
+
+### Added
+- **Modern UI Design System**: Comprehensive CSS design system with CSS custom properties for consistent theming across all pages
+- **Dark/Light Theme Toggle**: One-click theme switching with localStorage persistence, earth-tone palettes (terracotta/sand/olive for light; deep navy/charcoal/warm amber for dark)
+- **Collapsible Sidebar Navigation**: Slide-out sidebar with section grouping, active link highlighting, and mobile overlay mode
+- **Redesigned Top Navbar**: Clean icon-based navigation with theme toggle, quick-nav dropdown, and user menu
+- **Harris Matrix: Edge Style Differentiation**: Dashed red lines for negative relations (cuts, abuts), thick blue lines for contemporary relations (same as, bonds with), solid lines for normal stratigraphic relations
+- **Harris Matrix: Export PNG**: One-click PNG export of the Harris Matrix canvas at 2x resolution
+- **Harris Matrix: Node Tooltips**: Hover tooltips showing US number, type, description, area, and period
+- **Harris Matrix: Dark Theme Canvas**: Graph canvas automatically adapts colors to match the selected UI theme
+
+### Changed
+- Redesigned dashboard with earth-tone gradient stat cards (terracotta, olive, clay, earth)
+- All templates (dashboard, sites list/detail, US list) updated for design system consistency
+- Harris Matrix editor panels and controls now theme-aware with CSS custom properties
+- Improved mobile responsiveness with card-based layouts and touch-friendly targets
+- Sites detail page labels internationalized (previously hardcoded Italian)
+
 ## [2.0.2] - 2026-02-24
 
 ### Fixed

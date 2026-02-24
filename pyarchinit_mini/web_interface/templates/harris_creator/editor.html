@@ -13,8 +13,8 @@
 
 /* Toolbar */
 #toolbar {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 15px;
     width: 300px;
@@ -24,8 +24,8 @@
 /* Canvas */
 #cy-canvas {
     flex: 1;
-    background: #ffffff;
-    border: 2px solid #dee2e6;
+    background: var(--bg-surface);
+    border: 2px solid var(--border-color);
     border-radius: 4px;
     position: relative;
 }
@@ -52,8 +52,8 @@
 
 /* Properties Panel */
 #properties-panel {
-    background: #fff;
-    border: 1px solid #dee2e6;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 15px;
     width: 300px;
@@ -69,6 +69,7 @@
     font-size: 0.9em;
     margin-bottom: 3px;
     display: block;
+    color: var(--text-primary);
 }
 
 .property-field input,
@@ -84,11 +85,12 @@
     top: 10px;
     left: 10px;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--bg-surface);
     padding: 8px 15px;
     border-radius: 4px;
-    border: 2px solid #007bff;
+    border: 2px solid var(--accent-primary);
     font-weight: 600;
+    color: var(--text-primary);
 }
 
 #mode-indicator.edge-mode {
@@ -113,12 +115,13 @@
     align-items: center;
     margin-bottom: 5px;
     font-size: 0.85em;
+    color: var(--text-primary);
 }
 
 .legend-color {
     width: 20px;
     height: 20px;
-    border: 1px solid #333;
+    border: 1px solid var(--border-color);
     margin-right: 8px;
     flex-shrink: 0;
 }
@@ -126,7 +129,7 @@
 /* Help text */
 .help-text {
     font-size: 0.85em;
-    color: #6c757d;
+    color: var(--text-muted);
     margin-top: 5px;
 }
 </style>
@@ -155,6 +158,9 @@
             </button>
             <button class="btn btn-secondary btn-sm" id="export-dot-btn" title="Export to DOT">
                 <i class="fas fa-download"></i> DOT
+            </button>
+            <button class="btn btn-warning btn-sm" id="export-png-btn" title="Export as PNG">
+                <i class="fas fa-image"></i> PNG
             </button>
             <a href="{{ url_for('harris_creator.index') }}" class="btn btn-outline-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
@@ -251,6 +257,10 @@
                 <button class="btn btn-sm btn-light" id="fit-btn" title="Fit to Screen">
                     <i class="fas fa-expand"></i>
                 </button>
+            </div>
+
+            <!-- Tooltip for node hover -->
+            <div id="cy-tooltip" style="display:none; position:absolute; z-index:1001; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:6px; padding:10px 14px; font-size:0.82rem; box-shadow:var(--shadow-md); pointer-events:none; max-width:250px;">
             </div>
         </div>
 
