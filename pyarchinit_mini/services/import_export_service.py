@@ -18,6 +18,7 @@ import ast
 import json
 import shutil
 import os
+import uuid
 from datetime import datetime, date
 from typing import Dict, List, Optional, Tuple, Any
 import logging
@@ -375,13 +376,16 @@ class ImportExportService:
                         stats['updated'] += 1
                     else:
                         # Insert new site
+                        # Include BaseModel fields (version_number is NOT NULL, entity_uuid for uniqueness)
                         insert_query = text("""
                             INSERT INTO site_table
                             (sito, nazione, regione, comune, provincia, definizione_sito,
-                             descrizione, sito_path, find_check, created_at, updated_at)
+                             descrizione, sito_path, find_check, created_at, updated_at,
+                             version_number, entity_uuid, sync_status)
                             VALUES
                             (:sito, :nazione, :regione, :comune, :provincia, :definizione_sito,
-                             :descrizione, :sito_path, :find_check, :created_at, :updated_at)
+                             :descrizione, :sito_path, :find_check, :created_at, :updated_at,
+                             :version_number, :entity_uuid, :sync_status)
                         """)
 
                         mini_session.execute(insert_query, {
@@ -393,9 +397,12 @@ class ImportExportService:
                             'definizione_sito': site_data.get('definizione_sito'),
                             'descrizione': site_data.get('descrizione'),
                             'sito_path': site_data.get('sito_path'),
-                            'find_check': site_data.get('find_check', 0),
+                            'find_check': bool(site_data.get('find_check', False)),
                             'created_at': datetime.now(),
-                            'updated_at': datetime.now()
+                            'updated_at': datetime.now(),
+                            'version_number': 1,
+                            'entity_uuid': str(uuid.uuid4()),
+                            'sync_status': 'new'
                         })
                         stats['imported'] += 1
 
@@ -648,9 +655,10 @@ class ImportExportService:
                     us_data = dict(us_row._mapping)
 
                     # Check if US already exists using raw SQL (avoids ORM metadata issues)
+                    # Cast us to str: source db may have INTEGER us, but mini uses VARCHAR(100)
                     existing = mini_session.execute(
                         text("SELECT id_us FROM us_table WHERE sito = :sito AND us = :us LIMIT 1"),
-                        {'sito': us_data['sito'], 'us': us_data['us']}
+                        {'sito': us_data['sito'], 'us': str(us_data['us'])}
                     ).fetchone()
 
                     # Map fields from PyArchInit to PyArchInit-Mini
@@ -772,11 +780,20 @@ class ImportExportService:
             # If it's not None or date, set to None
             data_schedatura = None
 
+        # Cast us and area to str: source db (old pyarchinit) stores them as INTEGER,
+        # but pyarchinit-mini us_table.us is VARCHAR(100) after migration.
+        raw_us = source_data.get('us')
+        raw_area = source_data.get('area')
+
         mapped = {
             # Core fields
             'sito': source_data.get('sito'),
-            'area': source_data.get('area'),
-            'us': source_data.get('us'),
+            'area': str(raw_area) if raw_area is not None else None,
+            'us': str(raw_us) if raw_us is not None else None,
+            # BaseModel required fields (NOT NULL, no server-side default in PostgreSQL)
+            'version_number': 1,
+            'sync_status': 'new',
+            'entity_uuid': str(uuid.uuid4()),
             'd_stratigrafica': source_data.get('d_stratigrafica'),
             'd_interpretativa': source_data.get('d_interpretativa'),
             'descrizione': source_data.get('descrizione'),
@@ -850,10 +867,10 @@ class ImportExportService:
 
     def _insert_us_mini(self, session: Session, data: Dict[str, Any]):
         """Insert US into PyArchInit-Mini database"""
-        # Generate next id_us (VARCHAR field, sequential)
+        # Generate next id_us (INTEGER primary key with autoincrement)
         max_id_result = session.execute(text("SELECT MAX(CAST(id_us AS INTEGER)) FROM us_table")).fetchone()
         next_id = (max_id_result[0] or 0) + 1 if max_id_result else 1
-        data['id_us'] = str(next_id)
+        data['id_us'] = next_id  # Keep as int — id_us is INTEGER in PostgreSQL
 
         # Build INSERT with all fields including id_us
         fields = list(data.keys())

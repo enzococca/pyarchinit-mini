@@ -534,16 +534,36 @@ document.getElementById('start_import_btn').addEventListener('click', function()
             let resultsHTML = '<table class="table table-sm">';
             resultsHTML += '<thead><tr><th>{{ _("Table") }}</th><th>{{ _("Imported") }}</th><th>{{ _("Updated") }}</th><th>{{ _("Errors") }}</th></tr></thead><tbody>';
 
+            let allErrors = [];
             for (const [table, stats] of Object.entries(result.results)) {
+                const errCount = stats.errors ? stats.errors.length : 0;
                 resultsHTML += `<tr>
                     <td><strong>${table}</strong></td>
                     <td class="text-success">${stats.imported || 0}</td>
                     <td class="text-warning">${stats.updated || 0}</td>
-                    <td class="text-danger">${stats.errors ? stats.errors.length : 0}</td>
+                    <td class="text-danger">${errCount}</td>
                 </tr>`;
+                if (stats.errors && stats.errors.length > 0) {
+                    stats.errors.forEach(e => allErrors.push(`[${table}] ${e}`));
+                }
             }
 
             resultsHTML += '</tbody></table>';
+
+            // Show error details if any
+            if (allErrors.length > 0) {
+                const errId = 'import_error_details';
+                resultsHTML += `<div class="mt-2">
+                    <button class="btn btn-sm btn-outline-danger" type="button"
+                        onclick="var el=document.getElementById('${errId}'); el.style.display=(el.style.display==='none'?'block':'none')">
+                        ▼ {{ _("Show error details") }} (${allErrors.length})
+                    </button>
+                    <div id="${errId}" style="display:none; margin-top:8px; max-height:300px; overflow-y:auto;">
+                        <pre style="font-size:11px; background:#fff0f0; border:1px solid #f5c6cb; padding:10px; border-radius:4px;">${allErrors.map(e => e.replace(/</g,'&lt;').replace(/>/g,'&gt;')).join('\n')}</pre>
+                    </div>
+                </div>`;
+            }
+
             document.getElementById('import_results_content').innerHTML = resultsHTML;
             document.getElementById('import_results').style.display = 'block';
         } else {
