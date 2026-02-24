@@ -1,3 +1,11 @@
+## [2.1.3] - 2026-02-24
+
+### Fixed
+- Harris Matrix editor: canvas click not adding nodes/arcs on new matrices
+  Root cause: #cy height was 0 in flexbox (height:100% without min-height:0 on parent)
+  Fix: #cy now uses position:absolute to fill #cy-canvas + cy.resize() on requestAnimationFrame
+- Added window resize handler so canvas auto-adjusts when sidebar toggles
+
 ## [2.1.2] - 2026-02-24
 
 ### Fixed

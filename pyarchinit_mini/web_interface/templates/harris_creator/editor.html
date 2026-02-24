@@ -28,12 +28,17 @@
     border: 2px solid var(--border-color);
     border-radius: 4px;
     position: relative;
+    min-height: 0;    /* Critical: allows flex child to shrink correctly */
+    overflow: hidden;
 }
 
-/* Cytoscape container */
+/* Cytoscape container — absolute fill so height:100% always works */
 #cy {
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 /* Node Type Buttons */

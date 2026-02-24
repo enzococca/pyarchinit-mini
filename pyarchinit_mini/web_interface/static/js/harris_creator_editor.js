@@ -395,6 +395,11 @@ function initCytoscape() {
     });
 
     console.log('Cytoscape initialized');
+
+    // Force resize after DOM layout is fully painted — fixes height:100% in flex containers
+    requestAnimationFrame(function() {
+        cy.resize();
+    });
 }
 
 /**
@@ -826,6 +831,11 @@ function setupEventListeners() {
     if (exportPngBtn) {
         exportPngBtn.addEventListener('click', exportPNG);
     }
+
+    // Resize Cytoscape on window resize (e.g., sidebar toggle)
+    window.addEventListener('resize', function() {
+        if (cy) cy.resize();
+    });
 
     // Apply initial canvas theme
     updateCanvasTheme();
