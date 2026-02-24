@@ -884,7 +884,7 @@ def create_app():
                     # TAB 1: Informazioni Base
                     'sito': form.sito.data,
                     'area': form.area.data,
-                    'us': to_int(form.us.data),
+                    'us': str(form.us.data).strip() if form.us.data else None,
                     'unita_tipo': form.unita_tipo.data,
                     'tipo_documento': form.tipo_documento.data if form.unita_tipo.data == 'DOC' else None,
                     'anno_scavo': form.anno_scavo.data,
@@ -979,7 +979,7 @@ def create_app():
                     with db_manager.connection.get_session() as session:
                         relationship_sync_service.sync_rapporti_to_relationships_table(
                             sito=us_data['sito'],
-                            us_number=int(us_data['us']),
+                            us_number=int(str(us_data['us'])) if us_data.get('us') and str(us_data.get('us','')).strip().lstrip('-').isdigit() else 0,
                             rapporti_text=us_data.get('rapporti', ''),
                             session=session
                         )
@@ -1117,7 +1117,7 @@ def create_app():
                     # TAB 1: Informazioni Base
                     'sito': form.sito.data,
                     'area': form.area.data,
-                    'us': to_int(form.us.data),
+                    'us': str(form.us.data).strip() if form.us.data else None,
                     'unita_tipo': form.unita_tipo.data,
                     'tipo_documento': form.tipo_documento.data if form.unita_tipo.data == 'DOC' else None,
                     'anno_scavo': form.anno_scavo.data,
@@ -1212,7 +1212,7 @@ def create_app():
                     with db_manager.connection.get_session() as session:
                         relationship_sync_service.sync_rapporti_to_relationships_table(
                             sito=update_data['sito'],
-                            us_number=int(update_data['us']),
+                            us_number=int(str(update_data['us'])) if update_data.get('us') and str(update_data.get('us','')).strip().lstrip('-').isdigit() else 0,
                             rapporti_text=update_data.get('rapporti', ''),
                             session=session
                         )

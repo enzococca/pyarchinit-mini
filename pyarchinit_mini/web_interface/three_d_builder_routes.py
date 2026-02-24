@@ -1354,7 +1354,7 @@ def create_us():
             existing = db_session.query(US).filter(
                 US.sito == data['sito'],
                 US.area == data.get('area', ''),
-                US.us == int(data['us'])
+                US.us == str(data['us'])
             ).first()
 
             if existing:
@@ -1367,7 +1367,7 @@ def create_us():
             new_us = US()
             new_us.sito = data['sito']
             new_us.area = data.get('area', '')
-            new_us.us = int(data['us'])
+            new_us.us = str(data['us'])
             new_us.unita_tipo = 'USM' if data.get('tipo') == 'usm' else 'US'
             new_us.d_stratigrafica = data.get('d_stratigrafica', '')
             new_us.d_interpretativa = data.get('d_interpretativa', '')
@@ -1442,7 +1442,7 @@ def update_us():
             us_record = db_session.query(US).filter(
                 US.sito == data['sito'],
                 US.area == data.get('area', ''),
-                US.us == int(data['us'])
+                US.us == str(data['us'])
             ).first()
 
             if not us_record:
@@ -1520,7 +1520,7 @@ def delete_us():
             us_record = db_session.query(US).filter(
                 US.sito == data['sito'],
                 US.area == data.get('area', ''),
-                US.us == int(data['us'])
+                US.us == str(data['us'])
             ).first()
 
             if not us_record:

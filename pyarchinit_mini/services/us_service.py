@@ -60,7 +60,7 @@ class USService:
                 existing_us = session.query(US).filter(
                     US.sito == us_data['sito'],
                     US.area == us_data.get('area', ''),
-                    US.us == us_data['us']
+                    US.us == str(us_data['us'])  # us is VARCHAR(100)
                 ).first()
                 
                 if existing_us:
@@ -237,9 +237,10 @@ class USService:
         filters = {'sito': site_name, 'area': area}
         return self.get_all_us(page=page, size=size, filters=filters)
     
-    def _get_us_by_site_area_number(self, sito: str, area: str, us_number: int) -> Optional[US]:
-        """Get US by site, area and number combination"""
-        # This would need a compound query
+    def _get_us_by_site_area_number(self, sito: str, area: str, us_number) -> Optional[US]:
+        """Get US by site, area and number combination.
+        us_number can be int or str — us column is VARCHAR(100) in PostgreSQL.
+        """
         query = """
         SELECT * FROM us_table 
         WHERE sito = :sito AND 
@@ -252,7 +253,7 @@ class USService:
             result = session.execute(text(query), {
                 'sito': sito,
                 'area': area,
-                'us_number': us_number
+                'us_number': str(us_number)  # always str: us column is VARCHAR
             }).fetchone()
             
             if result:

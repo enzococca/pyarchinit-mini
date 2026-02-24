@@ -3,7 +3,7 @@ Pydantic schemas for API request/response validation
 """
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 from pydantic import BaseModel, Field, validator
 
 # Base schemas
@@ -59,7 +59,12 @@ class USBase(BaseModel):
     """Base US schema"""
     sito: str = Field(..., max_length=350, description="Site name")
     area: Optional[str] = Field(None, max_length=20, description="Area")
-    us: int = Field(..., gt=0, description="US number")
+    us: str = Field(..., description="US number (numeric or alphanumeric, e.g. '1' or 'A1')")
+
+    @validator('us', pre=True)
+    def us_to_str(cls, v):
+        """Accept int or str — us column is VARCHAR(100)"""
+        return str(v).strip() if v is not None else v
     d_stratigrafica: Optional[str] = Field(None, max_length=350, description="Stratigraphic description")
     d_interpretativa: Optional[str] = Field(None, max_length=350, description="Interpretative description")
     descrizione: Optional[str] = Field(None, description="Description")
@@ -231,7 +236,11 @@ class USUpdate(BaseModel):
     """Schema for updating a US"""
     sito: Optional[str] = Field(None, max_length=350)
     area: Optional[str] = Field(None, max_length=20)
-    us: Optional[int] = Field(None, gt=0)
+    us: Optional[str] = Field(None, description="US number (numeric or alphanumeric)")
+
+    @validator('us', pre=True)
+    def us_to_str(cls, v):
+        return str(v).strip() if v is not None else v
     d_stratigrafica: Optional[str] = Field(None, max_length=350)
     d_interpretativa: Optional[str] = Field(None, max_length=350)
     descrizione: Optional[str] = None
@@ -413,7 +422,7 @@ class InventarioBase(BaseModel):
     definizione: Optional[str] = Field(None, max_length=20, description="Definition")
     descrizione: Optional[str] = Field(None, description="Description")
     area: Optional[str] = Field(None, max_length=20, description="Area")
-    us: Optional[int] = Field(None, gt=0, description="US number")
+    us: Optional[str] = Field(None, description="US number (numeric or alphanumeric)")
     lavato: Optional[str] = Field(None, max_length=5, description="Washed")
     nr_cassa: Optional[str] = Field(None, max_length=20, description="Box number")
     luogo_conservazione: Optional[str] = Field(None, max_length=350, description="Conservation location")
@@ -460,7 +469,7 @@ class InventarioUpdate(BaseModel):
     definizione: Optional[str] = Field(None, max_length=20)
     descrizione: Optional[str] = None
     area: Optional[str] = Field(None, max_length=20)
-    us: Optional[int] = Field(None, gt=0)
+    us: Optional[str] = Field(None, description="US number")
     lavato: Optional[str] = Field(None, max_length=5)
     nr_cassa: Optional[str] = Field(None, max_length=20)
     luogo_conservazione: Optional[str] = Field(None, max_length=350)

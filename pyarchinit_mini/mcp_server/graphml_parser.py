@@ -543,7 +543,7 @@ class GraphMLParser:
             .filter(
                 Periodizzazione.sito == us_record.sito,
                 Periodizzazione.area == us_record.area,
-                Periodizzazione.us == us_record.us,
+                Periodizzazione.us == (int(us_record.us) if str(us_record.us).lstrip('-').isdigit() else -1),
             )
             .first()
         )

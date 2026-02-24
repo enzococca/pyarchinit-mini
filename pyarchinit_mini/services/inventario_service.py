@@ -97,7 +97,7 @@ class InventarioService:
         count = session.query(US).filter(
             US.sito == sito,
             or_(US.area == area, (US.area.is_(None) & (area == ''))),
-            US.us == us_number
+            US.us == str(us_number)  # us is VARCHAR(100)
         ).count()
         
         if count == 0:
@@ -271,7 +271,7 @@ class InventarioService:
         count = self.db_manager.execute_raw_query(query, {
             'sito': sito,
             'area': area,
-            'us_number': us_number
+            'us_number': str(us_number)  # us is VARCHAR(100)
         })[0][0]
         
         if count == 0:

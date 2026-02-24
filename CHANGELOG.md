@@ -1,3 +1,17 @@
+## [2.0.2] - 2026-02-24
+
+### Fixed
+- **PostgreSQL type mismatch on US creation**: `us_table.us` column was migrated from INTEGER to VARCHAR(100) but code was still passing integer values, causing `psycopg2.errors.UndefinedFunction: operator does not exist: character varying = integer` on PostgreSQL databases
+- Fixed `us_service._get_us_by_site_area_number`: always cast `us_number` to `str` in SQL params
+- Fixed `us_service.create_us_dto`: cast `US.us == str(us_data['us'])` in ORM filter
+- Fixed `web_interface/app.py`: `us` field kept as `str` instead of `int` in `us_data` dict (create and update flows)
+- Fixed `web_interface/three_d_builder_routes.py`: `US.us == str(data['us'])` in all 3D builder filters
+- Fixed `desktop_gui/dialogs.py`: validate US number as int but pass as str to DB layer
+- Fixed `inventario_service.py`: cast `us_number` to str in all US existence checks
+- Fixed `api/schemas.py`: `us` field changed from `int` to `str` (with backward-compatible validator accepting both)
+- Fixed `mcp_server/graphml_parser.py`: safe int cast for Periodizzazione.us comparison (still INTEGER column)
+
+
 # Changelog
 
 All notable changes to PyArchInit-Mini will be documented in this file.

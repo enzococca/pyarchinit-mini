@@ -643,17 +643,18 @@ class USDialog(BaseDialog):
                 messagebox.showerror(_("Error"), _("US number is required"))
                 return
 
+            # Validate: must be numeric (keep legacy GUI behavior)
             try:
-                us_number = int(us_number)
+                int(us_number)  # validate only, keep as string for DB
             except ValueError:
                 messagebox.showerror(_("Error"), _("US number must be an integer"))
                 return
 
-            # Prepare data
+            # Prepare data (us is VARCHAR(100) in DB — pass as string)
             us_data = {
                 'sito': sito,
                 'area': self.fields['area'].get().strip() or None,
-                'us': us_number,
+                'us': str(us_number).strip(),
                 'd_stratigrafica': self.fields['d_stratigrafica'].get("1.0", tk.END).strip() or None,
                 'd_interpretativa': self.fields['d_interpretativa'].get("1.0", tk.END).strip() or None,
                 'schedatore': self.fields['schedatore'].get().strip() or None,
