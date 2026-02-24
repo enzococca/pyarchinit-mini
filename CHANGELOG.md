@@ -1,3 +1,10 @@
+## [2.1.1] - 2026-02-24
+
+### Fixed
+- Added missing MCP server tool files: `create_harris_matrix_tool.py` and `create_database_tool.py`
+  that caused `ModuleNotFoundError` on startup (pre-existing bug, never committed to repo)
+- `pyarchinit-mini-web` now starts correctly without ImportError from mcp_server
+
 ## [2.1.0] - 2026-02-24
 
 ### Added

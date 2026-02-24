@@ -175,6 +175,8 @@ pyarchinit_mini/pyarchinit_mini.db
 
 # Temporary script files
 create_*.py
+!pyarchinit_mini/mcp_server/tools/create_harris_matrix_tool.py
+!pyarchinit_mini/mcp_server/tools/create_database_tool.py
 
 # Documentation duplicates and build files
 docs/*\ 2.*
