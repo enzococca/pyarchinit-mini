@@ -1,3 +1,10 @@
+## [2.1.2] - 2026-02-24
+
+### Fixed
+- `us_relationships_table` missing from concurrency columns migration: caused
+  `OperationalError: no such column: entity_uuid` when opening Harris Matrix editor
+  on existing databases. Migration now auto-runs on startup.
+
 ## [2.1.1] - 2026-02-24
 
 ### Fixed

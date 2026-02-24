@@ -173,7 +173,8 @@ class DatabaseMigrations:
             migrations_applied = 0
 
             tables = [
-                'site_table', 'us_table', 'inventario_materiali_table',
+                'site_table', 'us_table', 'us_relationships_table',
+                'inventario_materiali_table',
                 'periodizzazione_table', 'media_table', 'media_thumb_table',
                 'documentation_table', 'users',
             ]
