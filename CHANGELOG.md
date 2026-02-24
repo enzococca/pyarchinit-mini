@@ -1,3 +1,15 @@
+## [2.1.4] - 2026-02-24
+
+### Fixed
+- Harris Matrix: removed broken cytoscape-elk CDN (was unused, dagre is used instead)
+- Harris Matrix: /api/periods returned 500 because period_table lacked BaseModel columns
+  Fixed: raw SQL query avoids ORM touching unmigrated columns; returns [] on any error
+- Harris Matrix: loadPeriods() no longer blocks/alerts on failure (periods are optional)
+- Migration: added ALL missing tables to concurrency columns migration
+  (harris_matrix_table, period_table, datazioni_table, extended_matrix_table,
+   pyarchinit_thesaurus_sigle, thesaurus_field, thesaurus_category)
+  Migration auto-runs on startup — fixes OperationalError on any of these tables
+
 ## [2.1.3] - 2026-02-24
 
 ### Fixed

@@ -173,6 +173,11 @@ async function loadRelationshipTypes() {
 async function loadPeriods() {
     try {
         const response = await fetch('/harris-creator/api/periods');
+        if (!response.ok) {
+            // periods are optional — editor works fine without them
+            console.warn('Periods API returned', response.status, '— skipping period dropdowns');
+            return;
+        }
         periods = await response.json();
 
         // Populate period dropdown
@@ -207,8 +212,8 @@ async function loadPeriods() {
 
         console.log('Loaded', periods.length, 'periods');
     } catch (error) {
-        console.error('Error loading periods:', error);
-        alert('Failed to load periods');
+        // periods are optional — don't block the editor
+        console.warn('Error loading periods (non-fatal):', error);
     }
 }
 

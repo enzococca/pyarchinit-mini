@@ -174,9 +174,13 @@ class DatabaseMigrations:
 
             tables = [
                 'site_table', 'us_table', 'us_relationships_table',
+                'harris_matrix_table', 'period_table', 'datazioni_table',
+                'extended_matrix_table',
                 'inventario_materiali_table',
                 'periodizzazione_table', 'media_table', 'media_thumb_table',
-                'documentation_table', 'users',
+                'documentation_table',
+                'pyarchinit_thesaurus_sigle', 'thesaurus_field', 'thesaurus_category',
+                'users',
             ]
 
             concurrency_columns = [

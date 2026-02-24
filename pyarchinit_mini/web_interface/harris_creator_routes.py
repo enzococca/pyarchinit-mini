@@ -19,6 +19,9 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 import json
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
 from pyarchinit_mini.config.em_node_config_manager import get_config_manager
@@ -540,29 +543,29 @@ def get_relationship_types():
 @harris_creator_bp.route('/api/periods')
 def get_periods():
     """Get list of periods and phases from period_table"""
-    from pyarchinit_mini.models.harris_matrix import Period
+    try:
+        from pyarchinit_mini.models.harris_matrix import Period
+        from sqlalchemy import text as sa_text
 
-    with get_db_session() as db:
-        periods = db.query(Period).order_by(Period.period_name, Period.phase_name).all()
+        with get_db_session() as db:
+            # Use raw SQL to avoid ORM touching BaseModel columns not yet migrated
+            rows = db.execute(
+                sa_text("SELECT period_name, phase_name FROM period_table ORDER BY period_name, phase_name")
+            ).fetchall()
 
-        # Group by period_name
-        periods_dict = {}
-        for period in periods:
-            period_name = period.period_name
-            phase_name = period.phase_name or ''
+            periods_dict = {}
+            for row in rows:
+                period_name = row[0] or ''
+                phase_name = row[1] or ''
+                if not period_name:
+                    continue
+                if period_name not in periods_dict:
+                    periods_dict[period_name] = {'period': period_name, 'phases': []}
+                if phase_name and phase_name not in periods_dict[period_name]['phases']:
+                    periods_dict[period_name]['phases'].append(phase_name)
 
-            if period_name not in periods_dict:
-                periods_dict[period_name] = {
-                    'period': period_name,
-                    'phases': []
-                }
+            return jsonify(list(periods_dict.values()))
 
-            if phase_name and phase_name not in periods_dict[period_name]['phases']:
-                periods_dict[period_name]['phases'].append(phase_name)
-
-        # Convert to list
-        result = []
-        for period_data in periods_dict.values():
-            result.append(period_data)
-
-        return jsonify(result)
+    except Exception as e:
+        logger.warning(f"get_periods failed (non-fatal): {e}")
+        return jsonify([])  # Return empty list — periods dropdown is optional
