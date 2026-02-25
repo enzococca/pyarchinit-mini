@@ -26,7 +26,7 @@ def _get_default_database_url() -> str:
         Database URL string
     """
     # 1. Check environment variable first (backward compatibility)
-    env_db = os.getenv("DATABASE_URL")
+    env_db = os.getenv("DATABASE_URL", "").strip() or None
     if env_db:
         logger.info(f"Using DATABASE_URL from environment: {env_db}")
         return env_db
