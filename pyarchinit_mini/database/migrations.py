@@ -293,6 +293,35 @@ class DatabaseMigrations:
             logger.error(f"Error during US extra migration: {e}")
             raise
 
+    def migrate_us_column_to_text(self):
+        """Convert us_table.us from VARCHAR(100) to TEXT (PostgreSQL only — SQLite is dynamic)."""
+        try:
+            engine = self.connection.engine
+            dialect = engine.dialect.name
+            if dialect != 'postgresql':
+                return 0  # SQLite treats VARCHAR and TEXT identically, no-op
+
+            with self.connection.get_session() as session:
+                # Check current type
+                result = session.execute(
+                    text("""SELECT data_type FROM information_schema.columns
+                            WHERE table_name='us_table' AND column_name='us'""")
+                ).fetchone()
+                if result and result[0].lower() in ('text', 'character varying'):
+                    if result[0].lower() == 'text':
+                        return 0  # Already TEXT
+                    # Convert VARCHAR → TEXT
+                    session.execute(text(
+                        "ALTER TABLE us_table ALTER COLUMN us TYPE TEXT"
+                    ))
+                    session.commit()
+                    logger.info("Migrated us_table.us: VARCHAR → TEXT")
+                    return 1
+            return 0
+        except Exception as e:
+            logger.warning(f"migrate_us_column_to_text: {e}")
+            return 0
+
     def migrate_all_tables(self):
         """Run all necessary migrations"""
         try:
@@ -319,6 +348,9 @@ class DatabaseMigrations:
 
             # Add missing US columns
             total_migrations += self.migrate_us_extra_columns()
+
+            # Convert us_table.us from VARCHAR(100) to TEXT
+            total_migrations += self.migrate_us_column_to_text()
 
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations

@@ -104,7 +104,7 @@ class USValidator(BaseValidator):
         if 'd_interpretativa' in data and data['d_interpretativa']:
             cls.validate_string_length(data['d_interpretativa'], 'd_interpretativa', 350)
         
-        # US number validation — us is VARCHAR(100), accepts integers or strings
+        # US number validation — us is TEXT, accepts integers or strings (no length limit)
         if 'us' in data:
             us_value = data['us']
             if isinstance(us_value, int):
@@ -113,7 +113,6 @@ class USValidator(BaseValidator):
                 raise ValidationError("US must be a string or integer", 'us', us_value)
             if not str(us_value).strip():
                 raise ValidationError("US number cannot be empty", 'us', us_value)
-            cls.validate_string_length(str(us_value), 'us', 100)
         
         # Year validation
         if 'anno_scavo' in data and data['anno_scavo']:
