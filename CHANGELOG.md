@@ -1,3 +1,12 @@
+## [2.1.6] - 2026-02-25
+
+### Fixed
+- USValidator: us field validated as positive integer instead of string
+  Root cause: validators.py still had old check 
+  even though us_table.us is VARCHAR(100) since v2.0.2
+  Fix: accept str or int, convert to str, validate max length 100
+  Error shown: "US number must be a positive integer" on New SU form
+
 ## [2.1.5] - 2026-02-24
 
 ### Added
