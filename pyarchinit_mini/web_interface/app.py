@@ -387,6 +387,9 @@ def create_app():
     default_db_path = str(pyarchinit_home / 'data' / 'pyarchinit_mini.db')
     default_db_url = f"sqlite:///{default_db_path}"
     database_url = os.getenv("DATABASE_URL", default_db_url)
+    # Fix Railway/Heroku postgres:// → postgresql:// (SQLAlchemy requirement)
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
     print(f"[FLASK] Current working directory: {os.getcwd()}")
     print(f"[FLASK] Using database: {database_url}")
     # If SQLite, show absolute path
