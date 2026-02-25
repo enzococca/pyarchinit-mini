@@ -184,7 +184,7 @@ def create_user():
         email = request.form.get('email')
         password = request.form.get('password')
         full_name = request.form.get('full_name')
-        role = request.form.get('role', 'viewer')
+        role = request.form.get('role', 'VIEWER').upper()
 
         user = user_service.create_user(
             username=username,
@@ -218,7 +218,7 @@ def edit_user(user_id):
         if request.form.get('full_name'):
             updates['full_name'] = request.form.get('full_name')
         if request.form.get('role'):
-            updates['role'] = UserRole(request.form.get('role'))
+            updates['role'] = UserRole(request.form.get('role').upper())
         if request.form.get('password'):
             updates['password'] = request.form.get('password')
 

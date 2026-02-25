@@ -33,8 +33,8 @@ from pyarchinit_mini.services.datazione_service import DatazioneService
 from pyarchinit_mini.services.media_service import MediaService
 from pyarchinit_mini.services.import_export_service import ImportExportService
 from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
-from pyarchinit_mini.harris_matrix.matrix_visualizer import MatrixVisualizer
-from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
+# MatrixVisualizer and PyArchInitMatrixVisualizer are lazy-loaded on first use
+# (matplotlib import is very slow; defer until Harris Matrix is actually accessed)
 from pyarchinit_mini.utils.stratigraphic_validator import StratigraphicValidator
 from pyarchinit_mini.pdf_export.pdf_generator import PDFGenerator
 from pyarchinit_mini.media_manager.media_handler import MediaHandler
@@ -471,8 +471,9 @@ def create_app():
     datazione_service = DatazioneService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
     export_import_service = ImportExportService(db_manager.connection.connection_string)
-    matrix_visualizer = MatrixVisualizer()
-    graphviz_visualizer = PyArchInitMatrixVisualizer()  # Graphviz visualizer (desktop GUI style)
+    # Lazy-loaded on first Harris Matrix access to avoid matplotlib import at startup
+    matrix_visualizer = None
+    graphviz_visualizer = None
     pdf_generator = PDFGenerator()
     media_handler = MediaHandler()
     media_service = MediaService(db_manager, media_handler)
@@ -1634,7 +1635,11 @@ def create_app():
                                      stats=stats,
                                      num_nodes=num_nodes)
             else:
-                # Use matplotlib for small graphs
+                # Use matplotlib for small graphs (lazy-load MatrixVisualizer on first use)
+                global matrix_visualizer
+                if matrix_visualizer is None:
+                    from pyarchinit_mini.harris_matrix.matrix_visualizer import MatrixVisualizer
+                    matrix_visualizer = MatrixVisualizer()
                 matrix_image = matrix_visualizer.render_matplotlib(graph, levels)
 
                 return render_template('harris_matrix/view.html',
@@ -1660,7 +1665,11 @@ def create_app():
             levels = matrix_generator.get_matrix_levels(graph)
             stats = matrix_generator.get_matrix_statistics(graph)
 
-            # Generate visualization with Graphviz
+            # Generate visualization with Graphviz (lazy-load on first use)
+            global graphviz_visualizer
+            if graphviz_visualizer is None:
+                from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
+                graphviz_visualizer = PyArchInitMatrixVisualizer()
             output_path = graphviz_visualizer.create_matrix(
                 graph,
                 grouping=grouping,
@@ -2164,7 +2173,11 @@ def create_app():
             graph = matrix_generator.generate_matrix(site_name)
             stats = matrix_generator.get_matrix_statistics(graph)
 
-            # Create temporary file for matrix image
+            # Create temporary file for matrix image (lazy-load graphviz_visualizer)
+            global graphviz_visualizer
+            if graphviz_visualizer is None:
+                from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
+                graphviz_visualizer = PyArchInitMatrixVisualizer()
             matrix_img_path = graphviz_visualizer.create_matrix(
                 graph,
                 grouping='period_area',

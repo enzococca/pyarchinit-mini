@@ -37,9 +37,9 @@
                         <td>{{ user.email }}</td>
                         <td>{{ user.full_name or '-' }}</td>
                         <td>
-                            {% if user.role == 'admin' %}
+                            {% if user.role|upper == 'ADMIN' %}
                             <span class="badge bg-danger">Admin</span>
-                            {% elif user.role == 'operator' %}
+                            {% elif user.role|upper == 'OPERATOR' %}
                             <span class="badge bg-warning">Operator</span>
                             {% else %}
                             <span class="badge bg-info">Viewer</span>
@@ -111,9 +111,9 @@
                     <div class="mb-3">
                         <label for="role" class="form-label">Ruolo *</label>
                         <select class="form-select" id="role" name="role" required>
-                            <option value="viewer">Viewer (Solo lettura)</option>
-                            <option value="operator">Operator (Lettura/Scrittura)</option>
-                            <option value="admin">Admin (Tutti i permessi)</option>
+                            <option value="VIEWER">Viewer (Solo lettura)</option>
+                            <option value="OPERATOR">Operator (Lettura/Scrittura)</option>
+                            <option value="ADMIN">Admin (Tutti i permessi)</option>
                         </select>
                     </div>
                 </div>
@@ -162,9 +162,9 @@
                     <div class="mb-3">
                         <label for="edit_role" class="form-label">Ruolo</label>
                         <select class="form-select" id="edit_role" name="role">
-                            <option value="viewer">Viewer</option>
-                            <option value="operator">Operator</option>
-                            <option value="admin">Admin</option>
+                            <option value="VIEWER">Viewer</option>
+                            <option value="OPERATOR">Operator</option>
+                            <option value="ADMIN">Admin</option>
                         </select>
                     </div>
 
