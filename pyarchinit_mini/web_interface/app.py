@@ -459,6 +459,13 @@ def create_app():
     inventario_service = InventarioService(db_manager)
     thesaurus_service = ThesaurusService(db_manager)
     user_service = UserService(db_manager)
+    # Auto-create default admin user on first startup (if no users exist)
+    try:
+        default_admin = user_service.create_default_admin()
+        if default_admin:
+            print(f"[FLASK] Default admin user created (username: admin, password: admin) — CHANGE IN PRODUCTION!")
+    except Exception as e:
+        print(f"[FLASK] Warning: could not auto-create admin: {e}")
     analytics_service = AnalyticsService(db_manager)
     relationship_sync_service = RelationshipSyncService(db_manager)
     datazione_service = DatazioneService(db_manager)
@@ -3296,6 +3303,11 @@ def create_app():
         except Exception as e:
             return f'<html><body><h3>Error: {{str(e)}}</h3></body></html>', 500
 
+    def _mask_db_url(url):
+        """Mask password in database URL for safe display"""
+        import re
+        return re.sub(r'(://[^:]+:)[^@]+(@)', r'\1***\2', url)
+
     # Database Administration Routes
     @app.route('/admin/database')
     @login_required
@@ -3306,7 +3318,7 @@ def create_app():
 
         # Parse current connection info
         db_info = {
-            'url': current_url,
+            'url': _mask_db_url(current_url),
             'type': 'SQLite' if current_url.startswith('sqlite') else 'PostgreSQL',
             'is_default': current_url == database_url
         }
@@ -3500,7 +3512,7 @@ def create_app():
             return render_template('admin/database_info.html',
                                  tables=tables,
                                  table_counts=table_counts,
-                                 current_url=app.config['CURRENT_DATABASE_URL'])
+                                 current_url=_mask_db_url(app.config['CURRENT_DATABASE_URL']))
 
         except Exception as e:
             flash(f'Errore recupero info database: {str(e)}', 'error')
