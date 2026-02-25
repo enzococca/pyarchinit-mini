@@ -55,3 +55,4 @@ openpyxl>=3.1.5
 s3dgraphy>=0.1.0
 gunicorn>=21.0.0
 psutil>=5.9.0
+passlib[bcrypt]>=1.7.0
