@@ -12,9 +12,9 @@ from .base import BaseModel
 
 class UserRole(str, enum.Enum):
     """User role enumeration"""
-    ADMIN = "admin"           # Full access to everything
-    OPERATOR = "operator"     # Can create/edit/delete data
-    VIEWER = "viewer"         # Read-only access
+    ADMIN = "ADMIN"           # Full access to everything
+    OPERATOR = "OPERATOR"     # Can create/edit/delete data
+    VIEWER = "VIEWER"         # Read-only access
 
 
 class User(BaseModel):
