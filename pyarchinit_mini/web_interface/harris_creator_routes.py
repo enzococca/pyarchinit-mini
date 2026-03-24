@@ -515,28 +515,47 @@ def get_node_types():
 
 @harris_creator_bp.route('/api/relationship-types')
 def get_relationship_types():
-    """Get list of relationship types with descriptions"""
-    relationship_types = [
-        # Standard stratigraphic relationships
-        {'value': 'Covers', 'label': 'Covers (above/sopra)', 'symbol': 'Copre', 'style': 'solid', 'arrow': 'triangle'},
-        {'value': 'Covered_by', 'label': 'Covered by (below/sotto)', 'symbol': 'Coperto da', 'style': 'solid', 'arrow': 'triangle'},
-        {'value': 'Fills', 'label': 'Fills (riempie)', 'symbol': 'Riempie', 'style': 'solid', 'arrow': 'triangle'},
-        {'value': 'Filled_by', 'label': 'Filled by (riempito da)', 'symbol': 'Riempito da', 'style': 'solid', 'arrow': 'triangle'},
-        {'value': 'Cuts', 'label': 'Cuts (taglia)', 'symbol': 'Taglia', 'style': 'dashed', 'arrow': 'triangle'},
-        {'value': 'Cut_by', 'label': 'Cut by (tagliato da)', 'symbol': 'Tagliato da', 'style': 'dashed', 'arrow': 'triangle'},
-        {'value': 'Bonds_to', 'label': 'Bonds to (si lega a)', 'symbol': 'Si lega a', 'style': 'solid', 'arrow': 'triangle'},
-        {'value': 'Equal_to', 'label': 'Equal to (uguale a)', 'symbol': 'Uguale a', 'style': 'solid', 'arrow': 'triangle'},
-        {'value': 'Leans_on', 'label': 'Leans on (si appoggia a)', 'symbol': 'Si appoggia a', 'style': 'solid', 'arrow': 'triangle'},
+    """Get list of relationship types with descriptions, localized by current language"""
+    from pyarchinit_mini.i18n import get_locale
+    try:
+        lang = get_locale()
+    except Exception:
+        lang = 'it'
 
-        # Extended Matrix symbols
-        {'value': '>', 'label': '> - Connection to single-symbol unit', 'symbol': '>', 'style': 'dotted', 'arrow': 'triangle'},
-        {'value': '<', 'label': '< - From single-symbol unit', 'symbol': '<', 'style': 'dotted', 'arrow': 'triangle'},
-        {'value': '>>', 'label': '>> - Connection to double-symbol unit', 'symbol': '>>', 'style': 'dotted', 'arrow': 'triangle'},
-        {'value': '<<', 'label': '<< - From double-symbol unit', 'symbol': '<<', 'style': 'dotted', 'arrow': 'triangle'},
-
-        # Special
-        {'value': 'Continuity', 'label': 'Continuity (contemporary units)', 'symbol': 'Continuity', 'style': 'solid', 'arrow': 'none'},
-    ]
+    if lang == 'en':
+        relationship_types = [
+            {'value': 'Covers', 'label': 'Covers (above)', 'symbol': 'Covers', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Covered_by', 'label': 'Covered by (below)', 'symbol': 'Covered by', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Fills', 'label': 'Fills', 'symbol': 'Fills', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Filled_by', 'label': 'Filled by', 'symbol': 'Filled by', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Cuts', 'label': 'Cuts', 'symbol': 'Cuts', 'style': 'dashed', 'arrow': 'triangle'},
+            {'value': 'Cut_by', 'label': 'Cut by', 'symbol': 'Cut by', 'style': 'dashed', 'arrow': 'triangle'},
+            {'value': 'Bonds_to', 'label': 'Bonds to', 'symbol': 'Bonds to', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Equal_to', 'label': 'Equal to', 'symbol': 'Equal to', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Leans_on', 'label': 'Leans on', 'symbol': 'Leans on', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': '>', 'label': '> - Connection to single-symbol unit', 'symbol': '>', 'style': 'dotted', 'arrow': 'triangle'},
+            {'value': '<', 'label': '< - From single-symbol unit', 'symbol': '<', 'style': 'dotted', 'arrow': 'triangle'},
+            {'value': '>>', 'label': '>> - Connection to double-symbol unit', 'symbol': '>>', 'style': 'dotted', 'arrow': 'triangle'},
+            {'value': '<<', 'label': '<< - From double-symbol unit', 'symbol': '<<', 'style': 'dotted', 'arrow': 'triangle'},
+            {'value': 'Continuity', 'label': 'Continuity (contemporary units)', 'symbol': 'Continuity', 'style': 'solid', 'arrow': 'none'},
+        ]
+    else:
+        relationship_types = [
+            {'value': 'Covers', 'label': 'Copre (sopra)', 'symbol': 'Copre', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Covered_by', 'label': 'Coperto da (sotto)', 'symbol': 'Coperto da', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Fills', 'label': 'Riempie', 'symbol': 'Riempie', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Filled_by', 'label': 'Riempito da', 'symbol': 'Riempito da', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Cuts', 'label': 'Taglia', 'symbol': 'Taglia', 'style': 'dashed', 'arrow': 'triangle'},
+            {'value': 'Cut_by', 'label': 'Tagliato da', 'symbol': 'Tagliato da', 'style': 'dashed', 'arrow': 'triangle'},
+            {'value': 'Bonds_to', 'label': 'Si lega a', 'symbol': 'Si lega a', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Equal_to', 'label': 'Uguale a', 'symbol': 'Uguale a', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Leans_on', 'label': 'Si appoggia a', 'symbol': 'Si appoggia a', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': '>', 'label': '> - Connessione a unità simbolo singolo', 'symbol': '>', 'style': 'dotted', 'arrow': 'triangle'},
+            {'value': '<', 'label': '< - Da unità simbolo singolo', 'symbol': '<', 'style': 'dotted', 'arrow': 'triangle'},
+            {'value': '>>', 'label': '>> - Connessione a unità simbolo doppio', 'symbol': '>>', 'style': 'dotted', 'arrow': 'triangle'},
+            {'value': '<<', 'label': '<< - Da unità simbolo doppio', 'symbol': '<<', 'style': 'dotted', 'arrow': 'triangle'},
+            {'value': 'Continuity', 'label': 'Continuità (unità contemporanee)', 'symbol': 'Continuità', 'style': 'solid', 'arrow': 'none'},
+        ]
     return jsonify(relationship_types)
 
 

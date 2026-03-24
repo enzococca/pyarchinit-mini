@@ -15,7 +15,24 @@ class PyArchInitMatrixVisualizer:
     Harris Matrix visualizer that replicates PyArchInit plugin behavior
     Uses Graphviz with hierarchical orthogonal layout and period/area grouping
     """
-    
+
+    # Translation map: Italian -> English for edge labels
+    _IT_TO_EN = {
+        'copre': 'Covers', 'coperto da': 'Covered by',
+        'taglia': 'Cuts', 'tagliato da': 'Cut by',
+        'riempie': 'Fills', 'riempito da': 'Filled by',
+        'si lega a': 'Bonds to', 'uguale a': 'Equal to',
+        'si appoggia a': 'Leans on', 'gli si appoggia': 'Abutted by',
+        'contemporaneo a': 'Contemporary', 'anteriore a': 'Earlier than',
+        'posteriore a': 'Later than',
+    }
+
+    def _translate_label(self, label: str, lang: str = 'it') -> str:
+        """Translate an edge label to the requested language."""
+        if not label or lang == 'it':
+            return label
+        return self._IT_TO_EN.get(label.lower(), label)
+
     def __init__(self):
         self.default_settings = {
             'dpi': '300',  # Good resolution without excessive file size
@@ -359,7 +376,7 @@ class PyArchInitMatrixVisualizer:
             fontsize='10'
         )
 
-    def _get_edge_label_for_unit(self, graph: nx.DiGraph, node: int, rel_type: str = '') -> str:
+    def _get_edge_label_for_unit(self, graph: nx.DiGraph, node: int, rel_type: str = '', lang: str = 'it') -> str:
         """
         Get edge label based on Extended Matrix Framework unit type
 
@@ -388,7 +405,8 @@ class PyArchInitMatrixVisualizer:
 
         # US and USM use traditional textual relationship labels
         if unita_tipo in ['US', 'USM']:
-            return rel_type if rel_type else 'Copre'
+            label = rel_type if rel_type else 'Copre'
+            return self._translate_label(label, lang) if lang else label
 
         # Units that use double symbols (>> and <<)
         double_symbol_units = ['Extractor', 'Combiner', 'DOC', 'property']
@@ -402,13 +420,9 @@ class PyArchInitMatrixVisualizer:
 
     def _add_sequence_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict, use_xlabel: bool = False):
         """Add normal stratigraphic sequence edges with Extended Matrix symbols"""
+        lang = settings.get('lang', 'it')
         for source, target, rel_type in relations:
-            # Determine edge label based on unit type
-            # Extended Matrix Framework specification:
-            # - US/USM: Use textual labels (Copre, Coperto da, etc.)
-            # - USVA, USVB, USVC, TU, USD, CON, VSF, SF: Use > and <
-            # - Extractor, Combiner, DOC, property: Use >> and <<
-            edge_label = self._get_edge_label_for_unit(graph, source, rel_type)
+            edge_label = self._get_edge_label_for_unit(graph, source, rel_type, lang)
 
             # Use xlabel for orthogonal splines, label otherwise
             edge_params = {
@@ -424,9 +438,9 @@ class PyArchInitMatrixVisualizer:
     
     def _add_negative_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict, use_xlabel: bool = False):
         """Add negative (cuts) relationship edges with Extended Matrix symbols"""
+        lang = settings.get('lang', 'it')
         for source, target, rel_type in relations:
-            # Determine edge label based on unit type
-            edge_label = self._get_edge_label_for_unit(graph, source, rel_type)
+            edge_label = self._get_edge_label_for_unit(graph, source, rel_type, lang)
 
             # Use xlabel for orthogonal splines, label otherwise
             edge_params = {
@@ -442,9 +456,9 @@ class PyArchInitMatrixVisualizer:
 
     def _add_contemporary_edges(self, G: Digraph, graph: nx.DiGraph, relations: List[Tuple], settings: Dict, use_xlabel: bool = False):
         """Add contemporary/equivalent relationship edges with Extended Matrix symbols"""
+        lang = settings.get('lang', 'it')
         for source, target, rel_type in relations:
-            # Determine edge label based on unit type
-            edge_label = self._get_edge_label_for_unit(graph, source, rel_type)
+            edge_label = self._get_edge_label_for_unit(graph, source, rel_type, lang)
 
             # Use xlabel for orthogonal splines, label otherwise
             edge_params = {

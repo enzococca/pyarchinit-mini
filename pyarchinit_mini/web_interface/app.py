@@ -1699,12 +1699,18 @@ def create_app():
             if graphviz_visualizer is None:
                 from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
                 graphviz_visualizer = PyArchInitMatrixVisualizer()
+            from pyarchinit_mini.i18n import get_locale
+            try:
+                current_lang = get_locale()
+            except Exception:
+                current_lang = 'it'
             output_path = graphviz_visualizer.create_matrix(
                 graph,
                 grouping=grouping,
                 settings={
                     'show_legend': True,
-                    'show_periods': grouping != 'none'
+                    'show_periods': grouping != 'none',
+                    'lang': current_lang
                 }
             )
 
@@ -2207,10 +2213,15 @@ def create_app():
             if graphviz_visualizer is None:
                 from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
                 graphviz_visualizer = PyArchInitMatrixVisualizer()
+            from pyarchinit_mini.i18n import get_locale
+            try:
+                current_lang = get_locale()
+            except Exception:
+                current_lang = 'it'
             matrix_img_path = graphviz_visualizer.create_matrix(
                 graph,
                 grouping='period_area',
-                settings={'show_legend': True, 'show_periods': True}
+                settings={'show_legend': True, 'show_periods': True, 'lang': current_lang}
             )
 
             # Generate PDF with matrix

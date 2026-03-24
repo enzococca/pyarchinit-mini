@@ -12,9 +12,24 @@ import json
 
 class EnhancedHarrisMatrixVisualizer:
     """
-    Enhanced Harris Matrix visualizer using Graphviz for hierarchical orthogonal layout
-    Supports area/period/phase grouping and all stratigraphic relationships
+    Enhanced Harris Matrix visualizer using Graphviz for hierarchical orthogonal layout.
+    Supports area/period/phase grouping and all stratigraphic relationships.
     """
+
+    _IT_TO_EN = {
+        'copre': 'Covers', 'coperto da': 'Covered by',
+        'taglia': 'Cuts', 'tagliato da': 'Cut by',
+        'riempie': 'Fills', 'riempito da': 'Filled by',
+        'si lega a': 'Bonds to', 'uguale a': 'Equal to',
+        'si appoggia a': 'Leans on', 'gli si appoggia': 'Abutted by',
+        'contemporaneo a': 'Contemporary', 'anteriore a': 'Earlier than',
+        'posteriore a': 'Later than', 'sopra': 'Above', 'sotto': 'Below',
+    }
+
+    def _translate_label(self, label, lang='it'):
+        if not label or lang == 'it':
+            return label
+        return self._IT_TO_EN.get(label.lower(), label)
     
     def __init__(self):
         self.relationship_styles = {
@@ -255,16 +270,16 @@ class EnhancedHarrisMatrixVisualizer:
                 fontcolor='black'
             )
     
-    def _add_edges_to_graph(self, G, graph: nx.DiGraph):
+    def _add_edges_to_graph(self, G, graph: nx.DiGraph, lang: str = 'it'):
         """Add edges with proper styling based on relationship type"""
         for source, target in graph.edges():
             edge_data = graph.get_edge_data(source, target)
             relationship = edge_data.get('relationship', 'sopra')
             certainty = edge_data.get('certainty', 'certain')
-            
+
             # Get relationship style
             rel_style = self.relationship_styles.get(relationship, self.relationship_styles['sopra'])
-            
+
             # Modify style based on certainty
             if certainty in ['probabile', 'probable']:
                 style = 'dashed'
@@ -278,9 +293,9 @@ class EnhancedHarrisMatrixVisualizer:
             else:
                 style = rel_style['style']
                 alpha = '1.0'
-            
-            # Create edge label
-            label = relationship
+
+            # Create edge label (translated if needed)
+            label = self._translate_label(relationship, lang)
             if certainty != 'certain' and certainty != 'certa':
                 label += f"\\n({certainty})"
             
