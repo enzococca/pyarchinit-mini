@@ -3026,7 +3026,7 @@ def create_app():
             loader_type = loader_map.get(file_ext, 'GLTFLoader')
 
             # Create the model URL - need to serve it relative to web root
-            model_url = f'/{media.media_path}'
+            model_url = f'/{media.media_path}'.replace('\\', '/')
 
             # Create complete HTML page with Three.js viewer
             full_html = f'''

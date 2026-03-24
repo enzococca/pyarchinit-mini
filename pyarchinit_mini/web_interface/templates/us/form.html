@@ -420,16 +420,17 @@
             <div class="tab-pane fade" id="relationships" role="tabpanel" aria-labelledby="relationships-tab">
                 <div class="alert alert-info mb-4">
                     <i class="fas fa-info-circle"></i>
-                    <strong>{{ _('Stratigraphic relationships format:') }}</strong><br>
-                    {{ _('Enter relationships in the format:') }} <code>{{ _('covers 1002, cuts 1005, leans on 1010') }}</code><br>
-                    {{ _('Relationship types: covers, cuts, leans on, fills, equal to, bonds to') }}
+                    <strong>{{ _('Formato relazioni stratigrafiche:') }}</strong><br>
+                    {{ _('Inserire le relazioni nel formato:') }} <code>Copre 1002, Taglia 1005, Si appoggia a 1010</code><br>
+                    {{ _('Tipi di relazione:') }} Copre, Taglia, Si appoggia a, Riempie, Uguale a, Si lega a<br>
+                    <small class="text-muted">{{ _('English terms also accepted:') }} covers, cuts, leans on, fills, equal to, bonds to</small>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold">{{ _('Stratigraphic Relationships') }}</label>
+                    <label class="form-label fw-bold">{{ _('Relazioni Stratigrafiche') }}</label>
                     {{ form.rapporti(class="form-control", rows=8) }}
                     <small class="form-text text-muted">
-                        {{ _('Example: "Covers 1002, Covers 1003, Cuts 1005, Leans on 1010"') }}
+                        {{ _('Esempio: "Copre 1002, Copre 1003, Taglia 1005, Si appoggia a 1010"') }}
                     </small>
                 </div>
 

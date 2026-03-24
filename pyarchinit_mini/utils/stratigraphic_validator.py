@@ -220,21 +220,55 @@ class StratigraphicValidator:
             self.graph.add_edge(to_us, from_us)
             
     def parse_relationships(self, us_number: int, rapporti_text: str) -> List[Tuple[str, int]]:
-        """Parse relationship text into structured format"""
+        """Parse relationship text into structured format.
+
+        Accepts comma or semicolon as separator between relationships.
+        Supports both Italian and English terms (e.g. 'Copre 3, Taglia 5' or 'Covers 3, Cuts 5').
+        """
         if not rapporti_text:
             return []
-            
+
         relationships = []
-        parts = rapporti_text.split(';')
-        
+        # Support both comma and semicolon as separators
+        # First split by semicolons, then by commas — but only split by comma
+        # when the next segment starts with a known relationship type
+        import re
+        # Normalize: replace semicolons with commas
+        text = rapporti_text.replace(';', ',')
+
+        # Split by comma, then re-join segments that don't start with a relationship type
+        raw_parts = [p.strip() for p in text.split(',') if p.strip()]
+
+        # Sort relationship types by length (longest first) to match multi-word types first
+        sorted_types = sorted(self.RELATIONSHIP_TYPES.keys(), key=len, reverse=True)
+
+        # Merge parts: if a part doesn't start with a known type, it's a continuation number
+        parts = []
+        for raw in raw_parts:
+            raw_lower = raw.lower()
+            is_rel = False
+            for rel_type in sorted_types:
+                if raw_lower.startswith(rel_type):
+                    parts.append(raw)
+                    is_rel = True
+                    break
+            if not is_rel:
+                # Could be just a number belonging to previous relationship
+                # or an unrecognized part — try as number for previous rel
+                if parts:
+                    parts[-1] = parts[-1] + ', ' + raw
+                else:
+                    parts.append(raw)
+
         for part in parts:
             part = part.strip()
             if not part:
                 continue
-                
+
             # Parse relationship type and target US
-            for rel_type in self.RELATIONSHIP_TYPES.keys():
-                if part.lower().startswith(rel_type):
+            part_lower = part.lower()
+            for rel_type in sorted_types:
+                if part_lower.startswith(rel_type):
                     # Extract US numbers after relationship type
                     remainder = part[len(rel_type):].strip()
                     # Split by comma for multiple targets
@@ -245,10 +279,9 @@ class StratigraphicValidator:
                             target_us = int(target)
                             relationships.append((rel_type, target_us))
                         except ValueError:
-                            # Skip if not a valid number
                             pass
                     break
-                    
+
         return relationships
         
     def validate_unit_relationships(self, us_number: int) -> List[str]:

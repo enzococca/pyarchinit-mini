@@ -101,7 +101,7 @@ class MediaHandler:
         metadata = {
             'media_name': source_path.name,
             'media_filename': unique_filename,
-            'media_path': str(relative_path),  # Relative path: media/images/site_X/file.jpg
+            'media_path': str(relative_path).replace('\\', '/'),  # Always use forward slashes for web URLs
             'media_type': file_info['media_type'],
             'mime_type': file_info['mime_type'],
             'file_size': file_info['file_size'],
@@ -112,7 +112,7 @@ class MediaHandler:
             'height': file_info.get('height'),
             'entity_type': entity_type,
             'entity_id': entity_id,
-            'thumbnail_path': str(thumbnail_path.relative_to(self.base_media_path.parent)) if thumbnail_path else None
+            'thumbnail_path': str(thumbnail_path.relative_to(self.base_media_path.parent)).replace('\\', '/') if thumbnail_path else None
         }
 
         return metadata
