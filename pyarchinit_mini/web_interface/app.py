@@ -1128,6 +1128,15 @@ def create_app():
                             return None
                     return None
 
+                def to_date(value):
+                    if value and str(value).strip():
+                        try:
+                            from datetime import datetime
+                            return datetime.strptime(str(value).strip(), '%Y-%m-%d').date()
+                        except (ValueError, TypeError):
+                            return None
+                    return None
+
                 update_data = {
                     # TAB 1: Informazioni Base
                     'sito': form.sito.data,
