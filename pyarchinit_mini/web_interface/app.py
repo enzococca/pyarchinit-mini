@@ -453,6 +453,20 @@ def create_app():
                 print(f"[FLASK] Added default database '{db_name}' to saved connections")
             break
 
+    # Restore saved connections from ConnectionManager (persisted in connections.json)
+    for conn_data in conn_manager._connections.values():
+        conn_name = conn_data.get('name', '')
+        if conn_name and conn_name not in app.config['DATABASE_CONNECTIONS']:
+            conn_url = conn_data.get('connection_string', '')
+            app.config['DATABASE_CONNECTIONS'][conn_name] = {
+                'type': conn_data.get('db_type', 'sqlite'),
+                'url': conn_url,
+                'description': conn_data.get('description', ''),
+                'uploaded': True,
+                'is_active': database_url == conn_url
+            }
+            print(f"[FLASK] Restored saved connection '{conn_name}' from connections.json")
+
     # Initialize services
     site_service = SiteService(db_manager)
     us_service = USService(db_manager)
