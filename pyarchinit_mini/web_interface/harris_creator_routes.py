@@ -524,15 +524,15 @@ def get_relationship_types():
 
     if lang == 'en':
         relationship_types = [
-            {'value': 'Covers', 'label': 'Covers (above)', 'symbol': 'Covers', 'style': 'solid', 'arrow': 'triangle'},
-            {'value': 'Covered_by', 'label': 'Covered by (below)', 'symbol': 'Covered by', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Covers', 'label': 'Covers', 'symbol': 'Covers', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Covered_by', 'label': 'Covered by', 'symbol': 'Covered by', 'style': 'solid', 'arrow': 'triangle'},
             {'value': 'Fills', 'label': 'Fills', 'symbol': 'Fills', 'style': 'solid', 'arrow': 'triangle'},
             {'value': 'Filled_by', 'label': 'Filled by', 'symbol': 'Filled by', 'style': 'solid', 'arrow': 'triangle'},
             {'value': 'Cuts', 'label': 'Cuts', 'symbol': 'Cuts', 'style': 'dashed', 'arrow': 'triangle'},
             {'value': 'Cut_by', 'label': 'Cut by', 'symbol': 'Cut by', 'style': 'dashed', 'arrow': 'triangle'},
-            {'value': 'Bonds_to', 'label': 'Bonds to', 'symbol': 'Bonds to', 'style': 'solid', 'arrow': 'triangle'},
-            {'value': 'Equal_to', 'label': 'Equal to', 'symbol': 'Equal to', 'style': 'solid', 'arrow': 'triangle'},
-            {'value': 'Leans_on', 'label': 'Leans on', 'symbol': 'Leans on', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Bonds_to', 'label': 'Connected to', 'symbol': 'Connected to', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Equal_to', 'label': 'Same as', 'symbol': 'Same as', 'style': 'solid', 'arrow': 'triangle'},
+            {'value': 'Leans_on', 'label': 'Supports', 'symbol': 'Supports', 'style': 'solid', 'arrow': 'triangle'},
             {'value': '>', 'label': '> - Connection to single-symbol unit', 'symbol': '>', 'style': 'dotted', 'arrow': 'triangle'},
             {'value': '<', 'label': '< - From single-symbol unit', 'symbol': '<', 'style': 'dotted', 'arrow': 'triangle'},
             {'value': '>>', 'label': '>> - Connection to double-symbol unit', 'symbol': '>>', 'style': 'dotted', 'arrow': 'triangle'},

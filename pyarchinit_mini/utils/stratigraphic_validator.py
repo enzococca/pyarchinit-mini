@@ -48,8 +48,10 @@ class StratigraphicValidator:
         'abutted by': 'abutted_by',
         'abutted_by': 'abutted_by',
         'leans on': 'abuts',  # Si appoggia a
+        'supports': 'abuts',  # Si appoggia a
         'equals': 'equals',
         'equal to': 'equals',
+        'same as': 'equals',  # Uguale a
         'contemporary': 'contemporary_with',
         'contemporary with': 'contemporary_with',
         'contemporary_with': 'contemporary_with',

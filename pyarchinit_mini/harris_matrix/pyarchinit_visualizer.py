@@ -21,8 +21,8 @@ class PyArchInitMatrixVisualizer:
         'copre': 'Covers', 'coperto da': 'Covered by',
         'taglia': 'Cuts', 'tagliato da': 'Cut by',
         'riempie': 'Fills', 'riempito da': 'Filled by',
-        'si lega a': 'Bonds to', 'uguale a': 'Equal to',
-        'si appoggia a': 'Leans on', 'gli si appoggia': 'Abutted by',
+        'si lega a': 'Connected to', 'uguale a': 'Same as',
+        'si appoggia a': 'Supports', 'gli si appoggia': 'Abuts',
         'contemporaneo a': 'Contemporary', 'anteriore a': 'Earlier than',
         'posteriore a': 'Later than',
     }
