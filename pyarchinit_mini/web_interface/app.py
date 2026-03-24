@@ -1036,6 +1036,12 @@ def create_app():
     def edit_us(us_id):
         """Edit existing US - us_id is a composite string: sito__area__us_number"""
         from flask import session
+        # Ensure us_id is an integer for correct comparison in service layer
+        try:
+            us_id = int(us_id)
+        except (ValueError, TypeError):
+            flash('ID US non valido', 'error')
+            return redirect(url_for('us_list'))
 
         form = USForm()
 
