@@ -1810,7 +1810,7 @@ window.addEventListener('load', function() {
         if (blenderSocket) return; // Already initialized
 
         console.log('[Blender Socket] Initializing Socket.IO connection...');
-        blenderSocket = io();
+        blenderSocket = io({reconnection: true, reconnectionDelay: 1000, reconnectionDelayMax: 10000, reconnectionAttempts: 10, transports: ['websocket', 'polling']});
 
         // Connection events
         blenderSocket.on('connect', () => {

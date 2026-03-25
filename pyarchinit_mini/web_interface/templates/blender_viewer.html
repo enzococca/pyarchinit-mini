@@ -641,7 +641,7 @@
         let selectedSite = null;
 
         // Socket.IO
-        const socket = io();
+        const socket = io({reconnection: true, reconnectionDelay: 1000, reconnectionDelayMax: 10000, reconnectionAttempts: 10, transports: ['websocket', 'polling']});
 
         // Initialize Three.js scene
         function initScene() {

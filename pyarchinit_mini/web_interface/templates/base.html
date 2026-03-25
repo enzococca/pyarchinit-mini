@@ -283,11 +283,21 @@
             'now': "{{ _('Now') }}"
         };
 
-        const socket = io();
+        const socket = io({
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 10000,
+            reconnectionAttempts: 10,
+            transports: ['websocket', 'polling']
+        });
         let onlineUsersCount = 0;
 
         socket.on('connect', function() { console.log('[WS] Connected'); });
-        socket.on('disconnect', function() { console.log('[WS] Disconnected'); });
+        socket.on('disconnect', function(reason) {
+            console.log('[WS] Disconnected:', reason);
+            if (reason === 'io server disconnect') { socket.connect(); }
+        });
+        socket.on('reconnect', function(attempt) { console.log('[WS] Reconnected after', attempt, 'attempts'); });
 
         socket.on('online_users', function(data) {
             onlineUsersCount = data.users.length;

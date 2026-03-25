@@ -535,8 +535,10 @@ def create_app():
     csrf.exempt(excel_import_bp)
     csrf.exempt(em_node_config_bp)
 
-    # Initialize Flask-SocketIO
-    socketio = SocketIO(app, cors_allowed_origins="*")
+    # Initialize Flask-SocketIO with robust timeout settings
+    socketio = SocketIO(app, cors_allowed_origins="*",
+                        ping_timeout=120, ping_interval=30,
+                        async_mode='threading')
 
     # Initialize WebSocket event handlers
     init_socketio_events(socketio)
@@ -601,17 +603,21 @@ def create_app():
     @login_required
     def sites_list():
         page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 50, type=int)
         search = request.args.get('search', '')
-        
+
         if search:
-            sites = site_service.search_sites(search, page=page, size=20)
+            sites = site_service.search_sites(search, page=page, size=per_page)
         else:
-            sites = site_service.get_all_sites(page=page, size=20)
-        
+            sites = site_service.get_all_sites(page=page, size=per_page)
+
         total = site_service.count_sites()
-        
-        return render_template('sites/list.html', sites=sites, total=total, 
-                             page=page, search=search)
+        import math
+        total_pages = math.ceil(total / per_page) if per_page > 0 else 1
+
+        return render_template('sites/list.html', sites=sites, total=total,
+                             page=page, per_page=per_page, total_pages=total_pages,
+                             search=search)
     
     @app.route('/sites/create', methods=['GET', 'POST'])
     @login_required
@@ -810,11 +816,12 @@ def create_app():
             'us_number': us_number_filter
         }
 
-        us_list = us_service.get_all_us(page=page, size=20, filters=filters)
+        per_page = request.args.get('per_page', 50, type=int)
+        us_list = us_service.get_all_us(page=page, size=per_page, filters=filters)
         total = us_service.count_us(filters=filters)
 
-        # Get sites for filter
-        sites = site_service.get_all_sites(size=100)
+        # Get sites for filter dropdown (need all sites)
+        sites = site_service.get_all_sites(size=10000)
 
         # Get distinct values for filters
         with db_manager.connection.get_session() as db_session:
@@ -852,7 +859,7 @@ def create_app():
         form = USForm()
         
         # Populate site choices
-        sites = site_service.get_all_sites(size=100)
+        sites = site_service.get_all_sites(size=10000)
         form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
 
         # Populate datazione choices
@@ -1046,7 +1053,7 @@ def create_app():
         form = USForm()
 
         # Populate site choices
-        sites = site_service.get_all_sites(size=100)
+        sites = site_service.get_all_sites(size=10000)
         form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
 
         # Populate datazione choices
@@ -1359,7 +1366,7 @@ def create_app():
         total = inventario_service.count_inventario(filters=filters)
         
         # Get options for filters
-        sites = site_service.get_all_sites(size=100)
+        sites = site_service.get_all_sites(size=10000)
         
         return render_template('inventario/list.html', inventory_list=inventory_list,
                              sites=sites, total=total, page=page,
@@ -1372,7 +1379,7 @@ def create_app():
         form = InventarioForm()
 
         # Populate site choices
-        sites = site_service.get_all_sites(size=100)
+        sites = site_service.get_all_sites(size=10000)
         form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
 
         # Populate thesaurus choices
@@ -1480,7 +1487,7 @@ def create_app():
         form = InventarioForm()
 
         # Populate site choices
-        sites = site_service.get_all_sites(size=100)
+        sites = site_service.get_all_sites(size=10000)
         form.sito.choices = [('', '-- Seleziona Sito --')] + [(s.sito, s.sito) for s in sites]
 
         # Populate thesaurus choices
@@ -2734,11 +2741,14 @@ def create_app():
     def serve_media(filepath):
         """Serve media files from the media directory"""
         from flask import send_from_directory
-        import os
-
-        # Get the media directory path from centralized location
         from pathlib import Path
+
         media_dir = str(Path.home() / '.pyarchinit_mini' / 'media')
+        # Strip leading "media/" prefix from old DB records to avoid double media/media/
+        if filepath.startswith('media/'):
+            filepath = filepath[len('media/'):]
+        # Normalize backslashes from Windows DB records
+        filepath = filepath.replace('\\', '/')
         return send_from_directory(media_dir, filepath)
 
     @app.route('/media/delete/<int:media_id>', methods=['POST'])
@@ -3684,7 +3694,7 @@ def create_app():
     # API endpoints for AJAX
     @app.route('/api/sites')
     def api_sites():
-        sites = site_service.get_all_sites(size=100)
+        sites = site_service.get_all_sites(size=10000)
         return jsonify([{'id': s.id_sito, 'name': s.sito} for s in sites])
 
     # ===== Export/Import Routes =====

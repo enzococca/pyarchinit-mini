@@ -24,9 +24,13 @@ class MediaService:
         # Note: Skipping validate_data() as 'media' schema not defined
         # Database constraints will handle validation
 
-        # Check if file exists
-        if 'media_path' in media_data and not os.path.exists(media_data['media_path']):
-            raise ValidationError(f"Media file not found: {media_data['media_path']}")
+        # Check if file exists (resolve relative path against media base dir)
+        if 'media_path' in media_data:
+            from pathlib import Path
+            media_base = Path.home() / '.pyarchinit_mini' / 'media'
+            abs_path = media_base / media_data['media_path']
+            if not abs_path.exists():
+                raise ValidationError(f"Media file not found: {media_data['media_path']}")
 
         # Create media record
         return self.db_manager.create(Media, media_data)
