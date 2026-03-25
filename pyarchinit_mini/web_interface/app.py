@@ -350,6 +350,10 @@ class GraphMLExportForm(FlaskForm):
     reverse_epochs = BooleanField('Inverti ordine periodi', default=False)
 
 # Flask App Setup
+# Lazy-loaded visualizers (module-level so 'global' works in nested route handlers)
+matrix_visualizer = None
+graphviz_visualizer = None
+
 def create_app():
     # Declare global variables for database and services
     # This allows switch_database() to access and modify them
@@ -485,9 +489,7 @@ def create_app():
     datazione_service = DatazioneService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
     export_import_service = ImportExportService(db_manager.connection.connection_string)
-    # Lazy-loaded on first Harris Matrix access to avoid matplotlib import at startup
-    matrix_visualizer = None
-    graphviz_visualizer = None
+    # matrix_visualizer and graphviz_visualizer are declared at module level
     pdf_generator = PDFGenerator()
     media_handler = MediaHandler()
     media_service = MediaService(db_manager, media_handler)
