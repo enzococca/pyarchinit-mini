@@ -7,13 +7,23 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <style>
-    #map { height: calc(100vh - 200px); min-height: 500px; border-radius: 8px; border: 1px solid #dee2e6; }
-    .site-popup { min-width: 200px; }
+    #map { height: calc(100vh - 260px); min-height: 450px; border-radius: 8px; border: 1px solid #dee2e6; }
+    .site-popup { min-width: 220px; }
     .site-popup h6 { margin-bottom: 8px; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 4px; }
     .site-popup .prop { font-size: 0.85em; margin: 2px 0; }
     .site-popup .prop strong { color: #555; }
-    .map-controls { margin-bottom: 10px; }
-    .legend { background: white; padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 0.85em; }
+    .filter-bar { background: #f8f9fa; border-radius: 8px; padding: 10px 15px; margin-bottom: 10px; }
+    .filter-bar select { max-width: 200px; }
+    .custom-marker { border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        display: flex; align-items: center; justify-content: center; font-weight: bold;
+        font-size: 11px; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .legend-box { position: absolute; bottom: 20px; right: 10px; z-index: 1000;
+        background: white; padding: 10px 14px; border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: 0.82em; max-height: 300px; overflow-y: auto; }
+    .legend-box h6 { font-size: 0.9em; margin-bottom: 6px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+    .legend-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3); flex-shrink: 0; }
     #loading-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
         z-index: 1000; background: rgba(255,255,255,0.9); padding: 20px 40px; border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
@@ -30,33 +40,40 @@
     </div>
 </div>
 
-<div class="map-controls d-flex justify-content-between align-items-center">
-    <div>
-        <span class="badge bg-info" id="site-count">{{ _('Loading...') }}</span>
-    </div>
-    <div class="btn-group btn-group-sm">
+<!-- Filter Bar -->
+<div class="filter-bar d-flex flex-wrap align-items-center gap-2">
+    <span class="badge bg-info" id="site-count">{{ _('Loading...') }}</span>
+
+    <select id="filter-type" class="form-select form-select-sm" onchange="applyFilters()">
+        <option value="">{{ _('All site types') }}</option>
+    </select>
+
+    <select id="filter-us" class="form-select form-select-sm" onchange="applyFilters()" style="max-width:160px">
+        <option value="">{{ _('All') }}</option>
+        <option value="with_us">{{ _('With US') }}</option>
+        <option value="without_us">{{ _('Without US') }}</option>
+    </select>
+
+    <select id="color-by" class="form-select form-select-sm" onchange="recolor()" style="max-width:180px">
+        <option value="us">{{ _('Color by: US count') }}</option>
+        <option value="type">{{ _('Color by: site type') }}</option>
+        <option value="period">{{ _('Color by: period') }}</option>
+    </select>
+
+    <div class="ms-auto btn-group btn-group-sm">
         <button class="btn btn-outline-secondary" onclick="map.setView([42.5, 12.5], 6)" title="Italia">
             <i class="fas fa-flag"></i> Italia
         </button>
-        <button class="btn btn-outline-secondary" onclick="fitAll()" title="{{ _('Fit all sites') }}">
+        <button class="btn btn-outline-secondary" onclick="fitAll()">
             <i class="fas fa-expand"></i> {{ _('Fit All') }}
         </button>
     </div>
 </div>
 
 <div style="position: relative;">
-    <div id="loading-overlay">
-        <i class="fas fa-spinner fa-spin"></i> {{ _('Loading sites...') }}
-    </div>
+    <div id="loading-overlay"><i class="fas fa-spinner fa-spin"></i> {{ _('Loading sites...') }}</div>
     <div id="map"></div>
-</div>
-
-<div class="mt-2">
-    <small class="text-muted">
-        <i class="fas fa-info-circle"></i>
-        {{ _('Data from PostGIS layer') }} <code>pyarchinit_siti</code>.
-        {{ _('Coordinates reprojected on-the-fly to WGS84.') }}
-    </small>
+    <div class="legend-box" id="legend" style="display:none;"></div>
 </div>
 {% endblock %}
 
@@ -64,174 +81,249 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
-    // Initialize map centered on Italy
-    const map = L.map('map').setView([42.5, 12.5], 6);
+const map = L.map('map').setView([42.5, 12.5], 6);
 
-    // Base layers
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19
-    });
+// Base layers
+const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OSM', maxZoom: 19
+}).addTo(map);
+L.control.layers({
+    'OpenStreetMap': osmLayer,
+    'Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: '&copy; Esri', maxZoom: 19}),
+    'Topographic': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {attribution: '&copy; OpenTopoMap', maxZoom: 17})
+}).addTo(map);
 
-    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: '&copy; Esri, Maxar, Earthstar Geographics',
-        maxZoom: 19
-    });
+let allFeatures = [];
+let markers = L.markerClusterGroup({maxClusterRadius: 50, showCoverageOnHover: false});
+let nameField = null;
+let allBounds = null;
 
-    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenTopoMap',
-        maxZoom: 17
-    });
+// --- Color palettes ---
+const usColors = { none: '#95a5a6', low: '#3498db', medium: '#e67e22', high: '#e74c3c' };
 
-    osmLayer.addTo(map);
+function getUsColor(count) {
+    if (count === 0) return usColors.none;
+    if (count < 10) return usColors.low;
+    if (count < 50) return usColors.medium;
+    return usColors.high;
+}
 
-    L.control.layers({
-        'OpenStreetMap': osmLayer,
-        'Satellite': satelliteLayer,
-        'Topographic': topoLayer
-    }).addTo(map);
+// Distinct colors for categories
+const catPalette = [
+    '#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22',
+    '#34495e','#d35400','#16a085','#c0392b','#2980b9','#8e44ad','#27ae60',
+    '#f1c40f','#7f8c8d','#2c3e50','#ff6b6b','#48dbfb','#feca57'
+];
+let typeColorMap = {};
+let periodColorMap = {};
 
-    // Marker cluster group
-    const markers = L.markerClusterGroup({
-        maxClusterRadius: 50,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false
-    });
+function assignColors(values, map_) {
+    values.forEach((v, i) => { map_[v] = catPalette[i % catPalette.length]; });
+}
 
-    // GeoJSON layer for polygons
-    let geoJsonLayer = null;
-    let allBounds = null;
+// --- Marker creation ---
+function createMarker(feature, latlng) {
+    const p = feature.properties;
+    const colorBy = document.getElementById('color-by').value;
+    let color, size, label;
 
-    function fitAll() {
-        if (allBounds && allBounds.isValid()) {
-            map.fitBounds(allBounds, { padding: [30, 30] });
-        }
+    if (colorBy === 'type') {
+        color = typeColorMap[p._site_type] || '#95a5a6';
+        size = p._us_count > 0 ? 28 : 20;
+        label = p._us_count > 0 ? p._us_count : '';
+    } else if (colorBy === 'period') {
+        color = periodColorMap[p._period] || '#95a5a6';
+        size = p._us_count > 0 ? 28 : 20;
+        label = p._us_count > 0 ? p._us_count : '';
+    } else {
+        color = getUsColor(p._us_count || 0);
+        size = p._us_count > 0 ? Math.min(18 + Math.sqrt(p._us_count) * 3, 40) : 18;
+        label = p._us_count > 0 ? p._us_count : '';
     }
 
-    // Detect which column holds the site name (set after data loads)
-    let nameField = null;
+    const icon = L.divIcon({
+        className: '',
+        html: `<div class="custom-marker" style="width:${size}px;height:${size}px;background:${color};">${label}</div>`,
+        iconSize: [size, size],
+        iconAnchor: [size/2, size/2]
+    });
 
-    function detectNameField(columns) {
-        // Try common PyArchInit field names in priority order
-        const candidates = [
-            'sito', 'nome_site', 'nome', 'name', 'location_', 'location',
-            'site_name', 'sitename', 'denominazione', 'denominazi', 'label'
-        ];
-        for (const c of candidates) {
-            if (columns.includes(c)) return c;
-        }
-        // Fallback: first text column that's not an id/geom
-        const skip = ['gid', 'id', 'pkuid', 'ogc_fid', 'fid', 'the_geom', 'geom'];
-        for (const c of columns) {
-            if (!skip.includes(c.toLowerCase())) return c;
-        }
-        return columns[0] || null;
+    return L.marker(latlng, {icon: icon});
+}
+
+// --- Name detection ---
+function detectNameField(columns) {
+    const candidates = ['sito','nome_site','nome','name','location_','location','site_name','denominazione','denominazi','label'];
+    for (const c of candidates) { if (columns.includes(c)) return c; }
+    const skip = ['gid','id','pkuid','ogc_fid','fid'];
+    for (const c of columns) { if (!skip.includes(c.toLowerCase())) return c; }
+    return columns[0] || null;
+}
+
+function getSiteName(props) {
+    let name = nameField ? (props[nameField] || '') : '';
+    if (!name || name === 'None') name = props.sito || props.nome || props.name || props.location_ || 'N/A';
+    return name;
+}
+
+// --- Popup ---
+function buildPopup(props) {
+    const name = getSiteName(props);
+    const usCount = props._us_count || 0;
+    const invCount = props._inv_count || 0;
+    const sType = props._site_type || '';
+    const period = props._period || '';
+
+    let html = `<div class="site-popup"><h6><i class="fas fa-map-marker-alt"></i> ${name}</h6>`;
+    if (sType) html += `<div class="prop"><strong>{{ _('Type') }}:</strong> ${sType}</div>`;
+    if (period) html += `<div class="prop"><strong>{{ _('Period') }}:</strong> ${period}</div>`;
+    html += `<div class="prop"><strong>US:</strong> <span class="badge bg-${usCount > 0 ? 'info' : 'secondary'}">${usCount}</span>`;
+    html += ` <strong>{{ _('Materials') }}:</strong> <span class="badge bg-${invCount > 0 ? 'warning text-dark' : 'secondary'}">${invCount}</span></div>`;
+
+    // Other properties
+    const skipKeys = ['gid','id','the_geom','geom','pkuid','ogc_fid','fid','_us_count','_inv_count','_site_type','_period'];
+    for (const [key, value] of Object.entries(props)) {
+        if (skipKeys.includes(key) || (nameField && key === nameField)) continue;
+        if (value === null || value === '' || value === 'None') continue;
+        html += `<div class="prop"><strong>${key.replace(/_/g,' ')}:</strong> ${value}</div>`;
     }
 
-    // Build popup content from properties
-    function buildPopup(props) {
-        let name = nameField ? (props[nameField] || 'N/A') : 'N/A';
-        // Also try common alternatives if nameField gave empty
-        if (name === 'N/A' || name === '' || name === 'None') {
-            name = props.sito || props.nome || props.name || props.location_ || 'N/A';
+    html += `<div class="mt-2"><a href="{{ url_for('sites_list') }}?search=${encodeURIComponent(name)}" class="btn btn-sm btn-outline-primary">`;
+    html += `<i class="fas fa-eye"></i> {{ _('View') }}</a></div></div>`;
+    return html;
+}
+
+// --- Legend ---
+function updateLegend() {
+    const colorBy = document.getElementById('color-by').value;
+    const el = document.getElementById('legend');
+    let html = '';
+
+    if (colorBy === 'us') {
+        html = `<h6>{{ _('US Count') }}</h6>
+            <div class="legend-item"><div class="legend-dot" style="background:${usColors.none}"></div> {{ _('No US') }}</div>
+            <div class="legend-item"><div class="legend-dot" style="background:${usColors.low}"></div> 1-9 US</div>
+            <div class="legend-item"><div class="legend-dot" style="background:${usColors.medium}"></div> 10-49 US</div>
+            <div class="legend-item"><div class="legend-dot" style="background:${usColors.high}"></div> 50+ US</div>`;
+    } else if (colorBy === 'type') {
+        html = `<h6>{{ _('Site Type') }}</h6>`;
+        for (const [t, c] of Object.entries(typeColorMap)) {
+            html += `<div class="legend-item"><div class="legend-dot" style="background:${c}"></div> ${t}</div>`;
         }
-        let html = `<div class="site-popup"><h6><i class="fas fa-map-marker-alt"></i> ${name}</h6>`;
-
-        const labelMap = {
-            'sito': '{{ _("Site") }}',
-            'nazione': '{{ _("Country") }}',
-            'regione': '{{ _("Region") }}',
-            'comune': '{{ _("Municipality") }}',
-            'provincia': '{{ _("Province") }}',
-            'definizione_sito': '{{ _("Type") }}',
-            'descrizione': '{{ _("Description") }}',
-            'nome_site': '{{ _("Site") }}',
-            'location_': '{{ _("Location") }}'
-        };
-
-        const skipKeys = ['gid', 'id', 'the_geom', 'geom', 'pkuid', 'ogc_fid', 'fid'];
-
-        for (const [key, value] of Object.entries(props)) {
-            if (skipKeys.includes(key.toLowerCase())) continue;
-            if (nameField && key === nameField) continue;
-            if (value === null || value === '' || value === 'None') continue;
-            let label = labelMap[key] || key.replace(/_/g, ' ');
-            html += `<div class="prop"><strong>${label}:</strong> ${value}</div>`;
+        html += `<div class="legend-item"><div class="legend-dot" style="background:#95a5a6"></div> {{ _('Unknown') }}</div>`;
+    } else {
+        html = `<h6>{{ _('Period') }}</h6>`;
+        for (const [p, c] of Object.entries(periodColorMap)) {
+            html += `<div class="legend-item"><div class="legend-dot" style="background:${c}"></div> ${p}</div>`;
         }
-
-        html += `<div class="mt-2"><a href="{{ url_for('sites_list') }}?search=${encodeURIComponent(name)}" class="btn btn-sm btn-outline-primary">`;
-        html += `<i class="fas fa-eye"></i> {{ _('View Details') }}</a></div>`;
-        html += '</div>';
-        return html;
+        html += `<div class="legend-item"><div class="legend-dot" style="background:#95a5a6"></div> {{ _('Unknown') }}</div>`;
     }
 
-    // Load GeoJSON data
-    fetch('{{ url_for("api_sites_geojson") }}')
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById('loading-overlay').style.display = 'none';
+    el.innerHTML = html;
+    el.style.display = 'block';
+}
 
-            if (data.error) {
-                document.getElementById('site-count').textContent = data.error;
-                document.getElementById('site-count').className = 'badge bg-warning';
-                return;
-            }
+// --- Filtering & rendering ---
+function applyFilters() {
+    const typeFilter = document.getElementById('filter-type').value;
+    const usFilter = document.getElementById('filter-us').value;
 
-            // Detect name field from columns
-            if (data.columns) {
-                nameField = detectNameField(data.columns);
-                console.log('[Map] Columns:', data.columns, '→ nameField:', nameField);
-            }
+    markers.clearLayers();
+    let count = 0;
 
-            const count = data.features.length;
-            document.getElementById('site-count').textContent = count + ' {{ _("sites on map") }}';
+    allFeatures.forEach(f => {
+        const p = f.properties;
+        // Type filter
+        if (typeFilter && (p._site_type || '') !== typeFilter) return;
+        // US filter
+        if (usFilter === 'with_us' && (p._us_count || 0) === 0) return;
+        if (usFilter === 'without_us' && (p._us_count || 0) > 0) return;
 
-            if (count === 0) {
-                document.getElementById('site-count').className = 'badge bg-warning';
-                return;
-            }
+        // Get centroid for polygons
+        let latlng;
+        if (f.geometry.type === 'Point') {
+            latlng = L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]);
+        } else {
+            const gjLayer = L.geoJSON(f);
+            latlng = gjLayer.getBounds().getCenter();
+        }
 
-            geoJsonLayer = L.geoJSON(data, {
-                pointToLayer: function(feature, latlng) {
-                    const marker = L.marker(latlng);
-                    markers.addLayer(marker);
-                    return marker;
-                },
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(buildPopup(feature.properties));
+        const marker = createMarker(f, latlng);
+        marker.bindPopup(buildPopup(p));
+        markers.addLayer(marker);
+        count++;
+    });
 
-                    // For non-point geometries (polygons, lines), also add a centroid marker
-                    if (feature.geometry.type !== 'Point') {
-                        const bounds = layer.getBounds();
-                        const center = bounds.getCenter();
-                        const marker = L.marker(center);
-                        marker.bindPopup(buildPopup(feature.properties));
-                        markers.addLayer(marker);
-                    }
-                },
-                style: function(feature) {
-                    return {
-                        color: '#3498db',
-                        weight: 2,
-                        fillColor: '#3498db',
-                        fillOpacity: 0.2
-                    };
-                }
-            });
+    map.addLayer(markers);
+    document.getElementById('site-count').textContent = count + ' {{ _("sites on map") }}';
 
-            geoJsonLayer.addTo(map);
-            map.addLayer(markers);
+    // Update bounds
+    if (markers.getLayers().length > 0) {
+        allBounds = markers.getBounds();
+    }
+}
 
-            // Fit to bounds
-            allBounds = geoJsonLayer.getBounds();
-            if (allBounds.isValid()) {
-                map.fitBounds(allBounds, { padding: [30, 30] });
-            }
-        })
-        .catch(err => {
-            document.getElementById('loading-overlay').style.display = 'none';
-            document.getElementById('site-count').textContent = 'Error: ' + err.message;
-            document.getElementById('site-count').className = 'badge bg-danger';
+function recolor() {
+    updateLegend();
+    applyFilters();
+}
+
+function fitAll() {
+    if (allBounds && allBounds.isValid()) map.fitBounds(allBounds, {padding: [30, 30]});
+}
+
+// --- Load data ---
+fetch('{{ url_for("api_sites_geojson") }}')
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('loading-overlay').style.display = 'none';
+
+        if (data.error) {
+            document.getElementById('site-count').textContent = data.error;
+            document.getElementById('site-count').className = 'badge bg-warning';
+            return;
+        }
+
+        if (data.columns) {
+            nameField = detectNameField(data.columns);
+            console.log('[Map] Columns:', data.columns, '→ nameField:', nameField);
+        }
+
+        allFeatures = data.features;
+
+        // Populate type filter and build color maps
+        const types = new Set();
+        const periods = new Set();
+        allFeatures.forEach(f => {
+            const t = f.properties._site_type;
+            const p = f.properties._period;
+            if (t) types.add(t);
+            if (p) periods.add(p);
         });
+
+        const typeSelect = document.getElementById('filter-type');
+        [...types].sort().forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t; opt.textContent = t;
+            typeSelect.appendChild(opt);
+        });
+
+        assignColors([...types].sort(), typeColorMap);
+        assignColors([...periods].sort(), periodColorMap);
+
+        // Initial render
+        updateLegend();
+        applyFilters();
+
+        if (markers.getLayers().length > 0) {
+            allBounds = markers.getBounds();
+            map.fitBounds(allBounds, {padding: [30, 30]});
+        }
+    })
+    .catch(err => {
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.getElementById('site-count').textContent = 'Error: ' + err.message;
+        document.getElementById('site-count').className = 'badge bg-danger';
+    });
 </script>
 {% endblock %}

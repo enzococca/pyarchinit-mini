@@ -3791,7 +3791,51 @@ def create_app():
                 """)
                 rows = conn.execute(query).fetchall()
 
+                # Get US counts per site and site types from site_table
+                us_counts = {}
+                inv_counts = {}
+                site_types = {}
+                site_periods = {}
+                try:
+                    us_rows = conn.execute(sa_text(
+                        "SELECT sito, COUNT(*) FROM us_table GROUP BY sito"
+                    )).fetchall()
+                    us_counts = {r[0]: r[1] for r in us_rows}
+                except Exception:
+                    pass
+                try:
+                    inv_rows = conn.execute(sa_text(
+                        "SELECT sito, COUNT(*) FROM inventario_materiali_table GROUP BY sito"
+                    )).fetchall()
+                    inv_counts = {r[0]: r[1] for r in inv_rows}
+                except Exception:
+                    pass
+                try:
+                    type_rows = conn.execute(sa_text(
+                        "SELECT sito, definizione_sito FROM site_table WHERE definizione_sito IS NOT NULL"
+                    )).fetchall()
+                    site_types = {r[0]: r[1] for r in type_rows}
+                except Exception:
+                    pass
+                try:
+                    # Get earliest period per site from US
+                    period_rows = conn.execute(sa_text(
+                        "SELECT sito, datazione FROM us_table "
+                        "WHERE datazione IS NOT NULL AND datazione != '' "
+                        "GROUP BY sito, datazione"
+                    )).fetchall()
+                    for r in period_rows:
+                        if r[0] not in site_periods:
+                            site_periods[r[0]] = r[1]
+                except Exception:
+                    pass
+
+                # Detect name field candidates
+                name_candidates = ['sito', 'nome_site', 'nome', 'name', 'location_',
+                                   'location', 'site_name', 'denominazione']
+
                 features = []
+                all_site_types = set()
                 for row in rows:
                     row_dict = dict(row._mapping)
                     geojson_str = row_dict.pop('geojson', None)
@@ -3799,11 +3843,27 @@ def create_app():
                     row_dict.pop('lon', None)
                     if geojson_str:
                         geometry = json_mod.loads(geojson_str)
-                        # Build properties from remaining columns
                         props = {}
                         for k, v in row_dict.items():
                             if v is not None:
                                 props[k] = str(v) if not isinstance(v, (int, float, bool)) else v
+
+                        # Find site name to cross-reference
+                        site_name = None
+                        for nc in name_candidates:
+                            if nc in props and props[nc]:
+                                site_name = props[nc]
+                                break
+
+                        # Enrich with counts and type
+                        props['_us_count'] = us_counts.get(site_name, 0) if site_name else 0
+                        props['_inv_count'] = inv_counts.get(site_name, 0) if site_name else 0
+                        stype = site_types.get(site_name, '')
+                        props['_site_type'] = stype
+                        props['_period'] = site_periods.get(site_name, '')
+                        if stype:
+                            all_site_types.add(stype)
+
                         features.append({
                             'type': 'Feature',
                             'geometry': geometry,
@@ -3811,7 +3871,8 @@ def create_app():
                         })
 
             return jsonify({'type': 'FeatureCollection', 'features': features,
-                            'columns': prop_cols})
+                            'columns': prop_cols,
+                            'site_types': sorted(all_site_types)})
 
         except Exception as e:
             return jsonify({'type': 'FeatureCollection', 'features': [],
