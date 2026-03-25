@@ -614,25 +614,30 @@ def create_app():
         import math
         total_pages = math.ceil(total / per_page) if per_page > 0 else 1
 
-        # Count US and Inventario per site (single query for all sites on this page)
+        # Count US and Inventario per site using raw SQL for compatibility
         site_counts = {}
         if sites:
             try:
-                from sqlalchemy import func
-                from pyarchinit_mini.models.us import US as USModel
-                from pyarchinit_mini.models.inventario import InventarioMateriali
-                site_names = [s.sito for s in sites]
+                from sqlalchemy import text as sa_text
                 with db_manager.connection.get_session() as session:
-                    us_counts = dict(
-                        session.query(USModel.sito, func.count(USModel.id_us))
-                        .filter(USModel.sito.in_(site_names))
-                        .group_by(USModel.sito).all()
-                    )
-                    inv_counts = dict(
-                        session.query(InventarioMateriali.sito, func.count(InventarioMateriali.id_invmat))
-                        .filter(InventarioMateriali.sito.in_(site_names))
-                        .group_by(InventarioMateriali.sito).all()
-                    )
+                    # Get all US counts grouped by sito
+                    try:
+                        us_rows = session.execute(sa_text(
+                            "SELECT sito, COUNT(*) as cnt FROM us_table GROUP BY sito"
+                        )).fetchall()
+                        us_counts = {row[0]: row[1] for row in us_rows}
+                    except Exception:
+                        us_counts = {}
+
+                    # Get all Inventario counts grouped by sito
+                    try:
+                        inv_rows = session.execute(sa_text(
+                            "SELECT sito, COUNT(*) as cnt FROM inventario_materiali_table GROUP BY sito"
+                        )).fetchall()
+                        inv_counts = {row[0]: row[1] for row in inv_rows}
+                    except Exception:
+                        inv_counts = {}
+
                 for s in sites:
                     site_counts[s.sito] = {
                         'us': us_counts.get(s.sito, 0),
