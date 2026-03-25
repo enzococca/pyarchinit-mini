@@ -153,7 +153,7 @@ function createMarker(feature, latlng) {
 
 // --- Name detection ---
 function detectNameField(columns) {
-    const candidates = ['sito','nome_site','nome','name','location_','location','site_name','denominazione','denominazi','label'];
+    const candidates = ['sito_nome','sito','nome_site','nome','name','location_','location','site_name','denominazione','denominazi','label'];
     for (const c of candidates) { if (columns.includes(c)) return c; }
     const skip = ['gid','id','pkuid','ogc_fid','fid'];
     for (const c of columns) { if (!skip.includes(c.toLowerCase())) return c; }
@@ -162,7 +162,7 @@ function detectNameField(columns) {
 
 function getSiteName(props) {
     let name = nameField ? (props[nameField] || '') : '';
-    if (!name || name === 'None') name = props.sito || props.nome || props.name || props.location_ || 'N/A';
+    if (!name || name === 'None') name = props.sito_nome || props.sito || props.nome || props.name || props.location_ || 'N/A';
     return name;
 }
 
@@ -287,6 +287,9 @@ fetch('{{ url_for("api_sites_geojson") }}')
         if (data.columns) {
             nameField = detectNameField(data.columns);
             console.log('[Map] Columns:', data.columns, '→ nameField:', nameField);
+        }
+        if (data.debug) {
+            console.log('[Map] Debug info:', JSON.stringify(data.debug, null, 2));
         }
 
         allFeatures = data.features;
