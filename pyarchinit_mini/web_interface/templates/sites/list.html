@@ -32,16 +32,21 @@
                 <th>{{ _('Country') }}</th>
                 <th>{{ _('Region') }}</th>
                 <th>{{ _('Municipality') }}</th>
+                <th class="text-center">US</th>
+                <th class="text-center">{{ _('Materials') }}</th>
                 <th>{{ _('Actions') }}</th>
             </tr>
         </thead>
         <tbody>
             {% for site in sites %}
+            {% set counts = site_counts.get(site.sito, {'us': 0, 'inv': 0}) %}
             <tr>
                 <td><a href="{{ url_for('view_site', site_id=site.id_sito) }}">{{ site.sito }}</a></td>
                 <td>{{ site.nazione or '-' }}</td>
                 <td>{{ site.regione or '-' }}</td>
                 <td>{{ site.comune or '-' }}</td>
+                <td class="text-center"><span class="badge bg-info">{{ counts.us }}</span></td>
+                <td class="text-center"><span class="badge bg-secondary">{{ counts.inv }}</span></td>
                 <td>
                     <div class="btn-group btn-group-sm">
                         <a href="{{ url_for('view_site', site_id=site.id_sito) }}" class="btn btn-info">
@@ -111,6 +116,11 @@
             <div class="label">{{ _('Municipality') }}</div>
             <div class="value">{{ site.comune }}</div>
             {% endif %}
+            {% set counts = site_counts.get(site.sito, {'us': 0, 'inv': 0}) %}
+            <div class="d-flex gap-3 mt-2">
+                <span class="badge bg-info">US: {{ counts.us }}</span>
+                <span class="badge bg-secondary">{{ _('Materials') }}: {{ counts.inv }}</span>
+            </div>
         </div>
         <div class="mobile-card-actions">
             <a href="{{ url_for('view_site', site_id=site.id_sito) }}" class="btn btn-info btn-sm">
