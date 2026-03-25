@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Sites Map') }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<style>
+    #map { height: calc(100vh - 200px); min-height: 500px; border-radius: 8px; border: 1px solid #dee2e6; }
+    .site-popup { min-width: 200px; }
+    .site-popup h6 { margin-bottom: 8px; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 4px; }
+    .site-popup .prop { font-size: 0.85em; margin: 2px 0; }
+    .site-popup .prop strong { color: #555; }
+    .map-controls { margin-bottom: 10px; }
+    .legend { background: white; padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 0.85em; }
+    #loading-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        z-index: 1000; background: rgba(255,255,255,0.9); padding: 20px 40px; border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="fas fa-map"></i> {{ _('Sites Map') }}</h2>
+    <div>
+        <a href="{{ url_for('sites_list') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-list"></i> {{ _('List View') }}
+        </a>
+    </div>
+</div>
+
+<div class="map-controls d-flex justify-content-between align-items-center">
+    <div>
+        <span class="badge bg-info" id="site-count">{{ _('Loading...') }}</span>
+    </div>
+    <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" onclick="map.setView([42.5, 12.5], 6)" title="Italia">
+            <i class="fas fa-flag"></i> Italia
+        </button>
+        <button class="btn btn-outline-secondary" onclick="fitAll()" title="{{ _('Fit all sites') }}">
+            <i class="fas fa-expand"></i> {{ _('Fit All') }}
+        </button>
+    </div>
+</div>
+
+<div style="position: relative;">
+    <div id="loading-overlay">
+        <i class="fas fa-spinner fa-spin"></i> {{ _('Loading sites...') }}
+    </div>
+    <div id="map"></div>
+</div>
+
+<div class="mt-2">
+    <small class="text-muted">
+        <i class="fas fa-info-circle"></i>
+        {{ _('Data from PostGIS layer') }} <code>pyarchinit_siti</code>.
+        {{ _('Coordinates reprojected on-the-fly to WGS84.') }}
+    </small>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+    // Initialize map centered on Italy
+    const map = L.map('map').setView([42.5, 12.5], 6);
+
+    // Base layers
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    });
+
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri, Maxar, Earthstar Geographics',
+        maxZoom: 19
+    });
+
+    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenTopoMap',
+        maxZoom: 17
+    });
+
+    osmLayer.addTo(map);
+
+    L.control.layers({
+        'OpenStreetMap': osmLayer,
+        'Satellite': satelliteLayer,
+        'Topographic': topoLayer
+    }).addTo(map);
+
+    // Marker cluster group
+    const markers = L.markerClusterGroup({
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false
+    });
+
+    // GeoJSON layer for polygons
+    let geoJsonLayer = null;
+    let allBounds = null;
+
+    function fitAll() {
+        if (allBounds && allBounds.isValid()) {
+            map.fitBounds(allBounds, { padding: [30, 30] });
+        }
+    }
+
+    // Build popup content from properties
+    function buildPopup(props) {
+        let name = props.sito || props.nome || props.name || 'Unknown';
+        let html = `<div class="site-popup"><h6><i class="fas fa-map-marker-alt"></i> ${name}</h6>`;
+
+        const labelMap = {
+            'sito': '{{ _("Site") }}',
+            'nazione': '{{ _("Country") }}',
+            'regione': '{{ _("Region") }}',
+            'comune': '{{ _("Municipality") }}',
+            'provincia': '{{ _("Province") }}',
+            'definizione_sito': '{{ _("Type") }}',
+            'descrizione': '{{ _("Description") }}'
+        };
+
+        const skipKeys = ['gid', 'id', 'the_geom', 'geom', 'pkuid'];
+
+        for (const [key, value] of Object.entries(props)) {
+            if (skipKeys.includes(key.toLowerCase()) || key === 'sito') continue;
+            if (value === null || value === '' || value === 'None') continue;
+            let label = labelMap[key] || key.replace(/_/g, ' ');
+            html += `<div class="prop"><strong>${label}:</strong> ${value}</div>`;
+        }
+
+        html += `<div class="mt-2"><a href="{{ url_for('sites_list') }}?search=${encodeURIComponent(name)}" class="btn btn-sm btn-outline-primary">`;
+        html += `<i class="fas fa-eye"></i> {{ _('View Details') }}</a></div>`;
+        html += '</div>';
+        return html;
+    }
+
+    // Load GeoJSON data
+    fetch('{{ url_for("api_sites_geojson") }}')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('loading-overlay').style.display = 'none';
+
+            if (data.error) {
+                document.getElementById('site-count').textContent = data.error;
+                document.getElementById('site-count').className = 'badge bg-warning';
+                return;
+            }
+
+            const count = data.features.length;
+            document.getElementById('site-count').textContent = count + ' {{ _("sites on map") }}';
+
+            if (count === 0) {
+                document.getElementById('site-count').className = 'badge bg-warning';
+                return;
+            }
+
+            geoJsonLayer = L.geoJSON(data, {
+                pointToLayer: function(feature, latlng) {
+                    const marker = L.marker(latlng);
+                    markers.addLayer(marker);
+                    return marker;
+                },
+                onEachFeature: function(feature, layer) {
+                    layer.bindPopup(buildPopup(feature.properties));
+
+                    // For non-point geometries (polygons, lines), also add a centroid marker
+                    if (feature.geometry.type !== 'Point') {
+                        const bounds = layer.getBounds();
+                        const center = bounds.getCenter();
+                        const marker = L.marker(center);
+                        marker.bindPopup(buildPopup(feature.properties));
+                        markers.addLayer(marker);
+                    }
+                },
+                style: function(feature) {
+                    return {
+                        color: '#3498db',
+                        weight: 2,
+                        fillColor: '#3498db',
+                        fillOpacity: 0.2
+                    };
+                }
+            });
+
+            geoJsonLayer.addTo(map);
+            map.addLayer(markers);
+
+            // Fit to bounds
+            allBounds = geoJsonLayer.getBounds();
+            if (allBounds.isValid()) {
+                map.fitBounds(allBounds, { padding: [30, 30] });
+            }
+        })
+        .catch(err => {
+            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById('site-count').textContent = 'Error: ' + err.message;
+            document.getElementById('site-count').className = 'badge bg-danger';
+        });
+</script>
+{% endblock %}

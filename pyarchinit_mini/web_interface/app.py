@@ -3723,6 +3723,94 @@ def create_app():
         sites = site_service.get_all_sites(size=10000)
         return jsonify([{'id': s.id_sito, 'name': s.sito} for s in sites])
 
+    # ===== Sites Map =====
+
+    @app.route('/sites/map')
+    @login_required
+    def sites_map():
+        """Show sites on a Leaflet map using PostGIS geometries"""
+        return render_template('sites/map.html')
+
+    @app.route('/api/sites/geojson')
+    @login_required
+    def api_sites_geojson():
+        """Return GeoJSON of sites from pyarchinit_siti PostGIS layer.
+        Reprojects on-the-fly to WGS84 (EPSG:4326) regardless of source SRID."""
+        import json as json_mod
+        try:
+            current_url = app.config.get('CURRENT_DATABASE_URL', '')
+            if 'postgresql' not in current_url:
+                return jsonify({'type': 'FeatureCollection', 'features': [],
+                                'error': 'Map requires a PostgreSQL/PostGIS database'})
+
+            from sqlalchemy import create_engine, text as sa_text
+            engine = create_engine(current_url)
+            with engine.connect() as conn:
+                # First check if pyarchinit_siti table exists
+                check = conn.execute(sa_text(
+                    "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+                    "WHERE table_name = 'pyarchinit_siti')"
+                )).scalar()
+                if not check:
+                    return jsonify({'type': 'FeatureCollection', 'features': [],
+                                    'error': 'Table pyarchinit_siti not found'})
+
+                # Detect geometry column name
+                geom_col = 'the_geom'
+                cols_result = conn.execute(sa_text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name = 'pyarchinit_siti' "
+                    "AND udt_name = 'geometry'"
+                )).fetchall()
+                if cols_result:
+                    geom_col = cols_result[0][0]
+
+                # Detect available columns for properties
+                all_cols = conn.execute(sa_text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name = 'pyarchinit_siti' AND udt_name != 'geometry'"
+                )).fetchall()
+                prop_cols = [c[0] for c in all_cols]
+
+                # Build SELECT for properties
+                prop_select = ', '.join([f'"{c}"' for c in prop_cols[:20]])  # limit columns
+
+                # Query with ST_Transform to WGS84 and centroid for polygons
+                query = sa_text(f"""
+                    SELECT {prop_select},
+                           ST_AsGeoJSON(ST_Transform({geom_col}, 4326)) as geojson,
+                           ST_Y(ST_Centroid(ST_Transform({geom_col}, 4326))) as lat,
+                           ST_X(ST_Centroid(ST_Transform({geom_col}, 4326))) as lon
+                    FROM pyarchinit_siti
+                    WHERE {geom_col} IS NOT NULL
+                """)
+                rows = conn.execute(query).fetchall()
+
+                features = []
+                for row in rows:
+                    row_dict = dict(row._mapping)
+                    geojson_str = row_dict.pop('geojson', None)
+                    row_dict.pop('lat', None)
+                    row_dict.pop('lon', None)
+                    if geojson_str:
+                        geometry = json_mod.loads(geojson_str)
+                        # Build properties from remaining columns
+                        props = {}
+                        for k, v in row_dict.items():
+                            if v is not None:
+                                props[k] = str(v) if not isinstance(v, (int, float, bool)) else v
+                        features.append({
+                            'type': 'Feature',
+                            'geometry': geometry,
+                            'properties': props
+                        })
+
+            return jsonify({'type': 'FeatureCollection', 'features': features})
+
+        except Exception as e:
+            return jsonify({'type': 'FeatureCollection', 'features': [],
+                            'error': str(e)})
+
     # ===== Export/Import Routes =====
 
     @app.route('/export')
