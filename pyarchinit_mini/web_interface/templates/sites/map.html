@@ -108,9 +108,33 @@
         }
     }
 
+    // Detect which column holds the site name (set after data loads)
+    let nameField = null;
+
+    function detectNameField(columns) {
+        // Try common PyArchInit field names in priority order
+        const candidates = [
+            'sito', 'nome_site', 'nome', 'name', 'location_', 'location',
+            'site_name', 'sitename', 'denominazione', 'denominazi', 'label'
+        ];
+        for (const c of candidates) {
+            if (columns.includes(c)) return c;
+        }
+        // Fallback: first text column that's not an id/geom
+        const skip = ['gid', 'id', 'pkuid', 'ogc_fid', 'fid', 'the_geom', 'geom'];
+        for (const c of columns) {
+            if (!skip.includes(c.toLowerCase())) return c;
+        }
+        return columns[0] || null;
+    }
+
     // Build popup content from properties
     function buildPopup(props) {
-        let name = props.sito || props.nome || props.name || 'Unknown';
+        let name = nameField ? (props[nameField] || 'N/A') : 'N/A';
+        // Also try common alternatives if nameField gave empty
+        if (name === 'N/A' || name === '' || name === 'None') {
+            name = props.sito || props.nome || props.name || props.location_ || 'N/A';
+        }
         let html = `<div class="site-popup"><h6><i class="fas fa-map-marker-alt"></i> ${name}</h6>`;
 
         const labelMap = {
@@ -120,13 +144,16 @@
             'comune': '{{ _("Municipality") }}',
             'provincia': '{{ _("Province") }}',
             'definizione_sito': '{{ _("Type") }}',
-            'descrizione': '{{ _("Description") }}'
+            'descrizione': '{{ _("Description") }}',
+            'nome_site': '{{ _("Site") }}',
+            'location_': '{{ _("Location") }}'
         };
 
-        const skipKeys = ['gid', 'id', 'the_geom', 'geom', 'pkuid'];
+        const skipKeys = ['gid', 'id', 'the_geom', 'geom', 'pkuid', 'ogc_fid', 'fid'];
 
         for (const [key, value] of Object.entries(props)) {
-            if (skipKeys.includes(key.toLowerCase()) || key === 'sito') continue;
+            if (skipKeys.includes(key.toLowerCase())) continue;
+            if (nameField && key === nameField) continue;
             if (value === null || value === '' || value === 'None') continue;
             let label = labelMap[key] || key.replace(/_/g, ' ');
             html += `<div class="prop"><strong>${label}:</strong> ${value}</div>`;
@@ -148,6 +175,12 @@
                 document.getElementById('site-count').textContent = data.error;
                 document.getElementById('site-count').className = 'badge bg-warning';
                 return;
+            }
+
+            // Detect name field from columns
+            if (data.columns) {
+                nameField = detectNameField(data.columns);
+                console.log('[Map] Columns:', data.columns, '→ nameField:', nameField);
             }
 
             const count = data.features.length;

@@ -3805,7 +3805,8 @@ def create_app():
                             'properties': props
                         })
 
-            return jsonify({'type': 'FeatureCollection', 'features': features})
+            return jsonify({'type': 'FeatureCollection', 'features': features,
+                            'columns': prop_cols})
 
         except Exception as e:
             return jsonify({'type': 'FeatureCollection', 'features': [],
