@@ -276,7 +276,7 @@
                         <ul class="operator-sites-list">
                             {% for site in op.sites_list %}
                             <li>
-                                <a href="{{ url_for('site_detail', sito=site.name) }}" title="{{ site.name }}">
+                                <a href="{{ url_for('sites_list') + '?search=' + site.name }}" title="{{ site.name }}">
                                     {{ site.name }}
                                 </a>
                             </li>
@@ -304,7 +304,7 @@
                                         {% for site in op.sites_list %}
                                         <tr>
                                             <td>
-                                                <a href="{{ url_for('site_detail', sito=site.name) }}">
+                                                <a href="{{ url_for('sites_list') + '?search=' + site.name }}">
                                                     {{ site.name }}
                                                 </a>
                                             </td>

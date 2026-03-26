@@ -5,7 +5,7 @@ Universal search service for cross-table full-text search
 import logging
 from typing import Dict, Any, List
 
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, cast, String
 from sqlalchemy.exc import SQLAlchemyError
 
 from pyarchinit_mini.models.site import Site
@@ -118,7 +118,7 @@ class UniversalSearchService:
         return or_(
             US.sito.ilike(pattern),
             US.area.ilike(pattern),
-            US.us.ilike(pattern),
+            cast(US.us, String).ilike(pattern),
             US.d_stratigrafica.ilike(pattern),
             US.d_interpretativa.ilike(pattern),
             US.descrizione.ilike(pattern),
