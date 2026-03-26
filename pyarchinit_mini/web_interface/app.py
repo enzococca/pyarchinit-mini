@@ -2916,6 +2916,15 @@ def create_app():
         filepath = filepath.replace('\\', '/')
         return send_from_directory(media_dir, filepath)
 
+    @app.route('/images/<path:filepath>')
+    @login_required
+    def serve_media_images_alias(filepath):
+        """Alias: /images/... → serves from media/images/... (backward compat)"""
+        from flask import send_from_directory
+        from pathlib import Path
+        media_dir = str(Path.home() / '.pyarchinit_mini' / 'media')
+        return send_from_directory(media_dir, f'images/{filepath}')
+
     @app.route('/media/delete/<int:media_id>', methods=['POST'])
     @login_required
     @write_permission_required
