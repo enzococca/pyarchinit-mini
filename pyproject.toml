@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "2.1.32"
+version = "2.1.33"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, Heriverse/ATON export integration, and 3D CRUD viewer"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -94,6 +94,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# AI Assistant (optional - install with: pip install pyarchinit-mini[ai])
+ai = ["openai>=1.0.0", "anthropic>=0.20.0"]
 # CLI interface dependencies (now in core, kept for backward compatibility)
 cli = []
 # Web interface dependencies (now in core, kept for backward compatibility)

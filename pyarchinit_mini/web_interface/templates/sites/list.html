@@ -84,6 +84,9 @@
                                 <li><a class="dropdown-item" href="{{ url_for('export_site_pdf', site_id=site.id_sito) }}">
                                     <i class="fas fa-file-alt"></i> {{ _('Site Report') }}
                                 </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('export_site_dossier', site_id=site.id_sito) }}">
+                                    <i class="fas fa-book"></i> {{ _('Complete Dossier') }}
+                                </a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('export_site_pdf_with_matrix', site_name=site.sito) }}">
                                     <i class="fas fa-project-diagram"></i> {{ _('Harris Matrix PDF') }}
                                 </a></li>

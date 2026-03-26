@@ -2272,6 +2272,95 @@ def create_app():
             flash(f'Errore export PDF: {str(e)}', 'error')
             return redirect(url_for('view_site', site_id=site_id))
 
+    @app.route('/export/site_dossier/<int:site_id>')
+    @login_required
+    def export_site_dossier(site_id):
+        """Generate comprehensive professional site dossier PDF"""
+        try:
+            from pyarchinit_mini.models.site import Site as SiteModel
+            from pyarchinit_mini.models.us import US as USModel
+            from pyarchinit_mini.models.inventario_materiali import InventarioMateriali as InvModel
+            from pathlib import Path
+
+            with db_manager.connection.get_session() as session:
+                site = session.query(SiteModel).filter(SiteModel.id_sito == site_id).first()
+                if not site:
+                    flash('Sito non trovato', 'error')
+                    return redirect(url_for('sites_list'))
+
+                site_name = site.sito
+                site_dict = site.to_dict()
+
+                # Get ALL US and materials (no limit for dossier)
+                us_records = session.query(USModel).filter(USModel.sito == site_name).order_by(USModel.us).all()
+                us_list = [us.to_dict() for us in us_records]
+
+                inv_records = session.query(InvModel).filter(InvModel.sito == site_name).all()
+                inventory_list = [inv.to_dict() for inv in inv_records]
+
+            # Get media for the site
+            media_list = []
+            try:
+                media_base = Path.home() / '.pyarchinit_mini' / 'media'
+                site_media = media_service.get_media_by_entity('site', site_id, size=50)
+                for m in site_media:
+                    md = {'media_name': m.media_name, 'media_path': str(media_base / m.media_path) if m.media_path else '',
+                          'description': m.description, 'media_type': m.media_type}
+                    media_list.append(md)
+            except Exception:
+                pass
+
+            # Generate Harris Matrix image
+            matrix_img = None
+            matrix_stats = None
+            try:
+                graph = matrix_generator.generate_matrix(site_name)
+                matrix_stats = matrix_generator.get_matrix_statistics(graph)
+                global graphviz_visualizer
+                if graphviz_visualizer is None:
+                    from pyarchinit_mini.harris_matrix.pyarchinit_visualizer import PyArchInitMatrixVisualizer
+                    graphviz_visualizer = PyArchInitMatrixVisualizer()
+                from pyarchinit_mini.i18n import get_locale
+                try:
+                    lang = get_locale()
+                except Exception:
+                    lang = 'it'
+                matrix_img = graphviz_visualizer.create_matrix(graph, grouping='period_area',
+                    settings={'show_legend': True, 'show_periods': True, 'lang': lang})
+            except Exception:
+                pass
+
+            # Collect excavators and periods
+            excavators = set()
+            periods = set()
+            for u in us_list:
+                if u.get('schedatore'): excavators.add(u['schedatore'])
+                if u.get('direttore_us'): excavators.add(u['direttore_us'])
+                if u.get('responsabile_us'): excavators.add(u['responsabile_us'])
+                if u.get('datazione'): periods.add(u['datazione'])
+
+            # Generate dossier PDF
+            output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf').name
+            pdf_generator.generate_site_dossier(
+                site_data=site_dict,
+                us_list=us_list,
+                inventory_list=inventory_list,
+                media_list=media_list,
+                matrix_image_path=matrix_img,
+                statistics=matrix_stats,
+                excavators=list(excavators),
+                periods=list(periods),
+                output_path=output_path
+            )
+
+            return send_file(output_path, as_attachment=True,
+                           download_name=f"dossier_{site_name}.pdf",
+                           mimetype='application/pdf')
+
+        except Exception as e:
+            flash(f'Errore generazione dossier: {str(e)}', 'error')
+            return redirect(url_for('sites_list'))
+
     @app.route('/export/site_pdf_with_matrix/<site_name>')
     def export_site_pdf_with_matrix(site_name):
         """Export site PDF with integrated Harris Matrix"""
@@ -3958,6 +4047,67 @@ def create_app():
         except Exception as e:
             return jsonify({'type': 'FeatureCollection', 'features': [],
                             'error': str(e)})
+
+    # ===== AI Assistant =====
+    @app.route('/ai')
+    @login_required
+    def ai_assistant():
+        """AI Archaeological Assistant"""
+        return render_template('ai/assistant.html')
+
+    @app.route('/api/ai/ask', methods=['POST'])
+    @login_required
+    def ai_ask():
+        """AI assistant endpoint"""
+        try:
+            from pyarchinit_mini.services.ai_assistant_service import AIAssistantService
+            ai = AIAssistantService()
+
+            data = request.get_json()
+            question = data.get('question', '').strip()
+            site_name = data.get('site_name')
+            action = data.get('action')  # summarize, stratigraphy, materials, chronology
+
+            if not question and not action:
+                return jsonify({'error': 'No question provided'}), 400
+
+            context = {}
+            if site_name:
+                # Build context from site data
+                from pyarchinit_mini.models.site import Site as SiteModel
+                from pyarchinit_mini.models.us import US as USModel
+                from pyarchinit_mini.models.inventario_materiali import InventarioMateriali as InvModel
+                with db_manager.connection.get_session() as session:
+                    site = session.query(SiteModel).filter(SiteModel.sito == site_name).first()
+                    if site:
+                        context['site'] = site.to_dict()
+                        us_records = session.query(USModel).filter(USModel.sito == site_name).limit(50).all()
+                        context['us_list'] = [u.to_dict() for u in us_records]
+                        context['us_count'] = session.query(USModel).filter(USModel.sito == site_name).count()
+                        inv_records = session.query(InvModel).filter(InvModel.sito == site_name).limit(30).all()
+                        context['inv_list'] = [i.to_dict() for i in inv_records]
+                        context['inv_count'] = session.query(InvModel).filter(InvModel.sito == site_name).count()
+
+            # Handle quick actions
+            if action == 'summarize' and context:
+                answer = ai.generate_report_summary(
+                    context.get('site', {}),
+                    context.get('us_list', []),
+                    context.get('inv_list', [])
+                )
+            elif action == 'stratigraphy' and context:
+                rels = []
+                for u in context.get('us_list', []):
+                    if u.get('rapporti'):
+                        rels.append({'us': u.get('us'), 'rapporti': u.get('rapporti')})
+                answer = ai.analyze_stratigraphy(site_name, rels)
+            else:
+                answer = ai.ask(question, context if context else None)
+
+            return jsonify({'answer': answer})
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
     # ===== Export/Import Routes =====
 
