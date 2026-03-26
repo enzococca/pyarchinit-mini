@@ -8,10 +8,12 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <style>
     #map { height: calc(100vh - 260px); min-height: 450px; border-radius: 8px; border: 1px solid #dee2e6; }
-    .site-popup { min-width: 220px; }
-    .site-popup h6 { margin-bottom: 8px; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 4px; }
-    .site-popup .prop { font-size: 0.85em; margin: 2px 0; }
+    .site-popup { min-width: 220px; max-width: 350px; }
+    .site-popup h6 { margin-bottom: 8px; color: #2c3e50; border-bottom: 2px solid #3498db;
+        padding-bottom: 4px; word-wrap: break-word; overflow-wrap: break-word; }
+    .site-popup .prop { font-size: 0.85em; margin: 2px 0; word-wrap: break-word; overflow-wrap: break-word; }
     .site-popup .prop strong { color: #555; }
+    .leaflet-popup-content { max-width: 340px; word-wrap: break-word; overflow-wrap: break-word; }
     .filter-bar { background: #f8f9fa; border-radius: 8px; padding: 10px 15px; margin-bottom: 10px; }
     .filter-bar select { max-width: 200px; }
     .custom-marker { border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
@@ -168,10 +170,11 @@ function getSiteName(props) {
 
 // --- Popup ---
 function buildPopup(props) {
-    const name = getSiteName(props);
+    const rawName = getSiteName(props);
+    const name = rawName.replace(/_/g, ' ');  // Replace underscores with spaces for readability
     const usCount = props._us_count || 0;
     const invCount = props._inv_count || 0;
-    const sType = props._site_type || '';
+    const sType = props._site_type ? props._site_type.replace(/_/g, ' ') : '';
     const period = props._period || '';
 
     let html = `<div class="site-popup"><h6><i class="fas fa-map-marker-alt"></i> ${name}</h6>`;
@@ -185,10 +188,13 @@ function buildPopup(props) {
     for (const [key, value] of Object.entries(props)) {
         if (skipKeys.includes(key) || (nameField && key === nameField)) continue;
         if (value === null || value === '' || value === 'None') continue;
-        html += `<div class="prop"><strong>${key.replace(/_/g,' ')}:</strong> ${value}</div>`;
+        let displayVal = String(value).replace(/_/g, ' ');
+        // Truncate very long values (like network paths)
+        if (displayVal.length > 80) displayVal = displayVal.substring(0, 77) + '...';
+        html += `<div class="prop"><strong>${key.replace(/_/g,' ')}:</strong> ${displayVal}</div>`;
     }
 
-    html += `<div class="mt-2"><a href="{{ url_for('sites_list') }}?search=${encodeURIComponent(name)}" class="btn btn-sm btn-outline-primary">`;
+    html += `<div class="mt-2"><a href="{{ url_for('sites_list') }}?search=${encodeURIComponent(rawName)}" class="btn btn-sm btn-outline-primary">`;
     html += `<i class="fas fa-eye"></i> {{ _('View') }}</a></div></div>`;
     return html;
 }
