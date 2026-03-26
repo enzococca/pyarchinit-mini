@@ -539,6 +539,26 @@ class DatabaseMigrations:
             except Exception as e:
                 logger.warning(f"Could not add contact columns to users: {e}")
 
+            # Fix PostgreSQL sequences (auto-increment out of sync)
+            if self.connection.engine.dialect.name == 'postgresql':
+                try:
+                    with self.connection.get_session() as session:
+                        for table, pk, seq in [
+                            ('site_table', 'id_sito', 'site_table_id_sito_seq'),
+                            ('us_table', 'id_us', 'us_table_id_us_seq'),
+                            ('inventario_materiali_table', 'id_invmat', 'inventario_materiali_table_id_invmat_seq'),
+                            ('users', 'id', 'users_id_seq'),
+                        ]:
+                            try:
+                                max_id = session.execute(text(f'SELECT MAX({pk}) FROM {table}')).scalar() or 0
+                                session.execute(text(f"SELECT setval('{seq}', {max_id + 1}, false)"))
+                            except Exception:
+                                pass
+                        session.commit()
+                        logger.info("PostgreSQL sequences synchronized")
+                except Exception as e:
+                    logger.warning(f"Could not fix sequences: {e}")
+
             # Bidirectional user sync trigger (PostgreSQL only)
             total_migrations += self.migrate_user_sync_trigger()
 
