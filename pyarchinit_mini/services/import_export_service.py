@@ -424,6 +424,143 @@ class ImportExportService:
             source_session.close()
             mini_session.close()
 
+    def _ensure_target_tables(self, target_engine):
+        """Create required tables in target database if they don't exist.
+        Uses raw SQL for cross-DB compatibility (SQLite and PostgreSQL)."""
+        with target_engine.connect() as conn:
+            # Detect if PostgreSQL or SQLite
+            is_pg = 'postgresql' in str(target_engine.url)
+            serial = 'SERIAL' if is_pg else 'INTEGER'
+            autoincrement = '' if is_pg else 'PRIMARY KEY AUTOINCREMENT'
+            pk = 'PRIMARY KEY' if is_pg else ''
+
+            # site_table
+            conn.execute(text(f"""
+                CREATE TABLE IF NOT EXISTS site_table (
+                    id_sito {serial} {pk} {autoincrement},
+                    sito TEXT,
+                    nazione TEXT,
+                    regione TEXT,
+                    comune TEXT,
+                    provincia TEXT,
+                    definizione_sito TEXT,
+                    descrizione TEXT,
+                    sito_path TEXT,
+                    find_check INTEGER DEFAULT 0
+                )
+            """))
+
+            # us_table - core columns compatible with PyArchInit
+            conn.execute(text(f"""
+                CREATE TABLE IF NOT EXISTS us_table (
+                    id_us {serial} {pk} {autoincrement},
+                    sito TEXT,
+                    area TEXT,
+                    us TEXT,
+                    d_stratigrafica TEXT,
+                    d_interpretativa TEXT,
+                    descrizione TEXT,
+                    interpretazione TEXT,
+                    periodo_iniziale TEXT,
+                    fase_iniziale TEXT,
+                    periodo_finale TEXT,
+                    fase_finale TEXT,
+                    scavato TEXT,
+                    attivita TEXT,
+                    anno_scavo TEXT,
+                    metodo_di_scavo TEXT,
+                    inclusi TEXT,
+                    campioni TEXT,
+                    rapporti TEXT,
+                    data_schedatura TEXT,
+                    schedatore TEXT,
+                    formazione TEXT,
+                    stato_di_conservazione TEXT,
+                    colore TEXT,
+                    consistenza TEXT,
+                    struttura TEXT,
+                    cont_per TEXT,
+                    order_layer INTEGER,
+                    quota_relativa REAL,
+                    quota_abs REAL,
+                    unita_tipo TEXT,
+                    settore TEXT,
+                    quad_par TEXT,
+                    ambient TEXT,
+                    saggio TEXT,
+                    elem_datanti TEXT,
+                    funz_statica TEXT,
+                    lavorazione TEXT,
+                    spess_giunti TEXT,
+                    letti_posa TEXT,
+                    alt_mod TEXT,
+                    un_edil_riass TEXT,
+                    reimp TEXT,
+                    posa_opera TEXT,
+                    qmin_us REAL,
+                    qmax_us REAL,
+                    lunghezza_max REAL,
+                    altezza_max REAL,
+                    altezza_min REAL,
+                    profondita_max REAL,
+                    profondita_min REAL,
+                    larghezza_media REAL,
+                    quota_max_us REAL,
+                    quota_min_us REAL,
+                    osservazioni TEXT,
+                    datazione TEXT,
+                    flottazione TEXT,
+                    setacciatura TEXT,
+                    affidabilita TEXT,
+                    direttore_us TEXT,
+                    responsabile_us TEXT,
+                    n_catalogo_generale TEXT,
+                    n_catalogo_interno TEXT,
+                    n_catalogo_internazionale TEXT,
+                    soprintendenza TEXT,
+                    documentazione TEXT
+                )
+            """))
+
+            # inventario_materiali_table
+            conn.execute(text(f"""
+                CREATE TABLE IF NOT EXISTS inventario_materiali_table (
+                    id_invmat {serial} {pk} {autoincrement},
+                    sito TEXT,
+                    numero_inventario TEXT,
+                    tipo_reperto TEXT,
+                    criterio_schedatura TEXT,
+                    definizione TEXT,
+                    descrizione TEXT,
+                    area TEXT,
+                    us TEXT,
+                    lavato TEXT,
+                    nr_cassa TEXT,
+                    luogo_conservazione TEXT,
+                    stato_conservazione TEXT,
+                    datazione_reperto TEXT,
+                    elementi_reperto TEXT,
+                    misurazioni TEXT,
+                    rif_biblio TEXT,
+                    tecnologia TEXT,
+                    forme_minime TEXT,
+                    forme_massime TEXT,
+                    totale_frammenti TEXT,
+                    corpo_ceramico TEXT,
+                    rivestimento TEXT,
+                    diametro_orlo REAL,
+                    peso REAL,
+                    tipo TEXT,
+                    eve_orlo REAL,
+                    repertato TEXT,
+                    diagnostico TEXT,
+                    tipo_contenitore TEXT
+                )
+            """))
+
+            conn.commit()
+            logger.info("Target tables ensured (created if not existing)")
+
     def export_sites(self, target_db_connection: str, sito_filter: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Export sites from PyArchInit-Mini to PyArchInit
@@ -438,6 +575,10 @@ class ImportExportService:
         stats = {'exported': 0, 'updated': 0, 'skipped': 0, 'errors': []}
 
         target_engine = create_engine(target_db_connection)
+
+        # Ensure target tables exist before exporting
+        self._ensure_target_tables(target_engine)
+
         target_session = sessionmaker(bind=target_engine)()
         mini_session = self.mini_session_maker()
 
@@ -599,6 +740,11 @@ class ImportExportService:
 
         except Exception as e:
             logger.error(f"Error converting relationships: {str(e)}")
+            # CRITICAL: rollback the failed transaction to unblock the session
+            try:
+                mini_session.rollback()
+            except Exception:
+                pass
             return '[]'
 
     def import_us(self, sito_filter: Optional[List[str]] = None,
@@ -917,6 +1063,10 @@ class ImportExportService:
         stats = {'exported': 0, 'updated': 0, 'skipped': 0, 'errors': []}
 
         target_engine = create_engine(target_db_connection)
+
+        # Ensure target tables exist before exporting
+        self._ensure_target_tables(target_engine)
+
         target_session = sessionmaker(bind=target_engine)()
         mini_session = self.mini_session_maker()
 
