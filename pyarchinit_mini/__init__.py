@@ -23,7 +23,7 @@ Features:
 - Scalable and modular architecture
 """
 
-__version__ = "2.1.26"
+__version__ = "2.1.27"
 __author__ = "PyArchInit Team"
 __email__ = "enzo.ccc@gmail.com"
 

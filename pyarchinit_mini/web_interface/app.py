@@ -360,7 +360,7 @@ def create_app():
     global db_conn, db_manager
     global site_service, us_service, inventario_service, thesaurus_service
     global user_service, analytics_service, relationship_sync_service, datazione_service
-    global matrix_generator, export_import_service, media_service
+    global matrix_generator, export_import_service, csv_excel_service, media_service
 
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'your-secret-key-here'
@@ -489,6 +489,8 @@ def create_app():
     datazione_service = DatazioneService(db_manager)
     matrix_generator = HarrisMatrixGenerator(db_manager, us_service)  # Pass us_service for proper matrix generation
     export_import_service = ImportExportService(db_manager.connection.connection_string)
+    from pyarchinit_mini.services.export_import_service import ExportImportService
+    csv_excel_service = ExportImportService(db_manager)
     # matrix_visualizer and graphviz_visualizer are declared at module level
     pdf_generator = PDFGenerator()
     media_handler = MediaHandler()
@@ -3652,7 +3654,7 @@ def create_app():
             # Reinitialize ALL services with new database manager
             global site_service, us_service, inventario_service, thesaurus_service
             global user_service, analytics_service, relationship_sync_service, datazione_service
-            global matrix_generator, export_import_service
+            global matrix_generator, export_import_service, csv_excel_service
 
             site_service = SiteService(db_manager)
             us_service = USService(db_manager)
@@ -3664,6 +3666,8 @@ def create_app():
             datazione_service = DatazioneService(db_manager)
             matrix_generator = HarrisMatrixGenerator(db_manager, us_service)
             export_import_service = ImportExportService(db_manager.connection.connection_string)
+            from pyarchinit_mini.services.export_import_service import ExportImportService
+            csv_excel_service = ExportImportService(db_manager)
 
             # Update app stored services (ALL of them to ensure switch works)
             app.db_manager = db_manager
@@ -3940,7 +3944,7 @@ def create_app():
         """Export sites to Excel"""
         try:
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx').name
-            export_import_service.export_sites_to_excel(output_path)
+            csv_excel_service.export_sites_to_excel(output_path)
             return send_file(output_path, as_attachment=True,
                            download_name='sites_export.xlsx',
                            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -3954,7 +3958,7 @@ def create_app():
         try:
             site_name = request.args.get('sito')
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx').name
-            export_import_service.export_us_to_excel(output_path, site_name)
+            csv_excel_service.export_us_to_excel(output_path, site_name)
             filename = f'us_{site_name}.xlsx' if site_name else 'us_export.xlsx'
             return send_file(output_path, as_attachment=True,
                            download_name=filename,
@@ -3969,7 +3973,7 @@ def create_app():
         try:
             site_name = request.args.get('sito')
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx').name
-            export_import_service.export_inventario_to_excel(output_path, site_name)
+            csv_excel_service.export_inventario_to_excel(output_path, site_name)
             filename = f'inventario_{site_name}.xlsx' if site_name else 'inventario_export.xlsx'
             return send_file(output_path, as_attachment=True,
                            download_name=filename,
@@ -3984,7 +3988,7 @@ def create_app():
         """Export sites to CSV"""
         try:
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.csv').name
-            export_import_service.export_sites_to_csv(output_path)
+            csv_excel_service.export_sites_to_csv(output_path)
             return send_file(output_path, as_attachment=True,
                            download_name='sites_export.csv',
                            mimetype='text/csv')
@@ -3998,7 +4002,7 @@ def create_app():
         try:
             site_name = request.args.get('sito')
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.csv').name
-            export_import_service.export_us_to_csv(output_path, site_name)
+            csv_excel_service.export_us_to_csv(output_path, site_name)
             filename = f'us_{site_name}.csv' if site_name else 'us_export.csv'
             return send_file(output_path, as_attachment=True,
                            download_name=filename,
@@ -4013,7 +4017,7 @@ def create_app():
         try:
             site_name = request.args.get('sito')
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.csv').name
-            export_import_service.export_inventario_to_csv(output_path, site_name)
+            csv_excel_service.export_inventario_to_csv(output_path, site_name)
             filename = f'inventario_{site_name}.csv' if site_name else 'inventario_export.csv'
             return send_file(output_path, as_attachment=True,
                            download_name=filename,
@@ -4047,7 +4051,7 @@ def create_app():
 
             # Import data
             skip_duplicates = request.form.get('skip_duplicates', 'true').lower() == 'true'
-            result = export_import_service.batch_import_sites_from_csv(tmp_path, skip_duplicates)
+            result = csv_excel_service.batch_import_sites_from_csv(tmp_path, skip_duplicates)
 
             # Clean up
             os.unlink(tmp_path)
@@ -4089,7 +4093,7 @@ def create_app():
 
             # Import data
             skip_duplicates = request.form.get('skip_duplicates', 'true').lower() == 'true'
-            result = export_import_service.batch_import_us_from_csv(tmp_path, skip_duplicates)
+            result = csv_excel_service.batch_import_us_from_csv(tmp_path, skip_duplicates)
 
             # Clean up
             os.unlink(tmp_path)
@@ -4131,7 +4135,7 @@ def create_app():
 
             # Import data
             skip_duplicates = request.form.get('skip_duplicates', 'true').lower() == 'true'
-            result = export_import_service.batch_import_inventario_from_csv(tmp_path, skip_duplicates)
+            result = csv_excel_service.batch_import_inventario_from_csv(tmp_path, skip_duplicates)
 
             # Clean up
             os.unlink(tmp_path)
