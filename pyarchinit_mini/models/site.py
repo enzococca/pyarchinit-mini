@@ -23,7 +23,7 @@ class Site(BaseModel):
     comune = Column(String(250))
     provincia = Column(String(10))
     sito_path = Column(String(500))
-    find_check = Column(Boolean, default=False)
+    find_check = Column(Integer, default=0)  # Integer in PyArchInit PostgreSQL DB
 
     # Translatable fields (Italian + English)
     # Legacy column (kept for backward compatibility, maps to IT)

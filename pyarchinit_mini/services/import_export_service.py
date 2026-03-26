@@ -397,7 +397,7 @@ class ImportExportService:
                             'definizione_sito': site_data.get('definizione_sito'),
                             'descrizione': site_data.get('descrizione'),
                             'sito_path': site_data.get('sito_path'),
-                            'find_check': bool(site_data.get('find_check', False)),
+                            'find_check': int(bool(site_data.get('find_check', 0))),
                             'created_at': datetime.now(),
                             'updated_at': datetime.now(),
                             'version_number': 1,
