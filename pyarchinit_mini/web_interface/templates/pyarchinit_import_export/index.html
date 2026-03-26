@@ -275,20 +275,11 @@
 
                             <!-- SQLite Connection -->
                             <div id="export_sqlite_config">
-                                <div class="mb-3">
-                                    <label for="export_db_path" class="form-label">{{ _('Database File Path') }}</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="export_db_path"
-                                               placeholder="/Users/yourname/pyarchinit/pyarchinit_DB_folder/pyarchinit_db.sqlite">
-                                        <button class="btn btn-outline-secondary" type="button" id="browse_export_db">
-                                            <i class="fas fa-folder-open me-1"></i>{{ _('Browse') }}
-                                        </button>
-                                    </div>
-                                    <div class="form-text">
-                                        {{ _('Full absolute path to target PyArchInit SQLite database') }}<br>
-                                        <small class="text-muted">{{ _('Click Browse to select a file or type the path manually') }}</small>
-                                    </div>
+                                <div class="alert alert-success mb-3">
+                                    <i class="fas fa-download me-2"></i>
+                                    {{ _('The SQLite database will be exported and downloaded to your computer automatically.') }}
                                 </div>
+                                <input type="hidden" id="export_db_path" value="">
                             </div>
 
                             <!-- PostgreSQL Connection -->
@@ -635,6 +626,17 @@ document.getElementById('start_export_btn').addEventListener('click', function()
             resultsHTML += '</tbody></table>';
             document.getElementById('export_results_content').innerHTML = resultsHTML;
             document.getElementById('export_results').style.display = 'block';
+
+            // Trigger download if export was to SQLite (download mode)
+            if (result.download_token) {
+                const downloadUrl = '/pyarchinit-import-export/api/pyarchinit/export/download/' + result.download_token;
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = 'pyarchinit_export.sqlite';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
         } else {
             document.getElementById('export_status').innerHTML = `<i class="fas fa-times-circle me-2"></i>{{ _("Error") }}: ${result.message}`;
             document.getElementById('export_status').className = 'alert alert-danger';

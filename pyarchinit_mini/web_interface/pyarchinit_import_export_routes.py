@@ -377,19 +377,28 @@ def sync_datazioni():
 
 @pyarchinit_import_export_bp.route('/api/pyarchinit/export', methods=['POST'])
 def start_export():
-    """Start export to PyArchInit database"""
+    """Start export to PyArchInit database.
+    For SQLite: creates a temp file and returns a download token.
+    For PostgreSQL: exports directly to the target DB."""
     try:
         data = request.get_json()
 
-        # Build connection string for target database
         db_type = data.get('db_type', 'sqlite')
-        if db_type == 'sqlite':
-            db_path = data.get('db_path')
-            if not db_path:
-                return jsonify({'success': False, 'message': _('Please specify database path')}), 400
+        download_mode = False
 
-            # Expand user home directory and convert to absolute path
-            db_path = os.path.abspath(os.path.expanduser(db_path))
+        if db_type == 'sqlite':
+            db_path = data.get('db_path', '').strip()
+            if not db_path:
+                # No path specified → generate temp file for download
+                import tempfile
+                tmp = tempfile.NamedTemporaryFile(
+                    suffix='.sqlite', prefix='pyarchinit_export_',
+                    delete=False, dir=tempfile.gettempdir())
+                db_path = tmp.name
+                tmp.close()
+                download_mode = True
+            else:
+                db_path = os.path.abspath(os.path.expanduser(db_path))
 
             target_conn_string = f"sqlite:///{db_path}"
         else:
@@ -398,6 +407,8 @@ def start_export():
             database = data.get('pg_database')
             user = data.get('pg_user')
             password = data.get('pg_password')
+            if not database:
+                return jsonify({'success': False, 'message': _('Please specify database name')}), 400
             target_conn_string = f"postgresql://{user}:{password}@{host}:{port}/{database}"
 
         # Get options
@@ -415,7 +426,6 @@ def start_export():
         # Initialize service
         from pyarchinit_mini.services.import_export_service import ImportExportService
 
-        # Use CURRENT_DATABASE_URL to respect database switching
         mini_db_url = current_app.config.get('CURRENT_DATABASE_URL')
         if not mini_db_url:
             mini_db_url = current_app.config.get('DATABASE_URL', 'sqlite:///./pyarchinit_mini.db')
@@ -423,29 +433,36 @@ def start_export():
         logger.info(f"Exporting from database: {mini_db_url}")
         service = ImportExportService(mini_db_url)
 
-        # Prepare site filter
         site_filter_list = site_filter if site_filter else None
-
-        # Track results
         results = {}
 
-        # Export sites
         if export_sites:
             logger.info("Exporting sites...")
             stats = service.export_sites(target_conn_string, site_filter_list)
             results['sites'] = stats
 
-        # Export US
         if export_us:
             logger.info("Exporting US...")
             stats = service.export_us(target_conn_string, site_filter_list, export_relationships)
             results['us'] = stats
 
-        return jsonify({
+        response = {
             'success': True,
             'message': _('Export completed successfully'),
             'results': results
-        })
+        }
+
+        if download_mode:
+            # Store file path for download endpoint
+            import hashlib, time
+            token = hashlib.md5(f"{db_path}{time.time()}".encode()).hexdigest()
+            if not hasattr(current_app, '_export_files'):
+                current_app._export_files = {}
+            current_app._export_files[token] = db_path
+            response['download_token'] = token
+            response['message'] = _('Export completed — download starting...')
+
+        return jsonify(response)
 
     except Exception as e:
         logger.error(f"Export failed: {str(e)}")
@@ -453,6 +470,26 @@ def start_export():
             'success': False,
             'message': str(e)
         }), 500
+
+
+@pyarchinit_import_export_bp.route('/api/pyarchinit/export/download/<token>')
+def download_export(token):
+    """Download an exported SQLite database file"""
+    try:
+        export_files = getattr(current_app, '_export_files', {})
+        db_path = export_files.pop(token, None)
+        if not db_path or not os.path.exists(db_path):
+            return jsonify({'success': False, 'message': _('Export file not found or expired')}), 404
+
+        from flask import send_file
+        return send_file(
+            db_path,
+            as_attachment=True,
+            download_name='pyarchinit_export.sqlite',
+            mimetype='application/x-sqlite3'
+        )
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @pyarchinit_import_export_bp.route('/api/pyarchinit/create-database', methods=['POST'])
