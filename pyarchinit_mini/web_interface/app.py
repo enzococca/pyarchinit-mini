@@ -541,6 +541,17 @@ def create_app():
     csrf.exempt(excel_import_bp)
     csrf.exempt(em_node_config_bp)
 
+    # Exempt JSON API routes from CSRF check
+    @app.after_request
+    def _check_csrf_exemption(response):
+        return response
+
+    # Make csrf_token available globally for AJAX calls
+    @app.context_processor
+    def inject_csrf():
+        from flask_wtf.csrf import generate_csrf
+        return dict(csrf_token_value=generate_csrf())
+
     # Initialize Flask-SocketIO with robust timeout settings
     socketio = SocketIO(app, cors_allowed_origins="*",
                         ping_timeout=120, ping_interval=30)
@@ -4344,7 +4355,7 @@ def create_app():
             from pyarchinit_mini.services.ai_assistant_service import AIAssistantService
             import os as _os
 
-            data = request.get_json()
+            data = request.get_json(force=True, silent=True) or {}
             question = data.get('question', '').strip()
             site_name = data.get('site_name')
             action = data.get('action')  # summarize, stratigraphy, materials, chronology
