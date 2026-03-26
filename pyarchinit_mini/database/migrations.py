@@ -527,12 +527,20 @@ class DatabaseMigrations:
             # Convert us_table.us from VARCHAR(100) to TEXT
             total_migrations += self.migrate_us_column_to_text()
 
+            # Add contact fields to users table (BEFORE trigger so schema is ready)
+            try:
+                for col, typ in [('telegram_username', 'VARCHAR(100)'), ('phone', 'VARCHAR(30)')]:
+                    if not self.check_column_exists('users', col):
+                        with self.connection.get_session() as session:
+                            session.execute(text(f"ALTER TABLE users ADD COLUMN {col} {typ}"))
+                            session.commit()
+                            logger.info(f"Added column {col} to users table")
+                            total_migrations += 1
+            except Exception as e:
+                logger.warning(f"Could not add contact columns to users: {e}")
+
             # Bidirectional user sync trigger (PostgreSQL only)
             total_migrations += self.migrate_user_sync_trigger()
-
-            # Add contact fields to users table
-            for col, typ in [('telegram_username', 'VARCHAR(100)'), ('phone', 'VARCHAR(30)')]:
-                total_migrations += self.add_column_if_not_exists('users', col, typ)
 
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations
