@@ -4342,12 +4342,30 @@ def create_app():
         """AI assistant endpoint"""
         try:
             from pyarchinit_mini.services.ai_assistant_service import AIAssistantService
-            ai = AIAssistantService()
+            import os as _os
 
             data = request.get_json()
             question = data.get('question', '').strip()
             site_name = data.get('site_name')
             action = data.get('action')  # summarize, stratigraphy, materials, chronology
+
+            # Dynamic model selection from frontend (format: "provider:model")
+            model_choice = data.get('model', '')
+            if model_choice and ':' in model_choice:
+                provider, model = model_choice.split(':', 1)
+                _os.environ['AI_PROVIDER'] = provider
+                _os.environ['AI_MODEL'] = model
+                # Use the correct API key for the provider
+                if provider == 'anthropic':
+                    claude_key = _os.environ.get('ANTHROPIC_API_KEY', _os.environ.get('CLAUDE_API_KEY', ''))
+                    if claude_key:
+                        _os.environ['AI_API_KEY'] = claude_key
+                elif provider == 'openai':
+                    openai_key = _os.environ.get('OPENAI_API_KEY', _os.environ.get('GPT_API_KEY', ''))
+                    if openai_key:
+                        _os.environ['AI_API_KEY'] = openai_key
+
+            ai = AIAssistantService()
 
             if not question and not action:
                 return jsonify({'error': 'No question provided'}), 400
