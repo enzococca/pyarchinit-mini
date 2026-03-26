@@ -322,6 +322,165 @@ class DatabaseMigrations:
             logger.warning(f"migrate_us_column_to_text: {e}")
             return 0
 
+    def migrate_user_sync_trigger(self):
+        """Create bidirectional sync trigger between pyarchinit_users and users tables.
+        PostgreSQL only. Maps PyArchInit roles to Mini roles and vice versa."""
+        try:
+            engine = self.connection.engine
+            if engine.dialect.name != 'postgresql':
+                return 0
+
+            with self.connection.get_session() as session:
+                # Check if pyarchinit_users exists
+                exists = session.execute(text(
+                    "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+                    "WHERE table_name = 'pyarchinit_users')"
+                )).scalar()
+                if not exists:
+                    logger.info("pyarchinit_users not found, skipping user sync trigger")
+                    return 0
+
+                # Check if trigger already exists
+                trigger_exists = session.execute(text(
+                    "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_sync_pyarchinit_to_mini_users')"
+                )).scalar()
+                if trigger_exists:
+                    logger.info("User sync triggers already exist")
+                    return 0
+
+                # --- PyArchInit → Mini trigger ---
+                session.execute(text("""
+                    CREATE OR REPLACE FUNCTION sync_pyarchinit_to_mini_users() RETURNS TRIGGER AS $$
+                    DECLARE
+                        mini_role VARCHAR(10);
+                        mini_id INTEGER;
+                    BEGIN
+                        -- Map PyArchInit role to Mini role
+                        CASE LOWER(NEW.role)
+                            WHEN 'admin' THEN mini_role := 'ADMIN';
+                            WHEN 'responsabile' THEN mini_role := 'ADMIN';
+                            WHEN 'archeologo' THEN mini_role := 'OPERATOR';
+                            WHEN 'studente' THEN mini_role := 'OPERATOR';
+                            WHEN 'guest' THEN mini_role := 'VIEWER';
+                            ELSE mini_role := 'VIEWER';
+                        END CASE;
+
+                        IF TG_OP = 'INSERT' THEN
+                            -- Check if user already exists in Mini
+                            SELECT id INTO mini_id FROM users WHERE username = NEW.username;
+                            IF mini_id IS NULL THEN
+                                INSERT INTO users (username, email, full_name, hashed_password, role, is_active, created_at)
+                                VALUES (NEW.username, NEW.email, NEW.full_name,
+                                        COALESCE(NEW.password_hash, '!needs_reset'),
+                                        mini_role, COALESCE(NEW.is_active, true), NOW());
+                            END IF;
+                            RETURN NEW;
+
+                        ELSIF TG_OP = 'UPDATE' THEN
+                            UPDATE users SET
+                                full_name = NEW.full_name,
+                                email = NEW.email,
+                                role = mini_role,
+                                is_active = COALESCE(NEW.is_active, true),
+                                updated_at = NOW()
+                            WHERE username = NEW.username;
+                            -- If password changed, update it too
+                            IF NEW.password_hash IS DISTINCT FROM OLD.password_hash THEN
+                                UPDATE users SET hashed_password = NEW.password_hash WHERE username = NEW.username;
+                            END IF;
+                            RETURN NEW;
+
+                        ELSIF TG_OP = 'DELETE' THEN
+                            UPDATE users SET is_active = false WHERE username = OLD.username;
+                            RETURN OLD;
+                        END IF;
+                    END;
+                    $$ LANGUAGE plpgsql
+                """))
+
+                session.execute(text("""
+                    CREATE TRIGGER trg_sync_pyarchinit_to_mini_users
+                        AFTER INSERT OR UPDATE OR DELETE ON pyarchinit_users
+                        FOR EACH ROW EXECUTE FUNCTION sync_pyarchinit_to_mini_users()
+                """))
+
+                # --- Mini → PyArchInit trigger ---
+                session.execute(text("""
+                    CREATE OR REPLACE FUNCTION sync_mini_to_pyarchinit_users() RETURNS TRIGGER AS $$
+                    DECLARE
+                        pa_role VARCHAR(20);
+                        pa_id INTEGER;
+                    BEGIN
+                        -- Map Mini role to PyArchInit role
+                        CASE UPPER(NEW.role)
+                            WHEN 'ADMIN' THEN pa_role := 'admin';
+                            WHEN 'OPERATOR' THEN pa_role := 'responsabile';
+                            WHEN 'VIEWER' THEN pa_role := 'guest';
+                            ELSE pa_role := 'guest';
+                        END CASE;
+
+                        IF TG_OP = 'INSERT' THEN
+                            SELECT id INTO pa_id FROM pyarchinit_users WHERE username = NEW.username;
+                            IF pa_id IS NULL THEN
+                                INSERT INTO pyarchinit_users (username, email, full_name, password_hash, role, is_active, created_at)
+                                VALUES (NEW.username, NEW.email, NEW.full_name,
+                                        COALESCE(NEW.hashed_password, '!needs_reset'),
+                                        pa_role, COALESCE(NEW.is_active, true), NOW());
+                            END IF;
+                            RETURN NEW;
+
+                        ELSIF TG_OP = 'UPDATE' THEN
+                            UPDATE pyarchinit_users SET
+                                full_name = NEW.full_name,
+                                email = NEW.email,
+                                role = pa_role,
+                                is_active = COALESCE(NEW.is_active, true)
+                            WHERE username = NEW.username;
+                            IF NEW.hashed_password IS DISTINCT FROM OLD.hashed_password THEN
+                                UPDATE pyarchinit_users SET password_hash = NEW.hashed_password WHERE username = NEW.username;
+                            END IF;
+                            RETURN NEW;
+
+                        ELSIF TG_OP = 'DELETE' THEN
+                            UPDATE pyarchinit_users SET is_active = false WHERE username = OLD.username;
+                            RETURN OLD;
+                        END IF;
+                    END;
+                    $$ LANGUAGE plpgsql
+                """))
+
+                session.execute(text("""
+                    CREATE TRIGGER trg_sync_mini_to_pyarchinit_users
+                        AFTER INSERT OR UPDATE OR DELETE ON users
+                        FOR EACH ROW EXECUTE FUNCTION sync_mini_to_pyarchinit_users()
+                """))
+
+                # --- Initial sync: copy pyarchinit_users → users (missing ones) ---
+                session.execute(text("""
+                    INSERT INTO users (username, email, full_name, hashed_password, role, is_active, created_at)
+                    SELECT pu.username, pu.email, pu.full_name,
+                           COALESCE(pu.password_hash, '!needs_reset'),
+                           CASE LOWER(pu.role)
+                               WHEN 'admin' THEN 'ADMIN'
+                               WHEN 'responsabile' THEN 'ADMIN'
+                               WHEN 'archeologo' THEN 'OPERATOR'
+                               WHEN 'studente' THEN 'OPERATOR'
+                               WHEN 'guest' THEN 'VIEWER'
+                               ELSE 'VIEWER'
+                           END,
+                           COALESCE(pu.is_active, true), NOW()
+                    FROM pyarchinit_users pu
+                    WHERE NOT EXISTS (SELECT 1 FROM users u WHERE u.username = pu.username)
+                """))
+
+                session.commit()
+                logger.info("User sync triggers created + initial sync completed")
+                return 1
+
+        except Exception as e:
+            logger.warning(f"migrate_user_sync_trigger: {e}")
+            return 0
+
     def migrate_all_tables(self):
         """Run all necessary migrations"""
         try:
@@ -351,6 +510,9 @@ class DatabaseMigrations:
 
             # Convert us_table.us from VARCHAR(100) to TEXT
             total_migrations += self.migrate_us_column_to_text()
+
+            # Bidirectional user sync trigger (PostgreSQL only)
+            total_migrations += self.migrate_user_sync_trigger()
 
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations
