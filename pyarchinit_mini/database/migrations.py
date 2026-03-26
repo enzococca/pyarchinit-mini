@@ -473,6 +473,22 @@ class DatabaseMigrations:
                     WHERE NOT EXISTS (SELECT 1 FROM users u WHERE u.username = pu.username)
                 """))
 
+                # --- Initial sync: copy users → pyarchinit_users (missing ones) ---
+                session.execute(text("""
+                    INSERT INTO pyarchinit_users (username, email, full_name, password_hash, role, is_active, created_at)
+                    SELECT u.username, u.email, u.full_name,
+                           COALESCE(u.hashed_password, '!needs_reset'),
+                           CASE UPPER(u.role)
+                               WHEN 'ADMIN' THEN 'admin'
+                               WHEN 'OPERATOR' THEN 'responsabile'
+                               WHEN 'VIEWER' THEN 'guest'
+                               ELSE 'guest'
+                           END,
+                           COALESCE(u.is_active, true), NOW()
+                    FROM users u
+                    WHERE NOT EXISTS (SELECT 1 FROM pyarchinit_users pu WHERE pu.username = u.username)
+                """))
+
                 session.commit()
                 logger.info("User sync triggers created + initial sync completed")
                 return 1
