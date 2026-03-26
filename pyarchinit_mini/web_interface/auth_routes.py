@@ -16,7 +16,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 # User class for Flask-Login
 class User(UserMixin):
-    """User class for Flask-Login"""
+    """User class for Flask-Login with PyArchInit granular permissions support"""
 
     def __init__(self, user_dict):
         self.id = user_dict["id"]
@@ -26,6 +26,9 @@ class User(UserMixin):
         self.role = user_dict["role"]
         self.is_active_user = user_dict["is_active"]
         self.is_superuser = user_dict["is_superuser"]
+        # PyArchInit granular permissions (loaded at login from pyarchinit_roles/permissions)
+        self._pa_role_perms = None   # {'can_insert': bool, 'can_update': bool, ...}
+        self._pa_table_perms = None  # {table_name: {'can_insert': bool, ...}}
 
     def get_id(self):
         return str(self.id)
@@ -38,16 +41,41 @@ class User(UserMixin):
         """Check if user has specific role"""
         return self.role == role
 
-    def can_create(self):
-        """Check if user can create records"""
+    def _check_pa_permission(self, pa_key, table_name=None):
+        """Check PyArchInit permission. Returns None if not available (fallback to role).
+        Table-level permissions override role-level permissions."""
+        # If table_name specified → check that table
+        if table_name and self._pa_table_perms and table_name in self._pa_table_perms:
+            return bool(self._pa_table_perms[table_name].get(pa_key, False))
+        # If table_name NOT specified but table perms exist → user has granular perms,
+        # so check if ANY table allows this action (conservative: if all deny, deny)
+        if self._pa_table_perms and not table_name:
+            # If there are table-level perms, they override the role
+            return any(bool(tp.get(pa_key, False)) for tp in self._pa_table_perms.values())
+        # Role-level
+        if self._pa_role_perms:
+            return bool(self._pa_role_perms.get(pa_key, False))
+        return None  # No PA permissions → fallback to Mini role
+
+    def can_create(self, table_name=None):
+        """Check if user can create records (optionally for a specific table)"""
+        pa = self._check_pa_permission('can_insert', table_name)
+        if pa is not None:
+            return pa
         return self.role in [UserRole.ADMIN.value, UserRole.OPERATOR.value]
 
-    def can_edit(self):
+    def can_edit(self, table_name=None):
         """Check if user can edit records"""
+        pa = self._check_pa_permission('can_update', table_name)
+        if pa is not None:
+            return pa
         return self.role in [UserRole.ADMIN.value, UserRole.OPERATOR.value]
 
-    def can_delete(self):
+    def can_delete(self, table_name=None):
         """Check if user can delete records"""
+        pa = self._check_pa_permission('can_delete', table_name)
+        if pa is not None:
+            return pa
         return self.role in [UserRole.ADMIN.value, UserRole.OPERATOR.value]
 
     def can_manage_users(self):
@@ -96,10 +124,55 @@ def init_login_manager(app, user_service):
 
     @login_manager.user_loader
     def load_user(user_id):
-        """Load user by ID"""
+        """Load user by ID, with PyArchInit granular permissions if available"""
         user_dict = user_service.get_user_by_id(int(user_id))
         if user_dict:
-            return User(user_dict)
+            user = User(user_dict)
+            # Load PyArchInit permissions if PostgreSQL DB
+            try:
+                db_manager = getattr(app, 'db_manager', None)
+                if db_manager and 'postgresql' in str(db_manager.connection.engine.url):
+                    from sqlalchemy import text
+                    with db_manager.connection.get_session() as session:
+                        # Check if pyarchinit tables exist
+                        has_pa = session.execute(text(
+                            "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+                            "WHERE table_name = 'pyarchinit_users')"
+                        )).scalar()
+                        if has_pa:
+                            # Get PA role for this user
+                            pa_user = session.execute(text(
+                                "SELECT pu.role FROM pyarchinit_users pu WHERE pu.username = :u"
+                            ), {'u': user.username}).fetchone()
+                            if pa_user:
+                                role_perms = session.execute(text(
+                                    "SELECT can_insert, can_update, can_delete, can_view "
+                                    "FROM pyarchinit_roles WHERE role_name = :r"
+                                ), {'r': pa_user[0]}).fetchone()
+                                if role_perms:
+                                    user._pa_role_perms = {
+                                        'can_insert': role_perms[0], 'can_update': role_perms[1],
+                                        'can_delete': role_perms[2], 'can_view': role_perms[3]
+                                    }
+                                # Table-level overrides
+                                pa_id = session.execute(text(
+                                    "SELECT id FROM pyarchinit_users WHERE username = :u"
+                                ), {'u': user.username}).fetchone()
+                                if pa_id:
+                                    table_rows = session.execute(text(
+                                        "SELECT table_name, can_insert, can_update, can_delete, can_view "
+                                        "FROM pyarchinit_permissions WHERE user_id = :uid"
+                                    ), {'uid': pa_id[0]}).fetchall()
+                                    if table_rows:
+                                        user._pa_table_perms = {}
+                                        for r in table_rows:
+                                            user._pa_table_perms[r[0]] = {
+                                                'can_insert': r[1], 'can_update': r[2],
+                                                'can_delete': r[3], 'can_view': r[4]
+                                            }
+            except Exception:
+                pass  # PyArchInit tables may not exist (SQLite)
+            return user
         return None
 
     return login_manager
