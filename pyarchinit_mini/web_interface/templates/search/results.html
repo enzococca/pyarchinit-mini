@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Search Results') }} - {{ results.query }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="fas fa-search"></i> {{ _('Search Results') }}</h2>
+    <p class="text-muted mb-0">{{ _('Query') }}: <strong>"{{ results.query }}"</strong></p>
+</div>
+
+{% if results.stats.total > 0 %}
+<!-- Stats Banner -->
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <span class="badge bg-primary fs-6">
+        <i class="fas fa-map-marked-alt me-1"></i>{{ results.stats.sites }} {{ _('sites') }}
+    </span>
+    <span class="badge bg-info fs-6">
+        <i class="fas fa-layer-group me-1"></i>{{ results.stats.us }} {{ _('US') }}
+    </span>
+    <span class="badge bg-warning text-dark fs-6">
+        <i class="fas fa-archive me-1"></i>{{ results.stats.materials }} {{ _('materials') }}
+    </span>
+    <span class="badge bg-success fs-6">
+        <i class="fas fa-users me-1"></i>{{ results.stats.users }} {{ _('people') }}
+    </span>
+    <span class="badge bg-secondary fs-6">
+        <i class="fas fa-equals me-1"></i>{{ results.stats.total }} {{ _('total') }}
+    </span>
+</div>
+
+<!-- Nav Tabs -->
+<ul class="nav nav-tabs mb-3" id="searchTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if results.sites %}active{% endif %}" id="sites-tab"
+                data-bs-toggle="tab" data-bs-target="#sites-panel" type="button" role="tab"
+                aria-controls="sites-panel" aria-selected="{{ 'true' if results.sites else 'false' }}">
+            <i class="fas fa-map-marked-alt"></i> {{ _('Sites') }}
+            <span class="badge bg-primary ms-1">{{ results.stats.sites }}</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if not results.sites and results.us %}active{% endif %}" id="us-tab"
+                data-bs-toggle="tab" data-bs-target="#us-panel" type="button" role="tab"
+                aria-controls="us-panel" aria-selected="{{ 'true' if not results.sites and results.us else 'false' }}">
+            <i class="fas fa-layer-group"></i> {{ _('US') }}
+            <span class="badge bg-info ms-1">{{ results.stats.us }}</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if not results.sites and not results.us and results.materials %}active{% endif %}" id="materials-tab"
+                data-bs-toggle="tab" data-bs-target="#materials-panel" type="button" role="tab"
+                aria-controls="materials-panel" aria-selected="{{ 'true' if not results.sites and not results.us and results.materials else 'false' }}">
+            <i class="fas fa-archive"></i> {{ _('Materials') }}
+            <span class="badge bg-warning text-dark ms-1">{{ results.stats.materials }}</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if not results.sites and not results.us and not results.materials and results.users %}active{% endif %}" id="people-tab"
+                data-bs-toggle="tab" data-bs-target="#people-panel" type="button" role="tab"
+                aria-controls="people-panel" aria-selected="{{ 'true' if not results.sites and not results.us and not results.materials and results.users else 'false' }}">
+            <i class="fas fa-users"></i> {{ _('People') }}
+            <span class="badge bg-success ms-1">{{ results.stats.users }}</span>
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="searchTabContent">
+
+    <!-- Sites Tab -->
+    <div class="tab-pane fade {% if results.sites %}show active{% endif %}" id="sites-panel" role="tabpanel" aria-labelledby="sites-tab">
+        {% if results.sites %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>{{ _('Name') }}</th>
+                        <th>{{ _('Country') }}</th>
+                        <th>{{ _('Region') }}</th>
+                        <th>{{ _('Municipality') }}</th>
+                        <th>{{ _('Type') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="searchable">
+                    {% for site in results.sites %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('view_site', site_id=site.id_sito) }}">
+                                <i class="fas fa-map-marked-alt me-1"></i>{{ site.sito }}
+                            </a>
+                        </td>
+                        <td>{{ site.nazione or '-' }}</td>
+                        <td>{{ site.regione or '-' }}</td>
+                        <td>{{ site.comune or '-' }}</td>
+                        <td>{{ site.definizione_sito or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">{{ _('No sites match your search.') }}</p>
+        {% endif %}
+    </div>
+
+    <!-- US Tab -->
+    <div class="tab-pane fade {% if not results.sites and results.us %}show active{% endif %}" id="us-panel" role="tabpanel" aria-labelledby="us-tab">
+        {% if results.us %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>{{ _('US') }}#</th>
+                        <th>{{ _('Site') }}</th>
+                        <th>{{ _('Area') }}</th>
+                        <th>{{ _('Type') }}</th>
+                        <th>{{ _('Strat.Def') }}</th>
+                        <th>{{ _('Dating') }}</th>
+                        <th>{{ _('Excavator') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="searchable">
+                    {% for us in results.us %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('edit_us', us_id=us.id_us) }}">
+                                <i class="fas fa-layer-group me-1"></i>{{ us.us }}
+                            </a>
+                        </td>
+                        <td>{{ us.sito or '-' }}</td>
+                        <td>{{ us.area or '-' }}</td>
+                        <td>{{ us.unita_tipo or '-' }}</td>
+                        <td>{{ us.d_stratigrafica or '-' }}</td>
+                        <td>{{ us.datazione or '-' }}</td>
+                        <td>{{ us.schedatore or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">{{ _('No stratigraphic units match your search.') }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Materials Tab -->
+    <div class="tab-pane fade {% if not results.sites and not results.us and results.materials %}show active{% endif %}" id="materials-panel" role="tabpanel" aria-labelledby="materials-tab">
+        {% if results.materials %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>{{ _('Inv') }}#</th>
+                        <th>{{ _('Site') }}</th>
+                        <th>{{ _('Type') }}</th>
+                        <th>{{ _('Definition') }}</th>
+                        <th>{{ _('US') }}</th>
+                        <th>{{ _('Area') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="searchable">
+                    {% for mat in results.materials %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('edit_inventario', inv_id=mat.id_invmat) }}">
+                                <i class="fas fa-archive me-1"></i>{{ mat.numero_inventario }}
+                            </a>
+                        </td>
+                        <td>{{ mat.sito or '-' }}</td>
+                        <td>{{ mat.tipo_reperto or '-' }}</td>
+                        <td>{{ mat.definizione or '-' }}</td>
+                        <td>{{ mat.us or '-' }}</td>
+                        <td>{{ mat.area or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">{{ _('No materials match your search.') }}</p>
+        {% endif %}
+    </div>
+
+    <!-- People Tab -->
+    <div class="tab-pane fade {% if not results.sites and not results.us and not results.materials and results.users %}show active{% endif %}" id="people-panel" role="tabpanel" aria-labelledby="people-tab">
+        {% if results.users %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>{{ _('Username') }}</th>
+                        <th>{{ _('Full Name') }}</th>
+                        <th>{{ _('Email') }}</th>
+                        <th>{{ _('Role') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="searchable">
+                    {% for user in results.users %}
+                    <tr>
+                        <td><i class="fas fa-user me-1"></i>{{ user.username }}</td>
+                        <td>{{ user.full_name or '-' }}</td>
+                        <td>{{ user.email or '-' }}</td>
+                        <td>
+                            {% if user.role == 'admin' %}
+                            <span class="badge bg-danger">{{ _('Admin') }}</span>
+                            {% elif user.role == 'editor' %}
+                            <span class="badge bg-primary">{{ _('Editor') }}</span>
+                            {% elif user.role == 'viewer' %}
+                            <span class="badge bg-secondary">{{ _('Viewer') }}</span>
+                            {% else %}
+                            <span class="badge bg-dark">{{ user.role }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">{{ _('No users match your search.') }}</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% else %}
+<!-- No Results -->
+<div class="alert alert-warning mt-4">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ _('No results found for') }} <strong>"{{ results.query }}"</strong>.
+    {{ _('Try a different search term or check the spelling.') }}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var query = {{ results.query | tojson }};
+    if (!query || query.length < 2) return;
+
+    // Escape special regex characters
+    var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var regex = new RegExp('(' + escaped + ')', 'gi');
+
+    // Walk text nodes inside searchable table bodies and wrap matches in <mark>
+    var containers = document.querySelectorAll('.searchable');
+    containers.forEach(function(container) {
+        var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+        var nodes = [];
+        while (walker.nextNode()) {
+            nodes.push(walker.currentNode);
+        }
+        nodes.forEach(function(node) {
+            if (!regex.test(node.nodeValue)) return;
+            // Only highlight inside <td>, skip links' href
+            var parent = node.parentElement;
+            if (!parent || parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE') return;
+            var span = document.createElement('span');
+            span.innerHTML = node.nodeValue.replace(regex, '<mark>$1</mark>');
+            parent.replaceChild(span, node);
+        });
+    });
+
+    // Activate first tab that has results if none is active
+    var activeTab = document.querySelector('#searchTabs .nav-link.active');
+    if (!activeTab) {
+        var firstBadge = document.querySelector('#searchTabs .badge');
+        if (firstBadge) {
+            var tabs = document.querySelectorAll('#searchTabs .nav-link');
+            for (var i = 0; i < tabs.length; i++) {
+                var badge = tabs[i].querySelector('.badge');
+                if (badge && parseInt(badge.textContent) > 0) {
+                    var tab = new bootstrap.Tab(tabs[i]);
+                    tab.show();
+                    break;
+                }
+            }
+        }
+    }
+})();
+</script>
+{% endblock %}

@@ -42,6 +42,22 @@
             </a>
         </div>
 
+        {% if current_user.is_authenticated %}
+        <div class="pam-navbar-center">
+            <form class="pam-search-form" action="{{ url_for('universal_search') }}" method="GET" autocomplete="off">
+                <div class="pam-search-wrapper">
+                    <i class="fas fa-search pam-search-icon"></i>
+                    <input type="text" name="q" id="universal-search-input"
+                           class="pam-search-input"
+                           placeholder="{{ _('Search sites, US, materials, people...') }}"
+                           value="{{ request.args.get('q', '') }}">
+                    <kbd class="pam-search-kbd">/</kbd>
+                </div>
+                <div class="pam-search-dropdown" id="search-dropdown" style="display:none;"></div>
+            </form>
+        </div>
+        {% endif %}
+
         <div class="pam-navbar-right">
             {% if current_user.is_authenticated %}
             <span class="online-badge" id="online-users-badge">
@@ -360,6 +376,7 @@
         });
     </script>
 
+    <script src="{{ url_for('static', filename='js/universal_search.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

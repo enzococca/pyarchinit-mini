@@ -213,6 +213,47 @@ code {
   border-radius: 6px;
 }
 
+/* Universal Search Bar */
+.pam-navbar-center { flex: 1; max-width: 480px; margin: 0 16px; }
+.pam-search-form { position: relative; }
+.pam-search-wrapper {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.1); border-radius: 8px;
+  padding: 0 12px; height: 36px;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.pam-search-wrapper:focus-within {
+  background: rgba(255,255,255,0.18);
+  box-shadow: 0 0 0 2px var(--pam-terracotta);
+}
+.pam-search-icon { color: var(--text-sidebar); opacity: 0.6; margin-right: 8px; font-size: 0.85rem; }
+.pam-search-input {
+  background: transparent; border: none; outline: none;
+  color: var(--text-sidebar); flex: 1; font-size: 0.9rem;
+}
+.pam-search-input::placeholder { color: var(--text-sidebar); opacity: 0.5; }
+.pam-search-kbd {
+  background: rgba(255,255,255,0.15); border-radius: 4px;
+  padding: 1px 6px; font-size: 0.7rem; color: var(--text-sidebar); opacity: 0.6;
+  font-family: monospace;
+}
+.pam-search-dropdown {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--bg-card, #fff); border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-height: 400px; overflow-y: auto;
+  z-index: 1050; margin-top: 4px; border: 1px solid #dee2e6;
+}
+.pam-search-item {
+  display: flex; align-items: center; padding: 8px 14px; gap: 10px;
+  cursor: pointer; text-decoration: none; color: inherit; border-bottom: 1px solid #f0f0f0;
+}
+.pam-search-item:hover, .pam-search-item.active { background: #f0f5ff; }
+.pam-search-item .search-icon { width: 28px; text-align: center; color: #6c757d; font-size: 0.85rem; }
+.pam-search-item .search-label { font-weight: 500; font-size: 0.88rem; }
+.pam-search-item .search-sub { font-size: 0.78rem; color: #6c757d; }
+.pam-search-category { padding: 6px 14px; font-size: 0.72rem; font-weight: 600;
+  text-transform: uppercase; color: #6c757d; background: #f8f9fa; letter-spacing: 0.5px; }
+
 .pam-navbar-right {
   display: flex;
   align-items: center;

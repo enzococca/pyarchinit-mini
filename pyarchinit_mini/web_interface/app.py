@@ -491,6 +491,8 @@ def create_app():
     export_import_service = ImportExportService(db_manager.connection.connection_string)
     from pyarchinit_mini.services.export_import_service import ExportImportService
     csv_excel_service = ExportImportService(db_manager)
+    from pyarchinit_mini.services.search_service import UniversalSearchService
+    search_service = UniversalSearchService(db_manager)
     # matrix_visualizer and graphviz_visualizer are declared at module level
     pdf_generator = PDFGenerator()
     media_handler = MediaHandler()
@@ -587,6 +589,34 @@ def create_app():
     @app.route('/docs')
     def docs():
         return render_template("docs/index.html")
+
+    # Universal Search
+    @app.route('/search')
+    @login_required
+    def universal_search():
+        query = request.args.get('q', '').strip()
+        if not query:
+            return redirect(url_for('index'))
+        results = search_service.search_all(query)
+        return render_template('search/results.html', results=results)
+
+    @app.route('/api/search/suggest')
+    @login_required
+    def search_suggest():
+        query = request.args.get('q', '').strip()
+        if len(query) < 2:
+            return jsonify([])
+        results = search_service.search_all(query, limit_per_table=5)
+        suggestions = []
+        for s in results.get('sites', []):
+            suggestions.append({'type': 'site', 'label': s.get('sito', ''), 'sub': s.get('comune', ''), 'url': url_for('sites_list') + f"?search={s.get('sito', '')}"})
+        for u in results.get('us', []):
+            suggestions.append({'type': 'us', 'label': f"US {u.get('us', '')} - {u.get('sito', '')}", 'sub': u.get('d_stratigrafica', ''), 'url': url_for('us_list') + f"?sito={u.get('sito', '')}&us_number={u.get('us', '')}"})
+        for m in results.get('materials', []):
+            suggestions.append({'type': 'material', 'label': f"Inv. {m.get('numero_inventario', '')} - {m.get('sito', '')}", 'sub': m.get('tipo_reperto', ''), 'url': url_for('inventario_list')})
+        for p in results.get('users', []):
+            suggestions.append({'type': 'user', 'label': p.get('full_name', p.get('username', '')), 'sub': p.get('role', ''), 'url': url_for('auth.users')})
+        return jsonify(suggestions[:15])
 
     @app.route('/analytics')
     @login_required
