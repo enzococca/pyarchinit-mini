@@ -4398,23 +4398,81 @@ def create_app():
                 lang = 'it'
 
             context = {}
-            media_urls = []  # Collect media URLs to append to response
+            media_urls = []
             if site_name:
                 from pyarchinit_mini.models.site import Site as SiteModel
                 from pyarchinit_mini.models.us import US as USModel
                 from pyarchinit_mini.models.inventario_materiali import InventarioMateriali as InvModel
+                from sqlalchemy import func as sqlfunc, distinct
                 with db_manager.connection.get_session() as session:
                     site = session.query(SiteModel).filter(SiteModel.sito == site_name).first()
                     if site:
                         context['site'] = site.to_dict()
-                        us_records = session.query(USModel).filter(USModel.sito == site_name).limit(50).all()
-                        context['us_list'] = [u.to_dict() for u in us_records]
-                        context['us_count'] = session.query(USModel).filter(USModel.sito == site_name).count()
-                        inv_records = session.query(InvModel).filter(InvModel.sito == site_name).limit(30).all()
-                        context['inv_list'] = [i.to_dict() for i in inv_records]
-                        context['inv_count'] = session.query(InvModel).filter(InvModel.sito == site_name).count()
 
-                        # Collect media images for the site
+                        # --- COMPLETE US statistics (no limit) ---
+                        all_us = session.query(USModel).filter(USModel.sito == site_name).all()
+                        us_dicts = [u.to_dict() for u in all_us]
+                        context['us_count'] = len(us_dicts)
+
+                        # Pre-aggregate US data for comprehensive analysis
+                        us_by_type = {}
+                        us_by_area = {}
+                        us_by_period = {}
+                        us_by_year = {}
+                        excavators = set()
+                        directors = set()
+                        all_us_numbers = []
+                        for u in us_dicts:
+                            utype = u.get('unita_tipo', 'US') or 'US'
+                            us_by_type[utype] = us_by_type.get(utype, 0) + 1
+                            area = u.get('area', '-') or '-'
+                            us_by_area[area] = us_by_area.get(area, 0) + 1
+                            dat = u.get('datazione', '') or ''
+                            if dat:
+                                us_by_period[dat] = us_by_period.get(dat, 0) + 1
+                            yr = u.get('anno_scavo', '') or ''
+                            if yr:
+                                us_by_year[str(yr)] = us_by_year.get(str(yr), 0) + 1
+                            if u.get('schedatore'):
+                                excavators.add(u['schedatore'])
+                            if u.get('direttore_us'):
+                                directors.add(u['direttore_us'])
+                            all_us_numbers.append(u.get('us', ''))
+
+                        context['us_statistics'] = {
+                            'total': len(us_dicts),
+                            'by_type': dict(sorted(us_by_type.items(), key=lambda x: -x[1])),
+                            'by_area': dict(sorted(us_by_area.items(), key=lambda x: -x[1])),
+                            'by_period': dict(sorted(us_by_period.items(), key=lambda x: -x[1])),
+                            'by_year': dict(sorted(us_by_year.items())),
+                            'excavators': sorted(excavators),
+                            'directors': sorted(directors),
+                            'all_us_numbers': all_us_numbers,
+                        }
+                        # Include complete US list for detailed analysis
+                        context['us_list'] = us_dicts
+
+                        # --- COMPLETE inventory statistics ---
+                        all_inv = session.query(InvModel).filter(InvModel.sito == site_name).all()
+                        inv_dicts = [i.to_dict() for i in all_inv]
+                        context['inv_count'] = len(inv_dicts)
+
+                        inv_by_type = {}
+                        inv_by_us = {}
+                        for inv in inv_dicts:
+                            itype = inv.get('tipo_reperto', '-') or '-'
+                            inv_by_type[itype] = inv_by_type.get(itype, 0) + 1
+                            ius = inv.get('us', '-') or '-'
+                            inv_by_us[str(ius)] = inv_by_us.get(str(ius), 0) + 1
+
+                        context['inv_statistics'] = {
+                            'total': len(inv_dicts),
+                            'by_type': dict(sorted(inv_by_type.items(), key=lambda x: -x[1])),
+                            'by_us': dict(sorted(inv_by_us.items(), key=lambda x: -x[1])[:20]),
+                        }
+                        context['inv_list'] = inv_dicts
+
+                        # Collect media images
                         try:
                             site_media = media_service.get_media_by_entity('site', site.id_sito, size=10)
                             for m in site_media:

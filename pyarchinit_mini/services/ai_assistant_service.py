@@ -30,31 +30,31 @@ _NEW_TOKEN_PARAM_MODELS = {"gpt-5.4", "gpt-5.4-mini", "o4-mini", "o3", "o3-mini"
 SYSTEM_PROMPT_IT = """Sei un assistente archeologico esperto per il sistema PyArchInit.
 Aiuti ad analizzare dati stratigrafici, materiali, cronologia e informazioni sui siti.
 
-REGOLE DI FORMATTAZIONE (OBBLIGATORIE):
-- Rispondi SEMPRE in HTML ben formattato (non markdown).
-- Usa <h4> per i titoli di sezione, <h5> per i sottotitoli.
-- Usa <p> per i paragrafi, <ul>/<li> per le liste.
-- Per le tabelle usa <table class="table table-sm table-striped"><thead>...<tbody>...
-- Per i dati importanti usa <strong> o <span class="badge bg-info">.
-- Quando menzioni una US, crea un link: <a href="/us?sito=NOME_SITO&us_number=NUMERO">US NUMERO</a>
-- Quando menzioni un materiale, crea un link: <a href="/inventario">Inv. NUMERO</a>
-- NON usare markdown (no #, no **, no ```). Solo HTML pulito.
-- Struttura la risposta con sezioni chiare, titoli e paragrafi.
+REGOLE (OBBLIGATORIE):
+1. Rispondi SEMPRE in HTML ben formattato (MAI markdown).
+2. Usa <h4> per i titoli, <h5> per sottotitoli, <p> per paragrafi, <ul>/<li> per liste.
+3. Per tabelle: <table class="table table-sm table-striped"><thead>...<tbody>...
+4. Per dati importanti: <strong> o <span class="badge bg-info">.
+5. Link alle US: <a href="/us?sito=NOME_SITO&us_number=NUMERO" class="text-primary">US NUMERO</a>
+6. Link ai materiali: <a href="/inventario" class="text-primary">Inv. NUMERO</a>
+7. MAI tralasciare dati. Se ci sono 700 US, cita e analizza TUTTE le US — raggruppa per tipo, area, periodo, anno, ma includi TUTTI i numeri. Crea tabelle complete.
+8. Includi statistiche dettagliate: conteggi per tipo, per area, per periodo, per operatore.
+9. Sii ESAUSTIVO: ogni US, ogni materiale, ogni relazione deve essere menzionata o inclusa in una tabella.
 """
 
 SYSTEM_PROMPT_EN = """You are an expert archaeological assistant for the PyArchInit system.
 You help analyze stratigraphic data, materials, chronology, and site information.
 
-FORMATTING RULES (MANDATORY):
-- ALWAYS respond in well-formatted HTML (not markdown).
-- Use <h4> for section titles, <h5> for subtitles.
-- Use <p> for paragraphs, <ul>/<li> for lists.
-- For tables use <table class="table table-sm table-striped"><thead>...<tbody>...
-- For important data use <strong> or <span class="badge bg-info">.
-- When mentioning a US, create a link: <a href="/us?sito=SITE_NAME&us_number=NUMBER">US NUMBER</a>
-- When mentioning a material, create a link: <a href="/inventario">Inv. NUMBER</a>
-- Do NOT use markdown (no #, no **, no ```). Only clean HTML.
-- Structure the response with clear sections, titles, and paragraphs.
+RULES (MANDATORY):
+1. ALWAYS respond in well-formatted HTML (NEVER markdown).
+2. Use <h4> for titles, <h5> for subtitles, <p> for paragraphs, <ul>/<li> for lists.
+3. For tables: <table class="table table-sm table-striped"><thead>...<tbody>...
+4. For important data: <strong> or <span class="badge bg-info">.
+5. Link to US: <a href="/us?sito=SITE_NAME&us_number=NUMBER" class="text-primary">US NUMBER</a>
+6. Link to materials: <a href="/inventario" class="text-primary">Inv. NUMBER</a>
+7. NEVER omit data. If there are 700 US, cite and analyze ALL of them — group by type, area, period, year, but include ALL numbers. Create complete tables.
+8. Include detailed statistics: counts by type, area, period, operator.
+9. Be EXHAUSTIVE: every US, every material, every relationship must be mentioned or included in a table.
 """
 
 def _get_system_prompt(lang='it'):
@@ -94,11 +94,33 @@ class AIAssistantService:
         """
         system = _get_system_prompt(lang)
         if context:
-            # Add site name for link generation
             site_name = context.get('site', {}).get('sito', '') if isinstance(context.get('site'), dict) else ''
             if site_name:
                 system += f"\n\nSite name for links: {site_name}"
-            system += "\n\nContext data:\n" + json.dumps(context, indent=2, default=str)[:8000]
+
+            # Build comprehensive context: stats first, then data
+            ctx_parts = []
+            if context.get('site'):
+                ctx_parts.append("SITE INFO:\n" + json.dumps(context['site'], indent=1, default=str))
+            if context.get('us_statistics'):
+                ctx_parts.append("US STATISTICS (COMPLETE):\n" + json.dumps(context['us_statistics'], indent=1, default=str))
+            if context.get('inv_statistics'):
+                ctx_parts.append("MATERIAL STATISTICS (COMPLETE):\n" + json.dumps(context['inv_statistics'], indent=1, default=str))
+            # Include ALL US records (truncated per record to save tokens)
+            if context.get('us_list'):
+                us_summary = []
+                for u in context['us_list']:
+                    us_summary.append({k: u.get(k) for k in ['us', 'area', 'unita_tipo', 'd_stratigrafica', 'd_interpretativa', 'datazione', 'schedatore', 'anno_scavo', 'rapporti'] if u.get(k)})
+                ctx_parts.append(f"ALL {len(us_summary)} US RECORDS (key fields):\n" + json.dumps(us_summary, default=str))
+            if context.get('inv_list'):
+                inv_summary = []
+                for i in context['inv_list']:
+                    inv_summary.append({k: i.get(k) for k in ['numero_inventario', 'tipo_reperto', 'definizione', 'us', 'area', 'stato_conservazione', 'datazione_reperto'] if i.get(k)})
+                ctx_parts.append(f"ALL {len(inv_summary)} MATERIAL RECORDS (key fields):\n" + json.dumps(inv_summary, default=str))
+
+            full_context = "\n\n".join(ctx_parts)
+            # Limit to 30000 chars to fit in context window
+            system += "\n\nCOMPLETE DATA:\n" + full_context[:30000]
 
         return self._call_llm(system_prompt=system, user_message=question)
 
@@ -119,18 +141,30 @@ class AIAssistantService:
         Returns:
             A formatted summary string.
         """
+        # Build comprehensive context with ALL data
         context_parts = [
-            "Site information:",
-            json.dumps(site_data, indent=2, default=str),
-            f"\nNumber of stratigraphic units: {len(us_list)}",
+            "SITE INFORMATION:",
+            json.dumps(site_data, indent=1, default=str),
+            f"\nTOTAL STRATIGRAPHIC UNITS: {len(us_list)}",
         ]
         if us_list:
-            context_parts.append("Stratigraphic units data:")
-            context_parts.append(json.dumps(us_list[:50], indent=2, default=str))
-        context_parts.append(f"\nNumber of inventory items: {len(inv_list)}")
+            # Send ALL US with key fields
+            us_summary = [{k: u.get(k) if isinstance(u, dict) else getattr(u, k, None)
+                          for k in ['us', 'area', 'unita_tipo', 'd_stratigrafica', 'd_interpretativa',
+                                   'datazione', 'schedatore', 'anno_scavo', 'rapporti', 'descrizione']
+                          if (u.get(k) if isinstance(u, dict) else getattr(u, k, None))}
+                         for u in us_list]
+            context_parts.append(f"ALL {len(us_summary)} US RECORDS:")
+            context_parts.append(json.dumps(us_summary, default=str))
+        context_parts.append(f"\nTOTAL INVENTORY ITEMS: {len(inv_list)}")
         if inv_list:
-            context_parts.append("Inventory data:")
-            context_parts.append(json.dumps(inv_list[:50], indent=2, default=str))
+            inv_summary = [{k: i.get(k) if isinstance(i, dict) else getattr(i, k, None)
+                          for k in ['numero_inventario', 'tipo_reperto', 'definizione', 'descrizione',
+                                   'us', 'area', 'stato_conservazione', 'datazione_reperto']
+                          if (i.get(k) if isinstance(i, dict) else getattr(i, k, None))}
+                         for i in inv_list]
+            context_parts.append(f"ALL {len(inv_summary)} MATERIAL RECORDS:")
+            context_parts.append(json.dumps(inv_summary, default=str))
 
         site_name = site_data.get('sito', '')
         if lang == 'it':
@@ -220,9 +254,9 @@ class AIAssistantService:
         }
         # GPT-5.4, o-series use max_completion_tokens; older models use max_tokens
         if self.model in _NEW_TOKEN_PARAM_MODELS:
-            params["max_completion_tokens"] = 4096
+            params["max_completion_tokens"] = 16384
         else:
-            params["max_tokens"] = 4096
+            params["max_tokens"] = 16384
         response = client.chat.completions.create(**params)
         return response.choices[0].message.content
 
@@ -239,7 +273,7 @@ class AIAssistantService:
         client = anthropic.Anthropic(api_key=self.api_key)
         response = client.messages.create(
             model=self.model,
-            max_tokens=2048,
+            max_tokens=16384,
             system=system_prompt,
             messages=[
                 {"role": "user", "content": user_message},
