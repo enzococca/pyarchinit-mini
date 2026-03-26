@@ -4149,10 +4149,15 @@ def create_app():
                             op['role_badges'].append(badge)
                         op['us_count'] += us_count
                         op['sites_count'] = max(op['sites_count'], sites_count)
-                        if year_min and year_min < op['year_min']:
-                            op['year_min'] = year_min
-                        if year_max and year_max > op['year_max']:
-                            op['year_max'] = year_max
+                        try:
+                            ym = int(year_min) if year_min else None
+                            yx = int(year_max) if year_max else None
+                            if ym and ym < op['year_min']:
+                                op['year_min'] = ym
+                            if yx and yx > op['year_max']:
+                                op['year_max'] = yx
+                        except (ValueError, TypeError):
+                            pass
 
                 # Get email from users table
                 users = session.query(UserModel.username, UserModel.email, UserModel.full_name).all()
@@ -4225,9 +4230,15 @@ def create_app():
                 if site_filter:
                     us_query = us_query.filter(USModel.sito == site_filter)
                 if year_from:
-                    us_query = us_query.filter(USModel.anno_scavo >= int(year_from))
+                    try:
+                        us_query = us_query.filter(USModel.anno_scavo >= int(year_from))
+                    except (ValueError, TypeError):
+                        pass
                 if year_to:
-                    us_query = us_query.filter(USModel.anno_scavo <= int(year_to))
+                    try:
+                        us_query = us_query.filter(USModel.anno_scavo <= int(year_to))
+                    except (ValueError, TypeError):
+                        pass
                 if operator_filter:
                     us_query = us_query.filter(
                         (USModel.schedatore == operator_filter) |
