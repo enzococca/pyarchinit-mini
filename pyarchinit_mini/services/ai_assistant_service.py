@@ -27,11 +27,38 @@ AVAILABLE_MODELS = {
 # Models that use max_completion_tokens instead of max_tokens
 _NEW_TOKEN_PARAM_MODELS = {"gpt-5.4", "gpt-5.4-mini", "o4-mini", "o3", "o3-mini", "o1", "o1-mini"}
 
-SYSTEM_PROMPT = (
-    "You are an archaeological data assistant for the PyArchInit system. "
-    "You help analyze stratigraphic data, materials, chronology, and site "
-    "information. Answer in the same language as the question."
-)
+SYSTEM_PROMPT_IT = """Sei un assistente archeologico esperto per il sistema PyArchInit.
+Aiuti ad analizzare dati stratigrafici, materiali, cronologia e informazioni sui siti.
+
+REGOLE DI FORMATTAZIONE (OBBLIGATORIE):
+- Rispondi SEMPRE in HTML ben formattato (non markdown).
+- Usa <h4> per i titoli di sezione, <h5> per i sottotitoli.
+- Usa <p> per i paragrafi, <ul>/<li> per le liste.
+- Per le tabelle usa <table class="table table-sm table-striped"><thead>...<tbody>...
+- Per i dati importanti usa <strong> o <span class="badge bg-info">.
+- Quando menzioni una US, crea un link: <a href="/us?sito=NOME_SITO&us_number=NUMERO">US NUMERO</a>
+- Quando menzioni un materiale, crea un link: <a href="/inventario">Inv. NUMERO</a>
+- NON usare markdown (no #, no **, no ```). Solo HTML pulito.
+- Struttura la risposta con sezioni chiare, titoli e paragrafi.
+"""
+
+SYSTEM_PROMPT_EN = """You are an expert archaeological assistant for the PyArchInit system.
+You help analyze stratigraphic data, materials, chronology, and site information.
+
+FORMATTING RULES (MANDATORY):
+- ALWAYS respond in well-formatted HTML (not markdown).
+- Use <h4> for section titles, <h5> for subtitles.
+- Use <p> for paragraphs, <ul>/<li> for lists.
+- For tables use <table class="table table-sm table-striped"><thead>...<tbody>...
+- For important data use <strong> or <span class="badge bg-info">.
+- When mentioning a US, create a link: <a href="/us?sito=SITE_NAME&us_number=NUMBER">US NUMBER</a>
+- When mentioning a material, create a link: <a href="/inventario">Inv. NUMBER</a>
+- Do NOT use markdown (no #, no **, no ```). Only clean HTML.
+- Structure the response with clear sections, titles, and paragraphs.
+"""
+
+def _get_system_prompt(lang='it'):
+    return SYSTEM_PROMPT_IT if lang == 'it' else SYSTEM_PROMPT_EN
 
 
 class AIAssistantService:
@@ -54,21 +81,24 @@ class AIAssistantService:
     # Public API
     # ------------------------------------------------------------------
 
-    def ask(self, question: str, context: Optional[Dict[str, Any]] = None) -> str:
+    def ask(self, question: str, context: Optional[Dict[str, Any]] = None, lang: str = 'it') -> str:
         """Ask the AI assistant a free-form question.
 
         Args:
             question: The user's question.
-            context: Optional dict with keys like ``site_name``, ``us_data``,
-                     ``inventory_data``, etc.  Included in the prompt so the
-                     model can ground its answer.
+            context: Optional dict with site/US/material data for grounding.
+            lang: 'it' or 'en' for response language.
 
         Returns:
-            The AI response text, or an error message string on failure.
+            HTML-formatted AI response, or an error message string.
         """
-        system = SYSTEM_PROMPT
+        system = _get_system_prompt(lang)
         if context:
-            system += "\n\nContext data:\n" + json.dumps(context, indent=2, default=str)
+            # Add site name for link generation
+            site_name = context.get('site', {}).get('sito', '') if isinstance(context.get('site'), dict) else ''
+            if site_name:
+                system += f"\n\nSite name for links: {site_name}"
+            system += "\n\nContext data:\n" + json.dumps(context, indent=2, default=str)[:8000]
 
         return self._call_llm(system_prompt=system, user_message=question)
 
@@ -77,6 +107,7 @@ class AIAssistantService:
         site_data: Dict[str, Any],
         us_list: List[Any],
         inv_list: List[Any],
+        lang: str = 'it',
     ) -> str:
         """Generate a professional archaeological summary report.
 
@@ -101,38 +132,51 @@ class AIAssistantService:
             context_parts.append("Inventory data:")
             context_parts.append(json.dumps(inv_list[:50], indent=2, default=str))
 
-        user_message = (
-            "Based on the following archaeological data, write a professional "
-            "archaeological summary report for this site. Include sections on: "
-            "site overview, stratigraphic sequence, material culture, and "
-            "preliminary interpretation. Be thorough but concise.\n\n"
-            + "\n".join(context_parts)
-        )
+        site_name = site_data.get('sito', '')
+        if lang == 'it':
+            user_message = (
+                f"Basandoti sui seguenti dati archeologici del sito '{site_name}', "
+                "scrivi un report archeologico professionale in HTML. Includi sezioni su: "
+                "panoramica del sito, sequenza stratigrafica, cultura materiale, "
+                "interpretazione preliminare. Crea link alle US menzionate. "
+                "Usa tabelle HTML per i dati tabulari.\n\n"
+                + "\n".join(context_parts)
+            )
+        else:
+            user_message = (
+                f"Based on the following archaeological data for site '{site_name}', "
+                "write a professional archaeological summary report in HTML. Include sections on: "
+                "site overview, stratigraphic sequence, material culture, and "
+                "preliminary interpretation. Create links to mentioned US. "
+                "Use HTML tables for tabular data.\n\n"
+                + "\n".join(context_parts)
+            )
 
-        return self._call_llm(system_prompt=SYSTEM_PROMPT, user_message=user_message)
+        return self._call_llm(system_prompt=_get_system_prompt(lang), user_message=user_message)
 
     def analyze_stratigraphy(
-        self, site_name: str, relationships: List[Any]
+        self, site_name: str, relationships: List[Any], lang: str = 'it'
     ) -> str:
-        """Ask the AI to analyse a stratigraphic sequence.
+        if lang == 'it':
+            user_message = (
+                f"Analizza la sequenza stratigrafica del sito '{site_name}'. "
+                "Identifica le fasi principali, possibili disturbi, e suggerisci "
+                "un'interpretazione della storia deposizionale. "
+                "Crea link alle US menzionate nel formato HTML. Usa tabelle se utile.\n\n"
+                "Relazioni stratigrafiche:\n"
+                + json.dumps(relationships[:100], indent=2, default=str)
+            )
+        else:
+            user_message = (
+                f"Analyze the stratigraphic sequence for site '{site_name}'. "
+                "Identify the main phases, possible disturbances, and suggest "
+                "an interpretation of the depositional history. "
+                "Create links to mentioned US in HTML format. Use tables if helpful.\n\n"
+                "Stratigraphic relationships:\n"
+                + json.dumps(relationships[:100], indent=2, default=str)
+            )
 
-        Args:
-            site_name: Name of the archaeological site.
-            relationships: List of stratigraphic relationships (e.g.
-                ``[{"us": 1, "covers": 2}, ...]``).
-
-        Returns:
-            Analysis text.
-        """
-        user_message = (
-            f"Analyze the stratigraphic sequence for site '{site_name}'. "
-            "Identify the main phases, possible disturbances, and suggest "
-            "an interpretation of the depositional history.\n\n"
-            "Stratigraphic relationships:\n"
-            + json.dumps(relationships[:100], indent=2, default=str)
-        )
-
-        return self._call_llm(system_prompt=SYSTEM_PROMPT, user_message=user_message)
+        return self._call_llm(system_prompt=_get_system_prompt(lang), user_message=user_message)
 
     # ------------------------------------------------------------------
     # Provider helpers (lazy imports)

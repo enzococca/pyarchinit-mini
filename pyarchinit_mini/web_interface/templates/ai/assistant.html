@@ -23,14 +23,21 @@
         border-color: #444;
     }
     .chat-bubble {
-        max-width: 75%;
+        max-width: 85%;
         padding: 0.75rem 1rem;
         margin-bottom: 0.75rem;
         border-radius: 1rem;
         line-height: 1.5;
         word-wrap: break-word;
-        white-space: pre-wrap;
     }
+    .chat-bubble-ai { white-space: normal; }
+    .chat-bubble-user { white-space: pre-wrap; }
+    .ai-content h4 { font-size: 1.1rem; margin-top: 0.8rem; color: #2c3e50; border-bottom: 1px solid #dee2e6; padding-bottom: 4px; }
+    .ai-content h5 { font-size: 0.95rem; margin-top: 0.6rem; color: #34495e; }
+    .ai-content table { font-size: 0.85rem; }
+    .ai-content p { margin-bottom: 0.5rem; }
+    .ai-content a { color: #0d6efd; text-decoration: underline; }
+    .ai-content img { max-height: 150px; border-radius: 6px; margin: 4px; }
     .chat-bubble-user {
         margin-left: auto;
         background-color: #0d6efd;
@@ -210,7 +217,15 @@
         label.className = 'bubble-label';
         label.textContent = role === 'user' ? '{{ _("You") }}' : '{{ _("Assistant") }}';
         bubble.appendChild(label);
-        bubble.appendChild(document.createTextNode(text));
+        if (role === 'ai') {
+            // AI responses are HTML — render them properly
+            var content = document.createElement('div');
+            content.className = 'ai-content';
+            content.innerHTML = text;
+            bubble.appendChild(content);
+        } else {
+            bubble.appendChild(document.createTextNode(text));
+        }
         chatMessages.appendChild(bubble);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }

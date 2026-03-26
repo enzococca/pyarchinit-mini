@@ -4390,9 +4390,16 @@ def create_app():
             if not question and not action:
                 return jsonify({'error': 'No question provided'}), 400
 
+            # Detect language from session
+            from pyarchinit_mini.i18n import get_locale
+            try:
+                lang = get_locale()
+            except Exception:
+                lang = 'it'
+
             context = {}
+            media_urls = []  # Collect media URLs to append to response
             if site_name:
-                # Build context from site data
                 from pyarchinit_mini.models.site import Site as SiteModel
                 from pyarchinit_mini.models.us import US as USModel
                 from pyarchinit_mini.models.inventario_materiali import InventarioMateriali as InvModel
@@ -4407,21 +4414,44 @@ def create_app():
                         context['inv_list'] = [i.to_dict() for i in inv_records]
                         context['inv_count'] = session.query(InvModel).filter(InvModel.sito == site_name).count()
 
+                        # Collect media images for the site
+                        try:
+                            site_media = media_service.get_media_by_entity('site', site.id_sito, size=10)
+                            for m in site_media:
+                                if m.media_type == 'image' and m.media_path:
+                                    media_urls.append({
+                                        'url': f'/media/{m.media_path}',
+                                        'caption': m.description or m.media_name or ''
+                                    })
+                        except Exception:
+                            pass
+
             # Handle quick actions
             if action == 'summarize' and context:
                 answer = ai.generate_report_summary(
                     context.get('site', {}),
                     context.get('us_list', []),
-                    context.get('inv_list', [])
+                    context.get('inv_list', []),
+                    lang=lang
                 )
             elif action == 'stratigraphy' and context:
                 rels = []
                 for u in context.get('us_list', []):
                     if u.get('rapporti'):
                         rels.append({'us': u.get('us'), 'rapporti': u.get('rapporti')})
-                answer = ai.analyze_stratigraphy(site_name, rels)
+                answer = ai.analyze_stratigraphy(site_name, rels, lang=lang)
             else:
-                answer = ai.ask(question, context if context else None)
+                answer = ai.ask(question, context if context else None, lang=lang)
+
+            # Append media gallery if images available
+            if media_urls:
+                gallery = '<div class="mt-3 border-top pt-3"><h5><i class="fas fa-images"></i> '
+                gallery += ('Immagini del sito' if lang == 'it' else 'Site Images') + '</h5>'
+                gallery += '<div class="d-flex flex-wrap gap-2">'
+                for m in media_urls:
+                    gallery += f'<div class="text-center"><img src="{m["url"]}" style="max-height:120px;border-radius:6px;" class="img-thumbnail"><br><small>{m["caption"]}</small></div>'
+                gallery += '</div></div>'
+                answer += gallery
 
             return jsonify({'answer': answer})
 
