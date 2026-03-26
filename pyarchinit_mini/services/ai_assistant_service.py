@@ -13,15 +13,15 @@ from typing import Dict, Any, List, Optional
 logger = logging.getLogger(__name__)
 
 # Default models per provider (latest as of March 2026)
-# OpenAI: gpt-4.1-nano (cheapest), gpt-4.1-mini (fast), gpt-4.1 (best), o4-mini (reasoning)
+# OpenAI: gpt-5.4-mini (fast+cheap), gpt-5.4 (best), o4-mini (reasoning)
 # Anthropic: claude-haiku-4-5 (cheapest), claude-sonnet-4-6 (fast), claude-opus-4-6 (best)
 DEFAULT_MODELS = {
-    "openai": "gpt-4.1-mini",
+    "openai": "gpt-5.4-mini",
     "anthropic": "claude-sonnet-4-6",
 }
 # All supported models for UI selection
 AVAILABLE_MODELS = {
-    "openai": ["gpt-4.1-nano", "gpt-4.1-mini", "gpt-4.1", "o4-mini"],
+    "openai": ["gpt-5.4-mini", "gpt-5.4", "gpt-4.1-mini", "gpt-4.1", "o4-mini"],
     "anthropic": ["claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-6"],
 }
 
