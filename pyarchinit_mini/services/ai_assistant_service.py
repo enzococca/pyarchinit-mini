@@ -12,9 +12,11 @@ from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
-# Default models per provider
+# Default models per provider (latest as of March 2026)
+# OpenAI: gpt-4.1-mini (fast), gpt-4.1 (best), o4-mini (reasoning)
+# Anthropic: claude-sonnet-4-6 (fast), claude-opus-4-6 (best), claude-haiku-4-5 (cheapest)
 DEFAULT_MODELS = {
-    "openai": "gpt-4o-mini",
+    "openai": "gpt-4.1-mini",
     "anthropic": "claude-sonnet-4-6",
 }
 

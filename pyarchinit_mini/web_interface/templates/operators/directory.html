@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Operator Directory') }} - PyArchInit-Mini{% endblock %}
+
+{% block extra_css %}
+<style>
+    .operator-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+    }
+    .operator-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+    .operator-card .card-body {
+        padding: 1.5rem;
+    }
+    .operator-name {
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--bs-body-color);
+    }
+    .operator-email a {
+        color: var(--bs-primary);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    .operator-email a:hover {
+        text-decoration: underline;
+    }
+    .role-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin: 0.75rem 0;
+    }
+    .role-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+    }
+    .role-badge-schedatore {
+        background-color: rgba(13, 110, 253, 0.12);
+        color: #0d6efd;
+    }
+    .role-badge-direttore {
+        background-color: rgba(111, 66, 193, 0.12);
+        color: #6f42c1;
+    }
+    .role-badge-responsabile {
+        background-color: rgba(25, 135, 84, 0.12);
+        color: #198754;
+    }
+    .operator-stats {
+        display: flex;
+        gap: 1rem;
+        margin: 1rem 0;
+        flex-wrap: wrap;
+    }
+    .stat-item {
+        text-align: center;
+        min-width: 70px;
+    }
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: var(--bs-primary);
+    }
+    .stat-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--bs-secondary);
+        font-weight: 600;
+    }
+    .operator-sites-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+    .operator-sites-list li a {
+        display: inline-block;
+        padding: 0.2rem 0.55rem;
+        background: var(--bs-light);
+        border-radius: 6px;
+        font-size: 0.82rem;
+        color: var(--bs-body-color);
+        text-decoration: none;
+        transition: background 0.15s;
+    }
+    .operator-sites-list li a:hover {
+        background: var(--bs-primary);
+        color: #fff;
+    }
+    .us-per-site-table {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+    .us-per-site-table td,
+    .us-per-site-table th {
+        padding: 0.35rem 0.5rem;
+    }
+    .filter-bar {
+        background: var(--bs-white);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        margin-bottom: 1.5rem;
+    }
+    [data-theme="dark"] .filter-bar {
+        background: var(--bs-dark);
+    }
+    [data-theme="dark"] .operator-card {
+        background: var(--bs-dark);
+    }
+    [data-theme="dark"] .operator-sites-list li a {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    .no-results {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--bs-secondary);
+    }
+    .no-results i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.4;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-3">
+    <!-- Page header -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                <i class="fas fa-id-badge me-2 text-primary"></i>{{ _('Operator Directory') }}
+            </h1>
+            <p class="text-muted mb-0">
+                {{ _('Who excavated what, when, and how to reach them.') }}
+            </p>
+        </div>
+        <span class="badge bg-primary fs-6">
+            {{ operators|length }} {{ _('operators') }}
+        </span>
+    </div>
+
+    <!-- Search / filter bar -->
+    <div class="filter-bar">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" id="operator-search" class="form-control border-start-0"
+                           placeholder="{{ _('Search by name, site, or email...') }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select id="role-filter" class="form-select">
+                    <option value="">{{ _('All Roles') }}</option>
+                    <option value="schedatore">{{ _('Schedatore') }}</option>
+                    <option value="direttore">{{ _('Direttore') }}</option>
+                    <option value="responsabile">{{ _('Responsabile') }}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="site-filter" class="form-select">
+                    <option value="">{{ _('All Sites') }}</option>
+                    {% set all_sites = [] %}
+                    {% for op in operators %}
+                        {% for s in op.sites_list %}
+                            {% if s.name not in all_sites %}
+                                {% if all_sites.append(s.name) %}{% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    {% for site_name in all_sites|sort %}
+                    <option value="{{ site_name }}">{{ site_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1 text-end">
+                <button class="btn btn-outline-secondary" id="clear-filters" title="{{ _('Clear filters') }}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operator cards grid -->
+    <div class="row g-4" id="operators-grid">
+        {% for op in operators %}
+        <div class="col-12 col-md-6 col-lg-4 operator-col"
+             data-name="{{ op.name|lower }}"
+             data-email="{{ (op.email or '')|lower }}"
+             data-roles="{{ op.role_badges|join(',')|lower }}"
+             data-sites="{{ op.sites_list|map(attribute='name')|join(',')|lower }}">
+            <div class="card operator-card">
+                <div class="card-body d-flex flex-column">
+                    <!-- Name and avatar placeholder -->
+                    <div class="d-flex align-items-start mb-1">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3"
+                             style="width:48px; height:48px; min-width:48px;">
+                            <i class="fas fa-user-tie text-primary" style="font-size:1.3rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="operator-name">{{ op.name }}</div>
+                            {% if op.email %}
+                            <div class="operator-email">
+                                <i class="fas fa-envelope me-1 text-muted"></i>
+                                <a href="mailto:{{ op.email }}">{{ op.email }}</a>
+                            </div>
+                            {% else %}
+                            <div class="text-muted" style="font-size:0.85rem;">
+                                <i class="fas fa-envelope me-1"></i>{{ _('No email on file') }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Role badges -->
+                    <div class="role-badges">
+                        {% for badge in op.role_badges %}
+                        <span class="role-badge role-badge-{{ badge|lower }}">
+                            {% if badge == 'Schedatore' %}
+                                <i class="fas fa-pen-alt me-1"></i>
+                            {% elif badge == 'Direttore' %}
+                                <i class="fas fa-hard-hat me-1"></i>
+                            {% elif badge == 'Responsabile' %}
+                                <i class="fas fa-clipboard-check me-1"></i>
+                            {% endif %}
+                            {{ _(badge) }}
+                        </span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Stats row -->
+                    <div class="operator-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ op.sites_count }}</div>
+                            <div class="stat-label">{{ _('Sites') }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ op.us_count }}</div>
+                            <div class="stat-label">{{ _('US') }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">
+                                {% if op.years_range %}
+                                    {{ op.years_range }}
+                                {% else %}
+                                    &mdash;
+                                {% endif %}
+                            </div>
+                            <div class="stat-label">{{ _('Years Active') }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Sites worked on -->
+                    <div class="mt-auto">
+                        <div class="fw-semibold mb-1" style="font-size:0.85rem;">
+                            <i class="fas fa-map-marker-alt me-1 text-muted"></i>{{ _('Sites') }}
+                        </div>
+                        <ul class="operator-sites-list">
+                            {% for site in op.sites_list %}
+                            <li>
+                                <a href="{{ url_for('site_detail', sito=site.name) }}" title="{{ site.name }}">
+                                    {{ site.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+
+                        <!-- Expandable US per site -->
+                        {% if op.sites_list %}
+                        <div class="mt-2">
+                            <a class="btn btn-sm btn-link text-decoration-none p-0" style="font-size:0.82rem;"
+                               data-bs-toggle="collapse" href="#us-detail-{{ loop.index }}"
+                               role="button" aria-expanded="false"
+                               aria-controls="us-detail-{{ loop.index }}">
+                                <i class="fas fa-chevron-down me-1"></i>{{ _('US count per site') }}
+                            </a>
+                            <div class="collapse" id="us-detail-{{ loop.index }}">
+                                <table class="table table-sm us-per-site-table mt-1 mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ _('Site') }}</th>
+                                            <th class="text-end">{{ _('US Count') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for site in op.sites_list %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('site_detail', sito=site.name) }}">
+                                                    {{ site.name }}
+                                                </a>
+                                            </td>
+                                            <td class="text-end">{{ site.us_count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 no-results" id="empty-state">
+            <i class="fas fa-users-slash d-block"></i>
+            <h5>{{ _('No operators found') }}</h5>
+            <p class="text-muted">{{ _('Operator data is extracted from the schedatore, direttore, and responsabile fields in stratigraphic units.') }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- No results after filtering (hidden by default) -->
+    <div class="no-results d-none" id="no-filter-results">
+        <i class="fas fa-filter d-block"></i>
+        <h5>{{ _('No operators match your filters') }}</h5>
+        <p class="text-muted">{{ _('Try adjusting your search criteria.') }}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const searchInput = document.getElementById('operator-search');
+    const roleFilter = document.getElementById('role-filter');
+    const siteFilter = document.getElementById('site-filter');
+    const clearBtn = document.getElementById('clear-filters');
+    const grid = document.getElementById('operators-grid');
+    const noResults = document.getElementById('no-filter-results');
+    const cards = document.querySelectorAll('.operator-col');
+
+    function applyFilters() {
+        const query = searchInput.value.trim().toLowerCase();
+        const role = roleFilter.value.toLowerCase();
+        const site = siteFilter.value.toLowerCase();
+        let visible = 0;
+
+        cards.forEach(function(col) {
+            const name = col.dataset.name || '';
+            const email = col.dataset.email || '';
+            const roles = col.dataset.roles || '';
+            const sites = col.dataset.sites || '';
+
+            let show = true;
+
+            // Text search: match name, email, or sites
+            if (query) {
+                show = name.indexOf(query) !== -1
+                    || email.indexOf(query) !== -1
+                    || sites.indexOf(query) !== -1;
+            }
+
+            // Role filter
+            if (show && role) {
+                show = roles.indexOf(role) !== -1;
+            }
+
+            // Site filter
+            if (show && site) {
+                var siteLower = site.toLowerCase();
+                var sitesList = sites.split(',');
+                show = sitesList.some(function(s) { return s.trim() === siteLower; });
+            }
+
+            col.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        // Toggle no-results message
+        if (cards.length > 0) {
+            noResults.classList.toggle('d-none', visible > 0);
+        }
+    }
+
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (roleFilter) roleFilter.addEventListener('change', applyFilters);
+    if (siteFilter) siteFilter.addEventListener('change', applyFilters);
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            roleFilter.value = '';
+            siteFilter.value = '';
+            applyFilters();
+        });
+    }
+})();
+</script>
+{% endblock %}

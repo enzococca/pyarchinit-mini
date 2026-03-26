@@ -30,6 +30,9 @@ class User(BaseModel):
     role = Column(Enum(UserRole), default=UserRole.VIEWER, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_superuser = Column(Boolean, default=False, nullable=False)
+    # Contact info for messaging
+    telegram_username = Column(String(100), nullable=True)
+    phone = Column(String(30), nullable=True)
 
     # Audit fields
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

@@ -530,6 +530,10 @@ class DatabaseMigrations:
             # Bidirectional user sync trigger (PostgreSQL only)
             total_migrations += self.migrate_user_sync_trigger()
 
+            # Add contact fields to users table
+            for col, typ in [('telegram_username', 'VARCHAR(100)'), ('phone', 'VARCHAR(30)')]:
+                total_migrations += self.add_column_if_not_exists('users', col, typ)
+
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations
 

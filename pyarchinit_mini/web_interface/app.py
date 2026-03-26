@@ -4048,6 +4048,276 @@ def create_app():
             return jsonify({'type': 'FeatureCollection', 'features': [],
                             'error': str(e)})
 
+    # ===== Team Contacts & Messaging =====
+    @app.route('/messaging')
+    @login_required
+    def team_messaging():
+        """Team contacts with Telegram/WhatsApp/Email links"""
+        try:
+            from sqlalchemy import func, distinct
+            from pyarchinit_mini.models.us import US as USModel
+            from pyarchinit_mini.models.user import User as UserModel
+
+            contacts = []
+            with db_manager.connection.get_session() as session:
+                users = session.query(UserModel).filter(UserModel.is_active == True).all()
+                for u in users:
+                    # Get excavation stats for this user
+                    us_count = 0
+                    sites_count = 0
+                    years_range = ''
+                    sites = []
+                    try:
+                        name_variants = [u.username, u.full_name] if u.full_name else [u.username]
+                        for name in name_variants:
+                            if not name:
+                                continue
+                            cnt = session.query(func.count(USModel.id_us)).filter(
+                                (USModel.schedatore == name) | (USModel.direttore_us == name) | (USModel.responsabile_us == name)
+                            ).scalar()
+                            if cnt and cnt > us_count:
+                                us_count = cnt
+                                sites_count = session.query(func.count(distinct(USModel.sito))).filter(
+                                    (USModel.schedatore == name) | (USModel.direttore_us == name) | (USModel.responsabile_us == name)
+                                ).scalar() or 0
+                                ymin = session.query(func.min(USModel.anno_scavo)).filter(USModel.schedatore == name).scalar()
+                                ymax = session.query(func.max(USModel.anno_scavo)).filter(USModel.schedatore == name).scalar()
+                                if ymin and ymax:
+                                    years_range = f"{ymin}-{ymax}" if ymin != ymax else str(ymin)
+                                site_rows = session.query(distinct(USModel.sito)).filter(
+                                    (USModel.schedatore == name) | (USModel.direttore_us == name) | (USModel.responsabile_us == name)
+                                ).limit(15).all()
+                                sites = [s[0] for s in site_rows if s[0]]
+                    except Exception:
+                        pass
+
+                    contacts.append({
+                        'username': u.username,
+                        'full_name': u.full_name,
+                        'email': u.email,
+                        'role': u.role.value if hasattr(u.role, 'value') else str(u.role),
+                        'telegram_username': getattr(u, 'telegram_username', None),
+                        'phone': getattr(u, 'phone', None),
+                        'us_count': us_count,
+                        'sites_count': sites_count,
+                        'years_range': years_range,
+                        'sites': sites
+                    })
+
+            contacts.sort(key=lambda x: x['us_count'], reverse=True)
+            return render_template('messaging/contacts.html', contacts=contacts)
+
+        except Exception as e:
+            flash(f'Errore contatti: {str(e)}', 'error')
+            return redirect(url_for('index'))
+
+    # ===== Operator Directory =====
+    @app.route('/operators')
+    @login_required
+    def operator_directory():
+        """Operator directory: who excavated what, when, contacts"""
+        try:
+            from sqlalchemy import text as sa_text, func, distinct
+            from pyarchinit_mini.models.us import US as USModel
+            from pyarchinit_mini.models.user import User as UserModel
+            from collections import defaultdict
+
+            operators = {}  # name -> {email, role_badges, sites, us_count, years}
+
+            with db_manager.connection.get_session() as session:
+                # Get all unique operators from US records
+                for field, badge in [('schedatore', 'Schedatore'), ('direttore_us', 'Direttore'), ('responsabile_us', 'Responsabile')]:
+                    col = getattr(USModel, field)
+                    rows = session.query(
+                        col,
+                        func.count(USModel.id_us),
+                        func.count(distinct(USModel.sito)),
+                        func.min(USModel.anno_scavo),
+                        func.max(USModel.anno_scavo)
+                    ).filter(col.isnot(None), col != '').group_by(col).all()
+
+                    for name, us_count, sites_count, year_min, year_max in rows:
+                        name = name.strip()
+                        if not name:
+                            continue
+                        if name not in operators:
+                            operators[name] = {'name': name, 'email': None, 'role_badges': [],
+                                             'sites_count': 0, 'us_count': 0, 'years_range': '',
+                                             'sites_list': [], 'year_min': 9999, 'year_max': 0}
+                        op = operators[name]
+                        if badge not in op['role_badges']:
+                            op['role_badges'].append(badge)
+                        op['us_count'] += us_count
+                        op['sites_count'] = max(op['sites_count'], sites_count)
+                        if year_min and year_min < op['year_min']:
+                            op['year_min'] = year_min
+                        if year_max and year_max > op['year_max']:
+                            op['year_max'] = year_max
+
+                # Get email from users table
+                users = session.query(UserModel.username, UserModel.email, UserModel.full_name).all()
+                user_map = {}
+                for u in users:
+                    if u.full_name:
+                        user_map[u.full_name.lower().strip()] = u.email
+                    user_map[u.username.lower().strip()] = u.email
+
+                # Also check pyarchinit_users if PostgreSQL
+                try:
+                    pa_users = session.execute(sa_text(
+                        "SELECT username, email, full_name FROM pyarchinit_users"
+                    )).fetchall()
+                    for pu in pa_users:
+                        if pu[2]:  # full_name
+                            user_map[pu[2].lower().strip()] = pu[1]
+                        if pu[0]:
+                            user_map[pu[0].lower().strip()] = pu[1]
+                except Exception:
+                    pass
+
+                # Match emails and get sites list per operator
+                for name, op in operators.items():
+                    op['email'] = user_map.get(name.lower().strip())
+                    yr_min = op.pop('year_min')
+                    yr_max = op.pop('year_max')
+                    if yr_min < 9999 and yr_max > 0:
+                        op['years_range'] = f"{yr_min}-{yr_max}" if yr_min != yr_max else str(yr_min)
+
+                    # Get sites list for this operator
+                    sites_data = session.query(
+                        USModel.sito, func.count(USModel.id_us)
+                    ).filter(
+                        (USModel.schedatore == name) | (USModel.direttore_us == name) | (USModel.responsabile_us == name)
+                    ).group_by(USModel.sito).order_by(func.count(USModel.id_us).desc()).limit(15).all()
+                    op['sites_list'] = [{'name': s[0], 'us_count': s[1]} for s in sites_data]
+
+            # Sort by US count descending
+            op_list = sorted(operators.values(), key=lambda x: x['us_count'], reverse=True)
+
+            return render_template('operators/directory.html', operators=op_list)
+
+        except Exception as e:
+            flash(f'Errore directory operatori: {str(e)}', 'error')
+            return redirect(url_for('index'))
+
+    # ===== Targeted Statistics =====
+    @app.route('/stats')
+    @login_required
+    def targeted_stats():
+        """Targeted statistics with filters"""
+        try:
+            from sqlalchemy import text as sa_text, func, distinct
+            from pyarchinit_mini.models.us import US as USModel
+            from pyarchinit_mini.models.site import Site as SiteModel
+            from pyarchinit_mini.models.inventario_materiali import InventarioMateriali as InvModel
+
+            # Get filter params
+            site_filter = request.args.get('sito', '')
+            year_from = request.args.get('year_from', '', type=str)
+            year_to = request.args.get('year_to', '', type=str)
+            operator_filter = request.args.get('operator', '')
+
+            sites = site_service.get_all_sites(size=10000)
+
+            with db_manager.connection.get_session() as session:
+                # Base query filters
+                us_query = session.query(USModel)
+                if site_filter:
+                    us_query = us_query.filter(USModel.sito == site_filter)
+                if year_from:
+                    us_query = us_query.filter(USModel.anno_scavo >= int(year_from))
+                if year_to:
+                    us_query = us_query.filter(USModel.anno_scavo <= int(year_to))
+                if operator_filter:
+                    us_query = us_query.filter(
+                        (USModel.schedatore == operator_filter) |
+                        (USModel.direttore_us == operator_filter) |
+                        (USModel.responsabile_us == operator_filter))
+
+                # Total counts
+                total_sites = site_service.count_sites()
+                total_us = us_query.count()
+                total_materials = inventario_service.count_inventario(
+                    {'sito': site_filter} if site_filter else None)
+
+                # Operators list
+                operators_raw = session.query(distinct(USModel.schedatore)).filter(
+                    USModel.schedatore.isnot(None), USModel.schedatore != '').all()
+                operators_list = sorted([o[0] for o in operators_raw if o[0]])
+
+                # Activity by year
+                year_rows = session.query(
+                    USModel.anno_scavo, func.count(USModel.id_us)
+                ).filter(USModel.anno_scavo.isnot(None))
+                if site_filter:
+                    year_rows = year_rows.filter(USModel.sito == site_filter)
+                year_rows = year_rows.group_by(USModel.anno_scavo).order_by(USModel.anno_scavo).all()
+                activity_by_year = {str(r[0]): r[1] for r in year_rows if r[0]}
+
+                # Operator performance
+                op_perf = []
+                for op_name in operators_list[:30]:
+                    op_us = session.query(func.count(USModel.id_us)).filter(USModel.schedatore == op_name).scalar()
+                    op_sites = session.query(func.count(distinct(USModel.sito))).filter(USModel.schedatore == op_name).scalar()
+                    op_ymin = session.query(func.min(USModel.anno_scavo)).filter(USModel.schedatore == op_name).scalar()
+                    op_ymax = session.query(func.max(USModel.anno_scavo)).filter(USModel.schedatore == op_name).scalar()
+                    op_perf.append({
+                        'name': op_name, 'sites': op_sites, 'us_count': op_us,
+                        'materials': 0,
+                        'years': f"{op_ymin}-{op_ymax}" if op_ymin and op_ymax and op_ymin != op_ymax else str(op_ymin or '')
+                    })
+                op_perf.sort(key=lambda x: x['us_count'], reverse=True)
+
+                # Site type distribution
+                type_rows = session.query(
+                    SiteModel.definizione_sito, func.count(SiteModel.id_sito)
+                ).filter(SiteModel.definizione_sito.isnot(None), SiteModel.definizione_sito != ''
+                ).group_by(SiteModel.definizione_sito).order_by(func.count(SiteModel.id_sito).desc()).limit(15).all()
+                site_type_dist = {r[0]: r[1] for r in type_rows}
+
+                # Chronological distribution
+                chrono_rows = session.query(
+                    USModel.datazione, func.count(USModel.id_us)
+                ).filter(USModel.datazione.isnot(None), USModel.datazione != '')
+                if site_filter:
+                    chrono_rows = chrono_rows.filter(USModel.sito == site_filter)
+                chrono_rows = chrono_rows.group_by(USModel.datazione).order_by(func.count(USModel.id_us).desc()).limit(15).all()
+                chrono_dist = {r[0]: r[1] for r in chrono_rows}
+
+                # Material types
+                mat_rows = session.query(
+                    InvModel.tipo_reperto, func.count(InvModel.id_invmat)
+                ).filter(InvModel.tipo_reperto.isnot(None), InvModel.tipo_reperto != '')
+                if site_filter:
+                    mat_rows = mat_rows.filter(InvModel.sito == site_filter)
+                mat_rows = mat_rows.group_by(InvModel.tipo_reperto).order_by(func.count(InvModel.id_invmat).desc()).limit(15).all()
+                material_types = {r[0]: r[1] for r in mat_rows}
+
+                # Recent activity
+                recent_q = session.query(USModel).order_by(USModel.id_us.desc()).limit(20).all()
+                recent = [{'sito': u.sito, 'us': u.us, 'schedatore': u.schedatore,
+                          'data_schedatura': str(u.data_schedatura) if u.data_schedatura else ''} for u in recent_q]
+
+            data = {
+                'total_sites': total_sites, 'total_us': total_us,
+                'total_materials': total_materials, 'total_operators': len(operators_list),
+                'operators_list': operators_list,
+                'activity_by_year': activity_by_year,
+                'operator_performance': op_perf,
+                'site_type_distribution': site_type_dist,
+                'chronological_distribution': chrono_dist,
+                'material_types': material_types,
+                'recent_activity': recent
+            }
+
+            return render_template('stats/targeted.html', data=data, sites=sites,
+                                 site_filter=site_filter, year_from=year_from,
+                                 year_to=year_to, operator_filter=operator_filter)
+
+        except Exception as e:
+            flash(f'Errore statistiche: {str(e)}', 'error')
+            return redirect(url_for('index'))
+
     # ===== AI Assistant =====
     @app.route('/ai')
     @login_required
