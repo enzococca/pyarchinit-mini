@@ -24,6 +24,8 @@ AVAILABLE_MODELS = {
     "openai": ["gpt-5.4-mini", "gpt-5.4", "gpt-4.1-mini", "gpt-4.1", "o4-mini"],
     "anthropic": ["claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-6"],
 }
+# Models that use max_completion_tokens instead of max_tokens
+_NEW_TOKEN_PARAM_MODELS = {"gpt-5.4", "gpt-5.4-mini", "o4-mini", "o3", "o3-mini", "o1", "o1-mini"}
 
 SYSTEM_PROMPT = (
     "You are an archaeological data assistant for the PyArchInit system. "
@@ -164,15 +166,20 @@ class AIAssistantService:
             )
 
         client = openai.OpenAI(api_key=self.api_key)
-        response = client.chat.completions.create(
-            model=self.model,
-            messages=[
+        params = {
+            "model": self.model,
+            "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message},
             ],
-            temperature=0.7,
-            max_tokens=2048,
-        )
+            "temperature": 0.1,
+        }
+        # GPT-5.4, o-series use max_completion_tokens; older models use max_tokens
+        if self.model in _NEW_TOKEN_PARAM_MODELS:
+            params["max_completion_tokens"] = 4096
+        else:
+            params["max_tokens"] = 4096
+        response = client.chat.completions.create(**params)
         return response.choices[0].message.content
 
     def _call_anthropic(self, system_prompt: str, user_message: str) -> str:

@@ -3,6 +3,7 @@ User model for authentication and authorization
 """
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
+from sqlalchemy.orm import deferred
 from sqlalchemy.sql import func
 from datetime import datetime
 import enum
@@ -30,9 +31,9 @@ class User(BaseModel):
     role = Column(Enum(UserRole), default=UserRole.VIEWER, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_superuser = Column(Boolean, default=False, nullable=False)
-    # Contact info for messaging
-    telegram_username = Column(String(100), nullable=True)
-    phone = Column(String(30), nullable=True)
+    # Contact info for messaging (deferred to avoid errors when columns don't exist yet)
+    telegram_username = deferred(Column(String(100), nullable=True))
+    phone = deferred(Column(String(30), nullable=True))
 
     # Audit fields
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
