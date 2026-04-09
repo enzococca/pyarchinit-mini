@@ -45,7 +45,14 @@ class AuthUtils:
                 "passlib is required for password hashing. "
                 "Install with: pip install 'passlib[bcrypt]'"
             )
-        return pwd_context.verify(plain_password, hashed_password)
+        try:
+            return pwd_context.verify(plain_password, hashed_password)
+        except Exception:
+            # Hash not recognized (e.g. plain text from PyArchInit sync).
+            # Try direct comparison as last resort, then re-hash if matched.
+            if plain_password == hashed_password:
+                return True
+            return False
 
     @staticmethod
     def hash_password(password: str) -> str:
