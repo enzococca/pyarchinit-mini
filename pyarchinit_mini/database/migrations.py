@@ -543,8 +543,33 @@ class DatabaseMigrations:
                 """))
                 session.commit()
 
-                # If detail table existed already with the wrong schema, add missing columns
+                # If tables existed already with old schema, add missing columns
                 inspector = inspect(engine)
+
+                # Master table: ensure sync_status (BaseModel concurrency col)
+                if inspector.has_table('tma_materiali_archeologici'):
+                    existing_master = {c['name'] for c in inspector.get_columns('tma_materiali_archeologici')}
+                    master_needed = [
+                        ('sync_status', 'TEXT'),
+                        ('entity_uuid', 'TEXT'),
+                        ('version_number', 'INTEGER'),
+                        ('editing_by', 'VARCHAR(100)'),
+                        ('editing_since', 'TIMESTAMP'),
+                        ('last_modified_by', 'VARCHAR(100)'),
+                        ('last_modified_timestamp', 'TIMESTAMP'),
+                    ]
+                    for col, typ in master_needed:
+                        if col not in existing_master:
+                            try:
+                                with self.connection.get_session() as s2:
+                                    s2.execute(text(f"ALTER TABLE tma_materiali_archeologici ADD COLUMN {col} {typ}"))
+                                    s2.commit()
+                                    logger.info(f"Added column {col} to tma_materiali_archeologici")
+                                    applied += 1
+                            except Exception as e:
+                                logger.warning(f"Could not add {col} to master: {e}")
+
+                # Detail table: detail-specific columns + concurrency cols
                 if inspector.has_table('tma_materiali_ripetibili'):
                     existing = {c['name'] for c in inspector.get_columns('tma_materiali_ripetibili')}
                     needed = [
@@ -557,6 +582,13 @@ class DatabaseMigrations:
                         ('cronologia_mac', 'VARCHAR(100)'),
                         ('macq', 'VARCHAR(20)'),
                         ('peso', 'REAL'),
+                        ('sync_status', 'TEXT'),
+                        ('entity_uuid', 'TEXT'),
+                        ('version_number', 'INTEGER'),
+                        ('editing_by', 'VARCHAR(100)'),
+                        ('editing_since', 'TIMESTAMP'),
+                        ('last_modified_by', 'VARCHAR(100)'),
+                        ('last_modified_timestamp', 'TIMESTAMP'),
                     ]
                     for col, typ in needed:
                         if col not in existing:
