@@ -176,10 +176,12 @@ THESAURUS_MAPPINGS = {
             'Inciso', 'Impresso', 'Nudo'
         ]
     },
+    # PyArchInit splits TMA thesaurus into TWO separate categories:
+    # - 'TMA materiali archeologici' (master TMA card fields)
+    # - 'TMA Materiali Ripetibili'   (detail repetitive material fields, NOTE capital R)
     'TMA materiali archeologici': {
-        # Master TMA fields (PyArchInit thesaurus codes in comments)
         'area': [  # 10.7
-            'A', 'B', 'C', 'D', '1', '2', '3', 'Settore A', 'Settore B'
+            'A', 'B', 'C', 'D', '1', '2', '3'
         ],
         'localita': [  # 10.3
             'Rimini', 'Cesena', 'Forli', 'Ravenna', 'Bellaria',
@@ -198,28 +200,21 @@ THESAURUS_MAPPINGS = {
             'Museo Archeologico Cesena',
             'Museo Archeologico Rimini',
             'Museo Fellini Rimini',
-            'Centro Restauro Ravenna',
-            "Deposito Sant'Agata",
-            'Magazzino Soprintendenza Rimini'
         ],
         'scan': [  # 10.5 - Denominazione scavo
             'Scavo stratigrafico', 'Scavo di emergenza',
-            'Saggio', 'Sondaggio', 'Trincea',
-            "Assistenza in corso d'opera", 'Recupero'
+            'Saggio', 'Sondaggio', 'Trincea', 'Recupero'
         ],
         'dtzg': [  # 10.4 - Fascia cronologica
-            'Eta preistorica',
-            'Eta protostorica',
+            'Eta preistorica', 'Eta protostorica',
             'Eta etrusca (VIII-V sec. a.C.)',
             'Eta romana repubblicana (II-I sec. a.C.)',
             'Eta romana imperiale (I-II sec. d.C.)',
-            'Eta romana tarda (III-V sec. d.C.)',
             'Eta tardo-antica (IV-VI sec. d.C.)',
             'Eta alto-medievale (VI-X sec.)',
             'Eta medievale (XI-XIV sec.)',
             'Eta rinascimentale (XV-XVI sec.)',
             'Eta moderna (XVI-XVIII sec.)',
-            'Eta contemporanea (XIX-XX sec.)'
         ],
         'aint': [  # 10.6 - Tipologia acquisizione
             'Scavo stratigrafico', 'Scavo di emergenza',
@@ -229,14 +224,15 @@ THESAURUS_MAPPINGS = {
         'ftap': [  # 10.9 - Tipo fotografia
             'Digitale', 'Pellicola', 'Diapositiva',
             'Macro digitale', 'Digitale alta risoluzione',
-            'Stereoscopica', 'Multispettrale'
         ],
         'drat': [  # 10.16 - Tipo disegno
-            'Tecnico', 'Rilievo', 'Schizzo', 'Schematico',
+            'Tecnico', 'Rilievo', 'Schizzo',
             'Sezione', 'Pianta', 'Prospetto'
         ],
-        # Detail fields (materiali ripetibili)
-        'macc': [  # 10.10 - Categoria
+    },
+    'TMA Materiali Ripetibili': {
+        # Detail fields used by tma_materiali_ripetibili
+        'macc': [  # 10.10 - Categoria materiale
             'Ceramica', 'Vetro', 'Metallo', 'Osso', 'Pietra',
             'Legno', 'Bronzo', 'Ferro', 'Argilla', 'Mosaico',
             'Numismatica', 'Terra sigillata italica',
@@ -261,7 +257,7 @@ THESAURUS_MAPPINGS = {
             'Etrusco-padano', 'Profilo articolato',
             'Decoro a fasce', 'Frammentario'
         ],
-        'cronologia_mac': [  # 10.4
+        'cronologia_mac': [  # 10.4 (same code as dtzg, but different table)
             'I sec. d.C.', 'II sec. d.C.', 'III sec. d.C.',
             'IV sec. d.C.', 'V sec. d.C.', 'VI sec. d.C.',
             'VII-VIII sec.', 'XII sec.', 'XIII sec.',

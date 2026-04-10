@@ -497,6 +497,99 @@ class DatabaseMigrations:
             logger.warning(f"migrate_user_sync_trigger: {e}")
             return 0
 
+    def migrate_tma_thesaurus_sync_trigger(self):
+        """Create/update PostgreSQL trigger that syncs pyarchinit_thesaurus_sigle to
+        thesaurus_field, mapping numeric TMA tipologia_sigla codes to readable
+        field names (10.7→area, 10.3→localita, etc.)."""
+        try:
+            engine = self.connection.engine
+            if engine.dialect.name != 'postgresql':
+                return 0
+            with self.connection.get_session() as session:
+                # Check pyarchinit_thesaurus_sigle exists
+                exists = session.execute(text(
+                    "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+                    "WHERE table_name = 'pyarchinit_thesaurus_sigle')"
+                )).scalar()
+                if not exists:
+                    return 0
+
+                # Drop and recreate the trigger function with TMA mapping
+                session.execute(text("""
+                    CREATE OR REPLACE FUNCTION sync_thesaurus_to_field() RETURNS TRIGGER AS $$
+                    DECLARE
+                        mapped_field_name TEXT;
+                    BEGIN
+                        mapped_field_name := COALESCE(NEW.tipologia_sigla, OLD.tipologia_sigla);
+                        IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') AND NEW.nome_tabella = 'TMA materiali archeologici' THEN
+                            mapped_field_name := CASE NEW.tipologia_sigla
+                                WHEN '10.7' THEN 'area'
+                                WHEN '10.1' THEN 'ldcn'
+                                WHEN '10.2' THEN 'ldct'
+                                WHEN '10.3' THEN 'localita'
+                                WHEN '10.15' THEN 'settore'
+                                WHEN '10.5' THEN 'scan'
+                                WHEN '10.4' THEN 'dtzg'
+                                WHEN '10.6' THEN 'aint'
+                                WHEN '10.9' THEN 'ftap'
+                                WHEN '10.16' THEN 'drat'
+                                WHEN '10.10' THEN 'macc'
+                                WHEN '10.11' THEN 'macl'
+                                WHEN '10.12' THEN 'macp'
+                                WHEN '10.13' THEN 'macd'
+                                ELSE NEW.tipologia_sigla
+                            END;
+                        ELSIF TG_OP = 'DELETE' AND OLD.nome_tabella = 'TMA materiali archeologici' THEN
+                            mapped_field_name := CASE OLD.tipologia_sigla
+                                WHEN '10.7' THEN 'area'
+                                WHEN '10.1' THEN 'ldcn'
+                                WHEN '10.2' THEN 'ldct'
+                                WHEN '10.3' THEN 'localita'
+                                WHEN '10.15' THEN 'settore'
+                                WHEN '10.5' THEN 'scan'
+                                WHEN '10.4' THEN 'dtzg'
+                                WHEN '10.6' THEN 'aint'
+                                WHEN '10.9' THEN 'ftap'
+                                WHEN '10.16' THEN 'drat'
+                                WHEN '10.10' THEN 'macc'
+                                WHEN '10.11' THEN 'macl'
+                                WHEN '10.12' THEN 'macp'
+                                WHEN '10.13' THEN 'macd'
+                                ELSE OLD.tipologia_sigla
+                            END;
+                        END IF;
+
+                        IF TG_OP = 'INSERT' THEN
+                            INSERT INTO thesaurus_field (table_name, field_name, value, label, description, sort_order, active, language)
+                            VALUES (NEW.nome_tabella, mapped_field_name, NEW.sigla_estesa, NEW.sigla, NEW.descrizione, COALESCE(NEW.order_layer, 0), '1', LOWER(NEW.lingua));
+                            -- 10.4 maps to BOTH dtzg AND cronologia_mac for TMA
+                            IF NEW.nome_tabella = 'TMA materiali archeologici' AND NEW.tipologia_sigla = '10.4' THEN
+                                INSERT INTO thesaurus_field (table_name, field_name, value, label, description, sort_order, active, language)
+                                VALUES (NEW.nome_tabella, 'cronologia_mac', NEW.sigla_estesa, NEW.sigla, NEW.descrizione, COALESCE(NEW.order_layer, 0), '1', LOWER(NEW.lingua));
+                            END IF;
+                            RETURN NEW;
+                        ELSIF TG_OP = 'UPDATE' THEN
+                            UPDATE thesaurus_field SET
+                                table_name = NEW.nome_tabella, field_name = mapped_field_name,
+                                value = NEW.sigla_estesa, label = NEW.sigla, description = NEW.descrizione,
+                                sort_order = COALESCE(NEW.order_layer, 0), language = LOWER(NEW.lingua), updated_at = NOW()
+                            WHERE table_name = OLD.nome_tabella AND value = OLD.sigla_estesa AND language = LOWER(OLD.lingua);
+                            RETURN NEW;
+                        ELSIF TG_OP = 'DELETE' THEN
+                            DELETE FROM thesaurus_field
+                            WHERE table_name = OLD.nome_tabella AND value = OLD.sigla_estesa AND language = LOWER(OLD.lingua);
+                            RETURN OLD;
+                        END IF;
+                    END;
+                    $$ LANGUAGE plpgsql
+                """))
+                session.commit()
+                logger.info("TMA thesaurus sync trigger function created/updated")
+                return 1
+        except Exception as e:
+            logger.warning(f"migrate_tma_thesaurus_sync_trigger: {e}")
+            return 0
+
     def migrate_tma_tables(self):
         """Create/align TMA tables (tma_materiali_archeologici + tma_materiali_ripetibili).
         Adds missing columns to tma_materiali_ripetibili so it matches the PyArchInit
@@ -677,6 +770,12 @@ class DatabaseMigrations:
                 total_migrations += self.migrate_tma_tables()
             except Exception as e:
                 logger.warning(f"TMA migration failed: {e}")
+
+            # TMA thesaurus sync trigger (PostgreSQL only)
+            try:
+                total_migrations += self.migrate_tma_thesaurus_sync_trigger()
+            except Exception as e:
+                logger.warning(f"TMA thesaurus trigger failed: {e}")
 
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations

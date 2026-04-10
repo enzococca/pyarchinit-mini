@@ -196,56 +196,71 @@ class TMAService:
     # ---------------- Helpers ----------------
 
     # ---------------- Thesaurus integration ----------------
-    # Mapping of TMA fields to PyArchInit thesaurus tipologia_sigla codes
-    THESAURUS_FIELD_MAP = {
-        'area': '10.7',          # Area code
-        'ldcn': '10.1',          # Denominazione collocazione
-        'ldct': '10.2',          # Tipologia collocazione
-        'localita': '10.3',      # Località
-        'settore': '10.15',      # Settore
-        'scan': '10.5',          # Denominazione scavo
-        'dtzg': '10.4',          # Fascia cronologica
-        'aint': '10.6',          # Tipologia acquisizione
-        'ftap': '10.9',          # Tipo fotografia
-        'drat': '10.16',         # Tipo disegno
-        # Detail (repetitive material) fields
-        'macc': '10.10',         # Categoria materiale
-        'macl': '10.11',         # Classe
-        'macp': '10.12',         # Precisazione tipologica
-        'macd': '10.13',         # Definizione
-        'cronologia_mac': '10.4',  # Cronologia
+    # PyArchInit splits TMA thesaurus into TWO tables (note 'Materiali Ripetibili' has capital M+R):
+    #   'TMA materiali archeologici' → master TMA fields
+    #   'TMA Materiali Ripetibili'   → detail (repetitive material) fields
+    THESAURUS_MASTER_TABLE = 'TMA materiali archeologici'
+    THESAURUS_DETAIL_TABLE = 'TMA Materiali Ripetibili'
+
+    THESAURUS_MASTER_MAP = {
+        'area': '10.7',
+        'ldcn': '10.1',
+        'ldct': '10.2',
+        'localita': '10.3',
+        'settore': '10.15',
+        'scan': '10.5',
+        'dtzg': '10.4',
+        'aint': '10.6',
+        'ftap': '10.9',
+        'drat': '10.16',
     }
-    THESAURUS_TABLE_NAME = 'TMA materiali archeologici'
+    THESAURUS_DETAIL_MAP = {
+        'macc': '10.10',
+        'macl': '10.11',
+        'macp': '10.12',
+        'macd': '10.13',
+        'cronologia_mac': '10.4',
+    }
 
     def get_thesaurus_values(self, field: str) -> List[Dict[str, str]]:
-        """Return thesaurus values for a TMA field as [{value, label}, ...].
-        Tries pyarchinit_thesaurus_sigle first, falls back to thesaurus_field."""
+        """Return thesaurus values for a TMA field as [{value, code}, ...].
+        Routes to the correct PyArchInit table based on whether the field is
+        a master or detail field. Tries pyarchinit_thesaurus_sigle first,
+        falls back to thesaurus_field."""
         from sqlalchemy import text
-        sigla = self.THESAURUS_FIELD_MAP.get(field)
-        if not sigla:
+
+        # Determine which table this field belongs to
+        if field in self.THESAURUS_MASTER_MAP:
+            table_name = self.THESAURUS_MASTER_TABLE
+            sigla = self.THESAURUS_MASTER_MAP[field]
+        elif field in self.THESAURUS_DETAIL_MAP:
+            table_name = self.THESAURUS_DETAIL_TABLE
+            sigla = self.THESAURUS_DETAIL_MAP[field]
+        else:
             return []
+
         results = []
         try:
             with self.db_manager.connection.get_session() as session:
-                # Try PyArchInit native thesaurus
+                # Try PyArchInit native thesaurus first
                 try:
                     rows = session.execute(text(
                         "SELECT sigla, sigla_estesa FROM pyarchinit_thesaurus_sigle "
                         "WHERE nome_tabella = :t AND tipologia_sigla = :s "
                         "ORDER BY sigla_estesa"
-                    ), {'t': self.THESAURUS_TABLE_NAME, 's': sigla}).fetchall()
+                    ), {'t': table_name, 's': sigla}).fetchall()
                     for r in rows:
                         results.append({'value': r[1] or r[0], 'code': r[0]})
                 except Exception:
                     pass
-                # Fallback: Mini's thesaurus_field
+                # Fallback: Mini's thesaurus_field (lookup by mapped field name)
                 if not results:
                     try:
                         rows = session.execute(text(
                             "SELECT value, label FROM thesaurus_field "
-                            "WHERE table_name = :t AND field_name = :s "
+                            "WHERE table_name = :t AND field_name = :f "
                             "ORDER BY value"
-                        ), {'t': self.THESAURUS_TABLE_NAME, 's': sigla}).fetchall()
+                        ), {'t': table_name, 'f': field}).fetchall()
                         for r in rows:
                             results.append({'value': r[0], 'code': r[1] or ''})
                     except Exception:
