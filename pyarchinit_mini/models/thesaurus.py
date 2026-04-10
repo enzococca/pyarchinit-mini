@@ -175,5 +175,98 @@ THESAURUS_MAPPINGS = {
             'Verniciato', 'Ingobbato', 'Dipinto', 'Graffito',
             'Inciso', 'Impresso', 'Nudo'
         ]
+    },
+    'TMA materiali archeologici': {
+        # Master TMA fields (PyArchInit thesaurus codes in comments)
+        'area': [  # 10.7
+            'A', 'B', 'C', 'D', '1', '2', '3', 'Settore A', 'Settore B'
+        ],
+        'localita': [  # 10.3
+            'Rimini', 'Cesena', 'Forli', 'Ravenna', 'Bellaria',
+            'Apecchio', 'San Costanzo', 'Pesaro', 'Faenza'
+        ],
+        'settore': [  # 10.15
+            'A', 'B', 'C', 'D', 'Nord', 'Sud', 'Est', 'Ovest'
+        ],
+        'ldct': [  # 10.2 - Tipologia collocazione
+            'Magazzino', 'Museo', 'Caveau', 'Laboratorio',
+            'Restauro', 'Deposito', 'Archivio'
+        ],
+        'ldcn': [  # 10.1 - Denominazione collocazione
+            'Soprintendenza ABAP Ravenna',
+            'Soprintendenza ABAP Bologna',
+            'Museo Archeologico Cesena',
+            'Museo Archeologico Rimini',
+            'Museo Fellini Rimini',
+            'Centro Restauro Ravenna',
+            "Deposito Sant'Agata",
+            'Magazzino Soprintendenza Rimini'
+        ],
+        'scan': [  # 10.5 - Denominazione scavo
+            'Scavo stratigrafico', 'Scavo di emergenza',
+            'Saggio', 'Sondaggio', 'Trincea',
+            "Assistenza in corso d'opera", 'Recupero'
+        ],
+        'dtzg': [  # 10.4 - Fascia cronologica
+            'Eta preistorica',
+            'Eta protostorica',
+            'Eta etrusca (VIII-V sec. a.C.)',
+            'Eta romana repubblicana (II-I sec. a.C.)',
+            'Eta romana imperiale (I-II sec. d.C.)',
+            'Eta romana tarda (III-V sec. d.C.)',
+            'Eta tardo-antica (IV-VI sec. d.C.)',
+            'Eta alto-medievale (VI-X sec.)',
+            'Eta medievale (XI-XIV sec.)',
+            'Eta rinascimentale (XV-XVI sec.)',
+            'Eta moderna (XVI-XVIII sec.)',
+            'Eta contemporanea (XIX-XX sec.)'
+        ],
+        'aint': [  # 10.6 - Tipologia acquisizione
+            'Scavo stratigrafico', 'Scavo di emergenza',
+            'Recupero', 'Donazione', 'Sequestro',
+            'Acquisto', 'Ricognizione di superficie'
+        ],
+        'ftap': [  # 10.9 - Tipo fotografia
+            'Digitale', 'Pellicola', 'Diapositiva',
+            'Macro digitale', 'Digitale alta risoluzione',
+            'Stereoscopica', 'Multispettrale'
+        ],
+        'drat': [  # 10.16 - Tipo disegno
+            'Tecnico', 'Rilievo', 'Schizzo', 'Schematico',
+            'Sezione', 'Pianta', 'Prospetto'
+        ],
+        # Detail fields (materiali ripetibili)
+        'macc': [  # 10.10 - Categoria
+            'Ceramica', 'Vetro', 'Metallo', 'Osso', 'Pietra',
+            'Legno', 'Bronzo', 'Ferro', 'Argilla', 'Mosaico',
+            'Numismatica', 'Terra sigillata italica',
+            'Terra sigillata africana', 'Bucchero', 'Anfora',
+            'Maiolica graffita', 'Maiolica ingobbiata'
+        ],
+        'macl': [  # 10.11 - Classe
+            'Vasellame', 'Strumento', 'Contenitore', 'Equipaggiamento',
+            'Vestiario', 'Resti umani', 'Tessera', 'Lucerna',
+            'Numismatica', 'Architettonico'
+        ],
+        'macp': [  # 10.12 - Precisazione tipologica (forma)
+            'Coppa', 'Piatto', 'Bicchiere', 'Boccale', 'Olla',
+            'Anfora', 'Lucerna', 'Chiodo', 'Fibbia', 'Macina',
+            'Peso da telaio', 'Tessera', 'Cranio', 'Ossa lunghe',
+            'Ferro di cavallo', 'Balsamario'
+        ],
+        'macd': [  # 10.13 - Definizione
+            'Forma Conspectus 22', 'Hayes 27', 'Dragendorff 18',
+            'Dressel 6A', 'Isings 12', 'Isings 8',
+            'Manuale ovoidale', 'Tronco-piramidale',
+            'Etrusco-padano', 'Profilo articolato',
+            'Decoro a fasce', 'Frammentario'
+        ],
+        'cronologia_mac': [  # 10.4
+            'I sec. d.C.', 'II sec. d.C.', 'III sec. d.C.',
+            'IV sec. d.C.', 'V sec. d.C.', 'VI sec. d.C.',
+            'VII-VIII sec.', 'XII sec.', 'XIII sec.',
+            'XV sec.', 'XVI sec.', 'II-I sec. a.C.',
+            'VI-V sec. a.C.'
+        ],
     }
 }
