@@ -493,6 +493,8 @@ def create_app():
     csv_excel_service = ExportImportService(db_manager)
     from pyarchinit_mini.services.search_service import UniversalSearchService
     search_service = UniversalSearchService(db_manager)
+    from pyarchinit_mini.services.tma_service import TMAService
+    tma_service = TMAService(db_manager)
     # matrix_visualizer and graphviz_visualizer are declared at module level
     pdf_generator = PDFGenerator()
     media_handler = MediaHandler()
@@ -4348,6 +4350,157 @@ def create_app():
         except Exception as e:
             flash(f'Errore statistiche: {str(e)}', 'error')
             return redirect(url_for('index'))
+
+    # ===== TMA - Tabella Materiali Archeologici =====
+    @app.route('/tma')
+    @login_required
+    def tma_list():
+        page = request.args.get('page', 1, type=int)
+        per_page = 50
+        search = request.args.get('search', '').strip()
+        sito_filter = request.args.get('sito', '').strip()
+        try:
+            tma_list_data = tma_service.list_tma(page=page, size=per_page,
+                                                 search=search, sito=sito_filter)
+            total = tma_service.count_tma(search=search, sito=sito_filter)
+            sites = tma_service.get_distinct_sites()
+            import math
+            total_pages = max(math.ceil(total / per_page), 1)
+            return render_template('tma/list.html', tma_list=tma_list_data,
+                                   total=total, page=page, total_pages=total_pages,
+                                   search=search, sito_filter=sito_filter, sites=sites)
+        except Exception as e:
+            flash(f'Errore TMA: {str(e)}', 'error')
+            return redirect(url_for('index'))
+
+    @app.route('/tma/new', methods=['GET', 'POST'])
+    @login_required
+    @write_permission_required
+    def tma_create():
+        if request.method == 'POST':
+            data = {k: v for k, v in request.form.items()}
+            tma_id = tma_service.create_tma(data)
+            if tma_id:
+                flash('TMA creato', 'success')
+                return redirect(url_for('tma_edit', tma_id=tma_id))
+            flash('Errore creazione TMA', 'error')
+        return render_template('tma/form.html', tma={}, materials=[], media=[])
+
+    @app.route('/tma/<int:tma_id>', methods=['GET', 'POST'])
+    @login_required
+    def tma_edit(tma_id):
+        tma = tma_service.get_tma(tma_id)
+        if not tma:
+            flash('TMA non trovato', 'error')
+            return redirect(url_for('tma_list'))
+        if request.method == 'POST':
+            data = {k: v for k, v in request.form.items()}
+            if tma_service.update_tma(tma_id, data):
+                flash('TMA aggiornato', 'success')
+            else:
+                flash('Errore aggiornamento', 'error')
+            return redirect(url_for('tma_edit', tma_id=tma_id))
+        materials = tma_service.list_materials(tma_id)
+        # Load attached media
+        media_items = []
+        try:
+            media_items = media_service.get_media_by_entity('tma', tma_id, size=50)
+        except Exception:
+            pass
+        return render_template('tma/form.html', tma=tma, materials=materials, media=media_items)
+
+    @app.route('/tma/<int:tma_id>/delete', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def tma_delete(tma_id):
+        if tma_service.delete_tma(tma_id):
+            flash('TMA eliminato', 'success')
+        else:
+            flash('Errore eliminazione', 'error')
+        return redirect(url_for('tma_list'))
+
+    @app.route('/tma/<int:tma_id>/material/add', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def tma_material_add(tma_id):
+        data = {k: v for k, v in request.form.items()}
+        if tma_service.add_material(tma_id, data):
+            flash('Materiale aggiunto', 'success')
+        else:
+            flash('Errore aggiunta materiale', 'error')
+        return redirect(url_for('tma_edit', tma_id=tma_id))
+
+    @app.route('/tma/material/<int:mat_id>/delete')
+    @login_required
+    @write_permission_required
+    def tma_material_delete(mat_id):
+        tma_id = request.args.get('tma_id', type=int)
+        tma_service.delete_material(mat_id)
+        return redirect(url_for('tma_edit', tma_id=tma_id))
+
+    @app.route('/tma/<int:tma_id>/media/upload', methods=['POST'])
+    @login_required
+    @write_permission_required
+    def tma_media_upload(tma_id):
+        try:
+            f = request.files.get('file')
+            if not f or not f.filename:
+                flash('Nessun file', 'error')
+                return redirect(url_for('tma_edit', tma_id=tma_id))
+            from werkzeug.utils import secure_filename
+            filename = secure_filename(f.filename)
+            tmp_path = os.path.join(tempfile.gettempdir(), filename)
+            f.save(tmp_path)
+            metadata = media_handler.store_file(tmp_path, 'tma', tma_id, '', '', '')
+            if metadata:
+                media_service.create_media_record(metadata)
+                flash('Media caricato', 'success')
+            os.unlink(tmp_path)
+        except Exception as e:
+            flash(f'Errore upload: {e}', 'error')
+        return redirect(url_for('tma_edit', tma_id=tma_id))
+
+    @app.route('/tma/<int:tma_id>/label')
+    @login_required
+    def tma_label(tma_id):
+        tma = tma_service.get_tma(tma_id)
+        if not tma:
+            flash('TMA non trovato', 'error')
+            return redirect(url_for('tma_list'))
+        try:
+            from pyarchinit_mini.utils.tma_label_generator import TMALabelGenerator
+            fmt = request.args.get('format', 'avery_l7160')
+            gen = TMALabelGenerator(label_format=fmt)
+            output = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf').name
+            gen.generate([tma], output)
+            return send_file(output, as_attachment=True,
+                             download_name=f'tma_label_{tma_id}.pdf',
+                             mimetype='application/pdf')
+        except Exception as e:
+            flash(f'Errore generazione label: {e}', 'error')
+            return redirect(url_for('tma_edit', tma_id=tma_id))
+
+    @app.route('/tma/labels/bulk')
+    @login_required
+    def tma_labels_bulk():
+        search = request.args.get('search', '').strip()
+        sito = request.args.get('sito', '').strip()
+        try:
+            from pyarchinit_mini.utils.tma_label_generator import TMALabelGenerator
+            tma_records = tma_service.list_tma(page=1, size=10000, search=search, sito=sito)
+            if not tma_records:
+                flash('Nessun TMA trovato', 'warning')
+                return redirect(url_for('tma_list'))
+            fmt = request.args.get('format', 'avery_l7160')
+            gen = TMALabelGenerator(label_format=fmt)
+            output = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf').name
+            gen.generate(tma_records, output)
+            return send_file(output, as_attachment=True,
+                             download_name='tma_labels_bulk.pdf',
+                             mimetype='application/pdf')
+        except Exception as e:
+            flash(f'Errore: {e}', 'error')
+            return redirect(url_for('tma_list'))
 
     # ===== AI Assistant =====
     @app.route('/ai')

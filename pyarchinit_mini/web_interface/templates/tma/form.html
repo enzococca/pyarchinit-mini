@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block title %}{{ _('TMA') }} {{ tma.id if tma and tma.id else _('New') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="fas fa-boxes"></i>
+        {% if tma and tma.id %}{{ _('Edit TMA') }} #{{ tma.id }}{% else %}{{ _('New TMA') }}{% endif %}
+    </h2>
+    <a href="{{ url_for('tma_list') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> {{ _('Back') }}
+    </a>
+</div>
+
+<form method="POST">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-basic">{{ _('Identification') }}</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-loc">{{ _('Location') }}</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-exc">{{ _('Excavation') }}</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-doc">{{ _('Documentation') }}</a></li>
+        {% if tma and tma.id %}
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-mat">{{ _('Materials') }} ({{ materials|length }})</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-media">{{ _('Media') }} ({{ media|length }})</a></li>
+        {% endif %}
+    </ul>
+    <div class="tab-content border border-top-0 p-3">
+        <!-- Identification -->
+        <div class="tab-pane fade show active" id="tab-basic">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label">{{ _('Site') }}</label>
+                    <input type="text" name="sito" class="form-control" value="{{ tma.sito or '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ _('Locality') }}</label>
+                    <input type="text" name="localita" class="form-control" value="{{ tma.localita or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Area') }}</label>
+                    <input type="text" name="area" class="form-control" value="{{ tma.area or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Sector') }}</label>
+                    <input type="text" name="settore" class="form-control" value="{{ tma.settore or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Inventory') }}</label>
+                    <input type="text" name="inventario" class="form-control" value="{{ tma.inventario or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Box (Cassetta)') }} *</label>
+                    <input type="text" name="cassetta" class="form-control" value="{{ tma.cassetta or '' }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ _('Material type (OGTM)') }} *</label>
+                    <input type="text" name="ogtm" class="form-control" value="{{ tma.ogtm or '' }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ _('Chronology (DTZG)') }}</label>
+                    <input type="text" name="dtzg" class="form-control" value="{{ tma.dtzg or '' }}">
+                </div>
+            </div>
+        </div>
+        <!-- Location -->
+        <div class="tab-pane fade" id="tab-loc">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label">{{ _('Location type (LDCT)') }}</label>
+                    <input type="text" name="ldct" class="form-control" value="{{ tma.ldct or '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ _('Location denomination (LDCN)') }}</label>
+                    <input type="text" name="ldcn" class="form-control" value="{{ tma.ldcn or '' }}">
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">{{ _('Old location') }}</label>
+                    <input type="text" name="vecchia_collocazione" class="form-control" value="{{ tma.vecchia_collocazione or '' }}">
+                </div>
+            </div>
+        </div>
+        <!-- Excavation -->
+        <div class="tab-pane fade" id="tab-exc">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label class="form-label">{{ _('Excavation name (SCAN)') }}</label>
+                    <input type="text" name="scan" class="form-control" value="{{ tma.scan or '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ _('Test pit') }}</label>
+                    <input type="text" name="saggio" class="form-control" value="{{ tma.saggio or '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ _('Room/Locus') }}</label>
+                    <input type="text" name="vano_locus" class="form-control" value="{{ tma.vano_locus or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Excavation date') }}</label>
+                    <input type="text" name="dscd" class="form-control" value="{{ tma.dscd or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('US (DSCU)') }}</label>
+                    <input type="text" name="dscu" class="form-control" value="{{ tma.dscu or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Survey date') }}</label>
+                    <input type="text" name="rcgd" class="form-control" value="{{ tma.rcgd or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Acquisition type') }}</label>
+                    <input type="text" name="aint" class="form-control" value="{{ tma.aint or '' }}">
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">{{ _('Object indications (DESO)') }}</label>
+                    <textarea name="deso" class="form-control" rows="3">{{ tma.deso or '' }}</textarea>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">{{ _('Historical-critical notes (NSC)') }}</label>
+                    <textarea name="nsc" class="form-control" rows="3">{{ tma.nsc or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+        <!-- Documentation -->
+        <div class="tab-pane fade" id="tab-doc">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Photo type (FTAP)') }}</label>
+                    <input type="text" name="ftap" class="form-control" value="{{ tma.ftap or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Photo ID (FTAN)') }}</label>
+                    <input type="text" name="ftan" class="form-control" value="{{ tma.ftan or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Drawing type (DRAT)') }}</label>
+                    <input type="text" name="drat" class="form-control" value="{{ tma.drat or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ _('Drawing ID (DRAN)') }}</label>
+                    <input type="text" name="dran" class="form-control" value="{{ tma.dran or '' }}">
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">{{ _('Drawing author') }}</label>
+                    <input type="text" name="draa" class="form-control" value="{{ tma.draa or '' }}">
+                </div>
+            </div>
+        </div>
+
+        {% if tma and tma.id %}
+        <!-- Materials (repetitive) -->
+        <div class="tab-pane fade" id="tab-mat">
+            <h5>{{ _('Repetitive materials') }}</h5>
+            {% if materials %}
+            <table class="table table-sm table-striped">
+                <thead><tr>
+                    <th>MADI</th><th>MACC</th><th>MACL</th><th>MACP</th>
+                    <th>MACD</th><th>{{ _('Cronologia') }}</th><th>{{ _('Quantity') }}</th>
+                    <th>{{ _('Weight') }}</th><th></th>
+                </tr></thead>
+                <tbody>
+                {% for m in materials %}
+                <tr>
+                    <td>{{ m.madi or '-' }}</td>
+                    <td>{{ m.macc or '-' }}</td>
+                    <td>{{ m.macl or '-' }}</td>
+                    <td>{{ m.macp or '-' }}</td>
+                    <td>{{ m.macd or '-' }}</td>
+                    <td>{{ m.cronologia_mac or '-' }}</td>
+                    <td>{{ m.macq or '-' }}</td>
+                    <td>{{ m.peso or '-' }}</td>
+                    <td>
+                        <a href="{{ url_for('tma_material_delete', mat_id=m.id, tma_id=tma.id) }}"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('{{ _('Delete?') }}');">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">{{ _('No repetitive materials yet.') }}</p>
+            {% endif %}
+
+            <h6 class="mt-3">{{ _('Add new material') }}</h6>
+            <form method="POST" action="{{ url_for('tma_material_add', tma_id=tma.id) }}" class="row g-2">
+                <div class="col-md-2"><input name="madi" class="form-control form-control-sm" placeholder="MADI"></div>
+                <div class="col-md-2"><input name="macc" class="form-control form-control-sm" placeholder="MACC"></div>
+                <div class="col-md-2"><input name="macl" class="form-control form-control-sm" placeholder="MACL"></div>
+                <div class="col-md-2"><input name="macp" class="form-control form-control-sm" placeholder="MACP"></div>
+                <div class="col-md-2"><input name="macd" class="form-control form-control-sm" placeholder="MACD"></div>
+                <div class="col-md-2"><input name="cronologia_mac" class="form-control form-control-sm" placeholder="Crono"></div>
+                <div class="col-md-2"><input name="macq" class="form-control form-control-sm" placeholder="Q.tà"></div>
+                <div class="col-md-2"><input name="peso" type="number" step="0.01" class="form-control form-control-sm" placeholder="Peso"></div>
+                <div class="col-md-2"><button type="submit" class="btn btn-sm btn-primary w-100">{{ _('Add') }}</button></div>
+            </form>
+        </div>
+
+        <!-- Media -->
+        <div class="tab-pane fade" id="tab-media">
+            <h5>{{ _('TMA Media') }}</h5>
+            {% if media %}
+            <div class="row g-2">
+                {% for m in media %}
+                <div class="col-md-3">
+                    <div class="card">
+                        {% if m.media_type == 'image' %}
+                        <img src="/media/{{ m.media_path }}" class="card-img-top" style="max-height:150px;object-fit:cover;">
+                        {% else %}
+                        <div class="card-body text-center"><i class="fas fa-file fa-3x text-muted"></i></div>
+                        {% endif %}
+                        <div class="card-body p-2">
+                            <small>{{ m.media_name }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">{{ _('No media attached yet.') }}</p>
+            {% endif %}
+
+            <h6 class="mt-3">{{ _('Upload media') }}</h6>
+            <form method="POST" action="{{ url_for('tma_media_upload', tma_id=tma.id) }}" enctype="multipart/form-data" class="row g-2">
+                <div class="col-md-8"><input type="file" name="file" class="form-control" required></div>
+                <div class="col-md-4"><button type="submit" class="btn btn-primary w-100">{{ _('Upload') }}</button></div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> {{ _('Save') }}
+        </button>
+        {% if tma and tma.id %}
+        <a href="{{ url_for('tma_label', tma_id=tma.id) }}" class="btn btn-success">
+            <i class="fas fa-qrcode"></i> {{ _('Print Label') }}
+        </a>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}

@@ -497,6 +497,84 @@ class DatabaseMigrations:
             logger.warning(f"migrate_user_sync_trigger: {e}")
             return 0
 
+    def migrate_tma_tables(self):
+        """Create/align TMA tables (tma_materiali_archeologici + tma_materiali_ripetibili).
+        Adds missing columns to tma_materiali_ripetibili so it matches the PyArchInit
+        standard schema (id_tma FK, madi/macc/macl/macp/macd/cronologia_mac/macq/peso)."""
+        applied = 0
+        try:
+            engine = self.connection.engine
+            is_pg = engine.dialect.name == 'postgresql'
+            serial = 'SERIAL PRIMARY KEY' if is_pg else 'INTEGER PRIMARY KEY AUTOINCREMENT'
+
+            with self.connection.get_session() as session:
+                # Master table
+                session.execute(text(f"""
+                    CREATE TABLE IF NOT EXISTS tma_materiali_archeologici (
+                        id {serial},
+                        sito TEXT, area TEXT, localita TEXT, settore TEXT,
+                        inventario TEXT, ogtm TEXT, ldct TEXT, ldcn TEXT,
+                        vecchia_collocazione TEXT, cassetta TEXT,
+                        scan TEXT, saggio TEXT, vano_locus TEXT,
+                        dscd TEXT, dscu TEXT, rcgd TEXT, rcgz TEXT,
+                        aint TEXT, aind TEXT, dtzg TEXT, deso TEXT, nsc TEXT,
+                        ftap TEXT, ftan TEXT, drat TEXT, dran TEXT, draa TEXT,
+                        created_at TEXT, updated_at TEXT,
+                        created_by TEXT, updated_by TEXT, entity_uuid TEXT
+                    )
+                """))
+
+                # Detail (repetitive) table
+                session.execute(text(f"""
+                    CREATE TABLE IF NOT EXISTS tma_materiali_ripetibili (
+                        id {serial},
+                        id_tma INTEGER,
+                        madi VARCHAR(50),
+                        macc VARCHAR(50),
+                        macl VARCHAR(50),
+                        macp VARCHAR(50),
+                        macd VARCHAR(50),
+                        cronologia_mac VARCHAR(100),
+                        macq VARCHAR(20),
+                        peso REAL,
+                        created_at TEXT, updated_at TEXT,
+                        created_by TEXT, updated_by TEXT, entity_uuid TEXT
+                    )
+                """))
+                session.commit()
+
+                # If detail table existed already with the wrong schema, add missing columns
+                inspector = inspect(engine)
+                if inspector.has_table('tma_materiali_ripetibili'):
+                    existing = {c['name'] for c in inspector.get_columns('tma_materiali_ripetibili')}
+                    needed = [
+                        ('id_tma', 'INTEGER'),
+                        ('madi', 'VARCHAR(50)'),
+                        ('macc', 'VARCHAR(50)'),
+                        ('macl', 'VARCHAR(50)'),
+                        ('macp', 'VARCHAR(50)'),
+                        ('macd', 'VARCHAR(50)'),
+                        ('cronologia_mac', 'VARCHAR(100)'),
+                        ('macq', 'VARCHAR(20)'),
+                        ('peso', 'REAL'),
+                    ]
+                    for col, typ in needed:
+                        if col not in existing:
+                            try:
+                                with self.connection.get_session() as s2:
+                                    s2.execute(text(f"ALTER TABLE tma_materiali_ripetibili ADD COLUMN {col} {typ}"))
+                                    s2.commit()
+                                    logger.info(f"Added column {col} to tma_materiali_ripetibili")
+                                    applied += 1
+                            except Exception as e:
+                                logger.warning(f"Could not add {col}: {e}")
+
+                logger.info(f"TMA tables migration completed ({applied} columns added)")
+                return applied
+        except Exception as e:
+            logger.warning(f"migrate_tma_tables: {e}")
+            return applied
+
     def migrate_all_tables(self):
         """Run all necessary migrations"""
         try:
@@ -561,6 +639,12 @@ class DatabaseMigrations:
 
             # Bidirectional user sync trigger (PostgreSQL only)
             total_migrations += self.migrate_user_sync_trigger()
+
+            # TMA tables — create or align schema with PyArchInit standard
+            try:
+                total_migrations += self.migrate_tma_tables()
+            except Exception as e:
+                logger.warning(f"TMA migration failed: {e}")
 
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations
