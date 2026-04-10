@@ -4460,6 +4460,16 @@ def create_app():
             flash(f'Errore upload: {e}', 'error')
         return redirect(url_for('tma_edit', tma_id=tma_id))
 
+    @app.route('/api/tma/thesaurus/<field>')
+    @login_required
+    def tma_thesaurus(field):
+        """Return thesaurus values for a TMA field"""
+        try:
+            values = tma_service.get_thesaurus_values(field)
+            return jsonify(values)
+        except Exception as e:
+            return jsonify({'error': str(e), 'values': []}), 500
+
     @app.route('/tma/<int:tma_id>/label')
     @login_required
     def tma_label(tma_id):

@@ -32,15 +32,18 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">{{ _('Locality') }}</label>
-                    <input type="text" name="localita" class="form-control" value="{{ tma.localita or '' }}">
+                    <input type="text" name="localita" class="form-control" value="{{ tma.localita or '' }}" list="thes-localita">
+                    <datalist id="thes-localita"></datalist>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ _('Area') }}</label>
-                    <input type="text" name="area" class="form-control" value="{{ tma.area or '' }}">
+                    <input type="text" name="area" class="form-control" value="{{ tma.area or '' }}" list="thes-area">
+                    <datalist id="thes-area"></datalist>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ _('Sector') }}</label>
-                    <input type="text" name="settore" class="form-control" value="{{ tma.settore or '' }}">
+                    <input type="text" name="settore" class="form-control" value="{{ tma.settore or '' }}" list="thes-settore">
+                    <datalist id="thes-settore"></datalist>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ _('Inventory') }}</label>
@@ -56,7 +59,8 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">{{ _('Chronology (DTZG)') }}</label>
-                    <input type="text" name="dtzg" class="form-control" value="{{ tma.dtzg or '' }}">
+                    <input type="text" name="dtzg" class="form-control" value="{{ tma.dtzg or '' }}" list="thes-dtzg">
+                    <datalist id="thes-dtzg"></datalist>
                 </div>
             </div>
         </div>
@@ -65,11 +69,13 @@
             <div class="row g-2">
                 <div class="col-md-6">
                     <label class="form-label">{{ _('Location type (LDCT)') }}</label>
-                    <input type="text" name="ldct" class="form-control" value="{{ tma.ldct or '' }}">
+                    <input type="text" name="ldct" class="form-control" value="{{ tma.ldct or '' }}" list="thes-ldct">
+                    <datalist id="thes-ldct"></datalist>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">{{ _('Location denomination (LDCN)') }}</label>
-                    <input type="text" name="ldcn" class="form-control" value="{{ tma.ldcn or '' }}">
+                    <input type="text" name="ldcn" class="form-control" value="{{ tma.ldcn or '' }}" list="thes-ldcn">
+                    <datalist id="thes-ldcn"></datalist>
                 </div>
                 <div class="col-md-12">
                     <label class="form-label">{{ _('Old location') }}</label>
@@ -82,7 +88,8 @@
             <div class="row g-2">
                 <div class="col-md-4">
                     <label class="form-label">{{ _('Excavation name (SCAN)') }}</label>
-                    <input type="text" name="scan" class="form-control" value="{{ tma.scan or '' }}">
+                    <input type="text" name="scan" class="form-control" value="{{ tma.scan or '' }}" list="thes-scan">
+                    <datalist id="thes-scan"></datalist>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">{{ _('Test pit') }}</label>
@@ -106,7 +113,8 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ _('Acquisition type') }}</label>
-                    <input type="text" name="aint" class="form-control" value="{{ tma.aint or '' }}">
+                    <input type="text" name="aint" class="form-control" value="{{ tma.aint or '' }}" list="thes-aint">
+                    <datalist id="thes-aint"></datalist>
                 </div>
                 <div class="col-md-12">
                     <label class="form-label">{{ _('Object indications (DESO)') }}</label>
@@ -123,7 +131,8 @@
             <div class="row g-2">
                 <div class="col-md-3">
                     <label class="form-label">{{ _('Photo type (FTAP)') }}</label>
-                    <input type="text" name="ftap" class="form-control" value="{{ tma.ftap or '' }}">
+                    <input type="text" name="ftap" class="form-control" value="{{ tma.ftap or '' }}" list="thes-ftap">
+                    <datalist id="thes-ftap"></datalist>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ _('Photo ID (FTAN)') }}</label>
@@ -131,7 +140,8 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ _('Drawing type (DRAT)') }}</label>
-                    <input type="text" name="drat" class="form-control" value="{{ tma.drat or '' }}">
+                    <input type="text" name="drat" class="form-control" value="{{ tma.drat or '' }}" list="thes-drat">
+                    <datalist id="thes-drat"></datalist>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ _('Drawing ID (DRAN)') }}</label>
@@ -184,11 +194,11 @@
             <h6 class="mt-3">{{ _('Add new material') }}</h6>
             <form method="POST" action="{{ url_for('tma_material_add', tma_id=tma.id) }}" class="row g-2">
                 <div class="col-md-2"><input name="madi" class="form-control form-control-sm" placeholder="MADI"></div>
-                <div class="col-md-2"><input name="macc" class="form-control form-control-sm" placeholder="MACC"></div>
-                <div class="col-md-2"><input name="macl" class="form-control form-control-sm" placeholder="MACL"></div>
-                <div class="col-md-2"><input name="macp" class="form-control form-control-sm" placeholder="MACP"></div>
-                <div class="col-md-2"><input name="macd" class="form-control form-control-sm" placeholder="MACD"></div>
-                <div class="col-md-2"><input name="cronologia_mac" class="form-control form-control-sm" placeholder="Crono"></div>
+                <div class="col-md-2"><input name="macc" class="form-control form-control-sm" placeholder="MACC (Categoria)" list="thes-macc"><datalist id="thes-macc"></datalist></div>
+                <div class="col-md-2"><input name="macl" class="form-control form-control-sm" placeholder="MACL (Classe)" list="thes-macl"><datalist id="thes-macl"></datalist></div>
+                <div class="col-md-2"><input name="macp" class="form-control form-control-sm" placeholder="MACP (Tipologia)" list="thes-macp"><datalist id="thes-macp"></datalist></div>
+                <div class="col-md-2"><input name="macd" class="form-control form-control-sm" placeholder="MACD (Definizione)" list="thes-macd"><datalist id="thes-macd"></datalist></div>
+                <div class="col-md-2"><input name="cronologia_mac" class="form-control form-control-sm" placeholder="Crono" list="thes-cronologia_mac"><datalist id="thes-cronologia_mac"></datalist></div>
                 <div class="col-md-2"><input name="macq" class="form-control form-control-sm" placeholder="Q.tà"></div>
                 <div class="col-md-2"><input name="peso" type="number" step="0.01" class="form-control form-control-sm" placeholder="Peso"></div>
                 <div class="col-md-2"><button type="submit" class="btn btn-sm btn-primary w-100">{{ _('Add') }}</button></div>
@@ -239,4 +249,26 @@
         {% endif %}
     </div>
 </form>
+
+<script>
+// Populate datalist elements with thesaurus values from PyArchInit
+const TMA_THES_FIELDS = ['area','localita','settore','ldct','ldcn','scan','dtzg','aint','ftap','drat','macc','macl','macp','macd','cronologia_mac'];
+TMA_THES_FIELDS.forEach(function(field) {
+    fetch('/api/tma/thesaurus/' + field)
+        .then(function(r) { return r.json(); })
+        .then(function(values) {
+            if (!Array.isArray(values)) return;
+            const dl = document.getElementById('thes-' + field);
+            if (!dl) return;
+            dl.innerHTML = '';
+            values.forEach(function(v) {
+                const opt = document.createElement('option');
+                opt.value = v.value || '';
+                if (v.code) opt.label = v.code;
+                dl.appendChild(opt);
+            });
+        })
+        .catch(function() { /* silent */ });
+});
+</script>
 {% endblock %}
