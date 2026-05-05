@@ -201,17 +201,19 @@ class DatabaseMigrations:
                     if self.add_column_if_not_exists(table, col_name, col_type, default):
                         migrations_applied += 1
 
-            # Back-fill entity_uuid for existing rows that have NULL
+            # Back-fill entity_uuid for existing rows that have NULL.
+            # SQLite exposes `rowid`; PostgreSQL uses `ctid` (stable within a transaction).
+            row_id_col = 'ctid' if self.connection.engine.dialect.name == 'postgresql' else 'rowid'
             for table in tables:
                 try:
                     with self.connection.get_session() as session:
                         rows = session.execute(
-                            text(f"SELECT rowid FROM {table} WHERE entity_uuid IS NULL")
+                            text(f"SELECT {row_id_col} FROM {table} WHERE entity_uuid IS NULL")
                         ).fetchall()
                         for row in rows:
                             new_uuid = str(uuid_mod.uuid4())
                             session.execute(
-                                text(f"UPDATE {table} SET entity_uuid = :uuid WHERE rowid = :rid"),
+                                text(f"UPDATE {table} SET entity_uuid = :uuid WHERE {row_id_col} = :rid"),
                                 {"uuid": new_uuid, "rid": row[0]}
                             )
                         session.commit()

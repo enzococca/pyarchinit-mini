@@ -155,35 +155,42 @@ def create_postgresql_database(
         admin_connection_string = f"postgresql://{username}:{password}@{host}:{port}/postgres"
         admin_engine = create_engine(admin_connection_string, isolation_level="AUTOCOMMIT")
         
-        # Check if database exists
-        with admin_engine.connect() as conn:
-            result = conn.execute(
-                text("SELECT 1 FROM pg_database WHERE datname = :dbname"),
-                {"dbname": database}
-            )
-            db_exists = result.fetchone() is not None
-            
-            if db_exists:
-                if not overwrite:
-                    raise ValueError(f"Database '{database}' already exists on {host}:{port}")
-                else:
+        # Check if database exists. Connecting to the admin 'postgres' DB
+        # may fail on managed providers (e.g. Railway) where only the project
+        # DB is accessible — fall back to assuming the target exists.
+        db_exists = False
+        admin_available = True
+        try:
+            with admin_engine.connect() as conn:
+                result = conn.execute(
+                    text("SELECT 1 FROM pg_database WHERE datname = :dbname"),
+                    {"dbname": database}
+                )
+                db_exists = result.fetchone() is not None
+
+                if db_exists and overwrite:
                     logger.warning(f"Dropping existing database: {database}")
-                    # Terminate all connections to the database
                     conn.execute(text(f"""
                         SELECT pg_terminate_backend(pg_stat_activity.pid)
                         FROM pg_stat_activity
                         WHERE pg_stat_activity.datname = '{database}'
                         AND pid <> pg_backend_pid()
                     """))
-                    # Drop database
                     conn.execute(text(f"DROP DATABASE {database}"))
                     logger.info(f"Dropped database: {database}")
-            
-            # Create new database
-            logger.info(f"Creating PostgreSQL database: {database}")
-            conn.execute(text(f"CREATE DATABASE {database}"))
-            logger.info(f"Database created: {database}")
-        
+                    db_exists = False
+
+                if not db_exists:
+                    logger.info(f"Creating PostgreSQL database: {database}")
+                    conn.execute(text(f"CREATE DATABASE {database}"))
+                    logger.info(f"Database created: {database}")
+        except Exception as admin_err:
+            admin_available = False
+            logger.warning(
+                f"Cannot connect to admin 'postgres' DB ({admin_err}); "
+                f"assuming target '{database}' already exists and reusing it."
+            )
+
         admin_engine.dispose()
         
         # Now connect to the new database and create schema
