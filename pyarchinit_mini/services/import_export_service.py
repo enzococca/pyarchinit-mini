@@ -1955,18 +1955,24 @@ class ImportExportService:
             # Get list of tables to migrate (in correct order to handle foreign keys)
             # Order matters: create tables without dependencies first
             tables_order = [
-                'users_table',
+                'users',
                 'site_table',
                 'datazioni_table',
                 'us_table',
                 'us_relationships_table',
+                'period_table',
                 'periodizzazione_table',
-                'inventario_materiali_table',
                 'pyarchinit_thesaurus_sigle',
+                'thesaurus_field',
+                'thesaurus_category',
+                'inventario_materiali_table',
                 'media_table',
+                'media_thumb_table',
+                'documentation_table',
                 'harris_matrix_table',
-                'periods_table',
-                'extended_matrix_nodes_table'
+                'extended_matrix_table',
+                'tma_materiali_archeologici',
+                'tma_materiali_ripetibili',
             ]
 
             # Migrate each table
@@ -2173,18 +2179,24 @@ class ImportExportService:
 
             # Tables to check (in same order as migration)
             tables_order = [
-                'users_table',
+                'users',
                 'site_table',
                 'datazioni_table',
                 'us_table',
                 'us_relationships_table',
+                'period_table',
                 'periodizzazione_table',
-                'inventario_materiali_table',
                 'pyarchinit_thesaurus_sigle',
+                'thesaurus_field',
+                'thesaurus_category',
+                'inventario_materiali_table',
                 'media_table',
+                'media_thumb_table',
+                'documentation_table',
                 'harris_matrix_table',
-                'periods_table',
-                'extended_matrix_nodes_table'
+                'extended_matrix_table',
+                'tma_materiali_archeologici',
+                'tma_materiali_ripetibili',
             ]
 
             for table_name in tables_order:
@@ -2284,43 +2296,90 @@ class ImportExportService:
         if not str(target_engine.url).startswith('postgresql'):
             return stats
 
-        # Define tables with auto-increment primary keys (SERIAL columns)
-        # Format: (table_name, id_column_name, sequence_name)
+        # Define tables with auto-increment primary keys (SERIAL columns).
+        # Names must match the actual __tablename__ in pyarchinit_mini.models.
+        # Sequence names are auto-discovered via pg_get_serial_sequence to
+        # tolerate provider-specific suffixes (e.g. Railway-imported schemas).
         sequences = [
-            ('site_table', 'id_sito', 'site_table_id_sito_seq'),
-            ('inventario_materiali_table', 'id_invmat', 'inventario_materiali_table_id_invmat_seq'),
-            ('media_table', 'id_media', 'media_table_id_media_seq'),
-            ('users_table', 'id_user', 'users_table_id_user_seq'),
-            ('datazioni_table', 'id_datazione', 'datazioni_table_id_datazione_seq'),
-            ('periodizzazione_table', 'id_periodizzazione', 'periodizzazione_table_id_periodizzazione_seq'),
-            ('us_relationships_table', 'id_relationship', 'us_relationships_table_id_relationship_seq'),
-            ('pyarchinit_thesaurus_sigle', 'id_thesaurus_sigle', 'pyarchinit_thesaurus_sigle_id_thesaurus_sigle_seq'),
-            ('harris_matrix_table', 'id_matrix', 'harris_matrix_table_id_matrix_seq'),
-            ('periods_table', 'id', 'periods_table_id_seq'),
-            ('extended_matrix_nodes_table', 'id', 'extended_matrix_nodes_table_id_seq'),
+            ('site_table', 'id_sito'),
+            ('us_table', 'id_us'),
+            ('inventario_materiali_table', 'id_invmat'),
+            ('media_table', 'id_media'),
+            ('media_thumb_table', 'id_thumb'),
+            ('documentation_table', 'id_doc'),
+            ('users', 'id'),
+            ('datazioni_table', 'id_datazione'),
+            ('periodizzazione_table', 'id_periodizzazione'),
+            ('us_relationships_table', 'id_relationship'),
+            ('pyarchinit_thesaurus_sigle', 'id_thesaurus_sigle'),
+            ('thesaurus_field', 'id_field'),
+            ('thesaurus_category', 'id_category'),
+            ('harris_matrix_table', 'id_matrix'),
+            ('period_table', 'id_period'),
+            ('extended_matrix_table', 'id'),
+            ('tma_materiali_archeologici', 'id'),
+            ('tma_materiali_ripetibili', 'id'),
         ]
 
-        with target_engine.connect() as conn:
-            for table_name, id_column, sequence_name in sequences:
-                try:
-                    # Get max ID from table
-                    result = conn.execute(text(f"SELECT MAX({id_column}) FROM {table_name}"))
-                    max_id = result.scalar()
+        # Use a fresh transaction per sequence so a failure on one (e.g.
+        # missing table on the target) does not abort the rest with
+        # InFailedSqlTransaction.
+        for table_name, id_column in sequences:
+            try:
+                with target_engine.begin() as conn:
+                    # Skip silently if the table is not present on target.
+                    exists = conn.execute(
+                        text("SELECT to_regclass(:t)"),
+                        {'t': table_name}
+                    ).scalar()
+                    if exists is None:
+                        continue
 
-                    if max_id is not None:
-                        # Reset sequence to max_id + 1
-                        conn.execute(text(f"SELECT setval('{sequence_name}', :max_id, true)"), {'max_id': max_id})
-                        conn.commit()
-                        stats['sequences_reset'] += 1
-                        logger.info(f"Reset sequence {sequence_name} to {max_id + 1}")
+                    seq_name = conn.execute(
+                        text("SELECT pg_get_serial_sequence(:t, :c)"),
+                        {'t': table_name, 'c': id_column}
+                    ).scalar()
+                    if not seq_name:
+                        continue
 
-                except Exception as e:
-                    error_msg = f"Failed to reset sequence for {table_name}: {str(e)}"
-                    logger.warning(error_msg)
-                    stats['errors'].append(error_msg)
-                    # Continue with other sequences
+                    max_id = conn.execute(
+                        text(f"SELECT MAX({id_column}) FROM {table_name}")
+                    ).scalar()
+                    if max_id is None:
+                        continue
+
+                    conn.execute(
+                        text("SELECT setval(:seq, :max_id, true)"),
+                        {'seq': seq_name, 'max_id': max_id}
+                    )
+                    stats['sequences_reset'] += 1
+                    logger.info(f"Reset sequence {seq_name} to {max_id + 1}")
+            except Exception as e:
+                error_msg = f"Failed to reset sequence for {table_name}: {str(e).splitlines()[0]}"
+                logger.warning(error_msg)
+                stats['errors'].append(error_msg)
+                # Continue with other sequences — fresh transaction next round.
 
         return stats
+
+    @staticmethod
+    def _normalise_date(value: str):
+        """Best-effort parse of a legacy date string into ISO format.
+
+        Returns the original string if no known format matches — the DB will
+        either accept it (string columns) or surface a clearer error.
+        """
+        from datetime import datetime
+        formats = (
+            '%Y-%m-%d', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S',
+            '%d-%m-%Y', '%d/%m/%Y', '%d.%m.%Y',
+        )
+        for fmt in formats:
+            try:
+                return datetime.strptime(value, fmt).date().isoformat()
+            except ValueError:
+                continue
+        return value
 
     @staticmethod
     def _convert_boolean_fields(table_name: str, row_data: Dict[str, Any],
@@ -2340,12 +2399,13 @@ class ImportExportService:
         if not str(target_engine.url).startswith('postgresql'):
             return row_data
 
-        # Define boolean columns for each table
+        # Define boolean columns for each table.
+        # NOTE: site_table.find_check is Integer in pyarchinit-mini (matches
+        # the PyArchInit PostgreSQL schema) — do NOT convert it to bool.
         boolean_columns = {
-            'site_table': ['find_check'],
             'media_table': ['is_primary', 'is_public'],
             'harris_matrix_table': ['is_final', 'is_public'],
-            'users_table': ['is_active', 'is_superuser']
+            'users': ['is_active', 'is_superuser']
         }
 
         # Get boolean columns for this table
@@ -2412,11 +2472,29 @@ class ImportExportService:
             if not rows:
                 return 0
 
-            # Get column names
-            column_names = list(rows[0]._mapping.keys())
+            # Get column names from source
+            source_columns = list(rows[0]._mapping.keys())
 
-            # Get target engine for boolean conversion
+            # Get target engine for boolean conversion + schema introspection
             target_engine = target_session.get_bind()
+
+            # Intersect with target columns: legacy PyArchInit-QGIS schemas
+            # carry fields that don't exist in pyarchinit-mini (e.g.
+            # site_table.toponimo, us_table.quantificazioni). Keep only
+            # columns that exist on both sides.
+            try:
+                target_inspector = inspect(target_engine)
+                target_columns = {c['name'] for c in target_inspector.get_columns(table_name)}
+                column_names = [c for c in source_columns if c in target_columns]
+                dropped = [c for c in source_columns if c not in target_columns]
+                if dropped:
+                    logger.info(
+                        f"{table_name}: ignoring {len(dropped)} source-only columns: "
+                        f"{', '.join(dropped[:10])}{'...' if len(dropped) > 10 else ''}"
+                    )
+            except Exception as e:
+                logger.warning(f"{table_name}: could not introspect target columns ({e}); using source columns")
+                column_names = source_columns
 
             # Get existing IDs in target (for conflict detection)
             existing_ids = set()
@@ -2443,14 +2521,90 @@ class ImportExportService:
                 except Exception:
                     max_id = 0
 
+            # Introspect target column metadata to handle:
+            #  - Date/DateTime: parse legacy "DD-MM-YYYY"
+            #  - String(n): truncate over-length values
+            #  - NOT NULL columns: fill missing values from the source
+            #    (legacy schemas don't carry created_at/updated_at/etc.)
+            date_cols = set()
+            varchar_max = {}
+            non_text_cols = set()  # numeric/date/bool — empty strings → None
+            notnull_fillers = {}  # col -> callable producing a default value
+            try:
+                from datetime import datetime
+                import uuid as _uuid
+                for c in target_inspector.get_columns(table_name):
+                    type_name = str(c.get('type', '')).upper()
+                    is_datetime = 'DATETIME' in type_name or 'TIMESTAMP' in type_name
+                    is_date = (not is_datetime) and 'DATE' in type_name
+                    if is_datetime or is_date:
+                        date_cols.add(c['name'])
+                        non_text_cols.add(c['name'])
+                    if any(t in type_name for t in ('INT', 'NUMERIC', 'FLOAT', 'DOUBLE', 'BOOL', 'DECIMAL')):
+                        non_text_cols.add(c['name'])
+                    if c.get('type') is not None and getattr(c['type'], 'length', None):
+                        varchar_max[c['name']] = c['type'].length
+                    has_server_default = c.get('default') is not None or c.get('autoincrement') is True
+                    if not c.get('nullable', True) and c['name'] != pk_column and not has_server_default:
+                        if is_datetime:
+                            notnull_fillers[c['name']] = lambda: datetime.utcnow()
+                        elif is_date:
+                            notnull_fillers[c['name']] = lambda: datetime.utcnow().date()
+                        elif 'CHAR' in type_name or 'TEXT' in type_name:
+                            if c['name'] == 'entity_uuid':
+                                notnull_fillers[c['name']] = lambda: str(_uuid.uuid4())
+                            elif c['name'] == 'sync_status':
+                                notnull_fillers[c['name']] = lambda: 'new'
+                            else:
+                                notnull_fillers[c['name']] = lambda: ''
+                        elif 'INT' in type_name or 'NUMERIC' in type_name or 'FLOAT' in type_name:
+                            notnull_fillers[c['name']] = (
+                                lambda n=c['name']: 1 if n == 'version_number' else 0
+                            )
+                        elif 'BOOL' in type_name:
+                            notnull_fillers[c['name']] = lambda: False
+            except Exception:
+                pass
+
             # Process each row
             for row in rows:
                 row_data = dict(row._mapping)
+
+                # Drop source-only columns (kept aligned with column_names).
+                row_data = {k: v for k, v in row_data.items() if k in column_names}
 
                 # Convert boolean fields if needed (SQLite -> PostgreSQL)
                 row_data = ImportExportService._convert_boolean_fields(
                     table_name, row_data, target_engine
                 )
+
+                # Normalise legacy Italian date strings (DD-MM-YYYY,
+                # DD/MM/YYYY) to ISO YYYY-MM-DD for Date/DateTime targets.
+                for col in date_cols:
+                    val = row_data.get(col)
+                    if isinstance(val, str) and val.strip():
+                        row_data[col] = ImportExportService._normalise_date(val.strip())
+
+                # Empty strings on numeric/date columns mean NULL on PG.
+                for col in non_text_cols:
+                    if row_data.get(col) == '' or (isinstance(row_data.get(col), str) and not row_data[col].strip()):
+                        row_data[col] = None
+
+                # Truncate over-long strings to fit varchar(N) targets.
+                for col, max_len in varchar_max.items():
+                    val = row_data.get(col)
+                    if isinstance(val, str) and len(val) > max_len:
+                        row_data[col] = val[:max_len]
+
+                # Fill NOT NULL columns when the source row is missing them
+                # or carries None (legacy schemas don't have created_at, etc.)
+                for col, filler in notnull_fillers.items():
+                    if row_data.get(col) is None:
+                        row_data[col] = filler()
+
+                # The set of columns to write may differ per row (some are
+                # dropped to let DB defaults fire). Recompute each iteration.
+                row_columns = list(row_data.keys())
 
                 # Check for conflict
                 record_id = row_data.get(pk_column) if pk_column else None
@@ -2467,7 +2621,7 @@ class ImportExportService:
 
                         elif merge_strategy == 'overwrite':
                             # Update existing record
-                            set_clause = ', '.join([f"{col} = :{col}" for col in column_names if col != pk_column])
+                            set_clause = ', '.join([f"{col} = :{col}" for col in row_columns if col != pk_column])
                             update_query = text(f"""
                                 UPDATE {table_name}
                                 SET {set_clause}
@@ -2488,10 +2642,12 @@ class ImportExportService:
                             max_id += 1
                             row_data[pk_column] = max_id
                             existing_ids.add(max_id)  # Track new ID
+                            if pk_column not in row_columns:
+                                row_columns.append(pk_column)
 
                             # Build INSERT query
-                            columns = ', '.join(column_names)
-                            placeholders = ', '.join([f':{col}' for col in column_names])
+                            columns = ', '.join(row_columns)
+                            placeholders = ', '.join([f':{col}' for col in row_columns])
                             insert_query = text(f"""
                                 INSERT INTO {table_name} ({columns})
                                 VALUES ({placeholders})
@@ -2504,8 +2660,8 @@ class ImportExportService:
 
                     else:
                         # No conflict, insert normally
-                        columns = ', '.join(column_names)
-                        placeholders = ', '.join([f':{col}' for col in column_names])
+                        columns = ', '.join(row_columns)
+                        placeholders = ', '.join([f':{col}' for col in row_columns])
                         insert_query = text(f"""
                             INSERT INTO {table_name} ({columns})
                             VALUES ({placeholders})
