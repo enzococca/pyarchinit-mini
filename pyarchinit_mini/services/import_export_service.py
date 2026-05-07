@@ -2777,6 +2777,7 @@ class ImportExportService:
             date_cols = set()
             varchar_max = {}
             non_text_cols = set()  # numeric/date/bool — empty strings → None
+            bool_cols = set()      # target Boolean columns — coerce 0/1 → False/True
             notnull_fillers = {}  # col -> callable producing a default value
             try:
                 from datetime import datetime
@@ -2790,6 +2791,8 @@ class ImportExportService:
                         non_text_cols.add(c['name'])
                     if any(t in type_name for t in ('INT', 'NUMERIC', 'FLOAT', 'DOUBLE', 'BOOL', 'DECIMAL')):
                         non_text_cols.add(c['name'])
+                    if 'BOOL' in type_name:
+                        bool_cols.add(c['name'])
                     if c.get('type') is not None and getattr(c['type'], 'length', None):
                         varchar_max[c['name']] = c['type'].length
                     has_server_default = c.get('default') is not None or c.get('autoincrement') is True
@@ -2837,6 +2840,28 @@ class ImportExportService:
                 for col in non_text_cols:
                     if row_data.get(col) == '' or (isinstance(row_data.get(col), str) and not row_data[col].strip()):
                         row_data[col] = None
+
+                # Coerce 0/1 → False/True for any Boolean column on the target.
+                # Catches mismatches like Postgres `find_check BOOLEAN` vs source
+                # SQLite legacy storing 0/1 as Integer (the explicit
+                # _convert_boolean_fields hard-coded list misses tables/columns).
+                for col in bool_cols:
+                    if col not in row_data:
+                        continue
+                    val = row_data[col]
+                    if isinstance(val, bool) or val is None:
+                        continue
+                    try:
+                        if isinstance(val, (int, float)):
+                            row_data[col] = bool(int(val))
+                        elif isinstance(val, str):
+                            s = val.strip().lower()
+                            if s in ('1', 'true', 't', 'yes', 'y', 'si', 'sì'):
+                                row_data[col] = True
+                            elif s in ('0', 'false', 'f', 'no', 'n', ''):
+                                row_data[col] = False if s != '' else None
+                    except (ValueError, TypeError):
+                        pass
 
                 # Truncate over-long strings to fit varchar(N) targets.
                 for col, max_len in varchar_max.items():
