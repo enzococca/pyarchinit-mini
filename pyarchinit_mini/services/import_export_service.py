@@ -2224,10 +2224,12 @@ class ImportExportService:
 
         stats = {
             'tables_processed': 0,
+            'tables_created': 0,
             'columns_added': 0,
             'rows_backfilled': 0,
             'dates_normalised': 0,
             'added_per_table': {},
+            'created_tables': [],
             'errors': [],
         }
 
@@ -2235,6 +2237,23 @@ class ImportExportService:
         try:
             inspector = inspect(engine)
             existing_tables = set(inspector.get_table_names())
+
+            # Create any tables defined by current models but absent from the DB
+            # (e.g. users, media_thumb_table, extended_matrix*, tma_*).
+            missing_tables = [
+                t for name, t in Base.metadata.tables.items()
+                if name not in existing_tables
+            ]
+            if missing_tables:
+                try:
+                    Base.metadata.create_all(engine, tables=missing_tables, checkfirst=True)
+                    stats['tables_created'] = len(missing_tables)
+                    stats['created_tables'] = [t.name for t in missing_tables]
+                    # Refresh inspector so the rest of the routine sees the new tables
+                    inspector = inspect(engine)
+                    existing_tables = set(inspector.get_table_names())
+                except Exception as e:
+                    stats['errors'].append(f"create_all: {str(e).splitlines()[0]}")
 
             backfill_rules = {
                 'entity_uuid': 'uuid4',
@@ -2351,8 +2370,9 @@ class ImportExportService:
                         )
 
             logger.info(
-                f"upgrade_legacy_schema: {stats['columns_added']} columns added across "
-                f"{stats['tables_processed']} tables, {stats['rows_backfilled']} rows backfilled, "
+                f"upgrade_legacy_schema: {stats['tables_created']} tables created, "
+                f"{stats['columns_added']} columns added across {stats['tables_processed']} tables, "
+                f"{stats['rows_backfilled']} rows backfilled, "
                 f"{stats['dates_normalised']} dates normalised"
             )
         finally:

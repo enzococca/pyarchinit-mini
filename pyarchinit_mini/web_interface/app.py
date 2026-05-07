@@ -3633,11 +3633,12 @@ def create_app():
                 try:
                     from pyarchinit_mini.services.import_export_service import ImportExportService
                     upgrade_stats = ImportExportService.upgrade_legacy_schema(f'sqlite:///{db_path}')
-                    if upgrade_stats['columns_added'] or upgrade_stats['dates_normalised']:
+                    if upgrade_stats['columns_added'] or upgrade_stats['dates_normalised'] or upgrade_stats['tables_created']:
                         flash(
-                            f"Schema legacy aggiornato: {upgrade_stats['columns_added']} "
-                            f"colonne aggiunte, {upgrade_stats['rows_backfilled']} righe "
-                            f"riempite, {upgrade_stats['dates_normalised']} date convertite.",
+                            f"Schema legacy aggiornato: {upgrade_stats['tables_created']} "
+                            f"tabelle create, {upgrade_stats['columns_added']} colonne aggiunte, "
+                            f"{upgrade_stats['rows_backfilled']} righe riempite, "
+                            f"{upgrade_stats['dates_normalised']} date convertite.",
                             'info'
                         )
                     if upgrade_stats['errors']:
@@ -3702,10 +3703,10 @@ def create_app():
         try:
             stats = ImportExportService.upgrade_legacy_schema(connection_string)
             flash(
-                f"Schema aggiornato: {stats['columns_added']} colonne aggiunte su "
-                f"{stats['tables_processed']} tabelle, {stats['rows_backfilled']} righe "
-                f"riempite, {stats['dates_normalised']} date convertite, "
-                f"{len(stats['errors'])} avvisi.",
+                f"Schema aggiornato: {stats['tables_created']} tabelle create, "
+                f"{stats['columns_added']} colonne aggiunte su {stats['tables_processed']} "
+                f"tabelle, {stats['rows_backfilled']} righe riempite, "
+                f"{stats['dates_normalised']} date convertite, {len(stats['errors'])} avvisi.",
                 'success' if not stats['errors'] else 'warning'
             )
             if stats['errors']:
