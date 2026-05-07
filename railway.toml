@@ -1,2 +1,7 @@
 [deploy]
-startCommand = "gunicorn wsgi:app --bind 0.0.0.0:$PORT -w 1 --timeout 120"
+# --timeout 600: legacy SQLite → Postgres migrations on Railway can take
+# minutes (Postgres latency + per-row inserts), and the default 120s
+# was killing the worker mid-migration (CRITICAL WORKER TIMEOUT).
+# --threads 4: gives the sync worker some concurrency for WebSocket
+# long-polling without pulling in eventlet/gevent.
+startCommand = "gunicorn wsgi:app --bind 0.0.0.0:$PORT -w 1 --threads 4 --timeout 600 --graceful-timeout 30"
