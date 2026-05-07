@@ -286,6 +286,15 @@
                             <!-- Custom Source Fields (hidden by default) -->
                             <div id="migrate_custom_source_fields" style="display: none;">
                                 <div class="mb-2">
+                                    <label class="form-label">
+                                        <i class="fas fa-bookmark me-1"></i>{{ _('Saved Connections') }}
+                                    </label>
+                                    <select class="form-select form-select-sm" id="migrate_source_saved">
+                                        <option value="">{{ _('— Manual entry —') }}</option>
+                                    </select>
+                                    <small class="form-text text-muted">{{ _('Pick one to auto-fill the fields below.') }}</small>
+                                </div>
+                                <div class="mb-2">
                                     <label class="form-label">{{ _('Source Database Type') }}</label>
                                     <div class="btn-group w-100" role="group">
                                         <input type="radio" class="btn-check" name="migrate_source_db_type"
@@ -344,6 +353,16 @@
                         <div class="col-md-6">
                             <!-- Target Database -->
                             <h6 class="mb-3"><strong>{{ _('Target Database') }}</strong></h6>
+
+                            <div class="mb-2">
+                                <label class="form-label">
+                                    <i class="fas fa-bookmark me-1"></i>{{ _('Saved Connections') }}
+                                </label>
+                                <select class="form-select form-select-sm" id="migrate_target_saved">
+                                    <option value="">{{ _('— Manual entry —') }}</option>
+                                </select>
+                                <small class="form-text text-muted">{{ _('Pick one to auto-fill the fields below.') }}</small>
+                            </div>
 
                             <div class="mb-2">
                                 <label class="form-label">{{ _('Target Database Type') }}</label>
@@ -828,6 +847,88 @@ document.querySelectorAll('input[name="migrate_target_db_type"]').forEach(radio 
             postgresFields.style.display = 'block';
         }
     });
+});
+
+// ─── Saved-connections autofill for migrate-database form ───────────────
+async function loadSavedConnectionsInto(selectId) {
+    try {
+        const resp = await fetch('/pyarchinit-import-export/api/connections/list');
+        const data = await resp.json();
+        if (!data.success) return;
+        const sel = document.getElementById(selectId);
+        if (!sel) return;
+        while (sel.options.length > 1) sel.remove(1);
+        (data.connections || []).forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.name;
+            opt.dataset.dbType = c.db_type;
+            const desc = c.description ? ` — ${c.description}` : (c.display_info ? ` — ${c.display_info}` : '');
+            opt.textContent = `${c.name} [${c.db_type}]${desc}`;
+            sel.appendChild(opt);
+        });
+    } catch (e) {
+        console.warn('loadSavedConnectionsInto failed:', e);
+    }
+}
+
+function parseConnectionString(connStr) {
+    if (!connStr) return null;
+    if (connStr.startsWith('sqlite:///')) {
+        return { type: 'sqlite', path: connStr.replace(/^sqlite:\/\/\//, '') };
+    }
+    if (connStr.startsWith('postgresql') || connStr.startsWith('postgres://')) {
+        const m = connStr.match(/^postgres(?:ql)?(?:\+[\w]+)?:\/\/([^:@\/]+)(?::([^@]*))?@([^:\/]+)(?::(\d+))?\/(.+)$/);
+        if (m) {
+            return {
+                type: 'postgresql',
+                user: decodeURIComponent(m[1] || ''),
+                password: decodeURIComponent(m[2] || ''),
+                host: m[3], port: m[4] || '5432',
+                database: m[5]
+            };
+        }
+    }
+    return null;
+}
+
+async function applySavedConnection(side, connectionName) {
+    if (!connectionName) return;
+    try {
+        const resp = await fetch(`/pyarchinit-import-export/api/connections/${encodeURIComponent(connectionName)}`);
+        const data = await resp.json();
+        if (!data.success || !data.connection_string) return;
+        const parsed = parseConnectionString(data.connection_string);
+        if (!parsed) return;
+
+        const prefix = (side === 'source') ? 'migrate_source' : 'migrate_target';
+        const typeRadio = document.querySelector(`input[name="${prefix}_db_type"][value="${parsed.type}"]`);
+        if (typeRadio) {
+            typeRadio.checked = true;
+            typeRadio.dispatchEvent(new Event('change'));
+        }
+        if (parsed.type === 'sqlite') {
+            const pathEl = document.getElementById(`${prefix}_db_path`);
+            if (pathEl) pathEl.value = parsed.path;
+        } else {
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+            set(`${prefix}_pg_host`, parsed.host);
+            set(`${prefix}_pg_port`, parsed.port);
+            set(`${prefix}_pg_database`, parsed.database);
+            set(`${prefix}_pg_user`, parsed.user);
+            set(`${prefix}_pg_password`, parsed.password);
+        }
+    } catch (e) {
+        console.warn('applySavedConnection failed:', e);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadSavedConnectionsInto('migrate_source_saved');
+    loadSavedConnectionsInto('migrate_target_saved');
+    const srcSel = document.getElementById('migrate_source_saved');
+    const tgtSel = document.getElementById('migrate_target_saved');
+    if (srcSel) srcSel.addEventListener('change', e => applySavedConnection('source', e.target.value));
+    if (tgtSel) tgtSel.addEventListener('change', e => applySavedConnection('target', e.target.value));
 });
 
 // Helper function to build migration request data (DRY principle)
