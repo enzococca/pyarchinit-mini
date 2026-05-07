@@ -119,31 +119,37 @@ class ImportExportService:
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 backup_path = f"{database}_backup_{timestamp}.sql"
 
-                # Set password environment variable
-                env = os.environ.copy()
-                if password:
-                    env['PGPASSWORD'] = password
+                pg_dump_bin = shutil.which('pg_dump')
 
-                # Run pg_dump
-                cmd = [
-                    'pg_dump',
-                    '-h', host,
-                    '-p', str(port),
-                    '-U', user,
-                    '-F', 'p',  # Plain SQL format
-                    '-f', backup_path,
-                    database
-                ]
+                if pg_dump_bin:
+                    env = os.environ.copy()
+                    if password:
+                        env['PGPASSWORD'] = password
 
-                result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+                    cmd = [
+                        pg_dump_bin,
+                        '-h', host,
+                        '-p', str(port),
+                        '-U', user,
+                        '-F', 'p',
+                        '-f', backup_path,
+                        database
+                    ]
 
-                if result.returncode == 0:
-                    file_size = os.path.getsize(backup_path) / (1024 * 1024)  # MB
-                    logger.info(f"✓ Database backup created: {backup_path} ({file_size:.2f} MB)")
-                    return backup_path
-                else:
-                    logger.error(f"pg_dump failed: {result.stderr}")
+                    result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+
+                    if result.returncode == 0:
+                        file_size = os.path.getsize(backup_path) / (1024 * 1024)
+                        logger.info(f"✓ Database backup created: {backup_path} ({file_size:.2f} MB)")
+                        return backup_path
+                    logger.error(f"pg_dump failed: {result.stderr.strip()}")
                     return None
+
+                # pg_dump unavailable: fall back to JSON snapshot via SQLAlchemy
+                logger.info("pg_dump not found on PATH — using Python-native JSON snapshot fallback")
+                json_path = f"{database}_backup_{timestamp}.json"
+                snapshot = ImportExportService._python_json_snapshot(connection_string, json_path)
+                return snapshot.get('path') if snapshot.get('success') else None
 
             except Exception as e:
                 logger.error(f"Failed to create PostgreSQL backup: {e}")
@@ -2094,34 +2100,41 @@ class ImportExportService:
                 else:
                     backup_path = f"{database}_backup_{timestamp}.sql"
 
-                # Set password environment variable
-                env = os.environ.copy()
-                if password:
-                    env['PGPASSWORD'] = password
+                pg_dump_bin = shutil.which('pg_dump')
 
-                # Run pg_dump
-                cmd = [
-                    'pg_dump',
-                    '-h', host,
-                    '-p', str(port),
-                    '-U', user,
-                    '-F', 'p',  # Plain SQL format
-                    '-f', backup_path,
-                    database
-                ]
+                if pg_dump_bin:
+                    env = os.environ.copy()
+                    if password:
+                        env['PGPASSWORD'] = password
 
-                pg_result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+                    cmd = [
+                        pg_dump_bin,
+                        '-h', host,
+                        '-p', str(port),
+                        '-U', user,
+                        '-F', 'p',  # Plain SQL format
+                        '-f', backup_path,
+                        database
+                    ]
 
-                if pg_result.returncode == 0:
-                    file_size = os.path.getsize(backup_path) / (1024 * 1024)  # MB
-                    result['success'] = True
-                    result['path'] = backup_path
-                    result['size_mb'] = round(file_size, 2)
-                    result['message'] = f"PostgreSQL backup created ({result['size_mb']} MB)"
-                    logger.info(f"✓ PostgreSQL backup: {backup_path} ({result['size_mb']} MB)")
+                    pg_result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+
+                    if pg_result.returncode == 0:
+                        file_size = os.path.getsize(backup_path) / (1024 * 1024)
+                        result['success'] = True
+                        result['path'] = backup_path
+                        result['size_mb'] = round(file_size, 2)
+                        result['message'] = f"PostgreSQL backup created ({result['size_mb']} MB)"
+                        logger.info(f"✓ PostgreSQL backup: {backup_path} ({result['size_mb']} MB)")
+                    else:
+                        result['message'] = f"pg_dump failed: {pg_result.stderr.strip()}"
+                        logger.error(result['message'])
                 else:
-                    result['message'] = f"pg_dump failed: {pg_result.stderr}"
-                    logger.error(result['message'])
+                    # pg_dump unavailable (e.g. Railway/minimal containers): fall back to JSON snapshot via SQLAlchemy
+                    logger.info("pg_dump not found on PATH — using Python-native JSON snapshot fallback")
+                    json_path = backup_path[:-4] + '.json' if backup_path.endswith('.sql') else backup_path + '.json'
+                    snapshot = ImportExportService._python_json_snapshot(db_url, json_path)
+                    result.update(snapshot)
             else:
                 result['message'] = f"Unsupported database type for backup: {db_url}"
 
@@ -2129,6 +2142,57 @@ class ImportExportService:
             result['message'] = f"Backup failed: {str(e)}"
             logger.error(result['message'])
 
+        return result
+
+    @staticmethod
+    def _python_json_snapshot(db_url: str, snapshot_path: str) -> Dict[str, Any]:
+        """SQLAlchemy-based JSON snapshot used when pg_dump is unavailable.
+
+        Walks every user-table in the source DB, dumps rows to a single JSON file
+        keyed by table name. Datetime/date/UUID/bytes are coerced to strings.
+        """
+        result = {'success': False, 'path': None, 'size_mb': 0.0, 'message': ''}
+        try:
+            engine = create_engine(db_url)
+            inspector = inspect(engine)
+            data: Dict[str, list] = {}
+            with engine.connect() as conn:
+                for table_name in inspector.get_table_names():
+                    try:
+                        rows = conn.execute(text(f'SELECT * FROM "{table_name}"')).mappings().all()
+                    except Exception as e:
+                        logger.warning(f"Skipping {table_name} in snapshot: {str(e).splitlines()[0]}")
+                        continue
+                    serialised = []
+                    for row in rows:
+                        row_dict = {}
+                        for k, v in dict(row).items():
+                            if isinstance(v, (datetime, date)):
+                                row_dict[k] = v.isoformat()
+                            elif isinstance(v, (bytes, bytearray, memoryview)):
+                                row_dict[k] = bytes(v).hex()
+                            elif isinstance(v, uuid.UUID):
+                                row_dict[k] = str(v)
+                            else:
+                                row_dict[k] = v
+                        serialised.append(row_dict)
+                    data[table_name] = serialised
+            engine.dispose()
+
+            os.makedirs(os.path.dirname(snapshot_path) or '.', exist_ok=True)
+            with open(snapshot_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, default=str)
+
+            file_size = os.path.getsize(snapshot_path) / (1024 * 1024)
+            result['success'] = True
+            result['path'] = snapshot_path
+            result['size_mb'] = round(file_size, 2)
+            total_rows = sum(len(v) for v in data.values())
+            result['message'] = f"JSON snapshot created ({result['size_mb']} MB, {total_rows} rows across {len(data)} tables)"
+            logger.info(f"✓ JSON snapshot: {snapshot_path} ({result['size_mb']} MB)")
+        except Exception as e:
+            result['message'] = f"JSON snapshot failed: {str(e)}"
+            logger.error(result['message'])
         return result
 
     @staticmethod
