@@ -3629,6 +3629,26 @@ def create_app():
                     flash(f'File non valido: {str(e)}', 'error')
                     return render_template('admin/database_upload.html', form=form)
 
+                # Auto-upgrade legacy schema (PyArchInit-QGIS DBs lack i18n + sync columns)
+                try:
+                    from pyarchinit_mini.services.import_export_service import ImportExportService
+                    upgrade_stats = ImportExportService.upgrade_legacy_schema(f'sqlite:///{db_path}')
+                    if upgrade_stats['columns_added'] or upgrade_stats['dates_normalised']:
+                        flash(
+                            f"Schema legacy aggiornato: {upgrade_stats['columns_added']} "
+                            f"colonne aggiunte, {upgrade_stats['rows_backfilled']} righe "
+                            f"riempite, {upgrade_stats['dates_normalised']} date convertite.",
+                            'info'
+                        )
+                    if upgrade_stats['errors']:
+                        flash(
+                            f"Avvisi durante upgrade schema: {len(upgrade_stats['errors'])} "
+                            f"(prime: {'; '.join(upgrade_stats['errors'][:3])})",
+                            'warning'
+                        )
+                except Exception as e:
+                    flash(f'Upgrade schema fallito (DB caricato comunque): {str(e)}', 'warning')
+
                 # Store connection info
                 connections = app.config.get('DATABASE_CONNECTIONS', {})
                 connections[db_name] = {
@@ -3657,6 +3677,43 @@ def create_app():
                 flash(f'Errore caricamento database: {str(e)}', 'error')
 
         return render_template('admin/database_upload.html', form=form)
+
+    @app.route('/admin/database/upgrade-schema/<name>', methods=['POST', 'GET'])
+    def upgrade_database_schema(name):
+        """Run upgrade_legacy_schema on an already-registered connection.
+
+        Adds any missing columns from current models, backfills sync/audit
+        fields, and converts Italian-formatted date strings to ISO. Idempotent.
+        """
+        from pyarchinit_mini.config.connection_manager import get_connection_manager
+        from pyarchinit_mini.services.import_export_service import ImportExportService
+
+        conn_manager = get_connection_manager()
+        conn_info = conn_manager.get_connection(name)
+        if not conn_info:
+            flash(f'Connessione "{name}" non trovata', 'error')
+            return redirect(url_for('admin_database'))
+
+        connection_string = conn_info.get('connection_string') or conn_info.get('url')
+        if not connection_string:
+            flash(f'Connessione "{name}" senza URL', 'error')
+            return redirect(url_for('admin_database'))
+
+        try:
+            stats = ImportExportService.upgrade_legacy_schema(connection_string)
+            flash(
+                f"Schema aggiornato: {stats['columns_added']} colonne aggiunte su "
+                f"{stats['tables_processed']} tabelle, {stats['rows_backfilled']} righe "
+                f"riempite, {stats['dates_normalised']} date convertite, "
+                f"{len(stats['errors'])} avvisi.",
+                'success' if not stats['errors'] else 'warning'
+            )
+            if stats['errors']:
+                flash('Primi avvisi: ' + '; '.join(stats['errors'][:5]), 'warning')
+        except Exception as e:
+            flash(f'Upgrade fallito: {str(e)}', 'error')
+
+        return redirect(url_for('admin_database'))
 
     @app.route('/admin/database/connect', methods=['GET', 'POST'])
     def connect_database():

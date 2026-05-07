@@ -2196,6 +2196,170 @@ class ImportExportService:
         return result
 
     @staticmethod
+    def upgrade_legacy_schema(db_url: str) -> Dict[str, Any]:
+        """Add columns expected by current models to a legacy DB and
+        normalise legacy data so the ORM can read it.
+
+        Walks Base.metadata.tables and for each table that already exists in
+        the DB, ALTER TABLE adds any missing columns as NULLable (SQLite
+        refuses NOT NULL without a DEFAULT). After adding, sync/audit columns
+        are backfilled so existing rows satisfy not-null contracts at the ORM
+        layer:
+
+        - entity_uuid → fresh uuid4 per row (preserves uniqueness)
+        - created_at, updated_at → CURRENT_TIMESTAMP
+        - version_number → 1
+        - sync_status → 'new'
+
+        Date columns containing Italian-formatted strings (dd-mm-yyyy,
+        dd/mm/yyyy, dd.mm.yyyy) are converted to ISO yyyy-mm-dd so SQLAlchemy
+        Date coercion does not raise.
+
+        Idempotent: re-running on an already-upgraded DB is a no-op.
+        """
+        import uuid as uuid_mod
+        from sqlalchemy import Date as SADate, DateTime as SADateTime
+        from pyarchinit_mini.models import BaseModel  # noqa: F401 — registers all model tables
+        from pyarchinit_mini.models.base import Base
+
+        stats = {
+            'tables_processed': 0,
+            'columns_added': 0,
+            'rows_backfilled': 0,
+            'dates_normalised': 0,
+            'added_per_table': {},
+            'errors': [],
+        }
+
+        engine = create_engine(db_url)
+        try:
+            inspector = inspect(engine)
+            existing_tables = set(inspector.get_table_names())
+
+            backfill_rules = {
+                'entity_uuid': 'uuid4',
+                'created_at': 'now',
+                'updated_at': 'now',
+                'version_number': 1,
+                'sync_status': 'new',
+            }
+
+            for table_name, table_obj in Base.metadata.tables.items():
+                if table_name not in existing_tables:
+                    continue
+                existing_cols = {c['name'] for c in inspector.get_columns(table_name)}
+                added_cols = []
+                for col in table_obj.columns:
+                    if col.name in existing_cols:
+                        continue
+                    try:
+                        col_type_sql = col.type.compile(engine.dialect)
+                    except Exception:
+                        col_type_sql = 'TEXT'
+                    ddl = f'ALTER TABLE "{table_name}" ADD COLUMN "{col.name}" {col_type_sql}'
+                    try:
+                        with engine.begin() as conn:
+                            conn.execute(text(ddl))
+                        stats['columns_added'] += 1
+                        added_cols.append(col.name)
+                    except Exception as e:
+                        stats['errors'].append(f"{table_name}.{col.name}: {str(e).splitlines()[0]}")
+
+                if added_cols:
+                    stats['added_per_table'][table_name] = added_cols
+
+                pk_cols = [c.name for c in table_obj.primary_key.columns]
+                pk = pk_cols[0] if pk_cols else None
+
+                for col_name in added_cols:
+                    rule = backfill_rules.get(col_name)
+                    if rule is None:
+                        continue
+                    try:
+                        if rule == 'uuid4':
+                            if not pk:
+                                continue
+                            with engine.begin() as conn:
+                                rows = conn.execute(
+                                    text(f'SELECT {pk} FROM "{table_name}" WHERE "{col_name}" IS NULL')
+                                ).fetchall()
+                                for (rowid,) in rows:
+                                    conn.execute(
+                                        text(f'UPDATE "{table_name}" SET "{col_name}" = :u WHERE {pk} = :id'),
+                                        {'u': str(uuid_mod.uuid4()), 'id': rowid},
+                                    )
+                                    stats['rows_backfilled'] += 1
+                        elif rule == 'now':
+                            with engine.begin() as conn:
+                                res = conn.execute(
+                                    text(f'UPDATE "{table_name}" SET "{col_name}" = CURRENT_TIMESTAMP WHERE "{col_name}" IS NULL')
+                                )
+                                stats['rows_backfilled'] += res.rowcount or 0
+                        else:
+                            with engine.begin() as conn:
+                                res = conn.execute(
+                                    text(f'UPDATE "{table_name}" SET "{col_name}" = :v WHERE "{col_name}" IS NULL'),
+                                    {'v': rule},
+                                )
+                                stats['rows_backfilled'] += res.rowcount or 0
+                    except Exception as e:
+                        stats['errors'].append(f"backfill {table_name}.{col_name}: {str(e).splitlines()[0]}")
+
+                stats['tables_processed'] += 1
+
+            # Normalise Italian-formatted date strings in any Date/DateTime column
+            for table_name, table_obj in Base.metadata.tables.items():
+                if table_name not in existing_tables:
+                    continue
+                date_col_names = [
+                    c.name for c in table_obj.columns
+                    if isinstance(c.type, (SADate, SADateTime))
+                ]
+                if not date_col_names:
+                    continue
+                pk_cols = [c.name for c in table_obj.primary_key.columns]
+                if not pk_cols:
+                    continue
+                pk = pk_cols[0]
+                for col_name in date_col_names:
+                    try:
+                        with engine.begin() as conn:
+                            rows = conn.execute(
+                                text(
+                                    f'SELECT {pk}, "{col_name}" FROM "{table_name}" '
+                                    f'WHERE "{col_name}" IS NOT NULL AND "{col_name}" != \'\''
+                                )
+                            ).fetchall()
+                            for rowid, raw in rows:
+                                normalised = ImportExportService._normalise_date(raw)
+                                if normalised is None or str(raw) == str(normalised):
+                                    continue
+                                try:
+                                    conn.execute(
+                                        text(
+                                            f'UPDATE "{table_name}" SET "{col_name}" = :v '
+                                            f'WHERE {pk} = :id'
+                                        ),
+                                        {'v': str(normalised), 'id': rowid},
+                                    )
+                                    stats['dates_normalised'] += 1
+                                except Exception:
+                                    pass
+                    except Exception as e:
+                        stats['errors'].append(
+                            f"date-normalise {table_name}.{col_name}: {str(e).splitlines()[0]}"
+                        )
+
+            logger.info(
+                f"upgrade_legacy_schema: {stats['columns_added']} columns added across "
+                f"{stats['tables_processed']} tables, {stats['rows_backfilled']} rows backfilled, "
+                f"{stats['dates_normalised']} dates normalised"
+            )
+        finally:
+            engine.dispose()
+        return stats
+
+    @staticmethod
     def _detect_conflicts(source_db_url: str, target_db_url: str) -> Dict[str, Any]:
         """
         Detect conflicts between source and target databases before migration
