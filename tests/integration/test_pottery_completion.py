@@ -92,3 +92,21 @@ def test_form_create_no_manage_media_button(client):
     assert r.status_code == 200
     body = r.data.decode("utf-8")
     assert "entity_type=pottery" not in body
+
+
+def test_api_forms_includes_thesaurus_defaults(client, pottery_service):
+    # /api/pottery/forms must include archaeological defaults even with zero DB rows
+    r = client.get("/api/pottery/forms")
+    assert r.status_code == 200
+    values = r.get_json()["values"]
+    # Defaults from THESAURUS_MAPPINGS['pottery_table']['form']
+    for expected in ("Olla", "Ciotola", "Anfora"):
+        assert expected in values, f"{expected!r} missing from API output"
+
+
+def test_api_forms_merges_db_with_defaults(client, pottery_service):
+    pottery_service.create_pottery({"sito": "X", "form": "CustomShape"})
+    r = client.get("/api/pottery/forms")
+    values = r.get_json()["values"]
+    assert "CustomShape" in values  # DB value
+    assert "Olla" in values         # default value

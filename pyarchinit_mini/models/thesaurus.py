@@ -264,5 +264,31 @@ THESAURUS_MAPPINGS = {
             'XV sec.', 'XVI sec.', 'II-I sec. a.C.',
             'VI-V sec. a.C.'
         ],
-    }
+    },
+    'pottery_table': {
+        'material': [
+            'Ceramica', 'Vetro', 'Metallo', 'Osso', 'Pietra', 'Terracotta',
+            'Stucco', 'Mosaico', 'Marmo', 'Bronzo',
+        ],
+        'form': [
+            'Olla', 'Ciotola', 'Anfora', 'Coppa', 'Lucerna', 'Bicchiere',
+            'Brocca', 'Piatto', 'Pentola', 'Vaso', 'Catino', 'Boccale',
+            'Tegame', 'Mortaio', 'Unguentario',
+        ],
+        'fabric': [
+            'Coarse ware', 'Fine ware', 'Common ware', 'Cooking ware',
+            'Storage ware', 'Tableware', 'Painted ware', 'Glazed ware',
+        ],
+        'ware': [
+            'African Red Slip', 'Eastern Sigillata A', 'Eastern Sigillata B',
+            'Terra Sigillata Italica', 'Terra Sigillata Sud-Gallica',
+            'Phocaean Red Slip', 'Cypriot Red Slip', 'Late Roman C',
+            'Italo-Megarian', 'Black Glazed',
+        ],
+        'surf_trat': [
+            'Lisciatura', 'Lucidatura', 'Stralucidatura', 'Stralucidatura a stecca',
+            'Ingobbio', 'Vernice', 'Smalto', 'Pittura', 'Nessuno',
+        ],
+        'wheel_made': ['Yes', 'No', 'Indeterminate'],
+    },
 }

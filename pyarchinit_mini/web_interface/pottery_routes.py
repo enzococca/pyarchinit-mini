@@ -48,12 +48,16 @@ def _extract_pottery_form(form) -> dict:
 
 
 def _distinct_values(app, column_name: str):
-    """Return distinct non-null values for a Pottery column as JSON."""
+    """Return distinct values for a Pottery column (DB + THESAURUS_MAPPINGS) as JSON."""
     from ..models.pottery import Pottery
+    from ..models.thesaurus import THESAURUS_MAPPINGS
     with app.db_manager.connection.get_session() as session:
         col = getattr(Pottery, column_name)
         rows = session.query(col).filter(col.isnot(None)).distinct().all()
-        return jsonify({"values": sorted({r[0] for r in rows if r[0]})})
+        db_values = {r[0] for r in rows if r[0]}
+    defaults = set(THESAURUS_MAPPINGS.get("pottery_table", {}).get(column_name, []))
+    merged = sorted(db_values | defaults)
+    return jsonify({"values": merged})
 
 
 def _register_pottery_routes(app):
