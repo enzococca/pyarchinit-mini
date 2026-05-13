@@ -6,6 +6,10 @@ import logging
 from sqlalchemy import text, inspect
 from typing import List, Dict, Any
 
+# Ensure Pottery model is registered in Base.metadata so create_all picks it up
+# even when migrations runs before any service imports it.
+from ..models.pottery import Pottery  # noqa: F401
+
 logger = logging.getLogger(__name__)
 
 class DatabaseMigrations:
