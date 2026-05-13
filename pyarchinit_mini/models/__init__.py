@@ -12,6 +12,7 @@ from .datazione import Datazione
 from .media import Media, MediaThumb, Documentation
 from .thesaurus import ThesaurusSigle, ThesaurusField, ThesaurusCategory
 from .user import User, UserRole
+from .pottery import Pottery
 
 __all__ = [
     "BaseModel",
@@ -31,5 +32,6 @@ __all__ = [
     "ThesaurusField",
     "ThesaurusCategory",
     "User",
-    "UserRole"
+    "UserRole",
+    "Pottery",
 ]
