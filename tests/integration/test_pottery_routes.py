@@ -132,3 +132,28 @@ def test_detail_renders_record(client, pottery_service):
 def test_detail_404_for_missing(client):
     r = client.get("/pottery/99999")
     assert r.status_code == 404
+
+
+def test_edit_get_prefills_form(client, pottery_service):
+    p = pottery_service.create_pottery({"sito": "X", "form": "Olla"})
+    r = client.get(f"/pottery/{p.id_rep}/edit")
+    assert r.status_code == 200
+    assert b"Olla" in r.data
+
+
+def test_edit_post_updates(client, pottery_service):
+    p = pottery_service.create_pottery({"sito": "X", "form": "Olla"})
+    r = client.post(f"/pottery/{p.id_rep}/edit", data={
+        "sito": "X", "form": "Ciotola", "qty": "3"
+    })
+    assert r.status_code in (302, 303)
+    refreshed = pottery_service.get_pottery_by_id(p.id_rep)
+    assert refreshed.form == "Ciotola"
+    assert refreshed.qty == 3
+
+
+def test_delete_removes_record(client, pottery_service):
+    p = pottery_service.create_pottery({"sito": "X", "form": "Olla"})
+    r = client.post(f"/pottery/{p.id_rep}/delete")
+    assert r.status_code in (302, 303)
+    assert pottery_service.get_pottery_by_id(p.id_rep) is None
