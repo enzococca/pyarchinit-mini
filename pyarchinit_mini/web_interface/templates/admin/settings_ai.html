@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}AI Settings{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <h1><i class="fas fa-robot"></i> AI Settings</h1>
+  <p class="text-muted">API keys are stored encrypted at rest. Only the last 4 characters are shown.</p>
+
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="mb-3">
+      <label class="form-label" for="openai_api_key">OpenAI API Key</label>
+      <input class="form-control" id="openai_api_key" name="openai_api_key" type="password"
+             placeholder="{{ openai_key_masked or 'sk-...' }}">
+      {% if openai_key_masked %}<small class="text-muted">Current: <code>{{ openai_key_masked }}</code></small>{% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="anthropic_api_key">Anthropic API Key</label>
+      <input class="form-control" id="anthropic_api_key" name="anthropic_api_key" type="password"
+             placeholder="{{ anthropic_key_masked or 'sk-ant-...' }}">
+      {% if anthropic_key_masked %}<small class="text-muted">Current: <code>{{ anthropic_key_masked }}</code></small>{% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="ai_provider">Default Provider</label>
+      <select class="form-select" id="ai_provider" name="ai_provider">
+        <option value="openai" {% if ai_provider=="openai" %}selected{% endif %}>OpenAI</option>
+        <option value="anthropic" {% if ai_provider=="anthropic" %}selected{% endif %}>Anthropic</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="ai_model">Default Model</label>
+      <input class="form-control" id="ai_model" name="ai_model" type="text"
+             value="{{ ai_model }}" placeholder="gpt-5.5 / claude-sonnet-4-7">
+    </div>
+
+    <button class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+  </form>
+</div>
+{% endblock %}
