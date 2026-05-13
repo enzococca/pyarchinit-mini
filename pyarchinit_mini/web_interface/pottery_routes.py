@@ -152,3 +152,52 @@ def _register_pottery_routes(app):
             abort(404)
         flash(f"Pottery #{id_rep} deleted.", "info")
         return redirect(url_for("pottery_list"))
+
+    @app.route("/api/pottery/forms")
+    @login_required
+    def pottery_api_forms():
+        return _distinct_values(app, "form")
+
+    @app.route("/api/pottery/fabrics")
+    @login_required
+    def pottery_api_fabrics():
+        return _distinct_values(app, "fabric")
+
+    @app.route("/api/pottery/wares")
+    @login_required
+    def pottery_api_wares():
+        return _distinct_values(app, "ware")
+
+    @app.route("/api/pottery/stats")
+    @login_required
+    def pottery_api_stats():
+        from sqlalchemy import func as f
+        from ..models.pottery import Pottery as _Pottery
+        svc = PotteryService(app.db_manager)
+        sito = request.args.get("sito")
+        area = request.args.get("area")
+        us = request.args.get("us")
+        us_int = int(us) if us and us.isdigit() else None
+
+        by_form = svc.get_form_distribution(sito) if sito else svc.get_form_distribution()
+        by_fabric = svc.get_fabric_distribution(sito) if sito else svc.get_fabric_distribution()
+        by_ware = svc.get_ware_distribution(sito) if sito else svc.get_ware_distribution()
+
+        filters = {k: v for k, v in {"sito": sito, "area": area, "us": us_int}.items() if v}
+        total = svc.count_pottery(filters or None)
+        mni = svc.calculate_mni(sito, area, us_int)["total"] if sito else 0
+
+        with app.db_manager.connection.get_session() as session:
+            q = session.query(_Pottery.anno, f.count(_Pottery.id_rep)).group_by(_Pottery.anno)
+            if sito:
+                q = q.filter(_Pottery.sito == sito)
+            by_anno = [{"anno": a, "count": c} for a, c in q.all() if a is not None]
+
+        return jsonify({
+            "total": total,
+            "by_form": [{"form": k, "count": v} for k, v in by_form.items()],
+            "by_fabric": [{"fabric": k, "count": v} for k, v in by_fabric.items()],
+            "by_ware": [{"ware": k, "count": v} for k, v in by_ware.items()],
+            "by_anno": by_anno,
+            "mni": mni,
+        })

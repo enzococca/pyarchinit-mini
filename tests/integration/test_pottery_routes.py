@@ -157,3 +157,24 @@ def test_delete_removes_record(client, pottery_service):
     r = client.post(f"/pottery/{p.id_rep}/delete")
     assert r.status_code in (302, 303)
     assert pottery_service.get_pottery_by_id(p.id_rep) is None
+
+
+def test_api_forms_returns_distinct(client, pottery_service):
+    pottery_service.create_pottery({"sito": "X", "form": "Olla"})
+    pottery_service.create_pottery({"sito": "X", "form": "Ciotola"})
+    pottery_service.create_pottery({"sito": "Y", "form": "Olla"})
+    r = client.get("/api/pottery/forms")
+    assert r.status_code == 200
+    vs = r.get_json()["values"]
+    assert set(vs) == {"Olla", "Ciotola"}
+
+
+def test_api_stats(client, pottery_service):
+    pottery_service.create_pottery({"sito": "X", "form": "Olla", "fabric": "Coarse", "qty": 5, "anno": 2024})
+    pottery_service.create_pottery({"sito": "X", "form": "Ciotola", "fabric": "Fine", "qty": 1, "anno": 2024})
+    r = client.get("/api/pottery/stats?sito=X")
+    assert r.status_code == 200
+    o = r.get_json()
+    assert o["total"] == 2
+    assert any(d["form"] == "Olla" for d in o["by_form"])
+    assert o["mni"] == 6
