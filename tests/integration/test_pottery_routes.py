@@ -186,3 +186,32 @@ def test_api_media_pottery_lists_records(client, pottery_service):
     assert r.status_code == 200
     items = r.get_json()["items"]
     assert any(i["id_rep"] == p.id_rep for i in items)
+
+
+# ---------------------------------------------------------------------------
+# PDF export tests
+# ---------------------------------------------------------------------------
+import pytest  # noqa: E402 (already imported above but needed for mark)
+
+try:
+    from weasyprint import HTML as _HTML  # noqa: F401
+    HAS_WEASY = True
+except (ImportError, OSError):
+    HAS_WEASY = False
+
+
+@pytest.mark.skipif(not HAS_WEASY, reason="WeasyPrint unavailable (missing pango/gobject libs)")
+def test_pdf_single(client, pottery_service):
+    p = pottery_service.create_pottery({"sito": "X", "form": "Olla", "fabric": "Coarse", "qty": 2})
+    r = client.get(f"/export/pottery_single_pdf/{p.id_rep}")
+    assert r.status_code == 200
+    assert r.data.startswith(b"%PDF")
+
+
+@pytest.mark.skipif(not HAS_WEASY, reason="WeasyPrint unavailable (missing pango/gobject libs)")
+def test_pdf_batch(client, pottery_service):
+    pottery_service.create_pottery({"sito": "X", "form": "Olla"})
+    pottery_service.create_pottery({"sito": "X", "form": "Ciotola"})
+    r = client.get("/export/pottery_pdf?sito=X")
+    assert r.status_code == 200
+    assert r.data.startswith(b"%PDF")

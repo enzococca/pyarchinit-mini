@@ -351,6 +351,47 @@ def _register_pottery_routes(app):
         )
         return redirect(url_for("pottery_list"))
 
+    @app.route("/export/pottery_pdf")
+    @login_required
+    def pottery_export_pdf():
+        from io import BytesIO
+        from flask import send_file
+        from ..services.pottery_pdf_service import PotteryPDFService
+        from .. import __version__
+        svc = PotteryService(app.db_manager)
+        filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric") if request.args.get(k)}
+        if "us" in filters:
+            try:
+                filters["us"] = int(filters["us"])
+            except ValueError:
+                filters.pop("us")
+        items, _ = svc.get_all_pottery(page=1, size=10_000, filters=filters)
+        if not items:
+            flash("No pottery records matching filters.", "warning")
+            return redirect(url_for("pottery_list"))
+        pdf_bytes = PotteryPDFService.render_sheets(items, version=__version__)
+        return send_file(
+            BytesIO(pdf_bytes), mimetype="application/pdf",
+            as_attachment=True, download_name="pottery.pdf",
+        )
+
+    @app.route("/export/pottery_single_pdf/<int:id_rep>")
+    @login_required
+    def pottery_export_single_pdf(id_rep: int):
+        from io import BytesIO
+        from flask import send_file
+        from ..services.pottery_pdf_service import PotteryPDFService
+        from .. import __version__
+        svc = PotteryService(app.db_manager)
+        p = svc.get_pottery_by_id(id_rep)
+        if not p:
+            abort(404)
+        pdf_bytes = PotteryPDFService.render_sheets([p], version=__version__)
+        return send_file(
+            BytesIO(pdf_bytes), mimetype="application/pdf",
+            as_attachment=True, download_name=f"pottery_{id_rep}.pdf",
+        )
+
     @app.route("/api/pottery/stats")
     @login_required
     def pottery_api_stats():

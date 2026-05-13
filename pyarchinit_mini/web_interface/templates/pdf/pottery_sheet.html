@@ -1,0 +1,82 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 1.4cm; }
+  body { font: 10pt/1.3 sans-serif; color: #111; }
+  h1 { font-size: 14pt; margin: 0 0 .4em; }
+  .sheet { page-break-after: always; }
+  .sheet:last-child { page-break-after: auto; }
+  .header { display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding-bottom: 4px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0; }
+  .row > div { flex: 1 1 30%; }
+  .section { border-top: 1px dashed #aaa; margin-top: 6px; padding-top: 4px; }
+  .label { font-weight: bold; }
+</style></head>
+<body>
+{% for p in potteries %}
+<div class="sheet">
+  <div class="header">
+    <h1>POTTERY SHEET</h1>
+    <div><strong>Site:</strong> {{ p.sito }} &nbsp; <strong>ID rep:</strong> {{ p.id_rep }} &nbsp; <strong>ID #:</strong> {{ p.id_number or '' }}</div>
+  </div>
+
+  <div class="row">
+    <div><span class="label">Area:</span> {{ p.area or '' }}</div>
+    <div><span class="label">US:</span> {{ p.us or '' }}</div>
+    <div><span class="label">Year:</span> {{ p.anno or '' }}</div>
+    <div><span class="label">Sector:</span> {{ p.sector or '' }}</div>
+    <div><span class="label">Bag:</span> {{ p.bag or '' }}</div>
+    <div><span class="label">Box:</span> {{ p.box or '' }}</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Description</div>
+    <div class="row">
+      <div><span class="label">Material:</span> {{ p.material or '' }}</div>
+      <div><span class="label">Form:</span> {{ p.form or '' }}</div>
+      <div><span class="label">Specific form:</span> {{ p.specific_form or '' }}</div>
+      <div><span class="label">Specific shape:</span> {{ p.specific_shape or '' }}</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">Technical</div>
+    <div class="row">
+      <div><span class="label">Fabric:</span> {{ p.fabric or '' }}</div>
+      <div><span class="label">Ware:</span> {{ p.ware or '' }}</div>
+      <div><span class="label">Munsell:</span> {{ p.munsell or '' }}</div>
+      <div><span class="label">Surface treat.:</span> {{ p.surf_trat or '' }}</div>
+      <div><span class="label">Wheel-made:</span> {{ p.wheel_made or '' }}</div>
+      <div><span class="label">Percent:</span> {{ p.percent or '' }}</div>
+    </div>
+    <div class="row">
+      <div><span class="label">Ext deco:</span> {{ p.exdeco or '' }} → {{ p.descrip_ex_deco or '' }}</div>
+      <div><span class="label">Int deco:</span> {{ p.intdeco or '' }} → {{ p.descrip_in_deco or '' }}</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">Measurements</div>
+    <div class="row">
+      <div><span class="label">Qty:</span> {{ p.qty or '' }}</div>
+      <div><span class="label">Diam max:</span> {{ p.diametro_max or '' }}</div>
+      <div><span class="label">Rim:</span> {{ p.diametro_rim or '' }}</div>
+      <div><span class="label">Bottom:</span> {{ p.diametro_bottom or '' }}</div>
+      <div><span class="label">Height:</span> {{ p.diametro_height or '' }}</div>
+      <div><span class="label">Preserved:</span> {{ p.diametro_preserved or '' }}</div>
+    </div>
+  </div>
+
+  {% if p.note %}
+  <div class="section">
+    <div class="label">Notes</div>
+    <p>{{ p.note }}</p>
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<div style="position: fixed; bottom: 0; width: 100%; font-size: 8pt; color: #555; text-align: center;">
+  pyarchinit-mini v{{ version }} · printed {{ printed_at }}
+</div>
+</body></html>
