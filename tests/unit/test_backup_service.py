@@ -82,3 +82,61 @@ def test_set_schedule_rejects_invalid_frequency(backup_svc):
 def test_set_schedule_rejects_negative_keep_last(backup_svc):
     with pytest.raises(ValueError, match="keep_last"):
         backup_svc.set_schedule(enabled=True, frequency="daily", keep_last=0)
+
+
+def test_create_backup_now_postgres_pg_dump_missing_falls_back_to_json(backup_svc, monkeypatch):
+    """When pg_dump is unavailable AND _create_backup returns None path,
+    BackupService must fall back to an inline JSON snapshot instead of
+    crashing with 'argument should be a str ... not NoneType'.
+    """
+    from unittest.mock import patch
+
+    fake_url = "postgresql://user:pwd@host:5432/dbname"
+
+    # Simulate _create_backup returning success=False, path=None (the failure
+    # mode that caused the bug in v2.1.62)
+    def _fake_create_backup(db_url, backup_dir=None):
+        return {"success": False, "path": None, "message": "pg_dump not found"}
+
+    # Simulate _python_json_snapshot writing a tiny file at the requested path
+    def _fake_json_snapshot(db_url, snapshot_path):
+        from pathlib import Path as _P
+        _P(snapshot_path).write_text('{"tables": {}}')
+        return {"success": True, "path": snapshot_path, "size_mb": 0.01, "message": "ok"}
+
+    with patch(
+        "pyarchinit_mini.services.import_export_service.ImportExportService._create_backup",
+        side_effect=_fake_create_backup,
+    ), patch(
+        "pyarchinit_mini.services.import_export_service.ImportExportService._python_json_snapshot",
+        side_effect=_fake_json_snapshot,
+    ):
+        info = backup_svc.create_backup_now(db_url=fake_url)
+
+    assert info["format"] == "json"
+    from pathlib import Path as _P
+    assert _P(info["path"]).exists()
+
+
+def test_create_backup_now_raises_when_both_pg_dump_and_json_fail(backup_svc):
+    """If both pg_dump and JSON snapshot fail, BackupService raises a
+    clear RuntimeError rather than silently returning a broken result.
+    """
+    from unittest.mock import patch
+    fake_url = "postgresql://user:pwd@host:5432/dbname"
+
+    def _fail_create_backup(db_url, backup_dir=None):
+        return {"success": False, "path": None, "message": "pg_dump not found"}
+
+    def _fail_json_snapshot(db_url, snapshot_path):
+        return {"success": False, "path": None, "message": "DB unreachable"}
+
+    with patch(
+        "pyarchinit_mini.services.import_export_service.ImportExportService._create_backup",
+        side_effect=_fail_create_backup,
+    ), patch(
+        "pyarchinit_mini.services.import_export_service.ImportExportService._python_json_snapshot",
+        side_effect=_fail_json_snapshot,
+    ):
+        with pytest.raises(RuntimeError, match="JSON snapshot"):
+            backup_svc.create_backup_now(db_url=fake_url)
