@@ -117,3 +117,38 @@ def _register_pottery_routes(app):
             "pottery/detail.html",
             pottery=PotteryDTO.from_model(p),
         )
+
+    @app.route("/pottery/<int:id_rep>/edit", methods=["GET", "POST"])
+    @login_required
+    def pottery_edit(id_rep: int):
+        svc = PotteryService(app.db_manager)
+        p = svc.get_pottery_by_id(id_rep)
+        if not p:
+            abort(404)
+        if request.method == "POST":
+            data = _extract_pottery_form(request.form)
+            try:
+                svc.update_pottery(id_rep, data)
+            except ValueError as e:
+                flash(str(e), "danger")
+                return render_template(
+                    "pottery/form.html",
+                    pottery=PotteryDTO.from_model(p),
+                    form_data=data, mode="edit",
+                )
+            flash(f"Pottery #{id_rep} updated.", "success")
+            return redirect(url_for("pottery_detail", id_rep=id_rep))
+        return render_template(
+            "pottery/form.html",
+            pottery=PotteryDTO.from_model(p),
+            form_data={}, mode="edit",
+        )
+
+    @app.route("/pottery/<int:id_rep>/delete", methods=["POST"])
+    @login_required
+    def pottery_delete(id_rep: int):
+        svc = PotteryService(app.db_manager)
+        if not svc.delete_pottery(id_rep):
+            abort(404)
+        flash(f"Pottery #{id_rep} deleted.", "info")
+        return redirect(url_for("pottery_list"))

@@ -10,7 +10,11 @@
   <div class="d-flex justify-content-between">
     <h1>Pottery #{{ pottery.id_rep }} <small class="text-muted">{{ pottery.sito }}{% if pottery.id_number %} &middot; ID {{ pottery.id_number }}{% endif %}</small></h1>
     <div>
-      <button class="btn btn-warning" disabled>Edit (T13)</button>
+      <a class="btn btn-warning" href="{{ url_for('pottery_edit', id_rep=pottery.id_rep) }}">Edit</a>
+      <form method="post" class="d-inline" action="{{ url_for('pottery_delete', id_rep=pottery.id_rep) }}"
+            onsubmit="return confirm('Delete pottery #{{ pottery.id_rep }}?');">
+        <button class="btn btn-danger">Delete</button>
+      </form>
     </div>
   </div>
 
