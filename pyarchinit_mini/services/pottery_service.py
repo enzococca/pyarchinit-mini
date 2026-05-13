@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 
 from ..database.manager import DatabaseManager
 from ..models.pottery import Pottery
@@ -185,3 +185,51 @@ class PotteryService:
     def get_pottery_by_form(self, form: str, page: int = 1, size: int = 10) -> List[Pottery]:
         items, _ = self.get_all_pottery(page=page, size=size, filters={"form": form})
         return items
+
+    # ---------- Stats ----------
+    def _distribution(self, column_name: str, sito: Optional[str] = None) -> Dict[str, int]:
+        with self.db_manager.connection.get_session() as session:
+            col = getattr(Pottery, column_name)
+            q = session.query(col, func.count(Pottery.id_rep)).group_by(col)
+            if sito:
+                q = q.filter(Pottery.sito == sito)
+            return {k: c for k, c in q.all() if k is not None}
+
+    def get_form_distribution(self, sito: Optional[str] = None) -> Dict[str, int]:
+        return self._distribution("form", sito)
+
+    def get_fabric_distribution(self, sito: Optional[str] = None) -> Dict[str, int]:
+        return self._distribution("fabric", sito)
+
+    def get_ware_distribution(self, sito: Optional[str] = None) -> Dict[str, int]:
+        return self._distribution("ware", sito)
+
+    def count_by_site(self) -> List[Dict[str, Any]]:
+        with self.db_manager.connection.get_session() as session:
+            rows = (
+                session.query(Pottery.sito, func.count(Pottery.id_rep))
+                .group_by(Pottery.sito)
+                .all()
+            )
+            return [{"sito": s, "count": c} for s, c in rows]
+
+    def calculate_mni(
+        self, sito: str, area: Optional[str] = None, us: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Minimum Number of Individuals — sum of qty grouped by form+fabric+ware."""
+        with self.db_manager.connection.get_session() as session:
+            q = session.query(
+                Pottery.form, Pottery.fabric, Pottery.ware,
+                func.coalesce(func.sum(Pottery.qty), 0),
+            ).filter(Pottery.sito == sito)
+            if area:
+                q = q.filter(Pottery.area == area)
+            if us is not None:
+                q = q.filter(Pottery.us == us)
+            q = q.group_by(Pottery.form, Pottery.fabric, Pottery.ware)
+            groups = [
+                {"form": f, "fabric": fa, "ware": w, "mni": int(s or 0)}
+                for f, fa, w, s in q.all()
+            ]
+            total = sum(g["mni"] for g in groups)
+            return {"total": total, "groups": groups}
