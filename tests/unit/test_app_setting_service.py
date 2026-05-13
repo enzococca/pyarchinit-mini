@@ -52,3 +52,30 @@ def test_update_existing_key(svc):
     svc.set("ai_model", "gpt-5.4")
     svc.set("ai_model", "gpt-5.5")
     assert svc.get("ai_model") == "gpt-5.5"
+
+
+def test_ai_service_uses_appsetting_when_available(svc, monkeypatch):
+    """AIService must prefer AppSetting values over env vars."""
+    # Seed AppSetting with non-env values
+    svc.set("ai_provider", "anthropic")
+    svc.set("anthropic_api_key", "sk-from-db", is_secret=True)
+    svc.set("ai_model", "claude-sonnet-4-7")
+    # Set conflicting env to verify priority
+    monkeypatch.setenv("AI_PROVIDER", "openai")
+    monkeypatch.setenv("AI_API_KEY", "sk-from-env")
+
+    from pyarchinit_mini.services.ai_assistant_service import AIAssistantService
+    ai = AIAssistantService(db_manager=svc.db_manager)
+    assert ai.provider == "anthropic"
+    assert ai.api_key == "sk-from-db"
+    assert ai.model == "claude-sonnet-4-7"
+
+
+def test_ai_service_falls_back_to_env_when_no_appsetting(monkeypatch):
+    """AIService without db_manager uses env vars only."""
+    monkeypatch.setenv("AI_PROVIDER", "openai")
+    monkeypatch.setenv("AI_API_KEY", "sk-only-env")
+    from pyarchinit_mini.services.ai_assistant_service import AIAssistantService
+    ai = AIAssistantService()
+    assert ai.provider == "openai"
+    assert ai.api_key == "sk-only-env"

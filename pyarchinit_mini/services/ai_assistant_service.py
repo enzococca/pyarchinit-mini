@@ -70,12 +70,37 @@ class AIAssistantService:
         AI_MODEL     - Model name override (optional)
     """
 
-    def __init__(self):
-        self.provider: str = os.environ.get("AI_PROVIDER", "openai").lower()
-        self.api_key: str = os.environ.get("AI_API_KEY", "")
-        self.model: str = os.environ.get(
-            "AI_MODEL", DEFAULT_MODELS.get(self.provider, "gpt-4o-mini")
-        )
+    def __init__(self, db_manager=None):
+        """Initialize with optional DatabaseManager for AppSetting-backed config.
+
+        Priority order for each setting:
+          1. AppSetting row in the DB (via AppSettingService)
+          2. Environment variable
+          3. Hardcoded default in DEFAULT_MODELS
+        """
+        provider_env = os.environ.get("AI_PROVIDER", "openai").lower()
+        api_key_env = os.environ.get("AI_API_KEY", "")
+        model_env = os.environ.get("AI_MODEL", "")
+
+        provider = api_key = model = None
+        if db_manager is not None:
+            try:
+                from .app_setting_service import AppSettingService
+                svc = AppSettingService(db_manager)
+                p_from_db = svc.get("ai_provider")
+                if p_from_db:
+                    provider = p_from_db.lower()
+                    api_key = svc.get(f"{provider}_api_key") or None
+                model = svc.get("ai_model") or None
+            except Exception as exc:
+                # AppSetting infra may be unavailable during boot/migrations
+                logging.getLogger(__name__).debug(
+                    f"AIAssistantService: AppSetting unavailable, fallback to env: {exc}"
+                )
+
+        self.provider = (provider or provider_env).lower()
+        self.api_key = api_key or api_key_env
+        self.model = model or model_env or DEFAULT_MODELS.get(self.provider, "gpt-5.4-mini")
 
     # ------------------------------------------------------------------
     # Public API
