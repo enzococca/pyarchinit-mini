@@ -106,3 +106,47 @@ class BackupService:
             if self.delete_backup(old["filename"]):
                 deleted += 1
         return deleted
+
+    # ---------- Schedule ----------
+    _FREQUENCIES = ("daily", "weekly", "monthly")
+
+    def get_schedule(self) -> Dict[str, Any]:
+        from .app_setting_service import AppSettingService
+        svc = AppSettingService(self.db_manager)
+        enabled_raw = svc.get("backup_enabled")
+        return {
+            "enabled": str(enabled_raw or "false").lower() == "true",
+            "frequency": svc.get("backup_frequency") or "weekly",
+            "keep_last": int(svc.get("backup_keep_last") or 7),
+        }
+
+    def set_schedule(
+        self, enabled: bool, frequency: str = "weekly", keep_last: int = 7,
+    ) -> None:
+        if frequency not in self._FREQUENCIES:
+            raise ValueError(f"frequency must be one of {self._FREQUENCIES}")
+        if keep_last < 1:
+            raise ValueError("keep_last must be >= 1")
+        from .app_setting_service import AppSettingService
+        svc = AppSettingService(self.db_manager)
+        svc.set("backup_enabled", "true" if enabled else "false",
+                description="Backup scheduler enabled flag")
+        svc.set("backup_frequency", frequency,
+                description="Backup frequency: daily|weekly|monthly")
+        svc.set("backup_keep_last", str(keep_last),
+                description="Retention: number of backups to keep")
+
+    def is_due_for_backup(self) -> bool:
+        """Return True if a scheduled backup should run now."""
+        sched = self.get_schedule()
+        if not sched["enabled"]:
+            return False
+        items = self.list_backups()
+        if not items:
+            return True
+        # Newest backup's age vs frequency window (seconds)
+        windows = {"daily": 86400, "weekly": 7 * 86400, "monthly": 30 * 86400}
+        window = windows.get(sched["frequency"], 7 * 86400)
+        latest = datetime.fromisoformat(items[0]["created_at"])
+        age = (datetime.now(timezone.utc) - latest).total_seconds()
+        return age >= window

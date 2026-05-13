@@ -49,3 +49,36 @@ def test_enforce_retention(backup_svc):
         time.sleep(0.1)
     backup_svc._enforce_retention(keep_last=3)
     assert len(backup_svc.list_backups()) == 3
+
+
+def test_default_schedule(backup_svc):
+    sched = backup_svc.get_schedule()
+    assert sched == {"enabled": False, "frequency": "weekly", "keep_last": 7}
+
+
+def test_set_schedule_roundtrip(backup_svc):
+    backup_svc.set_schedule(enabled=True, frequency="daily", keep_last=14)
+    sched = backup_svc.get_schedule()
+    assert sched == {"enabled": True, "frequency": "daily", "keep_last": 14}
+
+
+def test_due_for_backup_no_previous_backup(backup_svc):
+    # With backup_enabled and no prior backups, due_for_backup returns True
+    backup_svc.set_schedule(enabled=True, frequency="daily", keep_last=7)
+    assert backup_svc.is_due_for_backup() is True
+
+
+def test_due_for_backup_recent_backup_not_due(backup_svc):
+    backup_svc.set_schedule(enabled=True, frequency="daily", keep_last=7)
+    backup_svc.create_backup_now()
+    assert backup_svc.is_due_for_backup() is False
+
+
+def test_set_schedule_rejects_invalid_frequency(backup_svc):
+    with pytest.raises(ValueError, match="frequency"):
+        backup_svc.set_schedule(enabled=True, frequency="hourly", keep_last=7)
+
+
+def test_set_schedule_rejects_negative_keep_last(backup_svc):
+    with pytest.raises(ValueError, match="keep_last"):
+        backup_svc.set_schedule(enabled=True, frequency="daily", keep_last=0)
