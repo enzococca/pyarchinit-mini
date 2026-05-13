@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Pottery — {{ "New" if mode=="create" else pottery.id_rep }}{% endblock %}
+
+{% macro fld(name, label, type="text", required=False) %}
+<div class="mb-2">
+  <label class="form-label" for="f_{{name}}">{{ label }}{% if required %} *{% endif %}</label>
+  <input class="form-control form-control-sm" id="f_{{name}}" name="{{name}}" type="{{type}}"
+    value="{{ form_data.get(name) if form_data else (pottery|attr(name) if pottery else '') }}"
+    {% if required %}required{% endif %}>
+</div>
+{% endmacro %}
+
+{% macro txa(name, label) %}
+<div class="mb-2">
+  <label class="form-label" for="f_{{name}}">{{ label }}</label>
+  <textarea class="form-control form-control-sm" id="f_{{name}}" name="{{name}}" rows="3">{{ form_data.get(name) if form_data else (pottery|attr(name) if pottery else '') }}</textarea>
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="container mt-3">
+  <h1>Pottery {% if mode=="create" %}<small class="text-muted">— Nuovo</small>{% else %}#{{ pottery.id_rep }}{% endif %}</h1>
+
+  <form method="post" novalidate>
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-desc">Description data</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-tech">Technical Data</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-supp">Supplements</a></li>
+    </ul>
+
+    <div class="tab-content border border-top-0 p-3">
+
+      <div class="tab-pane fade show active" id="tab-desc">
+        <div class="row">
+          <div class="col-md-4">{{ fld("sito", "Sito", required=True) }}</div>
+          <div class="col-md-4">{{ fld("area", "Area") }}</div>
+          <div class="col-md-2">{{ fld("us", "US", type="number") }}</div>
+          <div class="col-md-2">{{ fld("sector", "Sector") }}</div>
+          <div class="col-md-2">{{ fld("anno", "Year", type="number") }}</div>
+          <div class="col-md-2">{{ fld("box", "Box", type="number") }}</div>
+          <div class="col-md-2">{{ fld("bag", "Bag", type="number") }}</div>
+          <div class="col-md-2">{{ fld("id_number", "ID number", type="number") }}</div>
+          <div class="col-md-3">{{ fld("material", "Material") }}</div>
+          <div class="col-md-3">{{ fld("form", "Form") }}</div>
+          <div class="col-md-3">{{ fld("specific_form", "Specific form") }}</div>
+          <div class="col-md-3">{{ fld("specific_shape", "Specific shape") }}</div>
+          <div class="col-md-6">{{ fld("photo", "Photo (path)") }}</div>
+          <div class="col-md-6">{{ fld("drawing", "Drawing (path)") }}</div>
+          <div class="col-12">{{ txa("note", "Note") }}</div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-tech">
+        <div class="row">
+          <div class="col-md-3">{{ fld("fabric", "Fabric") }}</div>
+          <div class="col-md-3">{{ fld("ware", "Ware") }}</div>
+          <div class="col-md-3">{{ fld("munsell", "Munsell") }}</div>
+          <div class="col-md-3">{{ fld("percent", "Percent preserved") }}</div>
+          <div class="col-md-4">{{ fld("surf_trat", "Surface treatment") }}</div>
+          <div class="col-md-2">
+            <label class="form-label" for="f_wheel_made">Wheel-made</label>
+            <select class="form-select form-select-sm" id="f_wheel_made" name="wheel_made">
+              {% set wm = form_data.get('wheel_made') if form_data else (pottery.wheel_made if pottery else '') %}
+              <option value=""></option>
+              <option value="Yes" {% if wm=='Yes' %}selected{% endif %}>Yes</option>
+              <option value="No" {% if wm=='No' %}selected{% endif %}>No</option>
+              <option value="Indeterminate" {% if wm=='Indeterminate' %}selected{% endif %}>Indeterminate</option>
+            </select>
+          </div>
+          <div class="col-md-3">{{ fld("exdeco", "Exterior deco") }}</div>
+          <div class="col-md-3">{{ fld("intdeco", "Interior deco") }}</div>
+          <div class="col-md-6">{{ txa("descrip_ex_deco", "Ext deco description") }}</div>
+          <div class="col-md-6">{{ txa("descrip_in_deco", "Int deco description") }}</div>
+          <div class="col-md-2">{{ fld("qty", "Qty", type="number") }}</div>
+          <div class="col-md-2">{{ fld("diametro_max", "Diam max", type="number") }}</div>
+          <div class="col-md-2">{{ fld("diametro_rim", "Diam rim", type="number") }}</div>
+          <div class="col-md-2">{{ fld("diametro_bottom", "Diam bottom", type="number") }}</div>
+          <div class="col-md-2">{{ fld("diametro_height", "Diam height", type="number") }}</div>
+          <div class="col-md-2">{{ fld("diametro_preserved", "Diam preserved", type="number") }}</div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-supp">
+        <ul class="nav nav-pills mb-2">
+          <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#sub-bib">Bibliography</a></li>
+          <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#sub-stat">Statistic</a></li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="sub-bib">
+            <p class="text-muted">Bibliography integration coming in a future release.</p>
+          </div>
+          <div class="tab-pane fade" id="sub-stat">
+            <p class="text-muted">Statistics are computed from saved records — visible on the detail view.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mt-3">
+      <button class="btn btn-primary">Save</button>
+      <a class="btn btn-secondary" href="{{ url_for('pottery_list') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

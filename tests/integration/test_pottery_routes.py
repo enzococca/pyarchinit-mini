@@ -93,3 +93,29 @@ def test_list_page_filter_by_sito(client, pottery_service):
     assert r.status_code == 200
     assert b"Olla" in r.data
     assert b"Ciotola" not in r.data
+
+
+def test_create_form_renders(client):
+    r = client.get("/pottery/create")
+    assert r.status_code == 200
+    assert b"Description data" in r.data
+    assert b"Technical Data" in r.data
+    assert b"Supplements" in r.data
+
+
+def test_create_post_inserts_record(client, pottery_service):
+    r = client.post("/pottery/create", data={
+        "sito": "X", "area": "A", "us": "1", "form": "Olla",
+        "fabric": "Coarse", "qty": "2",
+    }, follow_redirects=False)
+    assert r.status_code in (302, 303)
+    items, total = pottery_service.get_all_pottery()
+    assert total == 1
+    assert items[0].sito == "X"
+    assert items[0].form == "Olla"
+
+
+def test_create_post_missing_sito_flashes_error(client):
+    r = client.post("/pottery/create", data={"form": "Olla"}, follow_redirects=True)
+    assert r.status_code == 200
+    assert b"sito" in r.data.lower()  # flashed error
