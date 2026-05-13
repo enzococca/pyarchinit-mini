@@ -13,6 +13,7 @@ from .media import Media, MediaThumb, Documentation
 from .thesaurus import ThesaurusSigle, ThesaurusField, ThesaurusCategory
 from .user import User, UserRole
 from .pottery import Pottery
+from .app_setting import AppSetting
 
 __all__ = [
     "BaseModel",
@@ -34,4 +35,5 @@ __all__ = [
     "User",
     "UserRole",
     "Pottery",
+    "AppSetting",
 ]
