@@ -346,13 +346,14 @@ class DatabaseMigrations:
                     logger.info("pyarchinit_users not found, skipping user sync trigger")
                     return 0
 
-                # Check if trigger already exists
+                # Check if trigger already exists. We still re-run CREATE OR
+                # REPLACE FUNCTION blocks below so newer guards (e.g. the
+                # pg_trigger_depth recursion guard added in v2.1.62) propagate
+                # to existing deploys. The CREATE TRIGGER statement itself is
+                # skipped when the trigger row already exists.
                 trigger_exists = session.execute(text(
                     "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_sync_pyarchinit_to_mini_users')"
                 )).scalar()
-                if trigger_exists:
-                    logger.info("User sync triggers already exist")
-                    return 0
 
                 # --- PyArchInit → Mini trigger ---
                 session.execute(text("""
@@ -361,6 +362,15 @@ class DatabaseMigrations:
                         mini_role VARCHAR(10);
                         mini_id INTEGER;
                     BEGIN
+                        -- Recursion guard: if we're already inside another trigger
+                        -- cascade (pg_trigger_depth > 1), don't fire writes that
+                        -- would bounce back via the sister trigger. This is what
+                        -- blew up UUID/sync-column backfills as StatementTooComplex
+                        -- on Marco's Railway Postgres before v2.1.62.
+                        IF pg_trigger_depth() > 1 THEN
+                            RETURN COALESCE(NEW, OLD);
+                        END IF;
+
                         -- Map PyArchInit role to Mini role
                         CASE LOWER(NEW.role)
                             WHEN 'admin' THEN mini_role := 'ADMIN';
@@ -404,11 +414,12 @@ class DatabaseMigrations:
                     $$ LANGUAGE plpgsql
                 """))
 
-                session.execute(text("""
-                    CREATE TRIGGER trg_sync_pyarchinit_to_mini_users
-                        AFTER INSERT OR UPDATE OR DELETE ON pyarchinit_users
-                        FOR EACH ROW EXECUTE FUNCTION sync_pyarchinit_to_mini_users()
-                """))
+                if not trigger_exists:
+                    session.execute(text("""
+                        CREATE TRIGGER trg_sync_pyarchinit_to_mini_users
+                            AFTER INSERT OR UPDATE OR DELETE ON pyarchinit_users
+                            FOR EACH ROW EXECUTE FUNCTION sync_pyarchinit_to_mini_users()
+                    """))
 
                 # --- Mini → PyArchInit trigger ---
                 session.execute(text("""
@@ -417,6 +428,14 @@ class DatabaseMigrations:
                         pa_role VARCHAR(20);
                         pa_id INTEGER;
                     BEGIN
+                        -- Recursion guard: when invoked by the sister trigger
+                        -- (depth > 1), skip the cascading write — prevents
+                        -- StatementTooComplex during bulk UUID/sync-column
+                        -- backfills.
+                        IF pg_trigger_depth() > 1 THEN
+                            RETURN COALESCE(NEW, OLD);
+                        END IF;
+
                         -- Map Mini role to PyArchInit role
                         CASE UPPER(NEW.role)
                             WHEN 'ADMIN' THEN pa_role := 'admin';
@@ -455,11 +474,12 @@ class DatabaseMigrations:
                     $$ LANGUAGE plpgsql
                 """))
 
-                session.execute(text("""
-                    CREATE TRIGGER trg_sync_mini_to_pyarchinit_users
-                        AFTER INSERT OR UPDATE OR DELETE ON users
-                        FOR EACH ROW EXECUTE FUNCTION sync_mini_to_pyarchinit_users()
-                """))
+                if not trigger_exists:
+                    session.execute(text("""
+                        CREATE TRIGGER trg_sync_mini_to_pyarchinit_users
+                            AFTER INSERT OR UPDATE OR DELETE ON users
+                            FOR EACH ROW EXECUTE FUNCTION sync_mini_to_pyarchinit_users()
+                    """))
 
                 # --- Initial sync: copy pyarchinit_users → users (missing ones) ---
                 session.execute(text("""

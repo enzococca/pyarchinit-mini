@@ -23,18 +23,13 @@
 
   <form method="post" novalidate>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    {% if pottery and pottery.id_rep %}
-    <div class="mb-3">
-      <a href="{{ url_for('upload_media') }}?entity_type=pottery&entity_id={{ pottery.id_rep }}"
-         class="btn btn-outline-secondary btn-sm">
-        <i class="fas fa-upload"></i> Add media to this pottery
-      </a>
-    </div>
-    {% endif %}
     <ul class="nav nav-tabs" role="tablist">
-      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-desc">Description data</a></li>
-      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-tech">Technical Data</a></li>
-      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-supp">Supplements</a></li>
+      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-desc"><i class="fas fa-book-open"></i> Description data</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-tech"><i class="fas fa-cogs"></i> Technical Data</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-supp"><i class="fas fa-book"></i> Supplements</a></li>
+      {% if pottery and pottery.id_rep %}
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-media"><i class="fas fa-photo-video"></i> File Multimediali</a></li>
+      {% endif %}
     </ul>
 
     <div class="tab-content border border-top-0 p-3">
@@ -104,6 +99,114 @@
         </div>
       </div>
 
+      {% if pottery and pottery.id_rep %}
+      <!-- TAB 4: File Multimediali -->
+      <div class="tab-pane fade" id="tab-media" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0"><i class="fas fa-photo-video"></i> File Multimediali</h5>
+          <a href="{{ url_for('upload_media') }}?entity_type=pottery&entity_id={{ pottery.id_rep }}"
+             class="btn btn-primary">
+            <i class="fas fa-upload"></i> Carica Media
+          </a>
+        </div>
+
+        <!-- Drag and Drop Upload Zone -->
+        <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-4"
+             style="border-color: #6c757d !important; background-color: #f8f9fa; cursor: pointer;">
+          <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-2"></i>
+          <p class="mb-1"><strong>Drag &amp; drop files here or click to browse</strong></p>
+          <p class="small text-muted mb-0">Supports: images, documents, videos, audio, 3D models</p>
+          <input type="file" id="fileInput" multiple class="d-none"
+                 accept="image/*,application/pdf,.doc,.docx,video/*,audio/*,.obj,.stl,.ply,.gltf,.glb,.dae,.fbx,.3ds">
+        </div>
+
+        <!-- Upload Progress -->
+        <div id="uploadProgress" class="d-none mb-3">
+          <div class="progress">
+            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                 role="progressbar" style="width: 0%"></div>
+          </div>
+          <p id="uploadStatus" class="small text-muted mt-1 mb-0"></p>
+        </div>
+
+        {% if media_list %}
+        <div class="row">
+          {% for media in media_list %}
+          <div class="col-md-3 mb-3">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                {% if media.media_type == 'image' and media.media_path %}
+                  <a href="/media/{{ media.media_path }}"
+                     class="glightbox" data-gallery="pottery-gallery"
+                     data-title="{{ media.media_name }}"
+                     data-description="{{ media.description if media.description else '' }}">
+                    <img src="/media/{{ media.media_path }}"
+                         alt="{{ media.media_name }}"
+                         class="img-fluid mb-2"
+                         style="max-height: 150px; object-fit: cover; cursor: pointer;"
+                         onerror="this.parentElement.innerHTML='<i class=\'fas fa-image fa-3x text-muted mb-2\'></i>'">
+                  </a>
+                {% elif media.media_type == 'document' %}
+                  <a href="/media/{{ media.media_path }}"
+                     class="glightbox" data-type="iframe" data-gallery="pottery-docs"
+                     data-title="{{ media.media_name }}">
+                    <i class="fas fa-file-pdf fa-3x text-danger mb-2" style="cursor: pointer;"></i>
+                  </a>
+                {% elif media.media_type == 'video' %}
+                  <a href="/media/{{ media.media_path }}"
+                     class="glightbox" data-type="video" data-gallery="pottery-videos"
+                     data-title="{{ media.media_name }}">
+                    <i class="fas fa-video fa-3x text-primary mb-2" style="cursor: pointer;"></i>
+                  </a>
+                {% elif media.media_type == 'audio' %}
+                  <i class="fas fa-music fa-3x text-info mb-2"></i>
+                {% elif media.media_type == '3d_model' %}
+                  <a href="{{ url_for('view_3d_model', media_id=media.id_media) }}" target="_blank">
+                    <i class="fas fa-cube fa-3x text-success mb-2" style="cursor: pointer;"></i>
+                  </a>
+                {% else %}
+                  <i class="fas fa-file fa-3x text-secondary mb-2"></i>
+                {% endif %}
+                <p class="small mb-1"><strong>{{ media.media_name }}</strong></p>
+                {% if media.description %}
+                <p class="small text-muted mb-2">{{ media.description[:50] }}{% if media.description|length > 50 %}...{% endif %}</p>
+                {% endif %}
+              </div>
+              <div class="card-footer text-center">
+                <div class="btn-group btn-group-sm">
+                  <a href="/media/{{ media.media_path }}" target="_blank" class="btn btn-primary" title="View">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a href="/media/{{ media.media_path }}" download="{{ media.media_name }}" class="btn btn-success" title="Download">
+                    <i class="fas fa-download"></i>
+                  </a>
+                  <form method="POST"
+                        action="{{ url_for('delete_media', media_id=media.id_media) }}"
+                        style="display: inline;"
+                        onsubmit="return confirm('Delete this media file? This action cannot be undone.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger" title="Delete">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i>
+          No media files have been uploaded for this pottery yet.
+          <a href="{{ url_for('upload_media') }}?entity_type=pottery&entity_id={{ pottery.id_rep }}">
+            Upload your first file
+          </a>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
     </div>
 
     <div class="mt-3">
@@ -112,4 +215,85 @@
     </div>
   </form>
 </div>
+
+{% if pottery and pottery.id_rep %}
+<script>
+(function() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const potteryId = {{ pottery.id_rep }};
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+                   || document.querySelector('input[name="csrf_token"]')?.value;
+
+    if (!dropZone || !fileInput) return;
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    ['dragenter','dragover','dragleave','drop'].forEach(ev => {
+        dropZone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false);
+        document.body.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false);
+    });
+    ['dragenter','dragover'].forEach(ev => {
+        dropZone.addEventListener(ev, () => {
+            dropZone.style.borderColor = '#007bff';
+            dropZone.style.backgroundColor = '#e7f3ff';
+        }, false);
+    });
+    ['dragleave','drop'].forEach(ev => {
+        dropZone.addEventListener(ev, () => {
+            dropZone.style.borderColor = '#6c757d';
+            dropZone.style.backgroundColor = '#f8f9fa';
+        }, false);
+    });
+
+    dropZone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        uploadFiles(files);
+    }, false);
+    fileInput.addEventListener('change', e => uploadFiles(e.target.files), false);
+
+    function uploadFiles(files) {
+        if (!files || files.length === 0) return;
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) formData.append('files', files[i]);
+        formData.append('entity_type', 'pottery');
+        formData.append('entity_id', potteryId);
+
+        uploadProgress.classList.remove('d-none');
+        progressBar.style.width = '0%';
+        uploadStatus.textContent = `Uploading ${files.length} file(s)...`;
+
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) progressBar.style.width = (e.loaded / e.total * 100) + '%';
+        });
+        xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+                progressBar.style.width = '100%';
+                uploadStatus.textContent = 'Upload complete! Refreshing...';
+                progressBar.classList.remove('progress-bar-animated');
+                progressBar.classList.add('bg-success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                uploadStatus.textContent = 'Upload failed: ' + xhr.statusText;
+                progressBar.classList.add('bg-danger');
+            }
+        });
+        xhr.addEventListener('error', () => {
+            uploadStatus.textContent = 'Upload error occurred';
+            progressBar.classList.add('bg-danger');
+        });
+        xhr.open('POST', '/media/upload/ajax', true);
+        if (csrfToken) xhr.setRequestHeader('X-CSRFToken', csrfToken);
+        xhr.send(formData);
+        fileInput.value = '';
+    }
+})();
+</script>
+{% endif %}
+
 {% endblock %}

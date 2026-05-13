@@ -129,6 +129,15 @@ def _register_pottery_routes(app):
         p = svc.get_pottery_by_id(id_rep)
         if not p:
             abort(404)
+
+        def _media_for_pottery():
+            try:
+                from ..services.media_service import MediaService
+                msvc = MediaService(app.db_manager)
+                return msvc.get_media_by_entity("pottery", id_rep)
+            except Exception:
+                return []
+
         if request.method == "POST":
             data = _extract_pottery_form(request.form)
             try:
@@ -139,6 +148,7 @@ def _register_pottery_routes(app):
                     "pottery/form.html",
                     pottery=PotteryDTO.from_model(p),
                     form_data=data, mode="edit",
+                    media_list=_media_for_pottery(),
                 )
             flash(f"Pottery #{id_rep} updated.", "success")
             return redirect(url_for("pottery_detail", id_rep=id_rep))
@@ -146,6 +156,7 @@ def _register_pottery_routes(app):
             "pottery/form.html",
             pottery=PotteryDTO.from_model(p),
             form_data={}, mode="edit",
+            media_list=_media_for_pottery(),
         )
 
     @app.route("/pottery/<int:id_rep>/delete", methods=["POST"])
