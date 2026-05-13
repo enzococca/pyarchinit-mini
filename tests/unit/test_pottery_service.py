@@ -74,3 +74,56 @@ def test_delete_pottery(pottery_service):
 
 def test_delete_pottery_missing_returns_false(pottery_service):
     assert pottery_service.delete_pottery(99999) is False
+
+
+@pytest.fixture
+def populated(pottery_service):
+    pottery_service.create_pottery({"sito": "X", "area": "A", "us": 1, "form": "Olla", "fabric": "Coarse", "qty": 5})
+    pottery_service.create_pottery({"sito": "X", "area": "A", "us": 2, "form": "Ciotola", "fabric": "Fine", "qty": 1})
+    pottery_service.create_pottery({"sito": "Y", "area": "B", "us": 1, "form": "Olla", "fabric": "Coarse", "qty": 2})
+    return pottery_service
+
+
+def test_get_all_pottery_paginated(populated):
+    items, total = populated.get_all_pottery(page=1, size=2)
+    assert total == 3
+    assert len(items) == 2
+
+
+def test_get_all_pottery_filter_by_sito(populated):
+    items, total = populated.get_all_pottery(filters={"sito": "X"})
+    assert total == 2
+    assert all(i.sito == "X" for i in items)
+
+
+def test_get_all_pottery_filter_combined(populated):
+    items, total = populated.get_all_pottery(filters={"sito": "X", "form": "Olla"})
+    assert total == 1
+
+
+def test_count_pottery(populated):
+    assert populated.count_pottery() == 3
+    assert populated.count_pottery({"form": "Olla"}) == 2
+
+
+def test_search_pottery_text(populated):
+    items = populated.search_pottery("Cias")  # case-insensitive substring, no matches
+    assert items == []
+    items = populated.search_pottery("Olla")
+    assert len(items) == 2
+
+
+def test_get_pottery_by_site(populated):
+    items = populated.get_pottery_by_site("Y")
+    assert len(items) == 1
+    assert items[0].sito == "Y"
+
+
+def test_get_pottery_by_us(populated):
+    items = populated.get_pottery_by_us("X", "A", 1)
+    assert len(items) == 1
+
+
+def test_get_pottery_by_form(populated):
+    items = populated.get_pottery_by_form("Olla")
+    assert len(items) == 2

@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+from sqlalchemy import or_
 
 from ..database.manager import DatabaseManager
 from ..models.pottery import Pottery
@@ -109,3 +111,77 @@ class PotteryService:
                 return False
             session.delete(p)
             return True
+
+    # ---------- Listing & Filtering ----------
+    _FILTERABLE = ("sito", "area", "us", "form", "fabric", "ware", "material")
+
+    def _apply_filters(self, q, filters: Optional[Dict[str, Any]]):
+        if not filters:
+            return q
+        for k in self._FILTERABLE:
+            v = filters.get(k)
+            if v in (None, ""):
+                continue
+            col = getattr(Pottery, k)
+            q = q.filter(col == v)
+        q_text = filters.get("q")
+        if q_text:
+            like = f"%{q_text}%"
+            q = q.filter(
+                or_(
+                    Pottery.form.ilike(like),
+                    Pottery.specific_form.ilike(like),
+                    Pottery.fabric.ilike(like),
+                    Pottery.ware.ilike(like),
+                    Pottery.note.ilike(like),
+                    Pottery.descrip_ex_deco.ilike(like),
+                    Pottery.descrip_in_deco.ilike(like),
+                )
+            )
+        return q
+
+    def get_all_pottery(
+        self, page: int = 1, size: int = 10,
+        filters: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[List[Pottery], int]:
+        with self.db_manager.connection.get_session() as session:
+            q = session.query(Pottery)
+            q = self._apply_filters(q, filters)
+            total = q.count()
+            items = (
+                q.order_by(Pottery.id_rep.desc())
+                .offset((page - 1) * size)
+                .limit(size)
+                .all()
+            )
+            for it in items:
+                session.expunge(it)
+            return items, total
+
+    def count_pottery(self, filters: Optional[Dict[str, Any]] = None) -> int:
+        with self.db_manager.connection.get_session() as session:
+            q = session.query(Pottery)
+            q = self._apply_filters(q, filters)
+            return q.count()
+
+    def search_pottery(self, q_text: str, page: int = 1, size: int = 10) -> List[Pottery]:
+        items, _ = self.get_all_pottery(page=page, size=size, filters={"q": q_text})
+        return items
+
+    def get_pottery_by_site(self, sito: str, page: int = 1, size: int = 10) -> List[Pottery]:
+        items, _ = self.get_all_pottery(page=page, size=size, filters={"sito": sito})
+        return items
+
+    def get_pottery_by_us(
+        self, sito: str, area: Optional[str], us: int,
+        page: int = 1, size: int = 10,
+    ) -> List[Pottery]:
+        items, _ = self.get_all_pottery(
+            page=page, size=size,
+            filters={"sito": sito, "area": area, "us": us},
+        )
+        return items
+
+    def get_pottery_by_form(self, form: str, page: int = 1, size: int = 10) -> List[Pottery]:
+        items, _ = self.get_all_pottery(page=page, size=size, filters={"form": form})
+        return items
