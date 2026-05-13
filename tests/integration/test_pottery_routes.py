@@ -64,6 +64,11 @@ def flask_app(db_manager):
     def index():
         return ""
 
+    # Stub upload_media — referenced by the pottery form's Manage media button (v2.1.61 T2)
+    @app.route("/upload-media")
+    def upload_media():
+        return ""
+
     _register_pottery_routes(app)
     return app
 
@@ -168,7 +173,10 @@ def test_api_forms_returns_distinct(client, pottery_service):
     r = client.get("/api/pottery/forms")
     assert r.status_code == 200
     vs = r.get_json()["values"]
-    assert set(vs) == {"Olla", "Ciotola"}
+    # v2.1.61: /api/pottery/forms now merges DB-distinct values with
+    # THESAURUS_MAPPINGS['pottery_table']['form'] defaults. Verify both
+    # DB values are present (don't assert strict equality).
+    assert {"Olla", "Ciotola"}.issubset(set(vs))
 
 
 def test_api_stats(client, pottery_service):
