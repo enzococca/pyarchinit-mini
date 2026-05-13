@@ -47,6 +47,8 @@ def flask_app(db_manager):
     # Inject dummy i18n helpers the base.html may reference
     app.jinja_env.globals.setdefault("get_locale", lambda: "it")
     app.jinja_env.globals.setdefault("_", lambda s: s)
+    # Stub csrf_token so templates render without CSRFProtect being initialised
+    app.jinja_env.globals.setdefault("csrf_token", lambda: "test-csrf-token")
 
     # Minimal LoginManager for current_user references in templates
     login_manager = LoginManager()

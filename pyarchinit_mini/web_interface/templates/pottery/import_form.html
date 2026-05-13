@@ -4,6 +4,7 @@
 <div class="container mt-3">
   <h1>Import Pottery — Excel / CSV</h1>
   <form method="post" action="{{ url_for('pottery_import_excel') }}" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="mb-3">
       <label class="form-label">File (.xlsx or .csv)</label>
       <input class="form-control" type="file" name="file" accept=".xlsx,.csv" required>

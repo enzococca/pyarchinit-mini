@@ -13,6 +13,7 @@
       <a class="btn btn-warning" href="{{ url_for('pottery_edit', id_rep=pottery.id_rep) }}">Edit</a>
       <form method="post" class="d-inline" action="{{ url_for('pottery_delete', id_rep=pottery.id_rep) }}"
             onsubmit="return confirm('Delete pottery #{{ pottery.id_rep }}?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-danger">Delete</button>
       </form>
     </div>
