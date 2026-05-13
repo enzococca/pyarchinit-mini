@@ -23,6 +23,14 @@
 
   <form method="post" novalidate>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if pottery and pottery.id_rep %}
+    <div class="mb-3">
+      <a href="{{ url_for('upload_media') }}?entity_type=pottery&entity_id={{ pottery.id_rep }}"
+         class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-upload"></i> Add media to this pottery
+      </a>
+    </div>
+    {% endif %}
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-desc">Description data</a></li>
       <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-tech">Technical Data</a></li>

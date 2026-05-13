@@ -50,3 +50,16 @@
   {% endif %}
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+fetch("/api/media/by-entity/pottery/{{ pottery.id_rep }}")
+  .then(r => r.json())
+  .then(data => {
+    if (data.items && data.items.length > 0) {
+      console.log("Media loaded:", data.items.length, "item(s)");
+    }
+  })
+  .catch(() => {});
+</script>
+{% endblock %}

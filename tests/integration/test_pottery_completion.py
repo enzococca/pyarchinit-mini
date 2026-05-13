@@ -49,6 +49,10 @@ def flask_app(db_manager):
     def index():
         return ""
 
+    @app.route("/media/upload")
+    def upload_media():
+        return ""
+
     _register_pottery_routes(app)
     return app
 
@@ -72,3 +76,19 @@ def test_list_shows_view_and_edit_buttons(client, pottery_service):
     # Both endpoints must be linked in the row
     assert f"/pottery/{p.id_rep}" in body, "Detail link missing"
     assert f"/pottery/{p.id_rep}/edit" in body, "Edit link missing"
+
+
+def test_form_edit_shows_manage_media_button(client, pottery_service):
+    p = pottery_service.create_pottery({"sito": "X", "form": "Olla"})
+    r = client.get(f"/pottery/{p.id_rep}/edit")
+    assert r.status_code == 200
+    body = r.data.decode("utf-8")
+    assert "entity_type=pottery" in body and f"entity_id={p.id_rep}" in body, "Manage media link missing"
+
+
+def test_form_create_no_manage_media_button(client):
+    """Manage media should only render when editing an existing pottery."""
+    r = client.get("/pottery/create")
+    assert r.status_code == 200
+    body = r.data.decode("utf-8")
+    assert "entity_type=pottery" not in body

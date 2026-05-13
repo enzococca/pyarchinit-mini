@@ -2661,6 +2661,26 @@ def create_app():
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+    @app.route('/api/media/by-entity/<entity_type>/<int:entity_id>')
+    @login_required
+    def api_media_by_entity(entity_type: str, entity_id: int):
+        from pyarchinit_mini.services.media_service import MediaService
+        msvc = MediaService(app.db_manager)
+        items = msvc.get_media_by_entity(entity_type, entity_id)
+        return jsonify({
+            "items": [
+                {
+                    "id_media": m.id_media,
+                    "media_name": m.media_name,
+                    "media_path": m.media_path,
+                    "media_type": m.media_type,
+                    "url": f"/media/{m.media_path}",
+                    "thumb_url": f"/media/{m.media_path}",
+                }
+                for m in items
+            ]
+        })
+
     @app.route('/media/upload', methods=['GET', 'POST'])
     @login_required
     @write_permission_required
