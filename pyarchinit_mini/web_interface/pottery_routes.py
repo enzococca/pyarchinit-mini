@@ -105,3 +105,15 @@ def _register_pottery_routes(app):
         return render_template(
             "pottery/form.html", pottery=None, form_data={}, mode="create"
         )
+
+    @app.route("/pottery/<int:id_rep>")
+    @login_required
+    def pottery_detail(id_rep: int):
+        svc = PotteryService(app.db_manager)
+        p = svc.get_pottery_by_id(id_rep)
+        if not p:
+            abort(404)
+        return render_template(
+            "pottery/detail.html",
+            pottery=PotteryDTO.from_model(p),
+        )

@@ -119,3 +119,16 @@ def test_create_post_missing_sito_flashes_error(client):
     r = client.post("/pottery/create", data={"form": "Olla"}, follow_redirects=True)
     assert r.status_code == 200
     assert b"sito" in r.data.lower()  # flashed error
+
+
+def test_detail_renders_record(client, pottery_service):
+    p = pottery_service.create_pottery({"sito": "X", "form": "Olla", "fabric": "Coarse"})
+    r = client.get(f"/pottery/{p.id_rep}")
+    assert r.status_code == 200
+    assert b"Olla" in r.data
+    assert b"Coarse" in r.data
+
+
+def test_detail_404_for_missing(client):
+    r = client.get("/pottery/99999")
+    assert r.status_code == 404
