@@ -41,7 +41,7 @@ from pyarchinit_mini.media_manager.media_handler import MediaHandler
 from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
 
 # Import authentication routes
-from pyarchinit_mini.web_interface.auth_routes import auth_bp, init_login_manager, write_permission_required
+from pyarchinit_mini.web_interface.auth_routes import auth_bp, init_login_manager, write_permission_required, admin_required
 
 # Import PyArchInit import/export routes
 from pyarchinit_mini.web_interface.pyarchinit_import_export_routes import pyarchinit_import_export_bp
@@ -5272,6 +5272,39 @@ def create_app():
         return redirect(url_for('thesaurus_list',
                                table=table_name,
                                field=field_name))
+
+    # ===== Admin: AI Settings =====
+    @app.route("/admin/settings/ai", methods=["GET", "POST"])
+    @admin_required
+    def admin_settings_ai():
+        from pyarchinit_mini.services.app_setting_service import AppSettingService
+        svc = AppSettingService(app.db_manager)
+        if request.method == "POST":
+            svc.set("openai_api_key",
+                    request.form.get("openai_api_key", "").strip(),
+                    is_secret=True)
+            svc.set("anthropic_api_key",
+                    request.form.get("anthropic_api_key", "").strip(),
+                    is_secret=True)
+            svc.set("ai_provider",
+                    request.form.get("ai_provider", "openai").strip())
+            svc.set("ai_model",
+                    request.form.get("ai_model", "").strip())
+            flash("AI settings saved", "success")
+            return redirect(url_for("admin_settings_ai"))
+
+        def _mask(k):
+            if not k:
+                return ""
+            return "*" * 8 + k[-4:] if len(k) > 4 else "****"
+
+        return render_template(
+            "admin/settings_ai.html",
+            openai_key_masked=_mask(svc.get("openai_api_key")),
+            anthropic_key_masked=_mask(svc.get("anthropic_api_key")),
+            ai_provider=svc.get("ai_provider") or "openai",
+            ai_model=svc.get("ai_model") or "",
+        )
 
     # ===== 3D Model Viewer Routes (s3Dgraphy Integration) =====
     try:
