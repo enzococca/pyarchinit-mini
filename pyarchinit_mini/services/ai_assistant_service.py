@@ -12,20 +12,29 @@ from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
-# Default models per provider (latest as of March 2026)
-# OpenAI: gpt-5.4-mini (fast+cheap), gpt-5.4 (best), o4-mini (reasoning)
-# Anthropic: claude-haiku-4-5 (cheapest), claude-sonnet-4-6 (fast), claude-opus-4-6 (best)
+# Default models per provider (latest as of May 2026)
+# OpenAI: gpt-5.5-mini (fast+cheap), gpt-5.5 (best), o4-mini (reasoning)
+# Anthropic: claude-haiku-4-5 (cheapest), claude-sonnet-4-7 (fast), claude-opus-4-7 (best)
 DEFAULT_MODELS = {
-    "openai": "gpt-5.4-mini",
-    "anthropic": "claude-sonnet-4-6",
+    "openai": "gpt-5.5-mini",
+    "anthropic": "claude-sonnet-4-7",
 }
 # All supported models for UI selection
 AVAILABLE_MODELS = {
-    "openai": ["gpt-5.4-mini", "gpt-5.4", "gpt-4.1-mini", "gpt-4.1", "o4-mini"],
-    "anthropic": ["claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-6"],
+    "openai": [
+        "gpt-5.5", "gpt-5.5-mini", "gpt-5.4", "gpt-5.4-mini",
+        "gpt-4.1", "gpt-4.1-mini", "o4-mini",
+    ],
+    "anthropic": [
+        "claude-opus-4-7", "claude-sonnet-4-7", "claude-haiku-4-5",
+        "claude-opus-4-6", "claude-sonnet-4-6",
+    ],
 }
 # Models that use max_completion_tokens instead of max_tokens
-_NEW_TOKEN_PARAM_MODELS = {"gpt-5.4", "gpt-5.4-mini", "o4-mini", "o3", "o3-mini", "o1", "o1-mini"}
+_NEW_TOKEN_PARAM_MODELS = {
+    "gpt-5.5", "gpt-5.5-mini", "gpt-5.4", "gpt-5.4-mini",
+    "o4-mini", "o3", "o3-mini", "o1", "o1-mini",
+}
 
 SYSTEM_PROMPT_IT = """Sei un assistente archeologico esperto per il sistema PyArchInit.
 Aiuti ad analizzare dati stratigrafici, materiali, cronologia e informazioni sui siti.
