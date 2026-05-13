@@ -5,7 +5,7 @@ Flask Web Interface for PyArchInit-Mini
 
 import os
 from pathlib import Path
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, abort
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from flask_login import login_required, current_user
@@ -5305,6 +5305,66 @@ def create_app():
             ai_provider=svc.get("ai_provider") or "openai",
             ai_model=svc.get("ai_model") or "",
         )
+
+    # ===== Admin: Backups =====
+    @app.route("/admin/backups", methods=["GET"])
+    @admin_required
+    def admin_backups():
+        from pyarchinit_mini.services.backup_service import BackupService
+        bs = BackupService(app.db_manager)
+        return render_template(
+            "admin/backups.html",
+            backups=bs.list_backups(),
+            schedule=bs.get_schedule(),
+        )
+
+    @app.route("/admin/backups/now", methods=["POST"])
+    @admin_required
+    def admin_backups_now():
+        from pyarchinit_mini.services.backup_service import BackupService
+        try:
+            info = BackupService(app.db_manager).create_backup_now()
+            flash(f"Backup created: {info['path']}", "success")
+        except Exception as e:
+            flash(f"Backup failed: {e}", "danger")
+        return redirect(url_for("admin_backups"))
+
+    @app.route("/admin/backups/schedule", methods=["POST"])
+    @admin_required
+    def admin_backups_schedule():
+        from pyarchinit_mini.services.backup_service import BackupService
+        bs = BackupService(app.db_manager)
+        try:
+            bs.set_schedule(
+                enabled=request.form.get("enabled") == "on",
+                frequency=request.form.get("frequency", "weekly"),
+                keep_last=int(request.form.get("keep_last", "7")),
+            )
+            flash("Schedule saved", "success")
+        except ValueError as e:
+            flash(str(e), "danger")
+        return redirect(url_for("admin_backups"))
+
+    @app.route("/admin/backups/<filename>/delete", methods=["POST"])
+    @admin_required
+    def admin_backups_delete(filename: str):
+        from pyarchinit_mini.services.backup_service import BackupService
+        if not BackupService(app.db_manager).delete_backup(filename):
+            abort(404)
+        flash(f"Deleted {filename}", "info")
+        return redirect(url_for("admin_backups"))
+
+    @app.route("/admin/backups/<filename>/download")
+    @admin_required
+    def admin_backups_download(filename: str):
+        from pathlib import Path as _P
+        if "/" in filename or ".." in filename or not filename.startswith("pyarchinit_backup_"):
+            abort(404)
+        base_env = os.environ.get("PYARCHINIT_HOME", str(_P.home() / ".pyarchinit_mini"))
+        target = _P(base_env) / "backups" / filename
+        if not target.exists():
+            abort(404)
+        return send_file(str(target), as_attachment=True)
 
     # ===== 3D Model Viewer Routes (s3Dgraphy Integration) =====
     try:

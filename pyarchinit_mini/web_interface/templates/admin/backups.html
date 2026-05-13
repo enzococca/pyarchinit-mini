@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Database Backups{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <h1><i class="fas fa-database"></i> Database Backups</h1>
+
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5>Backup Now</h5>
+          <p class="text-muted">Trigger an immediate backup of the active database.</p>
+          <form method="post" action="{{ url_for('admin_backups_now') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-primary"><i class="fas fa-save"></i> Backup Now</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5>Schedule</h5>
+          <form method="post" action="{{ url_for('admin_backups_schedule') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="sched_enabled" name="enabled" {% if schedule.enabled %}checked{% endif %}>
+              <label class="form-check-label" for="sched_enabled">Enable automatic backups</label>
+            </div>
+            <div class="mb-2">
+              <label class="form-label" for="sched_freq">Frequency</label>
+              <select class="form-select form-select-sm" id="sched_freq" name="frequency">
+                <option value="daily" {% if schedule.frequency=="daily" %}selected{% endif %}>Daily</option>
+                <option value="weekly" {% if schedule.frequency=="weekly" %}selected{% endif %}>Weekly</option>
+                <option value="monthly" {% if schedule.frequency=="monthly" %}selected{% endif %}>Monthly</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label" for="sched_keep">Keep last (files)</label>
+              <input class="form-control form-control-sm" id="sched_keep" name="keep_last" type="number" min="1" max="365" value="{{ schedule.keep_last }}">
+            </div>
+            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-save"></i> Save schedule</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="mt-4">Existing backups ({{ backups|length }})</h3>
+  <div class="table-responsive">
+    <table class="table table-sm">
+      <thead><tr><th>Filename</th><th>Size</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for b in backups %}
+        <tr>
+          <td><code>{{ b.filename }}</code></td>
+          <td>{{ (b.size_bytes / 1024 / 1024) | round(2) }} MB</td>
+          <td>{{ b.created_at }}</td>
+          <td>
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin_backups_download', filename=b.filename) }}"><i class="fas fa-download"></i></a>
+            <form method="post" class="d-inline" action="{{ url_for('admin_backups_delete', filename=b.filename) }}"
+                  onsubmit="return confirm('Delete {{ b.filename }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-muted">No backups yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
