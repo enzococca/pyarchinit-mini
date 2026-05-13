@@ -181,6 +181,27 @@
         </div>
     </div>
 </div>
+
+<!-- Pottery analytics — added in v2.1.60 -->
+<div class="card mt-4"><div class="card-body">
+  <h4><i class="fas fa-wine-bottle"></i> Pottery — Distribuzione</h4>
+  <div class="row">
+    <div class="col-md-4"><canvas id="potteryFormChart"></canvas></div>
+    <div class="col-md-4"><canvas id="potteryFabricChart"></canvas></div>
+    <div class="col-md-4"><canvas id="potteryWareChart"></canvas></div>
+  </div>
+  <div class="row mt-3">
+    <div class="col-md-6"><canvas id="potteryAnnoChart"></canvas></div>
+    <div class="col-md-6">
+      <div class="card text-center">
+        <div class="card-body">
+          <h2 id="potteryMNI">—</h2>
+          <p class="text-muted">Min Number of Individuals<br><small>(group by form+fabric+ware)</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
 {% endblock %}
 
 {% block extra_js %}
@@ -410,5 +431,39 @@
             }
         });
     }
+</script>
+
+<script>
+(function(){
+  const sito = (new URLSearchParams(location.search)).get("sito") || "";
+  fetch("/api/pottery/stats" + (sito ? `?sito=${encodeURIComponent(sito)}` : ""))
+    .then(r => r.ok ? r.json() : null)
+    .then(o => {
+      if (!o) return;
+      document.getElementById("potteryMNI").textContent = o.mni || 0;
+      if (typeof Chart === "undefined") return;
+      new Chart(document.getElementById("potteryFormChart"), {
+        type: "doughnut",
+        data: { labels: o.by_form.map(x=>x.form), datasets: [{ data: o.by_form.map(x=>x.count) }] },
+        options: { plugins: { title: { display: true, text: "Form distribution" } } },
+      });
+      new Chart(document.getElementById("potteryFabricChart"), {
+        type: "bar",
+        data: { labels: o.by_fabric.map(x=>x.fabric), datasets: [{ label: "Fabric", data: o.by_fabric.map(x=>x.count) }] },
+        options: { indexAxis: "y", plugins: { title: { display: true, text: "Fabric distribution" } } },
+      });
+      new Chart(document.getElementById("potteryWareChart"), {
+        type: "bar",
+        data: { labels: o.by_ware.map(x=>x.ware), datasets: [{ label: "Ware", data: o.by_ware.map(x=>x.count) }] },
+        options: { plugins: { title: { display: true, text: "Ware distribution" } } },
+      });
+      new Chart(document.getElementById("potteryAnnoChart"), {
+        type: "bar",
+        data: { labels: o.by_anno.map(x=>x.anno), datasets: [{ label: "By year", data: o.by_anno.map(x=>x.count) }] },
+        options: { plugins: { title: { display: true, text: "Pottery by year" } } },
+      });
+    })
+    .catch(() => {});
+})();
 </script>
 {% endblock %}
