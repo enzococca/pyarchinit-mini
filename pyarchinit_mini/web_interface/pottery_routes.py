@@ -257,6 +257,100 @@ def _register_pottery_routes(app):
             headers={"Content-Disposition": 'attachment; filename="pottery.csv"'},
         )
 
+    @app.route("/import/pottery", methods=["GET"])
+    @login_required
+    def pottery_import_form():
+        return render_template("pottery/import_form.html")
+
+    @app.route("/import/pottery/excel", methods=["POST"])
+    @login_required
+    def pottery_import_excel():
+        import csv as _csv
+        from openpyxl import load_workbook
+        from ..models.pottery import Pottery as _Pottery
+        f = request.files.get("file")
+        if not f:
+            flash("Missing file", "danger")
+            return redirect(url_for("pottery_import_form"))
+        mode = request.form.get("mode", "skip")  # skip | update | renumber
+
+        # Parse file into list of dicts
+        try:
+            fname = (f.filename or "").lower()
+            if fname.endswith(".csv"):
+                text = f.read().decode("utf-8-sig")
+                rows_raw = list(_csv.DictReader(text.splitlines()))
+            else:
+                wb = load_workbook(f, read_only=True, data_only=True)
+                ws = wb["pottery"]
+                row_iter = ws.iter_rows(values_only=True)
+                headers = [str(h) if h is not None else "" for h in next(row_iter)]
+                rows_raw = [dict(zip(headers, r)) for r in row_iter]
+                wb.close()
+        except Exception as e:
+            flash(f"Cannot read file: {e}", "danger")
+            return redirect(url_for("pottery_import_form"))
+
+        def _coerce(k, v):
+            """Coerce a raw cell value to the appropriate Python type."""
+            if v is None or v == "":
+                return None
+            if k in _INT_FIELDS:
+                try:
+                    return int(float(v))
+                except (TypeError, ValueError):
+                    return None
+            if k in _NUM_FIELDS:
+                try:
+                    return float(v)
+                except (TypeError, ValueError):
+                    return None
+            return str(v) if not isinstance(v, str) else v
+
+        svc = PotteryService(app.db_manager)
+        stats = {"inserted": 0, "updated": 0, "skipped": 0, "errors": []}
+        for idx, row in enumerate(rows_raw):
+            data = {k: _coerce(k, v) for k, v in row.items() if k in _POTTERY_FORM_FIELDS}
+            # Drop None values so service defaults apply
+            data = {k: v for k, v in data.items() if v is not None}
+            sito = data.get("sito")
+            idn = data.get("id_number")
+            if not sito:
+                stats["errors"].append(f"row {idx+2}: missing sito")
+                continue
+            existing_id = None
+            if idn is not None:
+                with app.db_manager.connection.get_session() as session:
+                    existing = (
+                        session.query(_Pottery)
+                        .filter(_Pottery.sito == sito, _Pottery.id_number == int(idn))
+                        .first()
+                    )
+                    existing_id = existing.id_rep if existing is not None else None
+            try:
+                if existing_id is not None and mode == "skip":
+                    stats["skipped"] += 1
+                elif existing_id is not None and mode == "update":
+                    svc.update_pottery(existing_id, data)
+                    stats["updated"] += 1
+                elif existing_id is not None and mode == "renumber":
+                    data.pop("id_number", None)
+                    svc.create_pottery(data)
+                    stats["inserted"] += 1
+                else:
+                    svc.create_pottery(data)
+                    stats["inserted"] += 1
+            except ValueError as e:
+                stats["errors"].append(f"row {idx+2}: {e}")
+
+        flash(
+            f"Import done: {stats['inserted']} inserted, "
+            f"{stats['updated']} updated, {stats['skipped']} skipped, "
+            f"{len(stats['errors'])} errors.",
+            "info",
+        )
+        return redirect(url_for("pottery_list"))
+
     @app.route("/api/pottery/stats")
     @login_required
     def pottery_api_stats():

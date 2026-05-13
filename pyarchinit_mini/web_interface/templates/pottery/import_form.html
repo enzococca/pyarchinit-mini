@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Import Pottery{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <h1>Import Pottery — Excel / CSV</h1>
+  <form method="post" action="{{ url_for('pottery_import_excel') }}" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label class="form-label">File (.xlsx or .csv)</label>
+      <input class="form-control" type="file" name="file" accept=".xlsx,.csv" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Duplicate handling</label>
+      <div class="form-check"><input class="form-check-input" type="radio" name="mode" value="skip" id="m1" checked><label for="m1" class="form-check-label">Skip duplicates</label></div>
+      <div class="form-check"><input class="form-check-input" type="radio" name="mode" value="update" id="m2"><label for="m2" class="form-check-label">Update duplicates</label></div>
+      <div class="form-check"><input class="form-check-input" type="radio" name="mode" value="renumber" id="m3"><label for="m3" class="form-check-label">Renumber (new id_number)</label></div>
+    </div>
+    <button class="btn btn-primary">Import</button>
+    <a class="btn btn-secondary" href="{{ url_for('pottery_list') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}
