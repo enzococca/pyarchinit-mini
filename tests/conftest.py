@@ -86,3 +86,11 @@ def sample_inventario_data():
         "area": "A",
         "us": 1001
     }
+
+from pyarchinit_mini.services.pottery_service import PotteryService
+
+
+@pytest.fixture
+def pottery_service(db_manager):
+    """Create pottery service with test database"""
+    return PotteryService(db_manager)

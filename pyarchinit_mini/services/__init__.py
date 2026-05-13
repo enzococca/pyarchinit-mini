@@ -8,6 +8,7 @@ from .inventario_service import InventarioService
 from .export_import_service import ExportImportService
 from .user_service import UserService
 from .analytics_service import AnalyticsService
+from .pottery_service import PotteryService  # noqa: F401
 
 __all__ = [
     "SiteService",
@@ -15,5 +16,6 @@ __all__ = [
     "InventarioService",
     "ExportImportService",
     "UserService",
-    "AnalyticsService"
+    "AnalyticsService",
+    "PotteryService",
 ]
