@@ -81,3 +81,27 @@ def _register_pottery_routes(app):
             items=[PotteryDTO.from_model(p) for p in items],
             total=total, page=page, size=size, filters=filters,
         )
+
+    @app.route("/pottery/create", methods=["GET", "POST"])
+    @login_required
+    def pottery_create():
+        svc = PotteryService(app.db_manager)
+        if request.method == "POST":
+            data = _extract_pottery_form(request.form)
+            try:
+                p = svc.create_pottery(data)
+            except ValueError as e:
+                flash(str(e), "danger")
+                return render_template(
+                    "pottery/form.html",
+                    pottery=None, form_data=data, mode="create",
+                )
+            flash(f"Pottery #{p.id_rep} created.", "success")
+            try:
+                return redirect(url_for("pottery_detail", id_rep=p.id_rep))
+            except Exception:
+                # pottery_detail not yet registered (during T11 development) — go to list
+                return redirect(url_for("pottery_list"))
+        return render_template(
+            "pottery/form.html", pottery=None, form_data={}, mode="create"
+        )
