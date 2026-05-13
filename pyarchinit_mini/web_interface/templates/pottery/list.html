@@ -1,13 +1,69 @@
 {% extends "base.html" %}
 {% block title %}Pottery{% endblock %}
+
 {% block content %}
-<div class="container mt-3">
-  <h1>Pottery <small class="text-muted">({{ total }})</small></h1>
-  <p class="text-muted">Full list UI lands in Task 10.</p>
-  <ul>
+<div class="container-fluid mt-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Pottery <small class="text-muted">({{ total }})</small></h1>
+    <div>
+      <button class="btn btn-primary" disabled>+ Nuovo (T11)</button>
+    </div>
+  </div>
+
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-2"><input class="form-control form-control-sm" type="text" name="sito" value="{{ filters.sito or '' }}" placeholder="Sito"></div>
+    <div class="col-md-1"><input class="form-control form-control-sm" type="text" name="area" value="{{ filters.area or '' }}" placeholder="Area"></div>
+    <div class="col-md-1"><input class="form-control form-control-sm" type="number" name="us" value="{{ filters.us or '' }}" placeholder="US"></div>
+    <div class="col-md-2"><input class="form-control form-control-sm" type="text" name="form" value="{{ filters.form or '' }}" placeholder="Forma" list="dl-forms"></div>
+    <div class="col-md-2"><input class="form-control form-control-sm" type="text" name="fabric" value="{{ filters.fabric or '' }}" placeholder="Impasto" list="dl-fabrics"></div>
+    <div class="col-md-3"><input class="form-control form-control-sm" type="text" name="q" value="{{ filters.q or '' }}" placeholder="Ricerca testo libero"></div>
+    <div class="col-md-1"><button class="btn btn-sm btn-secondary">Filtra</button></div>
+    <datalist id="dl-forms"></datalist>
+    <datalist id="dl-fabrics"></datalist>
+  </form>
+
+  <div class="table-responsive">
+  <table class="table table-sm table-hover">
+    <thead><tr>
+      <th>id_rep</th><th>id_num</th><th>Sito</th><th>Area</th><th>US</th>
+      <th>Forma</th><th>Impasto</th><th>Ware</th><th>Qty</th><th></th>
+    </tr></thead>
+    <tbody>
     {% for p in items %}
-    <li>#{{ p.id_rep }} — {{ p.sito }} — {{ p.form or '' }}</li>
+      <tr>
+        <td>{{ p.id_rep }}</td><td>{{ p.id_number or '' }}</td>
+        <td>{{ p.sito }}</td><td>{{ p.area or '' }}</td><td>{{ p.us or '' }}</td>
+        <td>{{ p.form or '' }}</td><td>{{ p.fabric or '' }}</td>
+        <td>{{ p.ware or '' }}</td><td>{{ p.qty or '' }}</td>
+        <td></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="10" class="text-muted">Nessun risultato</td></tr>
     {% endfor %}
-  </ul>
+    </tbody>
+  </table>
+  </div>
+
+  {% set pages = (total // size) + (1 if total % size else 0) %}
+  {% if pages > 1 %}
+  <nav><ul class="pagination pagination-sm">
+    {% for p in range(1, pages+1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="{{ url_for('pottery_list', page=p, **filters) }}">{{ p }}</a>
+      </li>
+    {% endfor %}
+  </ul></nav>
+  {% endif %}
 </div>
+
+<script>
+fetch("/api/pottery/forms").then(r=>r.ok?r.json():{values:[]}).then(o=>{
+  const dl = document.getElementById("dl-forms");
+  (o.values||[]).forEach(v => { const opt=document.createElement("option"); opt.value=v; dl.appendChild(opt); });
+}).catch(()=>{});
+fetch("/api/pottery/fabrics").then(r=>r.ok?r.json():{values:[]}).then(o=>{
+  const dl = document.getElementById("dl-fabrics");
+  (o.values||[]).forEach(v => { const opt=document.createElement("option"); opt.value=v; dl.appendChild(opt); });
+}).catch(()=>{});
+</script>
 {% endblock %}
