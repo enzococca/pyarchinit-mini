@@ -289,7 +289,8 @@ class MediaUploadForm(FlaskForm):
         ('', '-- Select --'),
         ('site', 'Site'),
         ('us', 'US'),
-        ('inventario', 'Inventory')
+        ('inventario', 'Inventory'),
+        ('pottery', 'Pottery')
     ], validators=[DataRequired()])
 
     # Fields for Site selection
@@ -2720,6 +2721,19 @@ def create_app():
                         return render_template('media/upload.html', form=form)
 
                     entity_id = inv_list[0].id_invmat
+
+                elif entity_type == 'pottery':
+                    from pyarchinit_mini.services.pottery_service import PotteryService
+                    psvc = PotteryService(app.db_manager)
+                    pot_id = request.form.get('pottery_id') or request.form.get('entity_id')
+                    if not pot_id:
+                        flash('For Pottery, a Pottery ID is required', 'error')
+                        return render_template('media/upload.html', form=form)
+                    p = psvc.get_pottery_by_id(int(pot_id))
+                    if not p:
+                        flash(f'Pottery #{pot_id} not found', 'error')
+                        return render_template('media/upload.html', form=form)
+                    entity_id = p.id_rep
 
                 if not entity_id:
                     flash('Error: unable to determine associated entity', 'error')
