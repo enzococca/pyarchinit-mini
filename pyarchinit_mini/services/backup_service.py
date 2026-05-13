@@ -41,17 +41,50 @@ class BackupService:
             shutil.copy(src, path)
             fmt = "sqlite"
         elif db_url.startswith("postgresql"):
-            # Try pg_dump first via ImportExportService._create_backup
-            result = ImportExportService._create_backup(db_url, backup_dir=str(backups))
-            path = Path(result["path"])
-            fmt = result.get("format", "pg_dump")
+            # Try pg_dump first via ImportExportService._create_backup.
+            # If it succeeds, use its path. If it fails (pg_dump missing on
+            # minimal containers, JSON snapshot fallback also failing, etc.),
+            # take ownership of a fresh JSON snapshot at a known path so we
+            # never propagate None to Path() and produce the misleading
+            # "argument should be a str ... not 'NoneType'" error.
+            path = None
+            fmt = None
+            try:
+                result = ImportExportService._create_backup(db_url, backup_dir=str(backups))
+            except Exception as e:
+                logger.warning(f"_create_backup raised: {e}")
+                result = {"success": False, "path": None, "message": str(e)}
+            if result.get("success") and result.get("path"):
+                path = Path(result["path"])
+                fmt = result.get("format", "pg_dump")
+            else:
+                # Fallback: write a JSON snapshot at our timestamped path
+                fallback_msg = result.get("message") or "_create_backup returned no path"
+                logger.warning(
+                    f"pg_dump backup unavailable ({fallback_msg}); "
+                    f"falling back to inline JSON snapshot"
+                )
+                json_path = backups / f"pyarchinit_backup_{ts}.json"
+                snap = ImportExportService._python_json_snapshot(db_url, str(json_path))
+                if not snap.get("success") or not snap.get("path"):
+                    raise RuntimeError(
+                        f"Backup failed: pg_dump unavailable and JSON snapshot "
+                        f"also failed. pg_dump branch: {fallback_msg}. "
+                        f"JSON branch: {snap.get('message') or 'unknown'}."
+                    )
+                path = Path(snap["path"])
+                fmt = "json"
         else:
             # JSON snapshot fallback for any other dialect
             path = backups / f"pyarchinit_backup_{ts}.json"
-            snapshot = ImportExportService._python_json_snapshot(db_url, str(path))
+            snap = ImportExportService._python_json_snapshot(db_url, str(path))
+            if not snap.get("success") or not snap.get("path"):
+                raise RuntimeError(
+                    f"Backup failed: JSON snapshot returned no path. "
+                    f"{snap.get('message') or 'unknown error'}."
+                )
+            path = Path(snap["path"])
             fmt = "json"
-            with open(path, "w", encoding="utf-8") as fh:
-                json.dump(snapshot, fh, default=str, indent=2)
 
         return {
             "path": str(path),
