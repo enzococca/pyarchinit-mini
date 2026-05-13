@@ -1401,3 +1401,33 @@ code {
 [data-theme="dark"] .btn-close {
   filter: invert(1) grayscale(100%) brightness(200%);
 }
+
+/* ───────────────────────── v2.1.61 fixes ───────────────────────── */
+
+/* Force visible horizontal scrollbar on table-responsive containers.
+   macOS Safari/Chrome default to auto-hidden scrollbars, which makes
+   horizontal overflow on long media/multi-column tables invisible. */
+.table-responsive {
+    overflow-x: auto;
+    scrollbar-color: var(--bs-primary, #0d6efd) transparent;
+    scrollbar-width: thin;
+}
+.table-responsive::-webkit-scrollbar {
+    height: 10px;
+    background: transparent;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+    background-color: var(--bs-primary, #0d6efd);
+    border-radius: 4px;
+}
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background-color: var(--bs-primary-dark, #0a58ca);
+}
+
+/* Sticky header so column titles stay visible while scrolling long lists. */
+.table-responsive table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bs-light, #f8f9fa);
+}
