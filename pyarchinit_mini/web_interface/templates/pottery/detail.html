@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Pottery #{{ pottery.id_rep }}{% endblock %}
+
+{% macro row(label, val) %}
+<div class="col-md-3"><strong>{{ label }}:</strong> {{ val if val is not none else '' }}</div>
+{% endmacro %}
+
+{% block content %}
+<div class="container mt-3">
+  <div class="d-flex justify-content-between">
+    <h1>Pottery #{{ pottery.id_rep }} <small class="text-muted">{{ pottery.sito }}{% if pottery.id_number %} &middot; ID {{ pottery.id_number }}{% endif %}</small></h1>
+    <div>
+      <button class="btn btn-warning" disabled>Edit (T13)</button>
+    </div>
+  </div>
+
+  <h3 class="mt-3">Description</h3>
+  <div class="row g-2">
+    {{ row("Site", pottery.sito) }}{{ row("Area", pottery.area) }}{{ row("US", pottery.us) }}{{ row("Sector", pottery.sector) }}
+    {{ row("Year", pottery.anno) }}{{ row("Box", pottery.box) }}{{ row("Bag", pottery.bag) }}{{ row("ID number", pottery.id_number) }}
+    {{ row("Material", pottery.material) }}{{ row("Form", pottery.form) }}{{ row("Specific form", pottery.specific_form) }}{{ row("Specific shape", pottery.specific_shape) }}
+  </div>
+
+  <h3 class="mt-3">Technical</h3>
+  <div class="row g-2">
+    {{ row("Fabric", pottery.fabric) }}{{ row("Ware", pottery.ware) }}{{ row("Munsell", pottery.munsell) }}{{ row("Percent", pottery.percent) }}
+    {{ row("Surface treat.", pottery.surf_trat) }}{{ row("Wheel-made", pottery.wheel_made) }}{{ row("Ext deco", pottery.exdeco) }}{{ row("Int deco", pottery.intdeco) }}
+  </div>
+  {% if pottery.descrip_ex_deco or pottery.descrip_in_deco %}
+  <div class="row g-2">
+    {% if pottery.descrip_ex_deco %}<div class="col-md-6"><strong>Ext deco desc.:</strong> {{ pottery.descrip_ex_deco }}</div>{% endif %}
+    {% if pottery.descrip_in_deco %}<div class="col-md-6"><strong>Int deco desc.:</strong> {{ pottery.descrip_in_deco }}</div>{% endif %}
+  </div>
+  {% endif %}
+
+  <h3 class="mt-3">Measurements</h3>
+  <div class="row g-2">
+    {{ row("Qty", pottery.qty) }}{{ row("Diam max", pottery.diametro_max) }}{{ row("Diam rim", pottery.diametro_rim) }}
+    {{ row("Diam bottom", pottery.diametro_bottom) }}{{ row("Diam height", pottery.diametro_height) }}{{ row("Diam preserved", pottery.diametro_preserved) }}
+  </div>
+
+  {% if pottery.note %}
+  <h3 class="mt-3">Notes</h3>
+  <p>{{ pottery.note }}</p>
+  {% endif %}
+</div>
+{% endblock %}
