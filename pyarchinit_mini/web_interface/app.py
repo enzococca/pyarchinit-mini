@@ -355,6 +355,28 @@ class GraphMLExportForm(FlaskForm):
 matrix_visualizer = None
 graphviz_visualizer = None
 
+import threading
+import time as _backup_time_module
+
+
+def _backup_scheduler_loop(app):
+    """Background thread: every hour, run a backup if due per schedule."""
+    import logging as _lg
+    _logger = _lg.getLogger(__name__)
+    while True:
+        try:
+            with app.app_context():
+                from pyarchinit_mini.services.backup_service import BackupService
+                bs = BackupService(app.db_manager)
+                if bs.is_due_for_backup():
+                    info = bs.create_backup_now()
+                    bs._enforce_retention()
+                    _logger.info(f"[backup-scheduler] backup created: {info['path']}")
+        except Exception as e:
+            _logger.error(f"[backup-scheduler] error: {e}")
+        _backup_time_module.sleep(3600)  # check every hour
+
+
 def create_app():
     # Declare global variables for database and services
     # This allows switch_database() to access and modify them
@@ -5383,6 +5405,14 @@ def create_app():
         print("[FLASK] pottery routes initialized")
     except Exception as e:
         print(f"[FLASK] Error initializing pottery routes: {e}")
+
+    # Start background backup scheduler (no-op if schedule disabled)
+    if os.environ.get("PYARCHINIT_NO_BACKUP_SCHEDULER") != "1":
+        _bk_thread = threading.Thread(
+            target=_backup_scheduler_loop, args=(app,), daemon=True
+        )
+        _bk_thread.start()
+        print("[FLASK] backup scheduler thread started")
 
     return app, socketio
 
