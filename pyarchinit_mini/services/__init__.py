@@ -10,6 +10,7 @@ from .user_service import UserService
 from .analytics_service import AnalyticsService
 from .pottery_service import PotteryService  # noqa: F401
 from .app_setting_service import AppSettingService  # noqa: F401
+from .backup_service import BackupService  # noqa: F401
 
 __all__ = [
     "SiteService",
