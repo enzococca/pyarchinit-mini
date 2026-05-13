@@ -127,3 +127,29 @@ def test_get_pottery_by_us(populated):
 def test_get_pottery_by_form(populated):
     items = populated.get_pottery_by_form("Olla")
     assert len(items) == 2
+
+
+def test_form_distribution(populated):
+    dist = populated.get_form_distribution()
+    assert dist["Olla"] == 2
+    assert dist["Ciotola"] == 1
+
+
+def test_fabric_distribution_scoped_by_site(populated):
+    dist = populated.get_fabric_distribution(sito="X")
+    assert dist["Coarse"] == 1
+    assert dist["Fine"] == 1
+
+
+def test_count_by_site(populated):
+    rows = populated.count_by_site()
+    by_site = {r["sito"]: r["count"] for r in rows}
+    assert by_site["X"] == 2
+    assert by_site["Y"] == 1
+
+
+def test_calculate_mni(populated):
+    mni = populated.calculate_mni(sito="X")
+    # (Olla, Coarse, None) qty=5 and (Ciotola, Fine, None) qty=1
+    assert mni["total"] == 6
+    assert len(mni["groups"]) == 2
