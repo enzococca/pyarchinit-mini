@@ -199,6 +199,64 @@ def _register_pottery_routes(app):
             except Exception:
                 abort(404)
 
+    @app.route("/export/pottery/excel")
+    @login_required
+    def pottery_export_excel():
+        import io as _io
+        import pandas as pd
+        from datetime import datetime, timezone
+        from flask import send_file
+        svc = PotteryService(app.db_manager)
+        filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric") if request.args.get(k)}
+        if "us" in filters:
+            try:
+                filters["us"] = int(filters["us"])
+            except ValueError:
+                filters.pop("us")
+        items, _ = svc.get_all_pottery(page=1, size=10_000, filters=filters)
+        rows = [PotteryDTO.from_model(p).to_dict() for p in items]
+        df = pd.DataFrame(rows, columns=list(_POTTERY_FORM_FIELDS) + ["id_rep"])
+        meta = pd.DataFrame([{
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "version": "2.1.60", "filters": str(filters),
+            "row_count": len(rows),
+        }])
+        buf = _io.BytesIO()
+        with pd.ExcelWriter(buf, engine="openpyxl") as w:
+            df.to_excel(w, sheet_name="pottery", index=False)
+            meta.to_excel(w, sheet_name="metadata", index=False)
+        buf.seek(0)
+        return send_file(
+            buf, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True, download_name="pottery.xlsx",
+        )
+
+    @app.route("/export/pottery/csv")
+    @login_required
+    def pottery_export_csv():
+        import io as _io
+        import csv
+        from flask import Response
+        svc = PotteryService(app.db_manager)
+        filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric") if request.args.get(k)}
+        if "us" in filters:
+            try:
+                filters["us"] = int(filters["us"])
+            except ValueError:
+                filters.pop("us")
+        items, _ = svc.get_all_pottery(page=1, size=10_000, filters=filters)
+        header = list(_POTTERY_FORM_FIELDS) + ["id_rep"]
+        buf = _io.StringIO()
+        w = csv.DictWriter(buf, fieldnames=header)
+        w.writeheader()
+        for p in items:
+            d = PotteryDTO.from_model(p).to_dict()
+            w.writerow({k: d.get(k, "") for k in header})
+        return Response(
+            buf.getvalue(), mimetype="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="pottery.csv"'},
+        )
+
     @app.route("/api/pottery/stats")
     @login_required
     def pottery_api_stats():
