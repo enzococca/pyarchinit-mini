@@ -164,6 +164,7 @@ class PyArchInitGUI:
         view_menu.add_command(label=_("Sites"), command=lambda: self.show_tab("sites"))
         view_menu.add_command(label=_("US"), command=lambda: self.show_tab("us"))
         view_menu.add_command(label=_("Inventory"), command=lambda: self.show_tab("inventario"))
+        view_menu.add_command(label=_("Pottery"), command=lambda: self.show_tab("pottery"))
 
         # Tools menu
         tools_menu = tk.Menu(menubar, tearoff=0)
@@ -211,6 +212,7 @@ class PyArchInitGUI:
         self.create_sites_tab()
         self.create_us_tab()
         self.create_inventario_tab()
+        self.create_pottery_tab()
         
         # Status bar
         self.create_status_bar(main_frame)
@@ -515,7 +517,13 @@ class PyArchInitGUI:
         
         # Bind double-click to edit
         self.inv_tree.bind("<Double-1>", lambda e: self.edit_selected_inventario())
-    
+
+    def create_pottery_tab(self):
+        """Create pottery management tab"""
+        from .pottery_panel import PotteryPanel
+        self.pottery_panel = PotteryPanel(self.notebook, self.db_manager)
+        self.notebook.add(self.pottery_panel, text=_("Pottery"))
+
     def refresh_data(self):
         """Refresh all data in the interface"""
         self.status_text.set("Aggiornamento dati...")
@@ -743,7 +751,8 @@ class PyArchInitGUI:
             "dashboard": 0,
             "sites": 1,
             "us": 2,
-            "inventario": 3
+            "inventario": 3,
+            "pottery": 4,
         }
         if tab_name in tab_map:
             self.notebook.select(tab_map[tab_name])
