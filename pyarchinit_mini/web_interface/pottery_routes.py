@@ -1,0 +1,83 @@
+"""Pottery web routes. Call _register_pottery_routes(app) from create_app()."""
+from __future__ import annotations
+
+from flask import (
+    render_template, request, redirect, url_for, flash, jsonify, abort,
+)
+from flask_login import login_required
+
+from ..services.pottery_service import PotteryService
+from ..services.pottery_dto import PotteryDTO
+
+
+_POTTERY_FORM_FIELDS = (
+    "id_number", "sito", "area", "us", "box", "photo", "drawing", "anno",
+    "fabric", "percent", "material", "form", "specific_form", "ware",
+    "munsell", "surf_trat", "exdeco", "intdeco", "wheel_made",
+    "descrip_ex_deco", "descrip_in_deco", "note", "diametro_max", "qty",
+    "diametro_rim", "diametro_bottom", "diametro_height",
+    "diametro_preserved", "specific_shape", "bag", "sector",
+)
+_INT_FIELDS = {"id_number", "us", "box", "anno", "qty", "bag"}
+_NUM_FIELDS = {
+    "diametro_max", "diametro_rim", "diametro_bottom",
+    "diametro_height", "diametro_preserved",
+}
+
+
+def _extract_pottery_form(form) -> dict:
+    """Pull pottery fields from a Flask request.form, coercing types."""
+    out = {}
+    for k in _POTTERY_FORM_FIELDS:
+        v = form.get(k)
+        if v in (None, ""):
+            continue
+        if k in _INT_FIELDS:
+            try:
+                out[k] = int(v)
+            except ValueError:
+                continue
+        elif k in _NUM_FIELDS:
+            try:
+                out[k] = float(v)
+            except ValueError:
+                continue
+        else:
+            out[k] = v
+    return out
+
+
+def _distinct_values(app, column_name: str):
+    """Return distinct non-null values for a Pottery column as JSON."""
+    from ..models.pottery import Pottery
+    with app.db_manager.connection.get_session() as session:
+        col = getattr(Pottery, column_name)
+        rows = session.query(col).filter(col.isnot(None)).distinct().all()
+        return jsonify({"values": sorted({r[0] for r in rows if r[0]})})
+
+
+def _register_pottery_routes(app):
+    """Register pottery URL rules on the Flask app."""
+
+    @app.route("/pottery")
+    @login_required
+    def pottery_list():
+        page = int(request.args.get("page", 1))
+        size = int(request.args.get("size", 25))
+        filters = {
+            k: request.args.get(k)
+            for k in ("sito", "area", "us", "form", "fabric", "ware", "q")
+            if request.args.get(k)
+        }
+        if "us" in filters:
+            try:
+                filters["us"] = int(filters["us"])
+            except ValueError:
+                filters.pop("us")
+        svc = PotteryService(app.db_manager)
+        items, total = svc.get_all_pottery(page=page, size=size, filters=filters)
+        return render_template(
+            "pottery/list.html",
+            items=[PotteryDTO.from_model(p) for p in items],
+            total=total, page=page, size=size, filters=filters,
+        )

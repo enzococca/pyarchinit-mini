@@ -5249,6 +5249,14 @@ def create_app():
     except Exception as e:
         print(f"[FLASK] Error initializing s3Dgraphy routes: {e}")
 
+    # ===== Pottery Routes =====
+    try:
+        from pyarchinit_mini.web_interface.pottery_routes import _register_pottery_routes
+        _register_pottery_routes(app)
+        print("[FLASK] pottery routes initialized")
+    except Exception as e:
+        print(f"[FLASK] Error initializing pottery routes: {e}")
+
     return app, socketio
 
 # Run app
