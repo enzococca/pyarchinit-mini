@@ -168,6 +168,37 @@ def _register_pottery_routes(app):
     def pottery_api_wares():
         return _distinct_values(app, "ware")
 
+    @app.route("/api/media/pottery")
+    @login_required
+    def api_media_pottery():
+        """Get list of all pottery items for media upload form."""
+        svc = PotteryService(app.db_manager)
+        items, _ = svc.get_all_pottery(page=1, size=500)
+        return jsonify({
+            "items": [
+                {
+                    "id_rep": p.id_rep,
+                    "sito": p.sito,
+                    "id_number": p.id_number,
+                    "form": p.form,
+                    "fabric": p.fabric,
+                }
+                for p in items
+            ]
+        })
+
+    @app.route("/pottery/<int:id_rep>/media")
+    @login_required
+    def pottery_media(id_rep: int):
+        """Redirect to the universal media manager for this pottery record."""
+        try:
+            return redirect(url_for("media_manage", entity_type="pottery", entity_id=id_rep))
+        except Exception:
+            try:
+                return redirect(url_for("upload_media", entity_type="pottery", entity_id=id_rep))
+            except Exception:
+                abort(404)
+
     @app.route("/api/pottery/stats")
     @login_required
     def pottery_api_stats():

@@ -178,3 +178,11 @@ def test_api_stats(client, pottery_service):
     assert o["total"] == 2
     assert any(d["form"] == "Olla" for d in o["by_form"])
     assert o["mni"] == 6
+
+
+def test_api_media_pottery_lists_records(client, pottery_service):
+    p = pottery_service.create_pottery({"sito": "X", "form": "Olla"})
+    r = client.get("/api/media/pottery")
+    assert r.status_code == 200
+    items = r.get_json()["items"]
+    assert any(i["id_rep"] == p.id_rep for i in items)
