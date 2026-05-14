@@ -4667,6 +4667,29 @@ def create_app():
             from pyarchinit_mini.services.ai_assistant_service import AIAssistantService
             import os as _os
 
+            # Bootstrap AI credentials from app_settings (UI Admin) into env
+            try:
+                from pyarchinit_mini.services.app_setting_service import AppSettingService
+                _settings = AppSettingService(app.db_manager)
+                _provider = (_settings.get('ai_provider') or '').strip().lower()
+                _model = (_settings.get('ai_model') or '').strip()
+                if _provider:
+                    _os.environ['AI_PROVIDER'] = _provider
+                if _model:
+                    _os.environ['AI_MODEL'] = _model
+                _openai_key = (_settings.get('openai_api_key') or '').strip()
+                _anthropic_key = (_settings.get('anthropic_api_key') or '').strip()
+                if _openai_key:
+                    _os.environ['OPENAI_API_KEY'] = _openai_key
+                if _anthropic_key:
+                    _os.environ['ANTHROPIC_API_KEY'] = _anthropic_key
+                if _provider == 'anthropic' and _anthropic_key:
+                    _os.environ['AI_API_KEY'] = _anthropic_key
+                elif _openai_key:
+                    _os.environ['AI_API_KEY'] = _openai_key
+            except Exception:
+                pass
+
             data = request.get_json(force=True, silent=True) or {}
             question = data.get('question', '').strip()
             site_name = data.get('site_name')
