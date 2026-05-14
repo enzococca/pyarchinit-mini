@@ -4729,6 +4729,10 @@ def create_app():
             question = data.get('question', '').strip()
             site_name = data.get('site_name')
             action = data.get('action')  # summarize, stratigraphy, materials, chronology
+            try:
+                conversation_id = int(data.get('conversation_id') or 0) or None
+            except (TypeError, ValueError):
+                conversation_id = None
 
             # Dynamic model selection from frontend (format: "provider:model")
             model_choice = data.get('model', '')
@@ -4872,10 +4876,69 @@ def create_app():
                 gallery += '</div></div>'
                 answer += gallery
 
-            return jsonify({'answer': answer})
+            # ---- Persist conversation history ----
+            try:
+                from pyarchinit_mini.services.ai_chat_service import AIChatService
+                chat_svc = AIChatService(db_manager)
+                _user = getattr(current_user, 'username', None) or 'anonymous'
+                _provider = _os.environ.get('AI_PROVIDER', '')
+                _model = _os.environ.get('AI_MODEL', '')
+                if not conversation_id:
+                    conversation_id = chat_svc.create_conversation(
+                        user=_user, title=(question or action or '')[:80],
+                        site_name=site_name, provider=_provider, model=_model)
+                if question:
+                    chat_svc.append_message(conversation_id, 'user', question)
+                elif action:
+                    chat_svc.append_message(conversation_id, 'user', f'[action:{action}]')
+                chat_svc.append_message(conversation_id, 'assistant', answer or '')
+            except Exception:
+                pass
+
+            return jsonify({'answer': answer, 'conversation_id': conversation_id})
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
+
+    # ===== AI Chat History Routes =====
+    @app.route('/api/ai/conversations', methods=['GET'])
+    @login_required
+    def list_ai_conversations():
+        from pyarchinit_mini.services.ai_chat_service import AIChatService
+        svc = AIChatService(db_manager)
+        user = getattr(current_user, 'username', None) or 'anonymous'
+        return jsonify({'conversations': svc.list_conversations(user, limit=200)})
+
+    @app.route('/api/ai/conversations/<int:cid>', methods=['GET'])
+    @login_required
+    def get_ai_conversation(cid):
+        from pyarchinit_mini.services.ai_chat_service import AIChatService
+        svc = AIChatService(db_manager)
+        user = getattr(current_user, 'username', None) or 'anonymous'
+        conv = svc.get_conversation(cid, user)
+        if not conv: return jsonify({'error': 'not found'}), 404
+        return jsonify(conv)
+
+    @app.route('/api/ai/conversations/<int:cid>', methods=['DELETE'])
+    @login_required
+    def delete_ai_conversation(cid):
+        from pyarchinit_mini.services.ai_chat_service import AIChatService
+        svc = AIChatService(db_manager)
+        user = getattr(current_user, 'username', None) or 'anonymous'
+        if not svc.delete_conversation(cid, user):
+            return jsonify({'error': 'not found'}), 404
+        return jsonify({'ok': True})
+
+    @app.route('/api/ai/conversations/<int:cid>/rename', methods=['POST'])
+    @login_required
+    def rename_ai_conversation(cid):
+        from pyarchinit_mini.services.ai_chat_service import AIChatService
+        svc = AIChatService(db_manager)
+        user = getattr(current_user, 'username', None) or 'anonymous'
+        title = (request.get_json(silent=True) or {}).get('title', '').strip()
+        if not svc.rename_conversation(cid, user, title):
+            return jsonify({'error': 'not found'}), 404
+        return jsonify({'ok': True, 'title': title})
 
     # ===== Export/Import Routes =====
 
