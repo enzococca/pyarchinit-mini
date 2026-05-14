@@ -14,6 +14,7 @@ from .thesaurus import ThesaurusSigle, ThesaurusField, ThesaurusCategory
 from .user import User, UserRole
 from .pottery import Pottery
 from .app_setting import AppSetting
+from .ai_chat import AIConversation, AIMessage
 
 __all__ = [
     "BaseModel",
@@ -36,4 +37,6 @@ __all__ = [
     "UserRole",
     "Pottery",
     "AppSetting",
+    "AIConversation",
+    "AIMessage",
 ]
