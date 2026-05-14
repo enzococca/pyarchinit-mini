@@ -212,6 +212,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 (function() {
     const chatMessages = document.getElementById('chat-messages');
@@ -323,6 +324,83 @@
         .catch(function() { /* sites endpoint may not exist yet */ });
 
     // ── Helpers ──
+    function enhanceAIMessage(bubble) {
+        // a. tables -> toolbar with xlsx / docx via form POST (CSP-safe)
+        bubble.querySelectorAll('table').forEach(function(tbl) {
+            if (tbl.dataset.enhanced) return; tbl.dataset.enhanced = '1';
+            const tb = document.createElement('div');
+            tb.style.cssText = 'display:flex;gap:4px;margin-bottom:4px;';
+            ['xlsx','docx'].forEach(function(fmt) {
+                const b = document.createElement('button');
+                b.className = 'btn btn-sm btn-outline-secondary';
+                b.innerHTML = '<i class="fas fa-download"></i> ' + fmt;
+                b.addEventListener('click', function() {
+                    const headers = Array.from(tbl.querySelectorAll('thead th')).map(c => c.textContent.trim());
+                    const rows = Array.from(tbl.querySelectorAll('tbody tr')).map(tr =>
+                        Array.from(tr.querySelectorAll('td')).map(c => c.textContent.trim()));
+                    const form = document.createElement('form');
+                    form.method = 'POST'; form.action = '{{ request.script_root }}/api/ai/export-table';
+                    form.target = '_blank'; form.style.display = 'none';
+                    function addField(n,v) { const i=document.createElement('input'); i.type='hidden'; i.name=n; i.value=v; form.appendChild(i); }
+                    addField('payload', JSON.stringify({headers: headers, rows: rows, fmt: fmt}));
+                    addField('csrf_token', '{{ csrf_token_value }}');
+                    document.body.appendChild(form); form.submit();
+                    setTimeout(() => form.remove(), 1000);
+                });
+                tb.appendChild(b);
+            });
+            tbl.parentNode.insertBefore(tb, tbl);
+        });
+        // b. .ai-chart -> Chart.js + Download PNG via form POST
+        bubble.querySelectorAll('.ai-chart').forEach(function(div) {
+            if (div.dataset.rendered) return; div.dataset.rendered = '1';
+            let spec = null;
+            const raw = div.dataset.chart || div.getAttribute('data-chart') || '';
+            const tryParse = function(v) { try { return JSON.parse(v); } catch (e) { return null; } };
+            spec = tryParse(raw);
+            if (!spec) {
+                const r2 = raw.replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+                              .replace(/'(?=\s*[\}:,\]])/g, '"').replace(/(?<=[\{:,\s])'/g, '"');
+                spec = tryParse(r2);
+            }
+            if (!spec) { console.warn('[ai-chart] cannot parse JSON, raw =', raw); div.style.color='crimson'; div.style.display='block'; div.textContent = '[ai-chart] JSON non valido: ' + raw.slice(0,200); return; }
+            if (!spec.datasets) {
+                const flatData = spec.data || spec.values || spec.counts || [];
+                spec.datasets = [{ label: spec.title || '', data: flatData }];
+            }
+            if (!spec.labels) spec.labels = spec.keys || spec.x || [];
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'position:relative;width:100%;max-width:560px;height:300px;margin:0.5em 0;';
+            if (spec.title) { const h=document.createElement('div'); h.style.cssText='font-weight:600;'; h.textContent=spec.title; wrap.appendChild(h); }
+            const canvas = document.createElement('canvas'); wrap.appendChild(canvas);
+            const dl = document.createElement('button');
+            dl.className = 'btn btn-sm btn-outline-secondary mt-1';
+            dl.innerHTML = '<i class="fas fa-download"></i> PNG';
+            wrap.appendChild(dl);
+            div.parentNode.insertBefore(wrap, div); div.style.display = 'none';
+            if (typeof Chart === 'undefined') return;
+            const dataset = { label: spec.title || '', data: spec.data || [],
+                              backgroundColor: 'rgba(13,110,253,0.4)', borderColor: '#0d6efd', borderWidth: 1 };
+            const chart = new Chart(canvas, {
+                type: spec.type || 'bar',
+                data: { labels: spec.labels || [], datasets: spec.datasets || [dataset] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+            dl.addEventListener('click', function() {
+                const dataUrl = canvas.toDataURL('image/png', 1.0);
+                const form = document.createElement('form');
+                form.method = 'POST'; form.action = '{{ request.script_root }}/api/ai/chart-png';
+                form.target = '_blank'; form.style.display = 'none';
+                function addField(n,v) { const i=document.createElement('input'); i.type='hidden'; i.name=n; i.value=v; form.appendChild(i); }
+                addField('png_base64', dataUrl);
+                addField('name', (spec.title || 'chart') + '.png');
+                addField('csrf_token', '{{ csrf_token_value }}');
+                document.body.appendChild(form); form.submit();
+                setTimeout(() => form.remove(), 2000);
+            });
+        });
+    }
+
     function appendMessage(role, text) {
         var bubble = document.createElement('div');
         bubble.className = 'chat-bubble ' + (role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai');
@@ -339,6 +417,7 @@
         } else {
             bubble.appendChild(document.createTextNode(text));
         }
+        if (role === 'ai') { try { enhanceAIMessage(bubble); } catch(e) { console.error(e); } }
         chatMessages.appendChild(bubble);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
