@@ -163,6 +163,11 @@
             <div class="stat-label">{{ _('Total Operators') }}</div>
             <div class="stat-number">{{ data.total_operators }}</div>
         </div>
+        <div class="stat-box">
+            <div class="stat-icon"><i class="fas fa-wine-bottle"></i></div>
+            <div class="stat-label">{{ _('Total Pottery') }}</div>
+            <div class="stat-number">{{ data.total_pottery or 0 }}</div>
+        </div>
     </div>
 
     <!-- A. Excavation Activity by Year -->
@@ -271,7 +276,37 @@
         </div>
     </div>
 
-    <!-- F. Recent Activity -->
+    <!-- F. Pottery by Form -->
+    <div class="chart-card">
+        <div class="collapsible-header" data-bs-toggle="collapse" data-bs-target="#collapse-pottery-form">
+            <div class="chart-title d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-wine-bottle"></i> {{ _('Pottery by Form') }}</span>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </div>
+        </div>
+        <div class="collapse show" id="collapse-pottery-form">
+            <div class="chart-container">
+                <canvas id="potteryFormChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- G. Pottery by Fabric -->
+    <div class="chart-card">
+        <div class="collapsible-header" data-bs-toggle="collapse" data-bs-target="#collapse-pottery-fabric">
+            <div class="chart-title d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-flask"></i> {{ _('Pottery by Fabric') }}</span>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </div>
+        </div>
+        <div class="collapse show" id="collapse-pottery-fabric">
+            <div class="chart-container">
+                <canvas id="potteryFabricChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- H. Recent Activity -->
     <div class="table-card">
         <div class="collapsible-header" data-bs-toggle="collapse" data-bs-target="#collapse-recent">
             <div class="chart-title d-flex justify-content-between align-items-center">
@@ -469,6 +504,34 @@
                     }
                 }
             }
+        });
+    }
+
+    // F. Pottery by Form
+    if (statsData.pottery_by_form && Object.keys(statsData.pottery_by_form).length > 0) {
+        new Chart(document.getElementById('potteryFormChart'), {
+            type: 'bar',
+            data: { labels: Object.keys(statsData.pottery_by_form),
+                    datasets: [{ label: "{{ _('Count') }}",
+                                 data: Object.values(statsData.pottery_by_form),
+                                 backgroundColor: colors.background[3],
+                                 borderColor: colors.primary[3], borderWidth: 2 }] },
+            options: { ...commonOptions, indexAxis: 'y',
+                       scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+    }
+
+    // G. Pottery by Fabric
+    if (statsData.pottery_by_fabric && Object.keys(statsData.pottery_by_fabric).length > 0) {
+        new Chart(document.getElementById('potteryFabricChart'), {
+            type: 'bar',
+            data: { labels: Object.keys(statsData.pottery_by_fabric),
+                    datasets: [{ label: "{{ _('Count') }}",
+                                 data: Object.values(statsData.pottery_by_fabric),
+                                 backgroundColor: colors.background[4 % colors.background.length],
+                                 borderColor: colors.primary[4 % colors.primary.length], borderWidth: 2 }] },
+            options: { ...commonOptions, indexAxis: 'y',
+                       scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
     }
 </script>
