@@ -274,7 +274,7 @@ class AIAssistantService:
         except ImportError:
             return (
                 "Error: the 'openai' package is not installed. "
-                "Run: pip install openai"
+                "Run: pip install pyarchinit-mini[ai]   (or: pip install openai)"
             )
 
         client = openai.OpenAI(api_key=self.api_key)
@@ -301,7 +301,7 @@ class AIAssistantService:
         except ImportError:
             return (
                 "Error: the 'anthropic' package is not installed. "
-                "Run: pip install anthropic"
+                "Run: pip install pyarchinit-mini[ai]   (or: pip install anthropic)"
             )
 
         client = anthropic.Anthropic(api_key=self.api_key)
