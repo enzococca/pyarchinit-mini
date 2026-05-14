@@ -4929,6 +4929,48 @@ def create_app():
             return jsonify({'error': 'not found'}), 404
         return jsonify({'ok': True})
 
+    @app.route('/api/ai/conversations/<int:cid>/export.<fmt>', methods=['GET'])
+    @login_required
+    def export_ai_conversation(cid, fmt):
+        import io as _io
+        from pyarchinit_mini.services.ai_chat_service import AIChatService
+        svc = AIChatService(db_manager)
+        user = getattr(current_user, 'username', None) or 'anonymous'
+        conv = svc.get_conversation(cid, user)
+        if not conv: return jsonify({'error': 'not found'}), 404
+        title = conv.get('title') or f'conversation_{cid}'
+        safe = ''.join(c if c.isalnum() or c in '-_.' else '_' for c in title)[:60]
+        if fmt == 'json': return jsonify(conv)
+        if fmt == 'md':
+            lines = [f'# {title}', '',
+                     f"_Sito: {conv.get('site_name') or '-'} | Modello: {conv.get('provider') or '-'}:{conv.get('model') or '-'}_", '']
+            for m in conv.get('messages', []):
+                ts = (m.get('created_at') or '')[:19].replace('T', ' ')
+                lines += [f"### {m.get('role','').upper()} - {ts}", '', m.get('content',''), '']
+            return send_file(_io.BytesIO('\n'.join(lines).encode('utf-8')),
+                             as_attachment=True, download_name=f'{safe}.md',
+                             mimetype='text/markdown; charset=utf-8')
+        if fmt == 'pdf':
+            try: from weasyprint import HTML
+            except Exception: return jsonify({'error': 'WeasyPrint not available'}), 500
+            parts = [f'<h1>{title}</h1>',
+                     f"<p><em>Sito: {conv.get('site_name') or '-'} | Modello: {conv.get('provider') or '-'}:{conv.get('model') or '-'}</em></p>"]
+            for m in conv.get('messages', []):
+                ts = (m.get('created_at') or '')[:19].replace('T', ' ')
+                content = m.get('content', '')
+                if m.get('role') == 'user':
+                    content = '<pre style="white-space:pre-wrap">' + content.replace('<','&lt;').replace('>','&gt;') + '</pre>'
+                parts.append(f'<div style="margin:1em 0;padding:0.5em;border-left:3px solid #888;"><strong>{m.get("role","").upper()}</strong> <small>{ts}</small>{content}</div>')
+            html_doc = (f'<!doctype html><html><head><meta charset="utf-8"><style>'
+                        f'body{{font-family:sans-serif;font-size:11pt;}}h1{{font-size:18pt;}}'
+                        f'table{{border-collapse:collapse;font-size:9pt;}}'
+                        f'td,th{{border:1px solid #ccc;padding:3px 6px;}} img{{max-width:200px;}}'
+                        f'</style></head><body>{"".join(parts)}</body></html>')
+            pdf_bytes = HTML(string=html_doc, base_url=request.base_url).write_pdf()
+            return send_file(_io.BytesIO(pdf_bytes), as_attachment=True,
+                             download_name=f'{safe}.pdf', mimetype='application/pdf')
+        return jsonify({'error': 'unsupported format'}), 400
+
     @app.route('/api/ai/conversations/<int:cid>/rename', methods=['POST'])
     @login_required
     def rename_ai_conversation(cid):
