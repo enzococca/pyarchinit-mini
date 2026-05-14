@@ -13,6 +13,7 @@ from ..database.manager import DatabaseManager
 from ..models.site import Site
 from ..models.us import US
 from ..models.inventario_materiali import InventarioMateriali
+from ..models.pottery import Pottery
 
 
 class AnalyticsService:
@@ -38,6 +39,7 @@ class AnalyticsService:
             total_sites = session.query(func.count(Site.id_sito)).scalar() or 0
             total_us = session.query(func.count(US.id_us)).scalar() or 0
             total_inventario = session.query(func.count(InventarioMateriali.id_invmat)).scalar() or 0
+            total_pottery = session.query(func.count(Pottery.id_rep)).scalar() or 0
 
             # Get distinct values
             total_regions = session.query(func.count(distinct(Site.regione))).filter(
@@ -54,6 +56,7 @@ class AnalyticsService:
                 'total_sites': total_sites,
                 'total_us': total_us,
                 'total_inventario': total_inventario,
+                'total_pottery': total_pottery,
                 'total_regions': total_regions,
                 'total_provinces': total_provinces
             }
@@ -222,6 +225,75 @@ class AnalyticsService:
 
             return {site: count for site, count in results if site}
 
+    def get_pottery_by_site(self, limit: int = 10) -> Dict[str, int]:
+        """
+        Get count of pottery items grouped by site
+
+        Args:
+            limit: Maximum number of sites to return
+
+        Returns:
+            Dictionary mapping site names to pottery counts
+        """
+        with self.db_manager.connection.get_session() as session:
+            results = session.query(
+                Pottery.sito,
+                func.count(Pottery.id_rep).label('count')
+            ).filter(
+                Pottery.sito.isnot(None),
+                Pottery.sito != ''
+            ).group_by(Pottery.sito).order_by(
+                func.count(Pottery.id_rep).desc()
+            ).limit(limit).all()
+
+            return {site: count for site, count in results if site}
+
+    def get_pottery_by_form(self, limit: int = 10) -> Dict[str, int]:
+        """
+        Get count of pottery items grouped by form (Top N).
+
+        Args:
+            limit: Maximum number of forms to return
+
+        Returns:
+            Dictionary mapping form names to counts
+        """
+        with self.db_manager.connection.get_session() as session:
+            results = session.query(
+                Pottery.form,
+                func.count(Pottery.id_rep).label('count')
+            ).filter(
+                Pottery.form.isnot(None),
+                Pottery.form != ''
+            ).group_by(Pottery.form).order_by(
+                func.count(Pottery.id_rep).desc()
+            ).limit(limit).all()
+
+            return {form: count for form, count in results if form}
+
+    def get_pottery_by_fabric(self, limit: int = 10) -> Dict[str, int]:
+        """
+        Get count of pottery items grouped by fabric (Top N).
+
+        Args:
+            limit: Maximum number of fabrics to return
+
+        Returns:
+            Dictionary mapping fabric names to counts
+        """
+        with self.db_manager.connection.get_session() as session:
+            results = session.query(
+                Pottery.fabric,
+                func.count(Pottery.id_rep).label('count')
+            ).filter(
+                Pottery.fabric.isnot(None),
+                Pottery.fabric != ''
+            ).group_by(Pottery.fabric).order_by(
+                func.count(Pottery.id_rep).desc()
+            ).limit(limit).all()
+
+            return {fabric: count for fabric, count in results if fabric}
+
     def get_complete_dashboard_data(self) -> Dict[str, Any]:
         """
         Get all analytics data for dashboard in a single call
@@ -238,5 +310,8 @@ class AnalyticsService:
             'us_by_site': self.get_us_by_site(limit=10),
             'inventario_by_type': self.get_inventario_by_type(limit=10),
             'inventario_by_conservation': self.get_inventario_by_conservation(),
-            'inventario_by_site': self.get_inventario_by_site(limit=10)
+            'inventario_by_site': self.get_inventario_by_site(limit=10),
+            'pottery_by_site': self.get_pottery_by_site(limit=10),
+            'pottery_by_form': self.get_pottery_by_form(limit=10),
+            'pottery_by_fabric': self.get_pottery_by_fabric(limit=10),
         }
