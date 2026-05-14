@@ -4891,6 +4891,7 @@ def create_app():
 
             # Handle quick actions
             if action == 'summarize' and context:
+                ai._pottery_summary = context.get('pottery_summary')
                 answer = ai.generate_report_summary(
                     context.get('site', {}),
                     context.get('us_list', []),
