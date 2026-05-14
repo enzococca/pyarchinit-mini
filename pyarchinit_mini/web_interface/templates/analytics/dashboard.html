@@ -74,6 +74,10 @@
             <div class="stat-number">{{ data.overview.total_inventario }}</div>
         </div>
         <div class="stat-box">
+            <div class="stat-label">{{ _('Total Pottery') }}</div>
+            <div class="stat-number">{{ data.overview.total_pottery }}</div>
+        </div>
+        <div class="stat-box">
             <div class="stat-label">{{ _('Regions') }}</div>
             <div class="stat-number">{{ data.overview.total_regions }}</div>
         </div>
@@ -176,6 +180,42 @@
                 </div>
                 <div class="chart-container">
                     <canvas id="inventarioBySiteChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pottery by Site -->
+        <div class="col-md-6">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fas fa-wine-bottle"></i> {{ _('Pottery by Site') }} (Top 10)
+                </div>
+                <div class="chart-container">
+                    <canvas id="potteryBySiteChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pottery by Form (server-side aggregate) -->
+        <div class="col-md-6">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fas fa-shapes"></i> {{ _('Pottery by Form') }} (Top 10)
+                </div>
+                <div class="chart-container">
+                    <canvas id="potteryByFormChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pottery by Fabric (server-side aggregate) -->
+        <div class="col-md-6">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fas fa-th-large"></i> {{ _('Pottery by Fabric') }} (Top 10)
+                </div>
+                <div class="chart-container">
+                    <canvas id="potteryByFabricChart"></canvas>
                 </div>
             </div>
         </div>
@@ -428,6 +468,71 @@
                         }
                     }
                 }
+            }
+        });
+    }
+
+    // Pottery by Site - Bar Chart
+    if (analyticsData.pottery_by_site && Object.keys(analyticsData.pottery_by_site).length > 0) {
+        new Chart(document.getElementById('potteryBySiteChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(analyticsData.pottery_by_site),
+                datasets: [{
+                    label: "{{ _('Number of Pottery') }}",
+                    data: Object.values(analyticsData.pottery_by_site),
+                    backgroundColor: colors.background[5],
+                    borderColor: colors.primary[5],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+
+    // Pottery by Form - Bar Chart
+    if (analyticsData.pottery_by_form && Object.keys(analyticsData.pottery_by_form).length > 0) {
+        new Chart(document.getElementById('potteryByFormChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(analyticsData.pottery_by_form),
+                datasets: [{
+                    label: "{{ _('Number of Pottery') }}",
+                    data: Object.values(analyticsData.pottery_by_form),
+                    backgroundColor: colors.background[6],
+                    borderColor: colors.primary[6],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...commonOptions,
+                indexAxis: 'y',
+                scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+
+    // Pottery by Fabric - Bar Chart
+    if (analyticsData.pottery_by_fabric && Object.keys(analyticsData.pottery_by_fabric).length > 0) {
+        new Chart(document.getElementById('potteryByFabricChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(analyticsData.pottery_by_fabric),
+                datasets: [{
+                    label: "{{ _('Number of Pottery') }}",
+                    data: Object.values(analyticsData.pottery_by_fabric),
+                    backgroundColor: colors.background[7],
+                    borderColor: colors.primary[7],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...commonOptions,
+                indexAxis: 'y',
+                scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
             }
         });
     }
