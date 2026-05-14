@@ -4929,6 +4929,106 @@ def create_app():
             return jsonify({'error': 'not found'}), 404
         return jsonify({'ok': True})
 
+    @app.route('/api/ai/export-table', methods=['POST'])
+    @login_required
+    def export_ai_table():
+        import io as _io, json as _json
+        data = request.get_json(force=True, silent=True)
+        if not data:
+            raw = request.form.get('payload')
+            try: data = _json.loads(raw) if raw else {}
+            except Exception: data = {}
+        headers = data.get('headers') or []
+        rows = data.get('rows') or []
+        fmt = (data.get('fmt') or 'xlsx').lower()
+        if fmt == 'xlsx':
+            from openpyxl import Workbook
+            wb = Workbook(); ws = wb.active
+            if headers: ws.append(list(headers))
+            for r in rows: ws.append([str(v) if v is not None else '' for v in r])
+            buf = _io.BytesIO(); wb.save(buf); buf.seek(0)
+            return send_file(buf, as_attachment=True, download_name='ai_table.xlsx',
+                             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        if fmt == 'docx':
+            from docx import Document
+            doc = Document()
+            cols = max(len(headers), max((len(r) for r in rows), default=0))
+            if cols == 0: return jsonify({'error': 'empty'}), 400
+            t = doc.add_table(rows=(1 if headers else 0), cols=cols)
+            if headers:
+                for i, h in enumerate(headers[:cols]): t.rows[0].cells[i].text = str(h)
+            for r in rows:
+                row = t.add_row()
+                for i in range(cols):
+                    v = r[i] if i < len(r) else ''
+                    row.cells[i].text = str(v) if v is not None else ''
+            buf = _io.BytesIO(); doc.save(buf); buf.seek(0)
+            return send_file(buf, as_attachment=True, download_name='ai_table.docx',
+                             mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        return jsonify({'error': 'unsupported fmt'}), 400
+
+    @app.route('/api/ai/conversations/<int:cid>/export.zip', methods=['GET'])
+    @login_required
+    def export_ai_conversation_zip(cid):
+        import io as _io, zipfile as _zf, re as _re, os as _os, urllib.parse as _up
+        from pyarchinit_mini.services.ai_chat_service import AIChatService
+        svc = AIChatService(db_manager)
+        user = getattr(current_user, 'username', None) or 'anonymous'
+        conv = svc.get_conversation(cid, user)
+        if not conv: return jsonify({'error': 'not found'}), 404
+        title = conv.get('title') or f'conversation_{cid}'
+        safe = ''.join(c if c.isalnum() or c in '-_.' else '_' for c in title)[:60]
+        images = {}
+        media_root = _os.path.expanduser('~/.pyarchinit_mini/media')
+        body_parts = []
+        for m in conv.get('messages', []):
+            content = m.get('content','') or ''
+            def _rewrite(match):
+                full = match.group(0); url = match.group(1)
+                if url.startswith('data:'): return full
+                if url.startswith('/media/'):
+                    rel = _up.unquote(url[len('/media/'):])
+                    cand = _os.path.join(media_root, rel)
+                    if _os.path.isfile(cand):
+                        images[_os.path.basename(cand)] = cand
+                        return full.replace(url, 'images/' + _os.path.basename(cand))
+                return full
+            content = _re.sub(r'<img[^>]+src="([^"]+)"', _rewrite, content)
+            ts = (m.get('created_at') or '')[:19].replace('T', ' ')
+            body_parts.append(f'<div class="msg msg-{m.get("role")}"><strong>{m.get("role","").upper()}</strong> <small>{ts}</small><div>{content}</div></div>')
+        html_doc = ('<!doctype html><html><head><meta charset="utf-8">'
+                    f'<title>{title}</title><style>body{{font-family:sans-serif;max-width:900px;margin:1em auto;}}'
+                    '.msg{padding:0.5em;margin:0.5em 0;border-left:3px solid #888;}'
+                    '.msg-user{border-color:#0d6efd;background:#f4f9ff;}'
+                    'table{border-collapse:collapse;}td,th{border:1px solid #ccc;padding:3px 6px;}'
+                    'img{max-width:300px;}</style></head><body>'
+                    f'<h1>{title}</h1>' + ''.join(body_parts) + '</body></html>')
+        buf = _io.BytesIO()
+        with _zf.ZipFile(buf, 'w', _zf.ZIP_DEFLATED) as zf:
+            zf.writestr('conversation.html', html_doc)
+            for name, path in images.items():
+                try:
+                    with open(path, 'rb') as fh: zf.writestr('images/' + name, fh.read())
+                except Exception: pass
+        buf.seek(0)
+        return send_file(buf, as_attachment=True, download_name=f'{safe}.zip', mimetype='application/zip')
+
+    @app.route('/api/ai/chart-png', methods=['POST'])
+    @login_required
+    def ai_chart_png():
+        import io as _io, base64 as _b64
+        fileobj = request.files.get('png')
+        if fileobj is not None: data_bytes = fileobj.read()
+        else:
+            raw = request.form.get('png_base64', '')
+            if ',' in raw: raw = raw.split(',', 1)[1]
+            try: data_bytes = _b64.b64decode(raw)
+            except Exception: return jsonify({'error': 'invalid png_base64'}), 400
+        name = request.form.get('name', 'chart.png')
+        if not name.endswith('.png'): name += '.png'
+        buf = _io.BytesIO(data_bytes); buf.seek(0)
+        return send_file(buf, as_attachment=True, download_name=name, mimetype='image/png')
+
     @app.route('/api/ai/conversations/<int:cid>/export.<fmt>', methods=['GET'])
     @login_required
     def export_ai_conversation(cid, fmt):
