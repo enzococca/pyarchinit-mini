@@ -30,7 +30,7 @@ class BackupService:
         from .import_export_service import ImportExportService
 
         if db_url is None:
-            db_url = str(self.db_manager.connection.engine.url)
+            db_url = self.db_manager.connection.engine.url.render_as_string(hide_password=False)
 
         backups = _backups_dir()
         ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
