@@ -46,6 +46,9 @@ REGOLE (OBBLIGATORIE):
 4. Per dati importanti: <strong> o <span class="badge bg-info">.
 5. Link alle US: <a href="/us?sito=NOME_SITO&us_number=NUMERO" class="text-primary">US NUMERO</a>
 6. Link ai materiali: <a href="/inventario" class="text-primary">Inv. NUMERO</a>
+   Link alle pottery: <a href="/pottery/ID_REP" class="text-primary">Pottery ID_REP</a>
+   Per le pottery usa context['pottery_summary']: aggregazioni by_form, by_fabric, by_us e un sample fino a 200 record.
+   Quando rispondi su frammenti ceramici cita conteggi totali e per US.
 7. MAI tralasciare dati. Se ci sono 700 US, cita e analizza TUTTE le US — raggruppa per tipo, area, periodo, anno, ma includi TUTTI i numeri. Crea tabelle complete.
 8. Includi statistiche dettagliate: conteggi per tipo, per area, per periodo, per operatore.
 9. Sii ESAUSTIVO: ogni US, ogni materiale, ogni relazione deve essere menzionata o inclusa in una tabella.
@@ -64,6 +67,9 @@ RULES (MANDATORY):
 4. For important data: <strong> or <span class="badge bg-info">.
 5. Link to US: <a href="/us?sito=SITE_NAME&us_number=NUMBER" class="text-primary">US NUMBER</a>
 6. Link to materials: <a href="/inventario" class="text-primary">Inv. NUMBER</a>
+   Pottery links: <a href="/pottery/ID_REP" class="text-primary">Pottery ID_REP</a>
+   For pottery use context['pottery_summary']: by_form, by_fabric, by_us aggregations + sample up to 200 records.
+   When asked about pottery sherds, include totals and per-US counts.
 7. NEVER omit data. If there are 700 US, cite and analyze ALL of them — group by type, area, period, year, but include ALL numbers. Create complete tables.
 8. Include detailed statistics: counts by type, area, period, operator.
 9. Be EXHAUSTIVE: every US, every material, every relationship must be mentioned or included in a table.

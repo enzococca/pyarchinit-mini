@@ -4845,6 +4845,38 @@ def create_app():
                         }
                         context['inv_list'] = inv_dicts
 
+                        # --- POTTERY context ---
+                        try:
+                            from pyarchinit_mini.models.pottery import Pottery as PotteryModel
+                            all_pottery = session.query(PotteryModel).filter(PotteryModel.sito == site_name).all()
+                            pottery_dicts = [p.to_dict() for p in all_pottery]
+                            pottery_by_form = {}
+                            pottery_by_fabric = {}
+                            pottery_by_us = {}
+                            for p in pottery_dicts:
+                                f = (p.get('form') or '-').strip() or '-'
+                                fa = (p.get('fabric') or '-').strip() or '-'
+                                u = p.get('us') or '-'
+                                pottery_by_form[f] = pottery_by_form.get(f, 0) + 1
+                                pottery_by_fabric[fa] = pottery_by_fabric.get(fa, 0) + 1
+                                pottery_by_us[u] = pottery_by_us.get(u, 0) + 1
+                            context['pottery_count'] = len(pottery_dicts)
+                            context['pottery_summary'] = {
+                                'total': len(pottery_dicts),
+                                'by_form': pottery_by_form,
+                                'by_fabric': pottery_by_fabric,
+                                'by_us': pottery_by_us,
+                                'sample': [
+                                    {k: p.get(k) for k in (
+                                        'id_rep', 'us', 'area', 'form', 'fabric',
+                                        'ware', 'material', 'note'
+                                    ) if p.get(k)}
+                                    for p in pottery_dicts[:200]
+                                ],
+                            }
+                        except Exception:
+                            pass
+
                         # Collect media images
                         try:
                             site_media = media_service.get_media_by_entity('site', site.id_sito, size=10)
@@ -4883,6 +4915,18 @@ def create_app():
                     gallery += f'<div class="text-center"><img src="{m["url"]}" style="max-height:120px;border-radius:6px;" class="img-thumbnail"><br><small>{m["caption"]}</small></div>'
                 gallery += '</div></div>'
                 answer += gallery
+
+            # Post-process: prefix relative pyarchinit URLs with script_root
+            # so AI-generated <a href="/inventario/...">...</a> work when the
+            # app is mounted under a path prefix (e.g. /pyarchinit-khutm/).
+            _prefix = (request.script_root or '').rstrip('/')
+            if _prefix:
+                import re as _re
+                answer = _re.sub(
+                    r'(href|src)=(["\'])/(inventario|us|pottery|sites|media|harris-matrix|ai)(/[^\"\']*)?\2',
+                    lambda m: f'{m.group(1)}={m.group(2)}{_prefix}/{m.group(3)}{m.group(4) or ""}{m.group(2)}',
+                    answer,
+                )
 
             # ---- Persist conversation history ----
             try:
