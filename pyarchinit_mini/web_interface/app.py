@@ -4373,7 +4373,7 @@ def create_app():
     def targeted_stats():
         """Targeted statistics with filters"""
         try:
-            from sqlalchemy import text as sa_text, func, distinct
+            from sqlalchemy import text as sa_text, func, distinct, Integer
             from pyarchinit_mini.models.us import US as USModel
             from pyarchinit_mini.models.site import Site as SiteModel
             from pyarchinit_mini.models.inventario_materiali import InventarioMateriali as InvModel
@@ -4391,14 +4391,22 @@ def create_app():
                 us_query = session.query(USModel)
                 if site_filter:
                     us_query = us_query.filter(USModel.sito == site_filter)
+                # anno_scavo is character varying in DB; cast to int after
+                # filtering to numeric-only values so postgres doesn't raise.
                 if year_from:
                     try:
-                        us_query = us_query.filter(USModel.anno_scavo >= int(year_from))
+                        _yf = int(year_from)
+                        us_query = us_query.filter(
+                            USModel.anno_scavo.op('~')('^-?[0-9]+$')
+                        ).filter(func.cast(USModel.anno_scavo, Integer) >= _yf)
                     except (ValueError, TypeError):
                         pass
                 if year_to:
                     try:
-                        us_query = us_query.filter(USModel.anno_scavo <= int(year_to))
+                        _yt = int(year_to)
+                        us_query = us_query.filter(
+                            USModel.anno_scavo.op('~')('^-?[0-9]+$')
+                        ).filter(func.cast(USModel.anno_scavo, Integer) <= _yt)
                     except (ValueError, TypeError):
                         pass
                 if operator_filter:
