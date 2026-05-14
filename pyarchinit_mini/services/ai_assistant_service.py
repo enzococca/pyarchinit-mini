@@ -152,6 +152,8 @@ class AIAssistantService:
                 ctx_parts.append("US STATISTICS (COMPLETE):\n" + json.dumps(context['us_statistics'], indent=1, default=str))
             if context.get('inv_statistics'):
                 ctx_parts.append("MATERIAL STATISTICS (COMPLETE):\n" + json.dumps(context['inv_statistics'], indent=1, default=str))
+            if context.get('pottery_summary'):
+                ctx_parts.append("POTTERY STATISTICS (COMPLETE):\n" + json.dumps(context['pottery_summary'], indent=1, default=str))
             # Include ALL US records (truncated per record to save tokens)
             if context.get('us_list'):
                 us_summary = []
@@ -203,6 +205,11 @@ class AIAssistantService:
             context_parts.append(f"ALL {len(us_summary)} US RECORDS:")
             context_parts.append(json.dumps(us_summary, default=str))
         context_parts.append(f"\nTOTAL INVENTORY ITEMS: {len(inv_list)}")
+        # pottery_summary: caller can attach it onto self for transient use
+        _ps = getattr(self, '_pottery_summary', None)
+        if _ps:
+            context_parts.append("POTTERY STATISTICS (COMPLETE):")
+            context_parts.append(json.dumps(_ps, indent=1, default=str))
         if inv_list:
             inv_summary = [{k: i.get(k) if isinstance(i, dict) else getattr(i, k, None)
                           for k in ['numero_inventario', 'tipo_reperto', 'definizione', 'descrizione',
