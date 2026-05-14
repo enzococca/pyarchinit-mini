@@ -73,11 +73,6 @@ def _register_pottery_routes(app):
             for k in ("sito", "area", "us", "form", "fabric", "ware", "q")
             if request.args.get(k)
         }
-        if "us" in filters:
-            try:
-                filters["us"] = int(filters["us"])
-            except ValueError:
-                filters.pop("us")
         svc = PotteryService(app.db_manager)
         items, total = svc.get_all_pottery(page=page, size=size, filters=filters)
         return render_template(
@@ -223,11 +218,6 @@ def _register_pottery_routes(app):
         from flask import send_file
         svc = PotteryService(app.db_manager)
         filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric") if request.args.get(k)}
-        if "us" in filters:
-            try:
-                filters["us"] = int(filters["us"])
-            except ValueError:
-                filters.pop("us")
         items, _ = svc.get_all_pottery(page=1, size=10_000, filters=filters)
         rows = [PotteryDTO.from_model(p).to_dict() for p in items]
         df = pd.DataFrame(rows, columns=list(_POTTERY_FORM_FIELDS) + ["id_rep"])
@@ -254,11 +244,6 @@ def _register_pottery_routes(app):
         from flask import Response
         svc = PotteryService(app.db_manager)
         filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric") if request.args.get(k)}
-        if "us" in filters:
-            try:
-                filters["us"] = int(filters["us"])
-            except ValueError:
-                filters.pop("us")
         items, _ = svc.get_all_pottery(page=1, size=10_000, filters=filters)
         header = list(_POTTERY_FORM_FIELDS) + ["id_rep"]
         buf = _io.StringIO()
@@ -375,11 +360,6 @@ def _register_pottery_routes(app):
         from .. import __version__
         svc = PotteryService(app.db_manager)
         filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric") if request.args.get(k)}
-        if "us" in filters:
-            try:
-                filters["us"] = int(filters["us"])
-            except ValueError:
-                filters.pop("us")
         items, _ = svc.get_all_pottery(page=1, size=10_000, filters=filters)
         if not items:
             flash("No pottery records matching filters.", "warning")
