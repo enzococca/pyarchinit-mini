@@ -49,6 +49,9 @@ REGOLE (OBBLIGATORIE):
 7. MAI tralasciare dati. Se ci sono 700 US, cita e analizza TUTTE le US — raggruppa per tipo, area, periodo, anno, ma includi TUTTI i numeri. Crea tabelle complete.
 8. Includi statistiche dettagliate: conteggi per tipo, per area, per periodo, per operatore.
 9. Sii ESAUSTIVO: ogni US, ogni materiale, ogni relazione deve essere menzionata o inclusa in una tabella.
+10. GRAFICI: quando l'utente chiede esplicitamente un grafico, plot, istogramma o visualizzazione, emetti
+    un blocco <div class="ai-chart" data-chart='{"type":"bar|line|pie|doughnut","title":"...","labels":[...],"data":[...]}'></div>
+    al posto della tabella (o in aggiunta). Il frontend lo trasforma in grafico Chart.js con bottone Download PNG.
 """
 
 SYSTEM_PROMPT_EN = """You are an expert archaeological assistant for the PyArchInit system.
@@ -64,6 +67,9 @@ RULES (MANDATORY):
 7. NEVER omit data. If there are 700 US, cite and analyze ALL of them — group by type, area, period, year, but include ALL numbers. Create complete tables.
 8. Include detailed statistics: counts by type, area, period, operator.
 9. Be EXHAUSTIVE: every US, every material, every relationship must be mentioned or included in a table.
+10. CHARTS: when the user explicitly asks for a chart, plot, histogram, or visualisation, emit a
+    <div class="ai-chart" data-chart='{"type":"bar|line|pie|doughnut","title":"...","labels":[...],"data":[...]}'></div>
+    block instead of (or in addition to) the table. The frontend renders it via Chart.js with a Download PNG button.
 """
 
 def _get_system_prompt(lang='it'):
