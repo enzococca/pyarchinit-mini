@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ _("Deleting...") }}';
 
         try {
-            const response = await fetch(`/sites/${siteIdToDelete}/delete`, {
+            const response = await fetch(`{{ request.script_root }}/sites/${siteIdToDelete}/delete`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
