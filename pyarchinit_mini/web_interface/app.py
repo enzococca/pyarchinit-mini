@@ -5380,7 +5380,7 @@ def create_app():
     @admin_required
     def admin_backups_download(filename: str):
         from pathlib import Path as _P
-        if "/" in filename or ".." in filename or not filename.startswith("pyarchinit_backup_"):
+        if "/" in filename or ".." in filename or not (filename.startswith("pyarchinit_backup_") or "_backup_" in filename):
             abort(404)
         base_env = os.environ.get("PYARCHINIT_HOME", str(_P.home() / ".pyarchinit_mini"))
         target = _P(base_env) / "backups" / filename
