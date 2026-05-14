@@ -15,7 +15,7 @@
 
 <!-- Statistics Cards -->
 <div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl col-lg-4 col-md-6 mb-4">
         <div class="card stats-card stats-card-terracotta">
             <div class="card-body">
                 <div class="stats-number">{{ stats.get('total_sites', 0) }}</div>
@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl col-lg-4 col-md-6 mb-4">
         <div class="card stats-card stats-card-olive">
             <div class="card-body">
                 <div class="stats-number">{{ stats.get('total_us', 0) }}</div>
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl col-lg-4 col-md-6 mb-4">
         <div class="card stats-card stats-card-clay">
             <div class="card-body">
                 <div class="stats-number">{{ stats.get('total_inventory', 0) }}</div>
@@ -45,7 +45,16 @@
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl col-lg-4 col-md-6 mb-4">
+        <div class="card stats-card stats-card-pottery">
+            <div class="card-body">
+                <div class="stats-number">{{ stats.get('total_pottery', 0) }}</div>
+                <div class="stats-label">{{ _('Pottery / Ceramica') }}</div>
+                <i class="fas fa-wine-bottle stats-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl col-lg-4 col-md-6 mb-4">
         <div class="card stats-card stats-card-earth">
             <div class="card-body">
                 <div class="stats-number">{{ stats.get('total_media', 0) }}</div>
