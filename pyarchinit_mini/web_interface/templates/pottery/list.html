@@ -5,7 +5,10 @@
 <div class="container-fluid mt-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Pottery <small class="text-muted">({{ total }})</small></h1>
-    <div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('pottery_export_pdf', **filters) }}" class="btn btn-danger" title="Export filtered PDF">
+        <i class="fas fa-file-pdf"></i> Export PDF
+      </a>
       <a href="{{ url_for('pottery_create') }}" class="btn btn-primary">+ Nuovo</a>
     </div>
   </div>
@@ -48,6 +51,9 @@
   </a>
   <a href="{{ url_for('pottery_edit', id_rep=p.id_rep) }}" class="btn btn-sm btn-primary" title="Edit">
     <i class="fas fa-edit"></i> <span class="d-none d-lg-inline">Edit</span>
+  </a>
+  <a href="{{ url_for('pottery_export_single_pdf', id_rep=p.id_rep) }}" class="btn btn-sm btn-outline-danger" title="Export PDF" target="_blank">
+    <i class="fas fa-file-pdf"></i>
   </a>
 </td>
       </tr>

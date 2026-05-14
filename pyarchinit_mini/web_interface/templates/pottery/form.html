@@ -19,7 +19,14 @@
 
 {% block content %}
 <div class="container mt-3">
-  <h1>Pottery {% if mode=="create" %}<small class="text-muted">— Nuovo</small>{% else %}#{{ pottery.id_rep }}{% endif %}</h1>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h1 class="mb-0">Pottery {% if mode=="create" %}<small class="text-muted">— Nuovo</small>{% else %}#{{ pottery.id_rep }}{% endif %}</h1>
+    {% if mode != "create" and pottery and pottery.id_rep %}
+    <a href="{{ url_for('pottery_export_single_pdf', id_rep=pottery.id_rep) }}" class="btn btn-danger" title="Export PDF" target="_blank">
+      <i class="fas fa-file-pdf"></i> Export PDF
+    </a>
+    {% endif %}
+  </div>
 
   <form method="post" novalidate>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
