@@ -1465,13 +1465,28 @@ def create_app():
         
         inventory_list = inventario_service.get_all_inventario(page=page, size=20, filters=filters)
         total = inventario_service.count_inventario(filters=filters)
-        
+
         # Get options for filters
         sites = site_service.get_all_sites(size=10000)
-        
+
+        # Build set of inventory IDs that have media attached (single query)
+        media_ids = set()
+        ids = [item.id_invmat for item in inventory_list]
+        if ids:
+            from pyarchinit_mini.models.media import Media
+            with db_manager.connection.get_session() as session:
+                rows = (
+                    session.query(Media.entity_id)
+                    .filter(Media.entity_type == 'inventario', Media.entity_id.in_(ids))
+                    .distinct()
+                    .all()
+                )
+                media_ids = {r[0] for r in rows}
+
         return render_template('inventario/list.html', inventory_list=inventory_list,
                              sites=sites, total=total, page=page,
-                             sito_filter=sito_filter, tipo_filter=tipo_filter)
+                             sito_filter=sito_filter, tipo_filter=tipo_filter,
+                             media_ids=media_ids)
     
     @app.route('/inventario/create', methods=['GET', 'POST'])
     @login_required

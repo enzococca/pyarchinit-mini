@@ -47,6 +47,7 @@
                     <th>{{ _('Definition') }}</th>
                     <th>US</th>
                     <th>{{ _('Weight (g)') }}</th>
+                    <th>Media</th>
                     <th>{{ _('Actions') }}</th>
                 </tr>
             </thead>
@@ -59,6 +60,13 @@
                     <td>{{ item.definizione or '-' }}</td>
                     <td>{{ item.us or '-' }}</td>
                     <td>{{ item.peso or '-' }}</td>
+                    <td>
+                        {% if item.id_invmat in media_ids %}
+                            <span class="badge bg-success" title="{{ _('Has media attached') }}"><i class="fas fa-paperclip"></i> {{ _('Yes') }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary" title="{{ _('No media') }}">{{ _('No') }}</span>
+                        {% endif %}
+                    </td>
                     <td>
                         <a href="{{ url_for('edit_inventario', inv_id=item.id_invmat) }}" class="btn btn-sm btn-primary">
                             <i class="fas fa-edit"></i> <span class="d-none d-lg-inline">{{ _('Edit') }}</span>
@@ -92,6 +100,14 @@
                 <div class="label">{{ _('Weight') }}</div>
                 <div class="value">{{ item.peso }} g</div>
                 {% endif %}
+                <div class="label">Media</div>
+                <div class="value">
+                    {% if item.id_invmat in media_ids %}
+                        <span class="badge bg-success"><i class="fas fa-paperclip"></i> {{ _('Yes') }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ _('No') }}</span>
+                    {% endif %}
+                </div>
             </div>
             <div class="mobile-card-actions">
                 <a href="{{ url_for('edit_inventario', inv_id=item.id_invmat) }}" class="btn btn-primary btn-sm">

@@ -75,10 +75,23 @@ def _register_pottery_routes(app):
         }
         svc = PotteryService(app.db_manager)
         items, total = svc.get_all_pottery(page=page, size=size, filters=filters)
+        ids = [p.id_rep for p in items]
+        media_ids: set[int] = set()
+        if ids:
+            from ..models.media import Media
+            with app.db_manager.connection.get_session() as session:
+                rows = (
+                    session.query(Media.entity_id)
+                    .filter(Media.entity_type == "pottery", Media.entity_id.in_(ids))
+                    .distinct()
+                    .all()
+                )
+                media_ids = {r[0] for r in rows}
         return render_template(
             "pottery/list.html",
             items=[PotteryDTO.from_model(p) for p in items],
             total=total, page=page, size=size, filters=filters,
+            media_ids=media_ids,
         )
 
     @app.route("/pottery/create", methods=["GET", "POST"])
