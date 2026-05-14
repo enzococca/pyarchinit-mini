@@ -659,7 +659,18 @@ function showNodeProperties(node) {
 
     // Populate fields
     document.getElementById('prop-us-number').value = node.data('us_number') || '';
-    document.getElementById('prop-unit-type').value = node.data('unit_type') || 'US';
+    (function(){
+        var uEl = document.getElementById('prop-unit-type');
+        var uVal = node.data('unit_type') || 'US';
+        if (uEl) {
+            uEl.value = uVal;
+            if (uEl.tagName === 'SELECT' && uEl.value !== uVal) {
+                var o = document.createElement('option');
+                o.value = uVal; o.textContent = uVal;
+                uEl.appendChild(o); uEl.value = uVal;
+            }
+        }
+    })();
     document.getElementById('prop-description').value = node.data('description') || '';
     document.getElementById('prop-area').value = node.data('area') || '';
     document.getElementById('prop-period').value = node.data('period') || '';
