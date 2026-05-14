@@ -609,14 +609,25 @@ def create_app():
             total_sites = site_service.count_sites()
             total_us = us_service.count_us()
             total_inventory = inventario_service.count_inventario()
-            
+            try:
+                total_media = media_service.count_media()
+            except Exception:
+                total_media = 0
+            try:
+                from pyarchinit_mini.services.pottery_service import PotteryService
+                total_pottery = PotteryService(db_manager).count_pottery()
+            except Exception:
+                total_pottery = 0
+
             stats = {
                 'total_sites': total_sites,
                 'total_us': total_us,
                 'total_inventory': total_inventory,
+                'total_media': total_media,
+                'total_pottery': total_pottery,
                 'recent_sites': sites
             }
-            
+
             return render_template('dashboard.html', stats=stats)
         except Exception as e:
             flash(f'Errore caricamento dashboard: {str(e)}', 'error')
