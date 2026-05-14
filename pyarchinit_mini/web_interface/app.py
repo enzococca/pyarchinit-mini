@@ -4466,6 +4466,38 @@ def create_app():
                 mat_rows = mat_rows.group_by(InvModel.tipo_reperto).order_by(func.count(InvModel.id_invmat).desc()).limit(15).all()
                 material_types = {r[0]: r[1] for r in mat_rows}
 
+                # Pottery stats
+                total_pottery = 0
+                pottery_by_form = {}
+                pottery_by_fabric = {}
+                try:
+                    from pyarchinit_mini.models.pottery import Pottery as PotteryModel
+                    # pottery_table.anno is bigint in DB so direct int comparison works
+                    _yf_int = int(year_from) if year_from else None
+                    _yt_int = int(year_to) if year_to else None
+                    def _apply_pot_filters(q):
+                        if site_filter:
+                            q = q.filter(PotteryModel.sito == site_filter)
+                        if _yf_int is not None:
+                            q = q.filter(PotteryModel.anno >= _yf_int)
+                        if _yt_int is not None:
+                            q = q.filter(PotteryModel.anno <= _yt_int)
+                        return q
+                    pot_q = _apply_pot_filters(session.query(PotteryModel))
+                    total_pottery = pot_q.count()
+                    pf = session.query(PotteryModel.form, func.count(PotteryModel.id_rep)) \
+                            .filter(PotteryModel.form.isnot(None), PotteryModel.form != '')
+                    pf = _apply_pot_filters(pf)
+                    pf = pf.group_by(PotteryModel.form).order_by(func.count(PotteryModel.id_rep).desc()).limit(15).all()
+                    pottery_by_form = {r[0]: r[1] for r in pf}
+                    pfa = session.query(PotteryModel.fabric, func.count(PotteryModel.id_rep)) \
+                            .filter(PotteryModel.fabric.isnot(None), PotteryModel.fabric != '')
+                    pfa = _apply_pot_filters(pfa)
+                    pfa = pfa.group_by(PotteryModel.fabric).order_by(func.count(PotteryModel.id_rep).desc()).limit(15).all()
+                    pottery_by_fabric = {r[0]: r[1] for r in pfa}
+                except (ValueError, TypeError, Exception):
+                    pass
+
                 # Recent activity
                 recent_q = session.query(USModel).order_by(USModel.id_us.desc()).limit(20).all()
                 recent = [{'sito': u.sito, 'us': u.us, 'schedatore': u.schedatore,
@@ -4474,12 +4506,15 @@ def create_app():
             data = {
                 'total_sites': total_sites, 'total_us': total_us,
                 'total_materials': total_materials, 'total_operators': len(operators_list),
+                'total_pottery': total_pottery,
                 'operators_list': operators_list,
                 'activity_by_year': activity_by_year,
                 'operator_performance': op_perf,
                 'site_type_distribution': site_type_dist,
                 'chronological_distribution': chrono_dist,
                 'material_types': material_types,
+                'pottery_by_form': pottery_by_form,
+                'pottery_by_fabric': pottery_by_fabric,
                 'recent_activity': recent
             }
 
