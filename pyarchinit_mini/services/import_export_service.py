@@ -141,6 +141,15 @@ class ImportExportService:
                     if result.returncode == 0:
                         file_size = os.path.getsize(backup_path) / (1024 * 1024)
                         logger.info(f"✓ Database backup created: {backup_path} ({file_size:.2f} MB)")
+                        # Also create a custom-format .backup file (pg_restore compatible)
+                        custom_path = backup_path[:-4] + '.backup' if backup_path.endswith('.sql') else backup_path + '.backup'
+                        custom_cmd = [pg_dump_bin, '-h', host, '-p', str(port), '-U', user,
+                                      '-F', 'c', '-Z', '6', '-f', custom_path, database]
+                        custom_res = subprocess.run(custom_cmd, env=env, capture_output=True, text=True)
+                        if custom_res.returncode == 0:
+                            logger.info(f"✓ PostgreSQL custom-format backup: {custom_path} ({os.path.getsize(custom_path)/1048576:.2f} MB)")
+                        else:
+                            logger.warning(f"pg_dump custom-format failed (sql backup kept): {custom_res.stderr.strip()}")
                         return backup_path
                     logger.error(f"pg_dump failed: {result.stderr.strip()}")
                     return None
