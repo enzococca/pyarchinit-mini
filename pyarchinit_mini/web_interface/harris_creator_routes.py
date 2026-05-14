@@ -103,7 +103,7 @@ def editor():
                     'file_path': us.file_path or ''
                 })
 
-            # Load relationships
+            # Load relationships from the dedicated table
             relationships = db.query(USRelationships).filter_by(sito=site_name).all()
             for rel in relationships:
                 existing_relationships.append({
@@ -111,6 +111,32 @@ def editor():
                     'to_us': rel.us_to,
                     'relationship': rel.relationship_type
                 })
+            # Fallback: when us_relationships_table is empty for this site
+            # (data imported from QGIS pyarchinit only fills us.rapporti),
+            # parse the rapporti field of each US as a python literal.
+            if not existing_relationships:
+                import ast
+                for us in us_list:
+                    rap = (us.rapporti or '').strip()
+                    if not rap or rap in ('[]', 'null', 'None'):
+                        continue
+                    try:
+                        parsed = ast.literal_eval(rap)
+                    except Exception:
+                        continue
+                    if not isinstance(parsed, (list, tuple)):
+                        continue
+                    for item in parsed:
+                        if not isinstance(item, (list, tuple)) or len(item) < 2:
+                            continue
+                        rel_type = str(item[0]).strip()
+                        us_to = str(item[1]).strip()
+                        if rel_type and us_to:
+                            existing_relationships.append({
+                                'from_us': str(us.us),
+                                'to_us': us_to,
+                                'relationship': rel_type,
+                            })
 
         return render_template('harris_creator/editor.html',
                              site_name=site_name,
