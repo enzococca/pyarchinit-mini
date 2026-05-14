@@ -26,7 +26,7 @@
   <table class="table table-sm table-hover">
     <thead><tr>
       <th>id_rep</th><th>id_num</th><th>Sito</th><th>Area</th><th>US</th>
-      <th>Forma</th><th>Impasto</th><th>Ware</th><th>Qty</th><th></th>
+      <th>Forma</th><th>Impasto</th><th>Ware</th><th>Qty</th><th>Media</th><th></th>
     </tr></thead>
     <tbody>
     {% for p in items %}
@@ -35,6 +35,13 @@
         <td>{{ p.sito }}</td><td>{{ p.area or '' }}</td><td>{{ p.us or '' }}</td>
         <td>{{ p.form or '' }}</td><td>{{ p.fabric or '' }}</td>
         <td>{{ p.ware or '' }}</td><td>{{ p.qty or '' }}</td>
+        <td>
+          {% if p.id_rep in media_ids %}
+            <span class="badge bg-success" title="Media allegati"><i class="fas fa-paperclip"></i> Sì</span>
+          {% else %}
+            <span class="badge bg-secondary" title="Nessun media">No</span>
+          {% endif %}
+        </td>
         <td>
   <a href="{{ url_for('pottery_detail', id_rep=p.id_rep) }}" class="btn btn-sm btn-outline-primary" title="View">
     <i class="fas fa-eye"></i>
@@ -45,7 +52,7 @@
 </td>
       </tr>
     {% else %}
-      <tr><td colspan="10" class="text-muted">Nessun risultato</td></tr>
+      <tr><td colspan="11" class="text-muted">Nessun risultato</td></tr>
     {% endfor %}
     </tbody>
   </table>
