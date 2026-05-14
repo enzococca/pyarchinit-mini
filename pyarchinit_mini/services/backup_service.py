@@ -100,7 +100,7 @@ class BackupService:
         for f in backups.iterdir():
             if not f.is_file():
                 continue
-            if not f.name.startswith("pyarchinit_backup_"):
+            if not (f.name.startswith("pyarchinit_backup_") or "_backup_" in f.name):
                 continue
             st = f.stat()
             items.append({
@@ -119,7 +119,7 @@ class BackupService:
         path = _backups_dir() / filename
         if not path.exists() or not path.is_file():
             return False
-        if not path.name.startswith("pyarchinit_backup_"):
+        if not (path.name.startswith("pyarchinit_backup_") or "_backup_" in path.name):
             return False
         path.unlink()
         return True
