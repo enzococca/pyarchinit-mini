@@ -11,6 +11,7 @@ import hashlib
 import json
 from dataclasses import asdict
 from flask import Blueprint, jsonify, make_response, request
+from flask_login import current_user
 
 from pyarchinit_mini.vocab.provider import VocabProvider
 
@@ -77,5 +78,10 @@ def get_visual_style(unit_type: str):
 
 @vocab_bp.get("/diagnostics")
 def diagnostics():
-    # Admin gate applied in Task 12 (next).
+    if not getattr(current_user, "is_authenticated", False):
+        return jsonify({"error": "forbidden"}), 403
+    role = getattr(current_user, "role", None)
+    role_value = getattr(role, "value", role) if role else None
+    if role_value not in ("ADMIN", "admin"):
+        return jsonify({"error": "forbidden"}), 403
     return jsonify(VocabProvider.instance().diagnostics()), 200
