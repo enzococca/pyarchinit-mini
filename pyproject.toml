@@ -58,7 +58,8 @@ dependencies = [
     "reportlab>=4.0.0",
     "pillow>=10.0.0",
     "qrcode[pil]>=7.4.0",
-    "s3dgraphy>=0.1.13",
+    "s3dgraphy>=0.1.42",
+    "uuid7>=0.1.0",
     # CLI interface dependencies
     "click>=8.1.0",
     "rich>=13.0.0",
@@ -128,6 +129,7 @@ dev = [
     "flake8>=6.0.0",
     "isort>=5.12.0",
     "mypy>=1.0.0",
+    "freezegun>=1.5.0",
 ]
 # Documentation
 docs = [
@@ -161,6 +163,7 @@ pyarchinit-mini-migrate = "pyarchinit_mini.cli.migrate:cli"
 pyarchinit-mcp-server = "pyarchinit_mini.mcp_server.__main__:main"
 pyarchinit-mcp-http = "pyarchinit_mini.mcp_server.http_server:main"
 pyarchinit-mini-sync = "pyarchinit_mini.cli.sync_cli:sync"
+pyarchinit-mini-migrate-vocab = "pyarchinit_mini.cli.migrate_vocab:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
