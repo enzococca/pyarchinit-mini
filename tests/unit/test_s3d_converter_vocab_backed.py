@@ -1,3 +1,5 @@
+import json
+import textwrap
 from pathlib import Path
 import pytest
 
@@ -72,3 +74,49 @@ def test_us_node_categorized_as_real():
     us_node = next((n for n in g.nodes if "5" in n.node_id), None)
     assert us_node is not None
     assert getattr(us_node, "attributes", {}).get("family") == "real"
+
+
+# ---------------------------------------------------------------------------
+# Fix 1: import_graphml_to_json categorises via VocabProvider
+# ---------------------------------------------------------------------------
+
+_GRAPHML_TEMPLATE = textwrap.dedent("""\
+    <?xml version="1.0" encoding="UTF-8"?>
+    <graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+      <key id="d0" for="node" attr.name="label" attr.type="string"/>
+      <graph id="G" edgedefault="directed">
+        <node id="n1">
+          <data key="d0">US1</data>
+        </node>
+        <node id="n2">
+          <data key="d0">USVs2</data>
+        </node>
+        <node id="n3">
+          <data key="d0">USVn3</data>
+        </node>
+      </graph>
+    </graphml>
+""")
+
+
+def test_import_graphml_to_json_categorizes_via_vocab(tmp_path):
+    """import_graphml_to_json must place USVs/USVn in the USVs bucket
+    (family='virtual') and plain US in the US bucket via VocabProvider."""
+    graphml_path = tmp_path / "test.graphml"
+    graphml_path.write_text(_GRAPHML_TEMPLATE, encoding="utf-8")
+    output_path = tmp_path / "out.json"
+
+    conv = S3DConverter()
+    conv.import_graphml_to_json(str(graphml_path), str(output_path), site_name="Test")
+
+    result = json.loads(output_path.read_text(encoding="utf-8"))
+    graphs = result["graphs"]
+    graph_id = list(graphs.keys())[0]
+    strat = graphs[graph_id]["nodes"]["stratigraphic"]
+
+    # n1 (US1) → US bucket
+    assert "n1" in strat["US"], f"US node not in US bucket; strat={strat}"
+    # n2 (USVs2) → USVs bucket (family=virtual via VocabProvider)
+    assert "n2" in strat["USVs"], f"USVs node not in USVs bucket; strat={strat}"
+    # n3 (USVn3) → USVs bucket (also family=virtual)
+    assert "n3" in strat["USVs"], f"USVn node not in USVs bucket; strat={strat}"
