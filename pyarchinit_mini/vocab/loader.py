@@ -30,6 +30,8 @@ class VisualRulesDatamodel:
 
 def _default_dir() -> Path:
     """Locate s3dgraphy JSON_config via importlib.resources."""
+    # TODO(Spec-2): honour PYARCHINIT_VOCAB_STRICT=0 env var → downgrade VocabBootstrapError
+    # to runtime VocabUnavailableError per Spec §7
     try:
         with resources.as_file(resources.files("s3dgraphy") / "JSON_config") as p:
             return Path(p)

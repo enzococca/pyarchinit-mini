@@ -106,6 +106,8 @@ def main(argv=None) -> int:
         return _list_backups(args.backups_dir)
 
     if args.rollback:
+        # TODO(Spec-2): implement actual rollback (read _index.json → restore latest backup
+        # SQLite via cp / PG via pg_restore). Currently prints manual instructions only.
         print("Rollback requires manual restore. Use --list-backups to see what's available,")
         print("then copy/restore the backup file manually (SQLite) or pg_restore (PostgreSQL).")
         return 0
@@ -121,6 +123,8 @@ def main(argv=None) -> int:
         else [SCRIPTS[k] for k in ORDER]
     )
 
+    # TODO(Spec-2): acquire data/.migration_lock (PID + timestamp) to reject concurrent
+    # --apply invocations per Spec §6.3
     overall_status = 0
     for db in dbs:
         print(f"== DB: {db} ==")
@@ -151,6 +155,8 @@ def main(argv=None) -> int:
                 print(f"  {script.__name__} FAILED: {e}", file=sys.stderr)
                 overall_status = 1
 
+    # TODO(Spec-2): append per-script JSON-line entry to data/migration.log per Spec §6.4
+    # (ts, script, db, rows_updated/mappings/tables_*, duration_ms, status)
     return overall_status
 
 

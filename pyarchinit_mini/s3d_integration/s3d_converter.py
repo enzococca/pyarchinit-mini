@@ -133,6 +133,9 @@ class S3DConverter:
 
         # Hand-curated mapping from canonical s3dgraphy edge name → legacy uppercase code.
         # This preserves the legacy `stratigraphic_relation` attribute values.
+        # TODO(Spec-2): split is_after legacy code into COVERED_BY (rapporti 'coperto da')
+        # vs CUT_BY (rapporti 'tagliato da'). Currently both map to COVERED_BY which is
+        # semantically incorrect for the cut-by relation.
         _LEGACY_CODE_MAP = {
             "covers": "COVERS",
             "is_after": "COVERED_BY",  # historical: rapporti 'coperto da' implied COVERED_BY semantically
