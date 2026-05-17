@@ -1,0 +1,28 @@
+{
+  "unit_types": {
+    "US": {"label": "US", "description": "Unità Stratigrafica"},
+    "USVs": {"label": "USV/s", "description": "Unità Stratigrafica Virtuale strutturale"},
+    "USVn": {"label": "USV/n", "description": "Unità Stratigrafica Virtuale non strutturale"},
+    "SF": {"label": "SF", "description": "Reperto Speciale"},
+    "VSF": {"label": "VSF", "description": "Reperto Speciale Virtuale"},
+    "USM": {"label": "USM", "description": "Unità Stratigrafica Muraria"},
+    "USD": {"label": "USD", "description": "Unità Stratigrafica Documentaria"},
+    "RSF": {"label": "RSF", "description": "Spoglio (Reperto Reimpiegato)"}
+  },
+  "edge_types": {
+    "covers": {"label": "copre"},
+    "cuts": {"label": "taglia"},
+    "fills": {"label": "riempie"},
+    "is_after": {"label": "è dopo"},
+    "has_same_time": {"label": "uguale a"},
+    "leans_against": {"label": "si appoggia a"}
+  },
+  "edge_type_aliases": {
+    "covers": ["copre"],
+    "is_after": ["coperto da", "coperta da", "tagliato da", "tagliata da"],
+    "cuts": ["taglia"],
+    "fills": ["riempie"],
+    "leans_against": ["si appoggia a", "si appoggia"],
+    "has_same_time": ["uguale a"]
+  }
+}

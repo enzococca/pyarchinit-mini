@@ -1,3 +1,51 @@
+## [2.2.0-alpha] - 2026-05-17
+
+### Added (IT)
+- Modulo `pyarchinit_mini/vocab/` con `VocabProvider` singleton: legge i tre pillar JSON di s3dgraphy
+  (`s3Dgraphy_node_datamodel.json`, `s3Dgraphy_connections_datamodel.json`, `em_visual_rules.json`)
+  come fonte canonica per tipi di unità, tipi di relazione, e stili visivi.
+- Endpoint REST `/api/v1/vocab/{unit-types, edge-types, visual-style, diagnostics}` per popolare
+  select e form lato web.
+- CLI `pyarchinit-mini-migrate-vocab` per allineare il vocabolario legacy
+  (`USVA`/`USVB` → `USVs`, `USVC` → `USVn`) e fare il backfill della colonna `node_uuid` (UUID v7)
+  su `us_table`, `inventario_materiali_table`, `periodizzazione_table`.
+- Colonna `node_uuid` (prerequisito per il sync futuro col Datacenter EM).
+- Catalogo i18n custom (`pyarchinit_mini/vocab/translations/vocab_{en,it}.json`) con
+  `edge_type_aliases` per il parsing dei `rapporti` italiani.
+
+### Added (EN)
+- New `pyarchinit_mini/vocab/` package with `VocabProvider` singleton reading three s3dgraphy
+  JSON pillars as canonical source of unit types, edge types, and visual styles.
+- REST endpoints `/api/v1/vocab/{unit-types, edge-types, visual-style, diagnostics}` to populate
+  forms in the web UI.
+- CLI `pyarchinit-mini-migrate-vocab` to align legacy vocabulary (`USVA`/`USVB` → `USVs`,
+  `USVC` → `USVn`) and backfill `node_uuid` (UUID v7) across `us_table`,
+  `inventario_materiali_table`, `periodizzazione_table`.
+- `node_uuid` column (prerequisite for future EM Datacenter sync).
+- Custom i18n catalogue with `edge_type_aliases` for parsing Italian `rapporti` strings.
+
+### Changed
+- `graphml_converter/em_palette.py` reads visual styles from `VocabProvider` instead of the
+  hardcoded `PALETTE` dict (kept as deprecated shim emitting `DeprecationWarning` on access).
+- `s3d_integration/s3d_converter.py` parses `rapporti` text and categorizes node families via
+  `VocabProvider` (`italian_aliases`, `family`, `class_name`) instead of hardcoded if/elif chains.
+- Harris Matrix Creator now consumes `VocabProvider` visual styles end-to-end.
+
+### Migration required
+- After upgrading, run `pyarchinit-mini-migrate-vocab --dry-run` to preview, then
+  `--apply` to migrate (auto-backup under `data/backups/`).
+- See `docs/CLI_MIGRATE_VOCAB.md` for full reference.
+
+### Dependencies
+- `s3dgraphy>=0.1.42` (was 0.1.15).
+- New: `uuid7>=0.1.0` (importable as `uuid_extensions`).
+- Dev: `freezegun>=1.5.0`.
+
+### Spec / Plan
+- Spec: `docs/superpowers/specs/2026-05-16-s3dgraphy-web-foundation-design.md`
+- Plan: `docs/superpowers/plans/2026-05-16-s3dgraphy-web-foundation.md`
+- This is Spec 1 of 4 for porting the s3dgraphy bidirectional bridge from the QGIS plugin.
+
 ## [2.1.6] - 2026-02-25
 
 ### Fixed

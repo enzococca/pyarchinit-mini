@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
 from pyarchinit_mini.config.em_node_config_manager import get_config_manager
+from pyarchinit_mini.vocab.provider import VocabProvider
 
 # Create Blueprint
 harris_creator_bp = Blueprint('harris_creator', __name__, url_prefix='/harris-creator')
@@ -94,7 +95,7 @@ def editor():
                 existing_nodes.append({
                     'id': f'us_{us.us}',
                     'us_number': us.us,
-                    'unit_type': us.unita_tipo or 'US',
+                    'unit_type': us.unita_tipo or 'US',  # default per VocabProvider canonical types
                     'description': us.d_stratigrafica or '',
                     'area': us.area or '',
                     'period': us.periodo_iniziale or '',
@@ -241,7 +242,7 @@ def save_matrix():
                 if us:
                     # Update existing US
                     nodes_updated += 1
-                    us.unita_tipo = node_data.get('unit_type', 'US')
+                    us.unita_tipo = node_data.get('unit_type', 'US')  # default per VocabProvider canonical types
                     us.d_stratigrafica = node_data.get('description', '') if node_data.get('description') else None
                     us.area = node_data.get('area', '') if node_data.get('area') else None
                     us.periodo_iniziale = node_data.get('period', '') if node_data.get('period') else None
@@ -255,7 +256,7 @@ def save_matrix():
                         # Do NOT set id_us - it's auto-incremented by the database
                         'sito': site_name,
                         'us': us_number,
-                        'unita_tipo': node_data.get('unit_type', 'US'),
+                        'unita_tipo': node_data.get('unit_type', 'US'),  # default per VocabProvider canonical types
                         'd_stratigrafica': node_data.get('description', '') if node_data.get('description') else None,
                         'area': node_data.get('area', '') if node_data.get('area') else None,
                         'periodo_iniziale': node_data.get('period', '') if node_data.get('period') else None,

@@ -867,3 +867,34 @@ PyArchInit-Mini Web GUI provides a complete, modern interface for archaeological
 **Version**: 1.7.13
 **Tutorial Last Updated**: 2025-10-29
 **Screenshots**: 63 images captured from live system
+
+---
+
+## Unit Types (Tipi di unità)
+
+Starting with 2.2.0-alpha, the **unit type** field in the US form (`unita_tipo`)
+is no longer a free-form string. It's populated from the canonical
+**Extended Matrix vocabulary** published by the `s3dgraphy` package.
+
+Standard types you'll see in the dropdown:
+
+| Abbreviation | Italian label | Description |
+|---|---|---|
+| `US` | Unità Stratigrafica | Standard stratigraphic unit (positive or negative) |
+| `USM` | Unità Stratigrafica Muraria | Masonry stratigraphic unit |
+| `USVs` | USV strutturale | Virtual structural reconstruction (was: USVA, USVB) |
+| `USVn` | USV non strutturale | Virtual non-structural reconstruction (was: USVC) |
+| `SF` | Reperto Speciale | Special find |
+| `VSF` | Reperto Speciale Virtuale | Virtual special find |
+| `USD` | Unità Stratigrafica Documentaria | Documentary stratigraphic unit |
+| `RSF` | Spoglio | Reused special find (spolia) |
+
+**Legacy data**: if your DB still has `USVA`/`USVB`/`USVC` values (from before
+the 2026 vocabulary alignment), the form will accept them with a deprecation
+warning suggesting the new equivalent. To upgrade all records at once, run:
+
+```bash
+pyarchinit-mini-migrate-vocab --apply
+```
+
+See `docs/CLI_MIGRATE_VOCAB.md` for full migration reference.

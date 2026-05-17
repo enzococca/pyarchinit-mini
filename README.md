@@ -2265,3 +2265,31 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 
 **Made with ❤️ for the Archaeological Community**
+
+## s3dgraphy integration
+
+Since 2.2.0-alpha, pyarchinit-mini-web reads the canonical Extended Matrix
+vocabulary (unit types, edge types, visual styles) from the
+[s3dgraphy](https://github.com/zalmoxes-laran/s3dgraphy) package's JSON
+catalogues. Unit types like `US`, `USVs`, `USVn`, `RSF`, `USM` come from
+`s3Dgraphy_node_datamodel.json` (v1.5.4 at time of writing).
+
+Bumping s3dgraphy (`pip install --upgrade s3dgraphy`) makes new EM types
+immediately available in form selects without any pyarchinit-mini code change.
+
+After upgrading, run the data alignment to update legacy records:
+
+```bash
+pyarchinit-mini-migrate-vocab --dry-run    # preview changes
+pyarchinit-mini-migrate-vocab --apply      # backup + migrate
+```
+
+See `docs/CLI_MIGRATE_VOCAB.md` for the full CLI reference.
+
+The vocab is exposed to the browser via:
+
+- `GET /api/v1/vocab/unit-types?lang=it`
+- `GET /api/v1/vocab/unit-types/<abbr>`
+- `GET /api/v1/vocab/edge-types?lang=it`
+- `GET /api/v1/vocab/visual-style/<unit_type>`
+- `GET /api/v1/vocab/diagnostics` (admin-only)

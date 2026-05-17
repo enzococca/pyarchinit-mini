@@ -58,6 +58,9 @@ from pyarchinit_mini.web_interface.em_node_config_routes import em_node_config_b
 # Import 3D Builder routes
 from pyarchinit_mini.web_interface.three_d_builder_routes import three_d_builder_bp, three_d_builder_ui_bp
 
+# Import Vocab routes
+from pyarchinit_mini.web_interface.vocab_routes import vocab_bp
+
 # Import WebSocket events
 from pyarchinit_mini.web_interface.socketio_events import (
     init_socketio_events,
@@ -542,6 +545,9 @@ def create_app():
 
     # Register authentication blueprint
     app.register_blueprint(auth_bp)
+
+    # Register Vocab blueprint
+    app.register_blueprint(vocab_bp)
 
     # Register PyArchInit import/export blueprint
     app.register_blueprint(pyarchinit_import_export_bp, url_prefix='/pyarchinit-import-export')
