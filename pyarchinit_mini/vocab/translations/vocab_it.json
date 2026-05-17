@@ -19,6 +19,7 @@
   },
   "edge_type_aliases": {
     "covers": ["copre"],
+    "overlies": ["copre"],
     "is_after": ["coperto da", "coperta da", "tagliato da", "tagliata da"],
     "cuts": ["taglia"],
     "fills": ["riempie"],
