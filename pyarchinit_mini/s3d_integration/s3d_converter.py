@@ -715,12 +715,23 @@ class S3DConverter:
                 key_name = keys.get(key_id, key_id)
                 node_dict[key_name] = data.text
 
-            # Parse label to extract unit type and number (e.g., "US12" → type="US", number="12")
+            # Parse label to extract unit type and number (e.g., "US12" → type="US",
+            # "USVs42" → type="USVs", "USVn3" → type="USVn").
+            # Pattern: leading letters (upper or lower) followed by digits.
             label = node_dict.get('label', node_id)
             import re
-            match = re.match(r'([A-Z]+)(\d+)', label)
+            match = re.match(r'([A-Za-z]+)(\d+)', label)
             if match:
-                node_dict['unit_type'] = match.group(1)
+                raw_prefix = match.group(1)
+                # Prefer longest vocab-known prefix so "USVs" beats "USV" or "US"
+                vp = VocabProvider.instance()
+                known_types = sorted(vp._unit_types_raw.keys(), key=len, reverse=True)
+                unit_type_from_label = raw_prefix  # default
+                for kt in known_types:
+                    if raw_prefix == kt or raw_prefix.upper() == kt.upper():
+                        unit_type_from_label = kt
+                        break
+                node_dict['unit_type'] = unit_type_from_label
                 node_dict['us_number'] = match.group(2)
 
             nodes_data.append(node_dict)
@@ -793,7 +804,7 @@ class S3DConverter:
             }
         }
 
-        # Categorize nodes
+        # Categorize nodes via VocabProvider (Spec 1 review fix)
         for node_data in nodes_data:
             node_id = node_data['id']
             unit_type = node_data.get('unit_type', 'US')
@@ -801,17 +812,18 @@ class S3DConverter:
             # Remove internal fields
             clean_data = {k: v for k, v in node_data.items() if k not in ['id']}
 
-            # Map to categories
-            if unit_type in ['USVA', 'USVB', 'USVC', 'USD']:
-                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["USVs"][node_id] = clean_data
-            elif unit_type in ['SF', 'VSF']:
-                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["SF"][node_id] = clean_data
-            elif unit_type == 'DOC':
+            # Map to categories using VocabProvider family — mirrors export_to_json logic
+            ut_info = VocabProvider.instance().get_unit_type(unit_type)
+            if unit_type in ('DOC',):
                 json_data["graphs"][graph_id]["nodes"]["documents"][node_id] = clean_data
-            elif unit_type == 'Extractor':
+            elif unit_type in ('Extractor',):
                 json_data["graphs"][graph_id]["nodes"]["extractors"][node_id] = clean_data
-            elif unit_type == 'Combiner':
+            elif unit_type in ('Combiner',):
                 json_data["graphs"][graph_id]["nodes"]["combiners"][node_id] = clean_data
+            elif unit_type in ('SF', 'VSF'):
+                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["SF"][node_id] = clean_data
+            elif ut_info and ut_info.family == "virtual":
+                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["USVs"][node_id] = clean_data
             else:
                 json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["US"][node_id] = clean_data
 
