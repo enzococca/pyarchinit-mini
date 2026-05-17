@@ -1,3 +1,4 @@
+# TODO(Spec-2): add PostgreSQL path coverage. Currently SQLite-only. See Spec §8.4.
 import sqlite3
 from pathlib import Path
 import pytest

@@ -56,6 +56,7 @@ class VocabProvider:
 
     @classmethod
     def reset(cls) -> None:
+        # TODO(Spec-2): emit warning if called outside test context (per Spec §4.1)
         with cls._lock:
             cls._instance = None
 
