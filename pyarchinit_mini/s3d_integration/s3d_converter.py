@@ -19,6 +19,8 @@ except ImportError:
     S3D_AVAILABLE = False
     print("[S3D] Warning: s3dgraphy not installed. Run: pip install s3dgraphy")
 
+from pyarchinit_mini.vocab.provider import VocabProvider
+
 
 class S3DConverter:
     """Convert PyArchInit stratigraphic data to s3dgraphy format"""
@@ -111,23 +113,34 @@ class S3DConverter:
         # Add stratigraphic relationships as edges
         edge_counter = 0
 
-        # Relationship type mapping (Italian → English)
-        relationship_mapping = {
-            'copre': 'COVERS',
-            'coperto da': 'COVERED_BY',
-            'coperta da': 'COVERED_BY',
-            'taglia': 'CUTS',
-            'tagliato da': 'CUT_BY',
-            'tagliata da': 'CUT_BY',
-            'riempie': 'FILLS',
-            'riempito da': 'FILLED_BY',
-            'riempita da': 'FILLED_BY',
-            'si lega a': 'BONDS_TO',
-            'si appoggia a': 'LEANS_AGAINST',
-            'gli si appoggia': 'LEANED_AGAINST_BY',
-            'uguale a': 'EQUAL_TO',
-            'si appoggia': 'LEANS_AGAINST',
+        # Build alias→(edge_name, legacy_code) map from VocabProvider.
+        # Italian aliases live in vocab_it.json edge_type_aliases.
+        # We also keep a "legacy_code" (uppercase like 'COVERS') for backward compat
+        # with downstream consumers that read the `stratigraphic_relation` attribute.
+        provider = VocabProvider.instance()
+        edge_types = provider.get_edge_types()
+
+        # Hand-curated mapping from canonical s3dgraphy edge name → legacy uppercase code.
+        # This preserves the legacy `stratigraphic_relation` attribute values.
+        _LEGACY_CODE_MAP = {
+            "covers": "COVERS",
+            "is_after": "COVERED_BY",  # historical: rapporti 'coperto da' implied COVERED_BY semantically
+            "cuts": "CUTS",
+            "fills": "FILLS",
+            "leans_against": "LEANS_AGAINST",
+            "has_same_time": "EQUAL_TO",
         }
+
+        alias_to_pair = {}  # {italian_lowercase: (edge_name, legacy_code)}
+        for et in edge_types:
+            legacy = _LEGACY_CODE_MAP.get(et.name)
+            if legacy is None:
+                continue  # only expose edges we have a legacy code for
+            for alias in et.italian_aliases:
+                alias_to_pair[alias.lower()] = (et.name, legacy)
+
+        # Match each relation token against longest alias first.
+        sorted_aliases = sorted(alias_to_pair.keys(), key=len, reverse=True)
 
         for us in us_list:
             us_number = str(us.get('us', ''))
@@ -158,24 +171,23 @@ class S3DConverter:
 
                 # Try to parse relationship: "verb US_number"
                 # Examples: "copre 1002", "Si appoggia a 1001", "coperto da 1003"
-                relation_lower = relation.lower().strip()
+                rel_lower = relation.lower().strip()
 
-                # Find matching relationship type
-                edge_type = None
+                # Find matching relationship type via VocabProvider alias table.
+                edge_name = None
+                legacy_code = None
                 target_us = None
-
-                for italian_rel, english_rel in relationship_mapping.items():
-                    if relation_lower.startswith(italian_rel):
-                        edge_type = english_rel
+                for alias in sorted_aliases:
+                    if rel_lower.startswith(alias):
+                        edge_name, legacy_code = alias_to_pair[alias]
                         # Extract target US number (everything after the relationship verb)
-                        target_us_str = relation_lower[len(italian_rel):].strip()
-                        # Remove any non-digit characters from the start
+                        target_us_str = rel_lower[len(alias):].strip()
                         target_us = ''.join(c for c in target_us_str if c.isdigit() or c in ['.', '-'])
                         if target_us:
                             target_us = target_us.split()[0] if ' ' in target_us else target_us
                         break
 
-                if not edge_type or not target_us:
+                if not edge_name or not target_us:
                     # Couldn't parse this relation, skip it
                     continue
 
@@ -187,18 +199,18 @@ class S3DConverter:
                 if target_id in us_node_ids:
                     # Create unique edge ID
                     edge_counter += 1
-                    edge_id = f"edge_{edge_counter}_{edge_type}_{source_id}_to_{target_id}"
+                    edge_id = f"edge_{edge_counter}_{legacy_code}_{source_id}_to_{target_id}"
 
                     # s3dgraphy uses "is_before" for chronological sequence
-                    # We store the specific relationship type as attribute
-                    s3d_edge_type = "is_before" if edge_type in ['COVERS', 'CUTS', 'FILLS'] else "generic_connection"
+                    # Keep this mapping policy unchanged: COVERS/CUTS/FILLS are "is_before" semantics.
+                    s3d_edge_type = "is_before" if legacy_code in ['COVERS', 'CUTS', 'FILLS'] else "generic_connection"
 
                     # Create edge
                     edge = graph.add_edge(edge_id, source_id, target_id, s3d_edge_type)
 
                     # Add relationship type as attribute for detailed semantics
-                    edge.attributes['stratigraphic_relation'] = edge_type
-                    edge.attributes['relation_label'] = edge_type.replace('_', ' ').title()
+                    edge.attributes['stratigraphic_relation'] = legacy_code
+                    edge.attributes['relation_label'] = legacy_code.replace('_', ' ').title()
 
         return graph
 
