@@ -205,3 +205,117 @@ class ParadataStore:
 
             del authors[node_id]
             self._write_json(data)
+
+    # ------------------------------------------------------------------
+    # Generic list-based helpers (licenses, embargoes, documents, epochs)
+    # ------------------------------------------------------------------
+
+    LICENSE_KEY = "licenses"
+    EMBARGO_KEY = "embargoes"
+    DOCUMENT_KEY = "documents"
+    EPOCH_KEY = "epochs"
+
+    LICENSE_PREFIX = "license:"
+    EMBARGO_PREFIX = "embargo:"
+    DOCUMENT_PREFIX = "document:"
+    EPOCH_PREFIX = "epoch:"
+
+    def _generic_next_id(self, data: dict, key: str, prefix: str) -> str:
+        existing = {item["node_id"] for item in data.get(key, [])}
+        n = 1
+        while f"{prefix}{n}" in existing:
+            n += 1
+        return f"{prefix}{n}"
+
+    def _generic_add(self, key: str, prefix: str, **fields) -> dict:
+        with paradata_flock(self.site, root=self._root):
+            data = self._load_json()
+            data.setdefault(key, [])
+            node_id = self._generic_next_id(data, key, prefix)
+            entry = {"node_id": node_id, **{k: v for k, v in fields.items() if v is not None}}
+            data[key].append(entry)
+            self._write_json(data)
+            return entry
+
+    def _generic_list(self, key: str) -> list[dict]:
+        data = self._load_json()
+        return list(data.get(key, []))
+
+    def _generic_update(self, key: str, node_id: str, **fields) -> dict:
+        with paradata_flock(self.site, root=self._root):
+            data = self._load_json()
+            items = data.get(key, [])
+            target = next((i for i in items if i["node_id"] == node_id), None)
+            if target is None:
+                raise ParadataNotFound(node_id=node_id)
+            for k, v in fields.items():
+                if v is not None:
+                    target[k] = v
+            self._write_json(data)
+            return target
+
+    def _generic_delete(self, key: str, node_id: str) -> None:
+        with paradata_flock(self.site, root=self._root):
+            data = self._load_json()
+            items = data.get(key, [])
+            target = next((i for i in items if i["node_id"] == node_id), None)
+            if target is None:
+                raise ParadataNotFound(node_id=node_id)
+            data[key] = [i for i in items if i["node_id"] != node_id]
+            self._write_json(data)
+
+    # --- licenses ---
+
+    def list_licenses(self) -> list[dict]:
+        return self._generic_list(self.LICENSE_KEY)
+
+    def add_license(self, *, name: str, url: str | None = None) -> dict:
+        return self._generic_add(self.LICENSE_KEY, self.LICENSE_PREFIX, name=name, url=url)
+
+    def update_license(self, node_id: str, **fields) -> dict:
+        return self._generic_update(self.LICENSE_KEY, node_id, **fields)
+
+    def delete_license(self, node_id: str) -> None:
+        self._generic_delete(self.LICENSE_KEY, node_id)
+
+    # --- embargoes ---
+
+    def list_embargoes(self) -> list[dict]:
+        return self._generic_list(self.EMBARGO_KEY)
+
+    def add_embargo(self, *, label: str, until: str | None = None) -> dict:
+        return self._generic_add(self.EMBARGO_KEY, self.EMBARGO_PREFIX, label=label, until=until)
+
+    def update_embargo(self, node_id: str, **fields) -> dict:
+        return self._generic_update(self.EMBARGO_KEY, node_id, **fields)
+
+    def delete_embargo(self, node_id: str) -> None:
+        self._generic_delete(self.EMBARGO_KEY, node_id)
+
+    # --- documents ---
+
+    def list_documents(self) -> list[dict]:
+        return self._generic_list(self.DOCUMENT_KEY)
+
+    def add_document(self, *, title: str, uri: str | None = None) -> dict:
+        return self._generic_add(self.DOCUMENT_KEY, self.DOCUMENT_PREFIX, title=title, uri=uri)
+
+    def update_document(self, node_id: str, **fields) -> dict:
+        return self._generic_update(self.DOCUMENT_KEY, node_id, **fields)
+
+    def delete_document(self, node_id: str) -> None:
+        self._generic_delete(self.DOCUMENT_KEY, node_id)
+
+    # --- epochs ---
+
+    def list_epochs(self) -> list[dict]:
+        return self._generic_list(self.EPOCH_KEY)
+
+    def add_epoch(self, *, name: str, start: Any = None, end: Any = None) -> dict:
+        return self._generic_add(self.EPOCH_KEY, self.EPOCH_PREFIX, name=name, start=start, end=end)
+
+    def update_epoch(self, node_id: str, **fields) -> dict:
+        return self._generic_update(self.EPOCH_KEY, node_id, **fields)
+
+    def delete_epoch(self, node_id: str) -> None:
+        self._generic_delete(self.EPOCH_KEY, node_id)
