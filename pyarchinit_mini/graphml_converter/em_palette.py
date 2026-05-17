@@ -302,12 +302,15 @@ class _PaletteProxy:
         return self._legacy.get(key, default)
 
     def keys(self):
+        self._warn()
         return self._legacy.keys()
 
     def items(self):
+        self._warn()
         return self._legacy.items()
 
     def values(self):
+        self._warn()
         return self._legacy.values()
 
 

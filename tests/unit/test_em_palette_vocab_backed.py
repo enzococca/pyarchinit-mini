@@ -45,3 +45,24 @@ def test_palette_dict_access_emits_deprecation_warning():
         warnings.simplefilter("always")
         _ = EMPalette.PALETTE["US"]
         assert any(issubclass(w.category, DeprecationWarning) for w in caught)
+
+
+def test_palette_iteration_emits_deprecation_warning_keys():
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        list(EMPalette.PALETTE.keys())
+        assert any(issubclass(w.category, DeprecationWarning) for w in caught)
+
+
+def test_palette_iteration_emits_deprecation_warning_items():
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        list(EMPalette.PALETTE.items())
+        assert any(issubclass(w.category, DeprecationWarning) for w in caught)
+
+
+def test_palette_iteration_emits_deprecation_warning_values():
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        list(EMPalette.PALETTE.values())
+        assert any(issubclass(w.category, DeprecationWarning) for w in caught)
