@@ -88,9 +88,20 @@ class S3DConverter:
             if area:
                 node.add_attribute("area", area)
 
+            # Resolve unit type via VocabProvider (family/class_name-driven)
+            provider = VocabProvider.instance()
+            unita_tipo = us.get('unita_tipo') or "US"
+            ut_info = provider.get_unit_type(unita_tipo)
+            if ut_info:
+                node.add_attribute("unit_type", ut_info.abbreviation)
+                node.add_attribute("family", ut_info.family or "unknown")
+                node.add_attribute("class_name", ut_info.class_name)
+            else:
+                # Unknown type (e.g. legacy USVA pre-migration): preserve verbatim, mark unknown
+                node.add_attribute("unit_type", str(unita_tipo))
+                node.add_attribute("family", "unknown")
+
             # Add all other US properties as attributes
-            if us.get('unita_tipo'):
-                node.add_attribute("unit_type", str(us.get('unita_tipo')))
             if us.get('d_stratigrafica'):
                 node.add_attribute("description_strat", str(us.get('d_stratigrafica')))
             if us.get('d_interpretativa'):
@@ -360,22 +371,24 @@ class S3DConverter:
                     if key not in ['name', 'description']:
                         node_data[key] = value
 
-            # Categorize node by unit_type
+            # Categorize node by unit_type — VocabProvider-driven dispatch
             unit_type = node.attributes.get('unit_type', 'US') if hasattr(node, 'attributes') else 'US'
+            ut_info = VocabProvider.instance().get_unit_type(unit_type)
 
-            # Map unit types to s3Dgraphy categories
-            if unit_type in ['USVA', 'USVB', 'USVC', 'USD']:
-                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
-            elif unit_type in ['SF', 'VSF']:
-                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
-            elif unit_type == 'DOC':
+            # Determine target bucket. Order matters: most specific first.
+            if unit_type in ('DOC',):
                 graph_data["nodes"]["documents"][node.node_id] = node_data
-            elif unit_type == 'Extractor':
+            elif unit_type in ('Extractor',):
                 graph_data["nodes"]["extractors"][node.node_id] = node_data
-            elif unit_type == 'Combiner':
+            elif unit_type in ('Combiner',):
                 graph_data["nodes"]["combiners"][node.node_id] = node_data
+            elif unit_type in ('SF', 'VSF'):
+                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
+            elif ut_info and ut_info.family == "virtual":
+                # Virtual stratigraphic units (USVs, USVn, etc.) — VocabProvider-driven
+                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
             else:
-                # Default to US category
+                # Default: real stratigraphic unit (US, SU, USM, RSF, ...)
                 graph_data["nodes"]["stratigraphic"]["US"][node.node_id] = node_data
 
         # Organize edges by type
@@ -548,25 +561,26 @@ class S3DConverter:
                     if key not in ['name', 'description']:
                         node_data[key] = value
 
-            # Categorize node by unit_type
+            # Categorize node by unit_type — VocabProvider-driven dispatch
             unit_type = node.attributes.get('unit_type', 'US') if hasattr(node, 'attributes') else 'US'
+            ut_info = VocabProvider.instance().get_unit_type(unit_type)
 
-            # Map unit types to Heriverse categories
-            if unit_type in ['USVA', 'USVB', 'USVC', 'USD']:
-                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
-            elif unit_type == 'USVn':
-                # Heriverse: Virtual negative units (separate category)
-                graph_data["nodes"]["stratigraphic"]["USVn"][node.node_id] = node_data
-            elif unit_type in ['SF', 'VSF']:
-                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
-            elif unit_type == 'DOC':
+            # Map unit types to Heriverse categories. Order matters: most specific first.
+            if unit_type in ('DOC',):
                 graph_data["nodes"]["documents"][node.node_id] = node_data
-            elif unit_type == 'Extractor':
+            elif unit_type in ('Extractor',):
                 graph_data["nodes"]["extractors"][node.node_id] = node_data
-            elif unit_type == 'Combiner':
+            elif unit_type in ('Combiner',):
                 graph_data["nodes"]["combiners"][node.node_id] = node_data
+            elif unit_type in ('SF', 'VSF'):
+                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
+            elif unit_type == 'USVn':
+                # Heriverse: virtual negative units have separate bucket
+                graph_data["nodes"]["stratigraphic"]["USVn"][node.node_id] = node_data
+            elif ut_info and ut_info.family == "virtual":
+                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
             else:
-                # Default to US category
+                # Default: real stratigraphic unit (US, SU, USM, RSF, ...)
                 graph_data["nodes"]["stratigraphic"]["US"][node.node_id] = node_data
 
                 # Heriverse: Auto-generate semantic_shape placeholder for each US

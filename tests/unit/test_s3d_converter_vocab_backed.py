@@ -47,3 +47,28 @@ def test_coperto_da_parsed_as_is_after():
     rel = (e.attributes.get("stratigraphic_relation") or "").lower()
     assert "is_after" in rel or "covered" in rel
     assert "covers" != rel  # NOT the inverse
+
+
+def test_usvs_node_categorized_via_vocab_family():
+    """USVs should get family='virtual' attribute via VocabProvider lookup."""
+    conv = S3DConverter()
+    us_list = [
+        {"sito": "S", "us": 10, "unita_tipo": "USVs", "rapporti": ""},
+        {"sito": "S", "us": 11, "unita_tipo": "US", "rapporti": ""},
+    ]
+    g = conv.create_graph_from_us(us_list, site_name="S")
+    # Find the USVs node by its semantic id suffix
+    usvs_node = next((n for n in g.nodes if "10" in n.node_id), None)
+    assert usvs_node is not None
+    assert getattr(usvs_node, "attributes", {}).get("family") == "virtual"
+
+
+def test_us_node_categorized_as_real():
+    conv = S3DConverter()
+    us_list = [
+        {"sito": "S", "us": 5, "unita_tipo": "US", "rapporti": ""},
+    ]
+    g = conv.create_graph_from_us(us_list, site_name="S")
+    us_node = next((n for n in g.nodes if "5" in n.node_id), None)
+    assert us_node is not None
+    assert getattr(us_node, "attributes", {}).get("family") == "real"
