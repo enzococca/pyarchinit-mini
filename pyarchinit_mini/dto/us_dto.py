@@ -2,8 +2,11 @@
 US Data Transfer Object
 """
 
+import warnings
 from dataclasses import dataclass
 from typing import Optional
+
+LEGACY_UNIT_TYPES = {"USVA", "USVB", "USVC"}
 
 
 @dataclass
@@ -231,6 +234,36 @@ class USDTO:
             'responsabile_us': self.responsabile_us
         }
     
+    def validate_unita_tipo(self) -> None:
+        """Validate self.unita_tipo against the s3dgraphy canonical vocabulary.
+
+        Behaviour:
+          - Empty/None → pass (column nullable in legacy data)
+          - Known canonical type → pass silently
+          - Legacy (USVA/USVB/USVC) → pass with DeprecationWarning suggesting replacement
+          - Unknown → ValueError listing valid canonical values
+        """
+        if not self.unita_tipo:
+            return
+        # Lazy import to avoid hard dependency cycle at module-import time
+        from pyarchinit_mini.vocab.provider import VocabProvider
+        provider = VocabProvider.instance()
+        if provider.get_unit_type(self.unita_tipo) is not None:
+            return
+        if self.unita_tipo in LEGACY_UNIT_TYPES:
+            suggested = "USVs" if self.unita_tipo in ("USVA", "USVB") else "USVn"
+            warnings.warn(
+                f"unita_tipo '{self.unita_tipo}' is deprecated; suggested replacement: '{suggested}'. "
+                f"Run pyarchinit-mini-migrate-vocab --apply to upgrade existing records.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            return
+        valid = sorted(t.abbreviation for t in provider.get_unit_types())
+        raise ValueError(
+            f"unknown unita_tipo '{self.unita_tipo}'. Valid values: {', '.join(valid)}"
+        )
+
     @property
     def display_name(self) -> str:
         """Get display name for the US"""

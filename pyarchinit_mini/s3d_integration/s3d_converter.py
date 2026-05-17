@@ -19,6 +19,8 @@ except ImportError:
     S3D_AVAILABLE = False
     print("[S3D] Warning: s3dgraphy not installed. Run: pip install s3dgraphy")
 
+from pyarchinit_mini.vocab.provider import VocabProvider
+
 
 class S3DConverter:
     """Convert PyArchInit stratigraphic data to s3dgraphy format"""
@@ -86,9 +88,20 @@ class S3DConverter:
             if area:
                 node.add_attribute("area", area)
 
+            # Resolve unit type via VocabProvider (family/class_name-driven)
+            provider = VocabProvider.instance()
+            unita_tipo = us.get('unita_tipo') or "US"
+            ut_info = provider.get_unit_type(unita_tipo)
+            if ut_info:
+                node.add_attribute("unit_type", ut_info.abbreviation)
+                node.add_attribute("family", ut_info.family or "unknown")
+                node.add_attribute("class_name", ut_info.class_name)
+            else:
+                # Unknown type (e.g. legacy USVA pre-migration): preserve verbatim, mark unknown
+                node.add_attribute("unit_type", str(unita_tipo))
+                node.add_attribute("family", "unknown")
+
             # Add all other US properties as attributes
-            if us.get('unita_tipo'):
-                node.add_attribute("unit_type", str(us.get('unita_tipo')))
             if us.get('d_stratigrafica'):
                 node.add_attribute("description_strat", str(us.get('d_stratigrafica')))
             if us.get('d_interpretativa'):
@@ -111,23 +124,37 @@ class S3DConverter:
         # Add stratigraphic relationships as edges
         edge_counter = 0
 
-        # Relationship type mapping (Italian → English)
-        relationship_mapping = {
-            'copre': 'COVERS',
-            'coperto da': 'COVERED_BY',
-            'coperta da': 'COVERED_BY',
-            'taglia': 'CUTS',
-            'tagliato da': 'CUT_BY',
-            'tagliata da': 'CUT_BY',
-            'riempie': 'FILLS',
-            'riempito da': 'FILLED_BY',
-            'riempita da': 'FILLED_BY',
-            'si lega a': 'BONDS_TO',
-            'si appoggia a': 'LEANS_AGAINST',
-            'gli si appoggia': 'LEANED_AGAINST_BY',
-            'uguale a': 'EQUAL_TO',
-            'si appoggia': 'LEANS_AGAINST',
+        # Build alias→(edge_name, legacy_code) map from VocabProvider.
+        # Italian aliases live in vocab_it.json edge_type_aliases.
+        # We also keep a "legacy_code" (uppercase like 'COVERS') for backward compat
+        # with downstream consumers that read the `stratigraphic_relation` attribute.
+        provider = VocabProvider.instance()
+        edge_types = provider.get_edge_types()
+
+        # Hand-curated mapping from canonical s3dgraphy edge name → legacy uppercase code.
+        # This preserves the legacy `stratigraphic_relation` attribute values.
+        # TODO(Spec-2): split is_after legacy code into COVERED_BY (rapporti 'coperto da')
+        # vs CUT_BY (rapporti 'tagliato da'). Currently both map to COVERED_BY which is
+        # semantically incorrect for the cut-by relation.
+        _LEGACY_CODE_MAP = {
+            "covers": "COVERS",
+            "is_after": "COVERED_BY",  # historical: rapporti 'coperto da' implied COVERED_BY semantically
+            "cuts": "CUTS",
+            "fills": "FILLS",
+            "leans_against": "LEANS_AGAINST",
+            "has_same_time": "EQUAL_TO",
         }
+
+        alias_to_pair = {}  # {italian_lowercase: (edge_name, legacy_code)}
+        for et in edge_types:
+            legacy = _LEGACY_CODE_MAP.get(et.name)
+            if legacy is None:
+                continue  # only expose edges we have a legacy code for
+            for alias in et.italian_aliases:
+                alias_to_pair[alias.lower()] = (et.name, legacy)
+
+        # Match each relation token against longest alias first.
+        sorted_aliases = sorted(alias_to_pair.keys(), key=len, reverse=True)
 
         for us in us_list:
             us_number = str(us.get('us', ''))
@@ -158,24 +185,23 @@ class S3DConverter:
 
                 # Try to parse relationship: "verb US_number"
                 # Examples: "copre 1002", "Si appoggia a 1001", "coperto da 1003"
-                relation_lower = relation.lower().strip()
+                rel_lower = relation.lower().strip()
 
-                # Find matching relationship type
-                edge_type = None
+                # Find matching relationship type via VocabProvider alias table.
+                edge_name = None
+                legacy_code = None
                 target_us = None
-
-                for italian_rel, english_rel in relationship_mapping.items():
-                    if relation_lower.startswith(italian_rel):
-                        edge_type = english_rel
+                for alias in sorted_aliases:
+                    if rel_lower.startswith(alias):
+                        edge_name, legacy_code = alias_to_pair[alias]
                         # Extract target US number (everything after the relationship verb)
-                        target_us_str = relation_lower[len(italian_rel):].strip()
-                        # Remove any non-digit characters from the start
+                        target_us_str = rel_lower[len(alias):].strip()
                         target_us = ''.join(c for c in target_us_str if c.isdigit() or c in ['.', '-'])
                         if target_us:
                             target_us = target_us.split()[0] if ' ' in target_us else target_us
                         break
 
-                if not edge_type or not target_us:
+                if not edge_name or not target_us:
                     # Couldn't parse this relation, skip it
                     continue
 
@@ -187,18 +213,18 @@ class S3DConverter:
                 if target_id in us_node_ids:
                     # Create unique edge ID
                     edge_counter += 1
-                    edge_id = f"edge_{edge_counter}_{edge_type}_{source_id}_to_{target_id}"
+                    edge_id = f"edge_{edge_counter}_{legacy_code}_{source_id}_to_{target_id}"
 
                     # s3dgraphy uses "is_before" for chronological sequence
-                    # We store the specific relationship type as attribute
-                    s3d_edge_type = "is_before" if edge_type in ['COVERS', 'CUTS', 'FILLS'] else "generic_connection"
+                    # Keep this mapping policy unchanged: COVERS/CUTS/FILLS are "is_before" semantics.
+                    s3d_edge_type = "is_before" if legacy_code in ['COVERS', 'CUTS', 'FILLS'] else "generic_connection"
 
                     # Create edge
                     edge = graph.add_edge(edge_id, source_id, target_id, s3d_edge_type)
 
                     # Add relationship type as attribute for detailed semantics
-                    edge.attributes['stratigraphic_relation'] = edge_type
-                    edge.attributes['relation_label'] = edge_type.replace('_', ' ').title()
+                    edge.attributes['stratigraphic_relation'] = legacy_code
+                    edge.attributes['relation_label'] = legacy_code.replace('_', ' ').title()
 
         return graph
 
@@ -348,22 +374,24 @@ class S3DConverter:
                     if key not in ['name', 'description']:
                         node_data[key] = value
 
-            # Categorize node by unit_type
+            # Categorize node by unit_type — VocabProvider-driven dispatch
             unit_type = node.attributes.get('unit_type', 'US') if hasattr(node, 'attributes') else 'US'
+            ut_info = VocabProvider.instance().get_unit_type(unit_type)
 
-            # Map unit types to s3Dgraphy categories
-            if unit_type in ['USVA', 'USVB', 'USVC', 'USD']:
-                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
-            elif unit_type in ['SF', 'VSF']:
-                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
-            elif unit_type == 'DOC':
+            # Determine target bucket. Order matters: most specific first.
+            if unit_type in ('DOC',):
                 graph_data["nodes"]["documents"][node.node_id] = node_data
-            elif unit_type == 'Extractor':
+            elif unit_type in ('Extractor',):
                 graph_data["nodes"]["extractors"][node.node_id] = node_data
-            elif unit_type == 'Combiner':
+            elif unit_type in ('Combiner',):
                 graph_data["nodes"]["combiners"][node.node_id] = node_data
+            elif unit_type in ('SF', 'VSF'):
+                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
+            elif ut_info and ut_info.family == "virtual":
+                # Virtual stratigraphic units (USVs, USVn, etc.) — VocabProvider-driven
+                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
             else:
-                # Default to US category
+                # Default: real stratigraphic unit (US, SU, USM, RSF, ...)
                 graph_data["nodes"]["stratigraphic"]["US"][node.node_id] = node_data
 
         # Organize edges by type
@@ -536,25 +564,26 @@ class S3DConverter:
                     if key not in ['name', 'description']:
                         node_data[key] = value
 
-            # Categorize node by unit_type
+            # Categorize node by unit_type — VocabProvider-driven dispatch
             unit_type = node.attributes.get('unit_type', 'US') if hasattr(node, 'attributes') else 'US'
+            ut_info = VocabProvider.instance().get_unit_type(unit_type)
 
-            # Map unit types to Heriverse categories
-            if unit_type in ['USVA', 'USVB', 'USVC', 'USD']:
-                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
-            elif unit_type == 'USVn':
-                # Heriverse: Virtual negative units (separate category)
-                graph_data["nodes"]["stratigraphic"]["USVn"][node.node_id] = node_data
-            elif unit_type in ['SF', 'VSF']:
-                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
-            elif unit_type == 'DOC':
+            # Map unit types to Heriverse categories. Order matters: most specific first.
+            if unit_type in ('DOC',):
                 graph_data["nodes"]["documents"][node.node_id] = node_data
-            elif unit_type == 'Extractor':
+            elif unit_type in ('Extractor',):
                 graph_data["nodes"]["extractors"][node.node_id] = node_data
-            elif unit_type == 'Combiner':
+            elif unit_type in ('Combiner',):
                 graph_data["nodes"]["combiners"][node.node_id] = node_data
+            elif unit_type in ('SF', 'VSF'):
+                graph_data["nodes"]["stratigraphic"]["SF"][node.node_id] = node_data
+            elif unit_type == 'USVn':
+                # Heriverse: virtual negative units have separate bucket
+                graph_data["nodes"]["stratigraphic"]["USVn"][node.node_id] = node_data
+            elif ut_info and ut_info.family == "virtual":
+                graph_data["nodes"]["stratigraphic"]["USVs"][node.node_id] = node_data
             else:
-                # Default to US category
+                # Default: real stratigraphic unit (US, SU, USM, RSF, ...)
                 graph_data["nodes"]["stratigraphic"]["US"][node.node_id] = node_data
 
                 # Heriverse: Auto-generate semantic_shape placeholder for each US
@@ -689,12 +718,23 @@ class S3DConverter:
                 key_name = keys.get(key_id, key_id)
                 node_dict[key_name] = data.text
 
-            # Parse label to extract unit type and number (e.g., "US12" → type="US", number="12")
+            # Parse label to extract unit type and number (e.g., "US12" → type="US",
+            # "USVs42" → type="USVs", "USVn3" → type="USVn").
+            # Pattern: leading letters (upper or lower) followed by digits.
             label = node_dict.get('label', node_id)
             import re
-            match = re.match(r'([A-Z]+)(\d+)', label)
+            match = re.match(r'([A-Za-z]+)(\d+)', label)
             if match:
-                node_dict['unit_type'] = match.group(1)
+                raw_prefix = match.group(1)
+                # Prefer longest vocab-known prefix so "USVs" beats "USV" or "US"
+                vp = VocabProvider.instance()
+                known_types = sorted(vp._unit_types_raw.keys(), key=len, reverse=True)
+                unit_type_from_label = raw_prefix  # default
+                for kt in known_types:
+                    if raw_prefix == kt or raw_prefix.upper() == kt.upper():
+                        unit_type_from_label = kt
+                        break
+                node_dict['unit_type'] = unit_type_from_label
                 node_dict['us_number'] = match.group(2)
 
             nodes_data.append(node_dict)
@@ -767,7 +807,7 @@ class S3DConverter:
             }
         }
 
-        # Categorize nodes
+        # Categorize nodes via VocabProvider (Spec 1 review fix)
         for node_data in nodes_data:
             node_id = node_data['id']
             unit_type = node_data.get('unit_type', 'US')
@@ -775,17 +815,18 @@ class S3DConverter:
             # Remove internal fields
             clean_data = {k: v for k, v in node_data.items() if k not in ['id']}
 
-            # Map to categories
-            if unit_type in ['USVA', 'USVB', 'USVC', 'USD']:
-                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["USVs"][node_id] = clean_data
-            elif unit_type in ['SF', 'VSF']:
-                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["SF"][node_id] = clean_data
-            elif unit_type == 'DOC':
+            # Map to categories using VocabProvider family — mirrors export_to_json logic
+            ut_info = VocabProvider.instance().get_unit_type(unit_type)
+            if unit_type in ('DOC',):
                 json_data["graphs"][graph_id]["nodes"]["documents"][node_id] = clean_data
-            elif unit_type == 'Extractor':
+            elif unit_type in ('Extractor',):
                 json_data["graphs"][graph_id]["nodes"]["extractors"][node_id] = clean_data
-            elif unit_type == 'Combiner':
+            elif unit_type in ('Combiner',):
                 json_data["graphs"][graph_id]["nodes"]["combiners"][node_id] = clean_data
+            elif unit_type in ('SF', 'VSF'):
+                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["SF"][node_id] = clean_data
+            elif ut_info and ut_info.family == "virtual":
+                json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["USVs"][node_id] = clean_data
             else:
                 json_data["graphs"][graph_id]["nodes"]["stratigraphic"]["US"][node_id] = clean_data
 

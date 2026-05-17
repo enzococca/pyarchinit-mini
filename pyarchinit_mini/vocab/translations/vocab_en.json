@@ -1,0 +1,20 @@
+{
+  "unit_types": {
+    "US": {"label": "US", "description": "Stratigraphic Unit"},
+    "USVs": {"label": "USV/s", "description": "Structural Virtual Stratigraphic Unit"},
+    "USVn": {"label": "USV/n", "description": "Non-structural Virtual Stratigraphic Unit"},
+    "SF": {"label": "SF", "description": "Special Find"},
+    "VSF": {"label": "VSF", "description": "Virtual Special Find"},
+    "USM": {"label": "USM", "description": "Stratigraphic Unit Masonry"},
+    "USD": {"label": "USD", "description": "Documentary Stratigraphic Unit"},
+    "RSF": {"label": "RSF", "description": "Reused Special Find (spolia)"}
+  },
+  "edge_types": {
+    "covers": {"label": "covers"},
+    "cuts": {"label": "cuts"},
+    "fills": {"label": "fills"},
+    "is_after": {"label": "is after"},
+    "has_same_time": {"label": "has same time"},
+    "leans_against": {"label": "leans against"}
+  }
+}

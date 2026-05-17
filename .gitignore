@@ -135,6 +135,7 @@ dmypy.json
 *.sqlite3
 !pyarchinit_mini_sample.db
 !data/pyarchinit_mini_sample.db
+!tests/fixtures/databases/*.db
 
 # Media files
 media/

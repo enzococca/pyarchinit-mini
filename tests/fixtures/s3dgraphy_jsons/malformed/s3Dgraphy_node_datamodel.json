@@ -1,0 +1,10 @@
+{
+  "s3Dgraphy_data_model_version": "1.5.4",
+  "node_types": {
+    "Node": {
+      "class": "Node",
+      "description": "Broken JSON on next line"
+      missing_comma_above
+    }
+  }
+}
