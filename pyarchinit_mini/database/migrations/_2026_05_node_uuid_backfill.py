@@ -35,6 +35,11 @@ def _backfill_sqlite(db_path: str, dry_run: bool) -> dict:
             if pk_col is None:
                 out[t] = 0
                 continue
+            col_names = {c[1] for c in cols}
+            if "node_uuid" not in col_names:
+                # Column not yet added (e.g. schema migration was dry-run)
+                out[t] = 0
+                continue
             rows = conn.execute(
                 f"SELECT {pk_col} FROM {t} WHERE node_uuid IS NULL"
             ).fetchall()
