@@ -137,11 +137,11 @@ class S3DConverter:
         # vs CUT_BY (rapporti 'tagliato da'). Currently both map to COVERED_BY which is
         # semantically incorrect for the cut-by relation.
         _LEGACY_CODE_MAP = {
-            "covers": "COVERS",
+            "overlies": "COVERS",  # s3dgraphy canonical 'overlies' = rapporti 'copre'
             "is_after": "COVERED_BY",  # historical: rapporti 'coperto da' implied COVERED_BY semantically
             "cuts": "CUTS",
             "fills": "FILLS",
-            "leans_against": "LEANS_AGAINST",
+            "abuts": "LEANS_AGAINST",  # s3dgraphy canonical 'abuts' = rapporti 'si appoggia a'
             "has_same_time": "EQUAL_TO",
         }
 

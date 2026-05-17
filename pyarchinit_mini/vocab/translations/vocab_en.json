@@ -10,11 +10,11 @@
     "RSF": {"label": "RSF", "description": "Reused Special Find (spolia)"}
   },
   "edge_types": {
-    "covers": {"label": "covers"},
+    "overlies": {"label": "overlies"},
     "cuts": {"label": "cuts"},
     "fills": {"label": "fills"},
     "is_after": {"label": "is after"},
     "has_same_time": {"label": "has same time"},
-    "leans_against": {"label": "leans against"}
+    "abuts": {"label": "abuts"}
   }
 }
