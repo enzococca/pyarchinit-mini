@@ -56,3 +56,51 @@ def test_schema_migration_skips_missing_tables(tmp_path):
     assert "us_table" in report.tables_changed
     assert any("inventario_materiali_table" in s for s in report.tables_skipped)
     assert any("periodizzazione_table" in s for s in report.tables_skipped)
+
+
+from pyarchinit_mini.database.migrations import (
+    _2026_05_node_uuid_backfill as backfill_m,
+)
+
+
+@pytest.fixture
+def db_with_schema(tmp_path):
+    db = tmp_path / "y.db"
+    conn = sqlite3.connect(db)
+    for t in ("us_table", "inventario_materiali_table", "periodizzazione_table"):
+        conn.execute(f"CREATE TABLE {t} (id INTEGER PRIMARY KEY, node_uuid TEXT)")
+        for i in range(10):
+            conn.execute(f"INSERT INTO {t}(id) VALUES (?)", (i,))
+    conn.commit()
+    conn.close()
+    return db
+
+
+def test_backfill_populates_node_uuid_on_all_rows(db_with_schema):
+    backfill_m.run(f"sqlite:///{db_with_schema}", dry_run=False)
+    conn = sqlite3.connect(db_with_schema)
+    for t in ("us_table", "inventario_materiali_table", "periodizzazione_table"):
+        nulls = conn.execute(f"SELECT COUNT(*) FROM {t} WHERE node_uuid IS NULL").fetchone()[0]
+        assert nulls == 0, f"{t} still has {nulls} rows with NULL node_uuid"
+    conn.close()
+
+
+def test_backfill_idempotent(db_with_schema):
+    backfill_m.run(f"sqlite:///{db_with_schema}", dry_run=False)
+    conn = sqlite3.connect(db_with_schema)
+    before = conn.execute("SELECT node_uuid FROM us_table ORDER BY id").fetchall()
+    conn.close()
+    backfill_m.run(f"sqlite:///{db_with_schema}", dry_run=False)
+    conn = sqlite3.connect(db_with_schema)
+    after = conn.execute("SELECT node_uuid FROM us_table ORDER BY id").fetchall()
+    conn.close()
+    assert before == after, "UUIDs must be preserved across re-runs"
+
+
+def test_backfill_dry_run_does_not_mutate(db_with_schema):
+    backfill_m.run(f"sqlite:///{db_with_schema}", dry_run=True)
+    conn = sqlite3.connect(db_with_schema)
+    for t in ("us_table", "inventario_materiali_table", "periodizzazione_table"):
+        nulls = conn.execute(f"SELECT COUNT(*) FROM {t} WHERE node_uuid IS NULL").fetchone()[0]
+        assert nulls == 10
+    conn.close()
