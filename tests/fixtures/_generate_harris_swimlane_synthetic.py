@@ -34,6 +34,7 @@ CREATE TABLE us_table (
     id_us INTEGER PRIMARY KEY AUTOINCREMENT,
     sito TEXT, area TEXT, us INTEGER, unita_tipo TEXT,
     d_stratigrafica TEXT, d_interpretativa TEXT,
+    datazione TEXT, file_path TEXT,
     rapporti TEXT, node_uuid TEXT,
     periodo_iniziale TEXT, fase_iniziale TEXT,
     periodo_finale TEXT, fase_finale TEXT
@@ -62,11 +63,12 @@ for i in range(30):
     us_records.append(
         ("Volterra", "A", 1000 + i, "US",
          f"strat {i}", f"interp {i}",
+         f"100..200", None,
          rapporti, f"uuid-{i:03d}",
          period, phase, None, None)
     )
 c.executemany(
-    "INSERT INTO us_table (sito, area, us, unita_tipo, d_stratigrafica, d_interpretativa, rapporti, node_uuid, periodo_iniziale, fase_iniziale, periodo_finale, fase_finale) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+    "INSERT INTO us_table (sito, area, us, unita_tipo, d_stratigrafica, d_interpretativa, datazione, file_path, rapporti, node_uuid, periodo_iniziale, fase_iniziale, periodo_finale, fase_finale) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
     us_records,
 )
 

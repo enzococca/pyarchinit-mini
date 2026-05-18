@@ -1,3 +1,48 @@
+## [2.4.5] - 2026-05-18
+
+### Changed (IT)
+- `/api/node-types` ora alimenta la sidebar del Harris Creator **direttamente
+  da VocabProvider** (s3dgraphy JSON catalogues), abbandonando il vecchio
+  YAML legacy. Conseguenza: i tipi USVs / USVn / USN / RSF / serSU /
+  serUSD / serUSVn / serUSVs / TSU / UL / BR / SE / USD compaiono
+  finalmente in sidebar. Aggiornare s3dgraphy aggiungerà automaticamente
+  nuovi tipi all'editor.
+- Colore e forma di ogni voce vengono presi da `visual_style.fill_color`
+  e `visual_style.shape` di s3dgraphy (es. SF / VSF / RSF = octagon,
+  USVs = parallelogram, USVn = hexagon, USD = roundrectangle, BR = diamond).
+
+### Fixed (IT)
+- Pannello Properties ora si popola correttamente al click di un nodo US:
+  `SwimlaneState.load` aggiunge `us_number`, `description` (da
+  `d_stratigrafica`), `area`, `datazione`, `file_path` ai `data` Cytoscape
+  che il pannello legge.
+- Ai US viene allegato anche `shape` / `border_color` / `border_style` da
+  VocabProvider — i nodi rendono con la simbologia EM appropriata, non più
+  rettangoli grigi.
+
+### Added (IT)
+- Toggle Hide/Show del pannello Properties (icona angle-double in alto a
+  destra del pannello): collassa a 36px e la scelta viene persistita in
+  `localStorage`. Cytoscape viene `fit()` dopo l'animazione per riempire
+  lo spazio guadagnato.
+
+### Changed (EN)
+- `/api/node-types` is now sourced from VocabProvider (s3dgraphy JSON
+  catalogues). Bumping s3dgraphy is enough to surface new types in the
+  sidebar.
+- US nodes pick `shape`/`fill_color`/`border_color`/`border_style` from
+  the s3dgraphy `visual_style` block so EM symbology renders correctly.
+
+### Fixed (EN)
+- Properties panel populates again on node click — `SwimlaneState.load`
+  now attaches `us_number` / `description` / `area` / `datazione` /
+  `file_path` to the Cytoscape `data` payload.
+
+### Added (EN)
+- Properties panel Hide/Show toggle (collapses to a thin strip on the
+  right). Choice persisted in `localStorage`; Cytoscape re-fits the
+  viewport after the transition.
+
 ## [2.4.4] - 2026-05-18
 
 ### Fixed (IT)

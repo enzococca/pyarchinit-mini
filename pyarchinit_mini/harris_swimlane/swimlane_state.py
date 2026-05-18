@@ -52,31 +52,64 @@ class SwimlaneState:
         provider = RowProvider(session, site)
         rows = provider.list_rows()
 
-        # Resolve unit_type → fill_color via VocabProvider once per request so
-        # the editor's `'background-color': data(color)` style renders properly.
+        # Resolve unit_type → visual_style via VocabProvider once per request,
+        # cached. The editor's Cytoscape style uses `data(color)` and
+        # `data(shape)`; if either is missing the node renders grey rectangles
+        # and Cytoscape logs a warning per node.
+        _SHAPE_TO_CYTOSCAPE = {
+            "rounded_rectangle": "roundrectangle",
+            "parallelogram": "rhomboid",
+            "trapezium": "triangle",
+            "trapezium2": "vee",
+            # Names that are already valid Cytoscape shapes pass through.
+        }
         try:
             from pyarchinit_mini.vocab.provider import VocabProvider
             _vocab = VocabProvider.instance()
-            _color_cache: dict[str, str] = {}
+            _style_cache: dict[str, dict] = {}
 
-            def _color_for(ut: str) -> str:
-                if ut in _color_cache:
-                    return _color_cache[ut]
+            def _style_for(ut: str) -> dict:
+                if ut in _style_cache:
+                    return _style_cache[ut]
                 try:
-                    style = _vocab.get_visual_style(ut)
-                    c = getattr(style, "fill_color", None) or "#CCCCCC"
+                    vs = _vocab.get_visual_style(ut)
+                    raw_shape = (
+                        vs.get("shape") if isinstance(vs, dict)
+                        else getattr(vs, "shape", "rectangle")
+                    )
+                    fill = (
+                        vs.get("fill_color") if isinstance(vs, dict)
+                        else getattr(vs, "fill_color", None)
+                    ) or "#CCCCCC"
+                    border = (
+                        vs.get("border_color") if isinstance(vs, dict)
+                        else getattr(vs, "border_color", None)
+                    ) or "#333333"
+                    border_style = (
+                        vs.get("border_style") if isinstance(vs, dict)
+                        else getattr(vs, "border_style", None)
+                    ) or "solid"
+                    out = {
+                        "color": fill,
+                        "shape": _SHAPE_TO_CYTOSCAPE.get(raw_shape, raw_shape),
+                        "border_color": border,
+                        "border_style": border_style,
+                    }
                 except Exception:
-                    c = "#CCCCCC"
-                _color_cache[ut] = c
-                return c
+                    out = {"color": "#CCCCCC", "shape": "rectangle",
+                           "border_color": "#333333", "border_style": "solid"}
+                _style_cache[ut] = out
+                return out
         except Exception:
-            def _color_for(ut: str) -> str:
-                return "#CCCCCC"
+            def _style_for(ut: str) -> dict:
+                return {"color": "#CCCCCC", "shape": "rectangle",
+                        "border_color": "#333333", "border_style": "solid"}
 
         # Load US records for site
         us_rows = session.execute(text(
             "SELECT id_us, sito, area, us, unita_tipo, rapporti, node_uuid, "
-            "periodo_iniziale, fase_iniziale "
+            "periodo_iniziale, fase_iniziale, "
+            "d_stratigrafica, datazione, file_path "
             "FROM us_table WHERE sito = :sito ORDER BY id_us"
         ), {"sito": site}).fetchall()
 
@@ -104,17 +137,30 @@ class SwimlaneState:
 
             pos = initial_node_position(_RowLike(), idx)
 
+            style = _style_for(unita_tipo)
             nodes.append(CytoscapeElement(
                 data={
                     "id": node_id,
                     "label": f"{unita_tipo}{us_num}",
                     "parent": parent_row_id,
                     "unit_type": unita_tipo,
-                    "color": _color_for(unita_tipo),
+                    # Visual fields — read by harris_creator_editor.js Cytoscape style
+                    "color": style["color"],
+                    "shape": style["shape"],
+                    "border_color": style["border_color"],
+                    "border_style": style["border_style"],
+                    # Identity + provenance
+                    "us": us_num,
+                    "us_number": us_num,          # Properties panel reads this name
+                    "node_uuid": r[6],
+                    # Temporal
                     "period": periodo,
                     "phase": fase,
-                    "us": us_num,
-                    "node_uuid": r[6],
+                    # Descriptive fields the Properties panel populates
+                    "description": r[9] or "",   # d_stratigrafica
+                    "area": (r[2] or "") if r[2] is not None else "",
+                    "datazione": r[10] or "",
+                    "file_path": r[11] or "",
                 },
                 position=pos,
             ))

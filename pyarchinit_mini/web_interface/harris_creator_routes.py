@@ -481,17 +481,20 @@ def export_matrix(format):
 
 @harris_creator_bp.route('/api/node-types')
 def get_node_types():
+    """List Extended Matrix node types from VocabProvider (s3dgraphy JSON
+    catalogues). The previous implementation read a legacy YAML config and
+    so missed every node type added in s3dgraphy >= 0.1.42 (USVs/USVn/USN/
+    RSF/serSU/serUSD/serUSVn/serUSVs/TSU/UL/BR/SE...). With this refactor,
+    upgrading s3dgraphy is enough to make new types appear in the editor.
     """
-    Get list of Extended Matrix node types with descriptions
-    Now dynamically loaded from YAML configuration
-    """
-    # Map GraphML/yEd shapes to Cytoscape.js compatible shapes
+    # Map s3dgraphy yEd-style shapes to Cytoscape.js shapes.
     SHAPE_MAP = {
-        'note': 'roundrectangle',      # Document shape -> rounded rectangle
-        'trapezium': 'triangle',        # Trapezoid -> triangle
-        'trapezium2': 'vee',            # Inverted trapezoid -> vee
-        'parallelogram': 'rhomboid',    # Parallelogram -> rhomboid
-        # Valid Cytoscape shapes pass through unchanged
+        'note': 'roundrectangle',
+        'trapezium': 'triangle',
+        'trapezium2': 'vee',
+        'parallelogram': 'rhomboid',
+        'rounded_rectangle': 'roundrectangle',
+        # Cytoscape-native shapes pass through.
         'rectangle': 'rectangle',
         'roundrectangle': 'roundrectangle',
         'ellipse': 'ellipse',
@@ -503,49 +506,36 @@ def get_node_types():
         'star': 'star',
         'diamond': 'diamond',
         'vee': 'vee',
-        'rhomboid': 'rhomboid'
+        'rhomboid': 'rhomboid',
     }
 
     try:
-        config_manager = get_config_manager()
-        all_types = config_manager.get_all_node_types()
-
-        # Default colors for visual editor (can be customized in config)
-        default_colors = {
-            'US': '#90CAF9', 'USM': '#FFAB91', 'USVA': '#CE93D8',
-            'USVB': '#E1BEE7', 'USVC': '#F48FB1', 'TU': '#80CBC4',
-            'USD': '#A5D6A7', 'SF': '#FFD54F', 'VSF': '#FFE082',
-            'CON': '#BCAAA4', 'DOC': '#B0BEC5', 'Extractor': '#EF9A9A',
-            'Combinar': '#9FA8DA', 'property': '#CFD8DC'
-        }
+        from pyarchinit_mini.vocab.provider import VocabProvider
+        provider = VocabProvider.instance()
+        unit_types = provider.get_unit_types()
 
         node_types = []
-        for tipo_id, config in all_types.items():
-            visual = config.get('visual', {})
-
-            # Build label
-            label = f"{tipo_id} - {config.get('name', tipo_id)}"
-            if config.get('description'):
-                label += f" ({config.get('description')})"
-
-            # Get shape from config and map to Cytoscape-compatible shape
-            config_shape = visual.get('shape', 'rectangle')
-            cytoscape_shape = SHAPE_MAP.get(config_shape, 'rectangle')
+        for ut in unit_types:
+            style = getattr(ut, "visual_style", None) or {}
+            shape = style.get("shape", "rectangle") if isinstance(style, dict) else getattr(style, "shape", "rectangle")
+            fill = style.get("fill_color", "#CCCCCC") if isinstance(style, dict) else getattr(style, "fill_color", "#CCCCCC")
+            description = getattr(ut, "description", "") or ""
+            label = ut.abbreviation
+            if description:
+                label = f"{ut.abbreviation} - {description[:80]}"
 
             node_types.append({
-                'value': tipo_id,
-                'label': label,
-                'color': default_colors.get(tipo_id, '#B0BEC5'),  # Use default or gray
-                'shape': cytoscape_shape,
-                'custom': config.get('custom', False)
+                "value": ut.abbreviation,
+                "label": label,
+                "color": fill,
+                "shape": SHAPE_MAP.get(shape, "rectangle"),
+                "family": getattr(ut, "family", None),
             })
-
         return jsonify(node_types)
-
     except Exception as e:
-        # Fallback to minimal list if config fails
         return jsonify([
-            {'value': 'US', 'label': 'US - Standard Stratigraphic Unit', 'color': '#90CAF9', 'shape': 'rectangle'}
+            {"value": "US", "label": "US - Standard Stratigraphic Unit",
+             "color": "#F0F0F0", "shape": "rectangle"}
         ])
 
 

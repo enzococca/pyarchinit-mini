@@ -32,7 +32,8 @@ def client_no_session(tmp_path, monkeypatch):
     );
     CREATE TABLE us_table (
         id_us INTEGER PRIMARY KEY,
-        sito TEXT, us INTEGER, unita_tipo TEXT,
+        sito TEXT, area TEXT, us INTEGER, unita_tipo TEXT,
+        d_stratigrafica TEXT, datazione TEXT, file_path TEXT,
         rapporti TEXT, node_uuid TEXT,
         periodo_iniziale TEXT, fase_iniziale TEXT
     );
