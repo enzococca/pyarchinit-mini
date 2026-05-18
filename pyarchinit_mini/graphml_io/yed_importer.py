@@ -114,3 +114,98 @@ def parse_extended_matrix(path: Path) -> ParsedGraphML:
         })
 
     return parsed
+
+
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+
+@dataclass
+class ImportPlan:
+    sites: list[dict] = field(default_factory=list)
+    periodizations: list[dict] = field(default_factory=list)
+    us_records: list[dict] = field(default_factory=list)
+    relationships: list[dict] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    conflicts: list[dict] = field(default_factory=list)
+
+
+def build_import_plan(parsed: ParsedGraphML, session: Session) -> ImportPlan:
+    plan = ImportPlan()
+    if not parsed.nodes:
+        raise YEDImportValidationError("File contains no US nodes")
+    sito_set = {n.get("sito") for n in parsed.nodes if n.get("sito")}
+    if not sito_set:
+        raise YEDImportValidationError("No pyarchinit.sito on any node")
+
+    # Sites
+    for sito in sito_set:
+        existing = session.execute(text(
+            "SELECT 1 FROM site_table WHERE sito = :s LIMIT 1"
+        ), {"s": sito}).fetchone()
+        plan.sites.append({"sito": sito, "da_creare": existing is None})
+
+    # Periodizations from epochs_meta
+    seen_pz = set()
+    for ep in parsed.epochs:
+        for sito in sito_set:
+            key = (sito, ep.get("periodo"), ep.get("fase"))
+            if key in seen_pz:
+                continue
+            seen_pz.add(key)
+            existing = session.execute(text(
+                "SELECT 1 FROM periodizzazione_table "
+                "WHERE sito=:s AND periodo_iniziale=:p AND fase_iniziale=:f LIMIT 1"
+            ), {"s": sito, "p": ep.get("periodo", ""), "f": ep.get("fase", "")}).fetchone()
+            plan.periodizations.append({
+                "sito": sito,
+                "periodo": ep.get("periodo", ""),
+                "fase": ep.get("fase", ""),
+                "datazione_estesa": ep.get("datazione_estesa", ""),
+                "action": "update" if existing else "create",
+            })
+
+    # US records — upsert by node_uuid, fallback (sito, us)
+    for n in parsed.nodes:
+        sito = n.get("sito")
+        us = n.get("us")
+        uuid = n.get("node_uuid") or n.get("EMID") or ""
+        existing = None
+        if uuid:
+            existing = session.execute(text(
+                "SELECT id_us FROM us_table WHERE node_uuid = :u LIMIT 1"
+            ), {"u": uuid}).fetchone()
+        if not existing:
+            existing = session.execute(text(
+                "SELECT id_us FROM us_table WHERE sito = :s AND us = :u LIMIT 1"
+            ), {"s": sito, "u": us}).fetchone()
+        action = "update" if existing else "create"
+        plan.us_records.append({
+            "sito": sito, "us": us, "node_uuid": uuid,
+            "unita_tipo": n.get("unita_tipo", "US"),
+            "area": n.get("area", ""),
+            "periodo_iniziale": n.get("periodo_iniziale", ""),
+            "fase_iniziale": n.get("fase_iniziale", ""),
+            "d_stratigrafica": n.get("d_stratigrafica", ""),
+            "rapporti": n.get("rapporti", ""),
+            "struttura": n.get("struttura", ""),
+            "attivita": n.get("attivita", ""),
+            "settore": n.get("settore", ""),
+            "ambient": n.get("ambient", ""),
+            "saggio": n.get("saggio", ""),
+            "quad_par": n.get("quad_par", ""),
+            "datazione": n.get("datazione_estesa", ""),
+            "action": action,
+        })
+
+    # Relationships
+    for e in parsed.edges:
+        plan.relationships.append({
+            "sito": list(sito_set)[0] if len(sito_set) == 1 else "",
+            "us_from": e["us_from"],
+            "us_to": e["us_to"],
+            "type": e["type"],
+            "action": "create",
+        })
+
+    return plan
