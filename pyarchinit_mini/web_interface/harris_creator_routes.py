@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 from pyarchinit_mini.services.relationship_sync_service import RelationshipSyncService
 from pyarchinit_mini.config.em_node_config_manager import get_config_manager
 from pyarchinit_mini.vocab.provider import VocabProvider
+from pyarchinit_mini.graphml_io.writer import write_graphml
+from pyarchinit_mini.graphproj.projector import GraphProjector
 
 # Create Blueprint
 harris_creator_bp = Blueprint('harris_creator', __name__, url_prefix='/harris-creator')
@@ -399,36 +401,11 @@ def export_matrix(format):
     if format not in ['graphml', 'dot']:
         return jsonify({'success': False, 'message': 'Invalid format. Use "graphml" or "dot"'}), 400
 
-    from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
-
     try:
         with get_db_session() as db:
-            # Generate matrix
-            # Note: HarrisMatrixGenerator expects a DatabaseManager and USService
-            # We'll use the app's db_manager if available
-            if hasattr(current_app, 'db_manager'):
-                db_manager = current_app.db_manager
-                from pyarchinit_mini.services.us_service import USService
-                us_service = USService(db_manager)
-                generator = HarrisMatrixGenerator(db_manager, us_service)
-            else:
-                # Fallback: create temporary manager
-                from pyarchinit_mini.database.manager import DatabaseManager
-                from pyarchinit_mini.database.connection import DatabaseConnection
-                from pyarchinit_mini.services.us_service import USService
-                db_url = os.getenv("DATABASE_URL", "sqlite:///pyarchinit_mini.db")
-                conn = DatabaseConnection.from_url(db_url)
-                db_manager = DatabaseManager(conn)
-                us_service = USService(db_manager)
-                generator = HarrisMatrixGenerator(db_manager, us_service)
-
-            graph = generator.generate_matrix(site_name)
-
-            if not graph or graph.number_of_nodes() == 0:
-                return jsonify({'success': False, 'message': 'No nodes found for this site'}), 404
-
             # Export
             import tempfile
+            from pathlib import Path as _Path
             output_dir = tempfile.mkdtemp()
             base_name = site_name.replace(' ', '_').replace('/', '_')
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -436,23 +413,44 @@ def export_matrix(format):
             output_path = os.path.join(output_dir, filename)
 
             if format == 'graphml':
-                # export_to_graphml returns the path (or empty string on error)
-                result_path = generator.export_to_graphml(
-                    graph=graph,
-                    output_path=output_path,
-                    use_extended_labels=True,
-                    site_name=site_name,
-                    include_periods=True
-                )
-                if not result_path:
-                    return jsonify({'success': False, 'message': 'GraphML export failed'}), 500
+                # Build s3dgraphy.Graph via GraphProjector then write with
+                # graphml_io.writer (bypasses the GraphMLBuilder.to_string bug).
+                graph = GraphProjector.populate_graph(db, site_name)
+
+                if not graph.nodes:
+                    return jsonify({'success': False, 'message': 'No nodes found for this site'}), 404
+
+                write_graphml(graph, _Path(output_path))
             else:  # dot
-                # For DOT, use graphml_exporter directly
+                # DOT export: build networkx graph via HarrisMatrixGenerator
+                # and delegate to GraphMLExporter (no GraphMLBuilder involved).
+                from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
                 from pyarchinit_mini.graphml_converter.graphml_exporter import GraphMLExporter
+
+                if hasattr(current_app, 'db_manager'):
+                    db_manager = current_app.db_manager
+                    from pyarchinit_mini.services.us_service import USService
+                    us_service = USService(db_manager)
+                    generator = HarrisMatrixGenerator(db_manager, us_service)
+                else:
+                    from pyarchinit_mini.database.manager import DatabaseManager
+                    from pyarchinit_mini.database.connection import DatabaseConnection
+                    from pyarchinit_mini.services.us_service import USService
+                    db_url = os.getenv("DATABASE_URL", "sqlite:///pyarchinit_mini.db")
+                    conn = DatabaseConnection.from_url(db_url)
+                    db_manager = DatabaseManager(conn)
+                    us_service = USService(db_manager)
+                    generator = HarrisMatrixGenerator(db_manager, us_service)
+
+                nx_graph = generator.generate_matrix(site_name)
+
+                if not nx_graph or nx_graph.number_of_nodes() == 0:
+                    return jsonify({'success': False, 'message': 'No nodes found for this site'}), 404
+
                 exporter = GraphMLExporter()
                 dot_path = output_path.replace('.dot', '') + '.dot'
                 try:
-                    exporter.export_to_dot(graph, dot_path, site_name=site_name)
+                    exporter.export_to_dot(nx_graph, dot_path, site_name=site_name)
                     output_path = dot_path
                 except Exception as e:
                     return jsonify({'success': False, 'message': f'DOT export failed: {str(e)}'}), 500
