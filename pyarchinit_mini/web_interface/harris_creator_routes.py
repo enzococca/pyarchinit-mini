@@ -627,6 +627,45 @@ from pyarchinit_mini.harris_swimlane.period_sync_service import PeriodSyncServic
 from pyarchinit_mini.harris_swimlane.exceptions import PeriodSyncError
 
 
+def _load_epochs(session, site: str) -> list[dict]:
+    """Load periodizzazione rows for the site to feed yed_writer epochs_meta.
+
+    Primary source: ``periodizzazione_table`` (populated when data is saved via
+    the Harris Creator editor).  Falls back to the distinct ``periodo_iniziale``
+    / ``fase_iniziale`` pairs from ``us_table`` so that fixture databases that
+    pre-date the periodizzazione write path (e.g. the Volterra test fixture)
+    still produce a non-empty epochs list.
+    """
+    from sqlalchemy import text
+    # ``datazione_estesa`` may not exist in older schema versions — use a
+    # NULL placeholder and handle missing column gracefully.
+    try:
+        rows = session.execute(text(
+            "SELECT DISTINCT periodo_iniziale, fase_iniziale, datazione_estesa "
+            "FROM periodizzazione_table WHERE sito = :s AND periodo_iniziale IS NOT NULL"
+        ), {"s": site}).fetchall()
+    except Exception:
+        rows = session.execute(text(
+            "SELECT DISTINCT periodo_iniziale, fase_iniziale, NULL as datazione_estesa "
+            "FROM periodizzazione_table WHERE sito = :s AND periodo_iniziale IS NOT NULL"
+        ), {"s": site}).fetchall()
+    if not rows:
+        # Fallback: derive epochs from us_table distinct values.
+        rows = session.execute(text(
+            "SELECT DISTINCT periodo_iniziale, fase_iniziale, NULL as datazione_estesa "
+            "FROM us_table WHERE sito = :s AND periodo_iniziale IS NOT NULL"
+        ), {"s": site}).fetchall()
+    out = []
+    for r in rows:
+        out.append({
+            "name": f"Period{r[0]}" + (f"_phase{r[1]}" if r[1] else ""),
+            "periodo": r[0] or "",
+            "fase": r[1] or "",
+            "datazione_estesa": r[2] or "",
+        })
+    return out
+
+
 def _get_session():
     """Get a request-scoped SQLAlchemy session for Spec 3-bis endpoints.
 
@@ -799,7 +838,7 @@ def api_export_yed(site: str):
     try:
         session = _get_session()
         state = SwimlaneState.load(session, site, group_by=group_by)
-        epochs = []  # populated from periodizzazione_table in Task 12
+        epochs = _load_epochs(session, site)
         out_dir = _Path("data/exports/harris_yed")
         out_dir.mkdir(parents=True, exist_ok=True)
         site_slug = slugify(site)
