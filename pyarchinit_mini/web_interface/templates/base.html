@@ -84,6 +84,7 @@
                     <li><hr class="dropdown-divider"></li>
                     <li><h6 class="dropdown-header">{{ _('Tools') }}</h6></li>
                     <li><a class="dropdown-item" href="{{ url_for('harris_creator.index') }}"><i class="fas fa-project-diagram"></i> {{ _('Harris Matrix Creator') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('paradata_ui.index') }}"><i class="fas fa-tags"></i> {{ _('Paradata') }}</a></li>
                     <li><a class="dropdown-item" href="{{ url_for('three_d_builder.blender_viewer') }}"><i class="fas fa-cube"></i> {{ _('Blender 3D') }}</a></li>
                     <li><a class="dropdown-item" href="{{ url_for('upload_media') }}"><i class="fas fa-images"></i> {{ _('Media') }}</a></li>
                     <li><a class="dropdown-item" href="{{ url_for('excel_import.index') }}"><i class="fas fa-file-excel"></i> {{ _('Excel Import') }}</a></li>
@@ -177,6 +178,7 @@
                 <li><a href="{{ url_for('upload_media') }}"><i class="fas fa-upload"></i> {{ _('Upload Media') }}</a></li>
                 <li><a href="{{ url_for('media_list') }}"><i class="fas fa-photo-video"></i> {{ _('Media Files') }}</a></li>
                 <li><a href="{{ url_for('harris_creator.index') }}"><i class="fas fa-project-diagram"></i> {{ _('Harris Matrix Creator') }}</a></li>
+                <li><a href="{{ url_for('paradata_ui.index') }}"><i class="fas fa-tags"></i> {{ _('Paradata') }}</a></li>
                 <li><a href="{{ url_for('export_harris_graphml') }}"><i class="fas fa-sitemap"></i> {{ _('Harris Export') }}</a></li>
             </ul>
         </div>

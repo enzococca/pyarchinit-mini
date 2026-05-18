@@ -3,7 +3,9 @@
 Backed by ParadataStore (JSON sidecar). REST counterparts live in
 paradata_routes.py.
 """
-from flask import Blueprint, render_template, request, redirect, url_for, abort
+import os
+
+from flask import Blueprint, current_app, render_template, request, redirect, url_for, abort
 
 from pyarchinit_mini.graphproj.paradata_store import ParadataStore
 from pyarchinit_mini.graphproj.exceptions import ParadataConflict, ParadataNotFound
@@ -45,6 +47,25 @@ def _kind_or_404(kind):
     if kind not in KIND_DEF:
         abort(404)
     return KIND_DEF[kind]
+
+
+@paradata_ui_bp.get("/", endpoint="index")
+def index():
+    """Paradata landing: list available sites + the 5 kinds."""
+    from pyarchinit_mini.models.site import Site
+    if hasattr(current_app, "db_manager"):
+        session_ctx = current_app.db_manager.connection.get_session()
+    else:
+        from pyarchinit_mini.database.connection import DatabaseConnection
+        db_url = os.getenv("DATABASE_URL", "sqlite:///pyarchinit_mini.db")
+        session_ctx = DatabaseConnection.from_url(db_url).get_session()
+    with session_ctx as db:
+        sites = [s.sito for s in db.query(Site).order_by(Site.sito).all()]
+    return render_template(
+        "paradata/index.html",
+        sites=sites,
+        kinds=list(KIND_DEF.keys()),
+    )
 
 
 @paradata_ui_bp.get("/<site>/<kind>", endpoint="list")

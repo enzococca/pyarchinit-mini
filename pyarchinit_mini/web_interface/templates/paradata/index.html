@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ _('Paradata') }} - PyArchInit-Mini{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1><i class="fas fa-tags"></i> {{ _('Paradata') }}</h1>
+  <p class="text-muted">
+    {{ _('Per-site paradata sidecar: authors, licenses, embargoes, documents, epochs. Stored as JSON next to the auto-regenerated stratigraphy graph.') }}
+  </p>
+
+  {% if not sites %}
+    <div class="alert alert-info">{{ _('No sites available. Create a site first.') }}</div>
+  {% else %}
+    <div class="card mb-4">
+      <div class="card-body">
+        <label for="site-picker" class="form-label">{{ _('Choose a site') }}</label>
+        <select id="site-picker" class="form-select">
+          <option value="">— {{ _('select') }} —</option>
+          {% for s in sites %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div id="kind-buttons" class="d-none">
+      <h5>{{ _('Manage') }}:</h5>
+      <div class="d-flex flex-wrap gap-2">
+        {% for k in kinds %}
+        <a id="kind-link-{{ k }}" href="#" class="btn btn-outline-primary">
+          <i class="fas fa-folder"></i> {{ k|capitalize }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+(function() {
+  const picker = document.getElementById('site-picker');
+  if (!picker) return;
+  const wrap = document.getElementById('kind-buttons');
+  const base = "{{ url_for('paradata_ui.list', site='__SITE__', kind='__KIND__') }}";
+  picker.addEventListener('change', () => {
+    const site = picker.value;
+    if (!site) { wrap.classList.add('d-none'); return; }
+    wrap.classList.remove('d-none');
+    {% for k in kinds %}
+    document.getElementById('kind-link-{{ k }}').href =
+      base.replace('__SITE__', encodeURIComponent(site)).replace('__KIND__', '{{ k }}');
+    {% endfor %}
+  });
+})();
+</script>
+{% endblock %}
