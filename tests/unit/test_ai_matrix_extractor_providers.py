@@ -59,3 +59,39 @@ def test_extract_anthropic_call_with_mock(monkeypatch):
     r = extract(b"\x89PNG\r\n\x1a\n" + b"x" * 100, "context text", "anthropic")
     assert r.rejected is False
     assert r.plan.detected_site == "S1"
+
+
+def test_extract_openai_call_with_mock(monkeypatch):
+    """End-to-end with mocked openai client."""
+    fake_payload = json.dumps({
+        "is_harris_matrix": True,
+        "confidence": 0.85,
+        "reason": "OK",
+        "detected_site": "S2",
+        "detected_area": "Area east",
+        "us": [{"us_num": "5", "area": "Area east", "unit_type": "USR",
+                "descrizione": "intonaco", "fase_recente": 2, "fase_iniziale": 2}],
+        "edges": [],
+    })
+
+    class FakeMessage:
+        def __init__(self, content): self.content = content
+    class FakeChoice:
+        def __init__(self, content): self.message = FakeMessage(content)
+    class FakeCompletion:
+        def __init__(self, content): self.choices = [FakeChoice(content)]
+    class FakeCompletions:
+        def create(self, **kw): return FakeCompletion(fake_payload)
+    class FakeChat:
+        def __init__(self): self.completions = FakeCompletions()
+    class FakeClient:
+        def __init__(self, **kw): self.chat = FakeChat()
+
+    import openai
+    monkeypatch.setattr(openai, "OpenAI", FakeClient)
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+
+    r = extract(b"\x89PNG\r\n\x1a\n" + b"x" * 100, "hint", "openai")
+    assert r.rejected is False
+    assert r.plan.detected_site == "S2"
+    assert r.plan.us[0].unit_type == "USR"
