@@ -27,11 +27,19 @@ Usage:
     )
 """
 
+import warnings as _spec2_warnings
 import os
 import locale
 from io import StringIO
 from . import dot_parser as dot
 from . import graphml_exporter as exporter
+
+_spec2_warnings.warn(
+    "pyarchinit_mini.graphml_converter.converter is deprecated; use "
+    "pyarchinit_mini.graphml_io.writer instead. This module will be removed in Spec 3.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 class GraphMLConverterOptions:
