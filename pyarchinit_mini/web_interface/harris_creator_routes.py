@@ -758,3 +758,57 @@ def api_create_row(site: str):
     except Exception as e:
         logger.exception("api_create_row failed")
         return jsonify({"error": "internal", "message": str(e)}), 500
+
+
+from pathlib import Path as _Path
+from datetime import datetime as _datetime
+import json as _json
+from flask import send_file as _send_file
+
+from pyarchinit_mini.graphml_io.yed_writer import write_yed_graphml
+from pyarchinit_mini.harris_swimlane.exceptions import YEDWriterError
+from pyarchinit_mini.graphproj.filesystem import slugify
+
+
+@harris_creator_bp.get("/api/export/<site>/yed-graphml")
+def api_export_yed(site: str):
+    """Export current swimlane state as yEd-flavored GraphML. On-demand."""
+    try:
+        session = _get_session()
+        state = SwimlaneState.load(session, site)
+
+        out_dir = _Path("data/exports/harris_yed")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        site_slug = slugify(site)
+        out_path = out_dir / f"{site_slug}-harris-yed.graphml"
+        write_yed_graphml(state, out_path)
+
+        idx_path = out_dir / "_index.json"
+        entries = []
+        if idx_path.exists():
+            try:
+                entries = _json.loads(idx_path.read_text(encoding="utf-8"))
+            except Exception:
+                entries = []
+        entries.append({
+            "site": site,
+            "site_slug": site_slug,
+            "file_path": str(out_path),
+            "file_size": out_path.stat().st_size,
+            "timestamp": _datetime.now().isoformat(),
+        })
+        idx_path.write_text(_json.dumps(entries, indent=2), encoding="utf-8")
+
+        return _send_file(
+            out_path.resolve(),
+            as_attachment=True,
+            download_name=f"{site_slug}-harris-yed.graphml",
+            mimetype="application/xml",
+        )
+    except YEDWriterError as e:
+        return jsonify({"error": "yed_writer", "message": str(e)}), 500
+    except SwimlaneError as e:
+        return jsonify({"error": "swimlane", "message": str(e)}), 500
+    except Exception as e:
+        logger.exception("api_export_yed failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
