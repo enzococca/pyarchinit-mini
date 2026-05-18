@@ -25,6 +25,7 @@ from pyarchinit_mini.models.us import US
 from pyarchinit_mini.harris_matrix.matrix_generator import HarrisMatrixGenerator
 from pyarchinit_mini.services.command_parser import CommandParser
 from pyarchinit_mini.services.mcp_executor import get_executor
+from pyarchinit_mini.graphproj.auto_regen import _trigger_graph_regen
 
 logger = logging.getLogger(__name__)
 
@@ -1385,6 +1386,12 @@ def create_us():
             db_session.add(new_us)
             db_session.commit()
 
+            # Spec 2: auto-regen stratigraphy.graphml post-commit.
+            try:
+                _trigger_graph_regen(data['sito'], session=db_session)
+            except Exception:
+                pass
+
             logger.info(f"Created new US: {data['sito']}/{data.get('area')}/US{data['us']}")
 
             return jsonify({
@@ -1470,6 +1477,12 @@ def update_us():
                 us_record.height = float(data['height'])
 
             db_session.commit()
+
+            # Spec 2: auto-regen stratigraphy.graphml post-commit.
+            try:
+                _trigger_graph_regen(data['sito'], session=db_session)
+            except Exception:
+                pass
 
             logger.info(f"Updated US: {data['sito']}/{data.get('area')}/US{data['us']}")
 
