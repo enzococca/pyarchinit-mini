@@ -638,20 +638,40 @@ from pyarchinit_mini.harris_swimlane.exceptions import PeriodSyncError
 
 
 def _get_session():
-    """Get the request-bound SQLAlchemy session.
+    """Get a request-scoped SQLAlchemy session for Spec 3-bis endpoints.
 
-    Requires the Flask app to set g.db_session in a before_request hook
-    (the production app does this; tests do too). Raises if not set —
-    fails loud rather than silently returning a context-manager generator
-    that downstream callers will treat as a Session.
+    Reuses ``g.db_session`` if a before_request hook has set it. Otherwise
+    lazily opens one through the same path as ``get_db_session()`` and
+    binds it to ``g`` (the teardown_request hook below releases it). This
+    keeps the API contract simple — endpoints just call ``_get_session()``
+    and get a real ``Session`` back, whether or not the host app wires a
+    before_request hook (the production app in 2.4.x does not).
     """
     db = getattr(g, "db_session", None)
-    if db is None:
-        raise RuntimeError(
-            "g.db_session not set. The Flask app must set it in a "
-            "before_request hook before invoking Spec 3-bis endpoints."
-        )
+    if db is not None:
+        return db
+    cm = get_db_session()
+    db = cm.__enter__()
+    g.db_session = db
+    g._db_session_cm = cm
     return db
+
+
+@harris_creator_bp.teardown_request
+def _release_lazy_db_session(exc):  # noqa: ARG001 — exc is part of the signature
+    """Close any session that ``_get_session()`` opened lazily for this request."""
+    cm = getattr(g, "_db_session_cm", None)
+    if cm is None:
+        return
+    try:
+        cm.__exit__(type(exc) if exc else None, exc, getattr(exc, "__traceback__", None))
+    except Exception:
+        pass
+    finally:
+        try:
+            delattr(g, "_db_session_cm")
+        except AttributeError:
+            pass
 
 
 @harris_creator_bp.get("/api/swimlanes/<site>")
