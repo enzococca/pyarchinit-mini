@@ -70,7 +70,7 @@ def _register_pottery_routes(app):
         size = int(request.args.get("size", 25))
         filters = {
             k: request.args.get(k)
-            for k in ("sito", "area", "us", "form", "fabric", "ware", "q")
+            for k in ("sito", "area", "us", "form", "fabric", "ware", "q", "id_number", "anno")
             if request.args.get(k)
         }
         svc = PotteryService(app.db_manager)
@@ -230,7 +230,7 @@ def _register_pottery_routes(app):
         from datetime import datetime, timezone
         from flask import send_file
         svc = PotteryService(app.db_manager)
-        filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric") if request.args.get(k)}
+        filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric","id_number","anno") if request.args.get(k)}
         items, _ = svc.get_all_pottery(page=1, size=10_000, filters=filters)
         rows = [PotteryDTO.from_model(p).to_dict() for p in items]
         df = pd.DataFrame(rows, columns=list(_POTTERY_FORM_FIELDS) + ["id_rep"])
@@ -256,7 +256,7 @@ def _register_pottery_routes(app):
         import csv
         from flask import Response
         svc = PotteryService(app.db_manager)
-        filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric") if request.args.get(k)}
+        filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric","id_number","anno") if request.args.get(k)}
         items, _ = svc.get_all_pottery(page=1, size=10_000, filters=filters)
         header = list(_POTTERY_FORM_FIELDS) + ["id_rep"]
         buf = _io.StringIO()
@@ -372,7 +372,7 @@ def _register_pottery_routes(app):
         from ..services.pottery_pdf_service import PotteryPDFService
         from .. import __version__
         svc = PotteryService(app.db_manager)
-        filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric") if request.args.get(k)}
+        filters = {k: request.args.get(k) for k in ("sito","area","us","form","fabric","id_number","anno") if request.args.get(k)}
         items, _ = svc.get_all_pottery(page=1, size=10_000, filters=filters)
         if not items:
             flash("No pottery records matching filters.", "warning")
