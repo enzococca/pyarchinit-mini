@@ -1,3 +1,22 @@
+## [2.6.0] - 2026-05-18
+
+### Changed (IT)
+- Editor Harris Matrix Creator: gli archi stratigrafici sono ora resi con
+  routing ortogonale (90°, `curve-style: 'taxi'`) invece che con curve
+  bezier diagonali. Allineato al `y:PolyLineEdge` di yEd usato da
+  pyarchinit QGIS plugin.
+- `harris_swimlane/harris_layout.py`: defaults aumentati a `v_gap=40`
+  (era 20) e `h_gap=50` (era 30) per dare respiro agli archi ortogonali.
+  Chiamanti che passano i parametri esplicitamente non sono toccati.
+
+### Changed (EN)
+- Harris Matrix Creator editor: stratigraphic edges now render with
+  right-angle routing (`curve-style: 'taxi'`) instead of bezier curves,
+  matching the `y:PolyLineEdge` style used by pyarchinit QGIS.
+- `harris_swimlane/harris_layout.py`: defaults bumped to `v_gap=40`
+  (was 20) and `h_gap=50` (was 30) to give orthogonal edges breathing
+  room. Explicit callers are unaffected.
+
 ## [2.5.1] - 2026-05-18
 
 ### Added (IT)

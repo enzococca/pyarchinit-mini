@@ -257,6 +257,8 @@ function initCytoscape() {
                 }
             },
             // Edge styles - default (normal stratigraphic)
+            // Spec 9: orthogonal routing matches yEd PolyLineEdge style used
+            // by pyarchinit QGIS plugin.
             {
                 selector: 'edge',
                 style: {
@@ -264,7 +266,9 @@ function initCytoscape() {
                     'line-color': '#666',
                     'target-arrow-color': '#666',
                     'target-arrow-shape': 'triangle',
-                    'curve-style': 'bezier',
+                    'curve-style': 'taxi',
+                    'taxi-direction': 'vertical',
+                    'taxi-turn': 'auto',
                     'label': 'data(label)',
                     'font-size': '10px',
                     'text-rotation': 'autorotate',
