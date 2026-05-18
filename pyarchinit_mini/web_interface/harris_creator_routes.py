@@ -787,7 +787,6 @@ from datetime import datetime as _datetime
 import json as _json
 from flask import send_file as _send_file
 
-from pyarchinit_mini.graphml_io.yed_writer import write_yed_graphml
 from pyarchinit_mini.harris_swimlane.exceptions import YEDWriterError
 from pyarchinit_mini.graphproj.filesystem import slugify
 
@@ -795,16 +794,20 @@ from pyarchinit_mini.graphproj.filesystem import slugify
 @harris_creator_bp.get("/api/export/<site>/yed-graphml")
 def api_export_yed(site: str):
     """Export current swimlane state as yEd-flavored GraphML. On-demand."""
+    from pyarchinit_mini.graphml_io.yed_writer import write_extended_matrix_graphml
+    group_by = request.args.get("group_by", "period_phase")
     try:
         session = _get_session()
-        state = SwimlaneState.load(session, site)
-
+        state = SwimlaneState.load(session, site, group_by=group_by)
+        epochs = []  # populated from periodizzazione_table in Task 12
         out_dir = _Path("data/exports/harris_yed")
         out_dir.mkdir(parents=True, exist_ok=True)
         site_slug = slugify(site)
-        out_path = out_dir / f"{site_slug}-harris-yed.graphml"
-        write_yed_graphml(state, out_path)
-
+        out_path = out_dir / f"{site_slug}-extmatrix.graphml"
+        write_extended_matrix_graphml(
+            state, site_meta={"sito": site}, epochs=epochs, out=out_path,
+        )
+        # Preserve the existing _index.json upsert-by-site_slug logic.
         idx_path = out_dir / "_index.json"
         entries = []
         if idx_path.exists():
@@ -812,7 +815,6 @@ def api_export_yed(site: str):
                 entries = _json.loads(idx_path.read_text(encoding="utf-8"))
             except Exception:
                 entries = []
-        # Upsert by site_slug: at most 1 entry per site, latest export wins
         entries = [e for e in entries if e.get("site_slug") != site_slug]
         entries.append({
             "site": site,
@@ -822,17 +824,14 @@ def api_export_yed(site: str):
             "timestamp": _datetime.now().isoformat(),
         })
         idx_path.write_text(_json.dumps(entries, indent=2), encoding="utf-8")
-
         return _send_file(
-            out_path.resolve(),
-            as_attachment=True,
-            download_name=f"{site_slug}-harris-yed.graphml",
+            out_path.resolve(), as_attachment=True,
+            download_name=f"{site_slug}-extmatrix.graphml",
             mimetype="application/xml",
         )
     except YEDWriterError as e:
-        return jsonify({"error": "yed_writer", "message": str(e)}), 500
-    except SwimlaneError as e:
-        return jsonify({"error": "swimlane", "message": str(e)}), 500
+        return jsonify({"error": "writer", "message": str(e)}), 500
+    except ValueError as e:
+        return jsonify({"error": "validation", "message": str(e)}), 400
     except Exception as e:
-        logger.exception("api_export_yed failed")
         return jsonify({"error": "internal", "message": str(e)}), 500

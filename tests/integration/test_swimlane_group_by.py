@@ -86,3 +86,19 @@ def test_api_load_accepts_group_by(tmp_path, monkeypatch):
     body = r.get_json()
     assert body["group_by"] == "none"
     assert len(body["rows"]) == 1
+
+
+def test_api_export_yed_with_group_by(tmp_path, monkeypatch):
+    from flask import Flask
+    from pyarchinit_mini.web_interface.harris_creator_routes import harris_creator_bp
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{DB_FIX}")
+    app = Flask(__name__)
+    app.config["TESTING"] = True
+    app.register_blueprint(harris_creator_bp)
+    cli = app.test_client()
+
+    r = cli.get("/harris-creator/api/export/Volterra/yed-graphml?group_by=none")
+    assert r.status_code == 200
+    body = r.get_data(as_text=True)
+    assert "YED_TABLE_NODE" in body
+    assert '<y:Row id="row_default"' in body
