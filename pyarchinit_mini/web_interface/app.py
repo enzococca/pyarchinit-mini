@@ -402,6 +402,7 @@ def create_app():
 
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'your-secret-key-here'
+    app.config.setdefault("MAX_CONTENT_LENGTH", 16 * 1024 * 1024)  # 16MB cap on uploads
     # Use centralized ~/.pyarchinit_mini directory
     pyarchinit_home = Path.home() / '.pyarchinit_mini'
     app.config['UPLOAD_FOLDER'] = str(pyarchinit_home / 'web_interface' / 'static' / 'uploads')

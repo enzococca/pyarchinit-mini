@@ -162,3 +162,21 @@ def test_apply_rejects_empty_selection(client_and_session):
     rows = s.execute(text("SELECT us FROM us_table")).fetchall()
     assert len(rows) == 0
     # site might still be created — that's OK (apply_ai_plan never ran)
+
+
+def test_apply_rejects_non_numeric_fase(client_and_session):
+    client, _ = client_and_session
+    plan = _plan_json(
+        us_rows=[{"us_num": "1", "area": "A", "unit_type": "USM",
+                  "descrizione": "x", "fase_recente": 1, "fase_iniziale": 1}],
+        edges=[],
+    )
+    r = client.post("/matrix-import/apply", data={
+        "plan_json": plan,
+        "sito": "S",
+        "selected_us": "0",
+        "us_num_0": "1", "area_0": "A", "unit_type_0": "USM",
+        "desc_0": "x", "fr_0": "abc", "fi_0": "1",  # malformed fase_recente
+    }, follow_redirects=False)
+    assert r.status_code in (302, 303)
+    assert "/us/list" not in r.headers.get("Location", "")

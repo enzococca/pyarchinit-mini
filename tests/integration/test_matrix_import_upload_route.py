@@ -115,3 +115,18 @@ def test_upload_missing_file_redirects(client):
         follow_redirects=False,
     )
     assert r.status_code in (302, 303)
+
+
+def test_upload_empty_file_filename_redirects(client):
+    """Browser submits form without choosing a file — FileStorage with empty filename."""
+    import io as _io
+    r = client.post(
+        "/matrix-import/upload",
+        data={
+            "image": (_io.BytesIO(b""), ""),  # empty filename — Flask treats as "no file"
+            "provider": "anthropic",
+        },
+        content_type="multipart/form-data",
+        follow_redirects=False,
+    )
+    assert r.status_code in (302, 303)

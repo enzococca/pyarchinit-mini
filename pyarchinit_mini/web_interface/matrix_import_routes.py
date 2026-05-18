@@ -44,7 +44,7 @@ def upload():
     area_form = request.form.get("area", "").strip()
     provider = request.form.get("provider", "anthropic")
 
-    if not image_file:
+    if not image_file or not image_file.filename:
         flash("Carica un'immagine", "error")
         return redirect(url_for("matrix_import.upload_form"))
     image_bytes = image_file.read()
@@ -136,7 +136,12 @@ def apply():
         current_app.logger.warning("matrix_import: malformed plan_json: %s", e)
         flash("Plan malformato — riprova l'analisi", "error")
         return redirect(url_for("matrix_import.upload_form"))
-    plan = _apply_form_edits(plan, request.form, selected_us, selected_edges)
+    try:
+        plan = _apply_form_edits(plan, request.form, selected_us, selected_edges)
+    except (ValueError, TypeError) as e:
+        current_app.logger.warning("matrix_import: malformed form edits: %s", e)
+        flash("Valori non validi nel form — controlla i campi numerici", "error")
+        return redirect(url_for("matrix_import.upload_form"))
 
     if not plan.us and not plan.edges:
         flash("Nessuna riga selezionata — controlla almeno una US o relazione", "error")
