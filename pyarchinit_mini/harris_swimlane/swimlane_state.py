@@ -54,27 +54,6 @@ class SwimlaneState:
             "FROM us_table WHERE sito = :sito ORDER BY id_us"
         ), {"sito": site}).fetchall()
 
-        # If no US records exist for this site, return a truly empty state
-        if not us_rows and not rows:
-            return EditorState(
-                site=site,
-                rows=[],
-                nodes=[],
-                edges=[],
-                pending_changes={"us_updates": [], "us_inserts": [], "us_deletes": []},
-            )
-
-        # If no US records but rows exist (shouldn't happen with well-formed data),
-        # treat as empty — no swimlane parents to show for an unknown site
-        if not us_rows:
-            return EditorState(
-                site=site,
-                rows=[],
-                nodes=[],
-                edges=[],
-                pending_changes={"us_updates": [], "us_inserts": [], "us_deletes": []},
-            )
-
         nodes: list[CytoscapeElement] = []
         us_num_to_node_id: dict[int, str] = {}
         row_counts: dict[str, int] = {}

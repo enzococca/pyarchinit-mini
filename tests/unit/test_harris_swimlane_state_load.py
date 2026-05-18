@@ -58,9 +58,27 @@ def test_load_creates_edges_from_rapporti(session):
     assert len(state.edges) >= 5
 
 
-def test_load_empty_site_returns_empty_state(session):
+def test_load_empty_site_returns_rows_but_no_us(session):
+    """Empty site (no US rows) still shows period_table rows so user can
+    start dragging/creating US into them."""
     state = SwimlaneState.load(session, "NoSuchSite")
-    assert state.rows == [] or len(state.rows) == 0
-    # nodes will be empty (no swimlane parents either since no rows)
-    assert state.nodes == []
-    assert state.edges == []
+    # period_table is cross-site; rows populated from there
+    # us_rows for unknown site is empty
+    us_nodes = [el for el in state.nodes if not el.data.get("is_swimlane")]
+    assert len(us_nodes) == 0  # no US for unknown site
+    assert state.edges == []   # no edges either
+    # rows may be non-empty (cross-site period_table); that's intentional
+
+
+def test_load_site_with_periods_but_no_us(session):
+    """A real site with period_table populated but 0 US records still
+    renders swimlane rows (so user can drag-create US into them)."""
+    state = SwimlaneState.load(session, "BrandNewSite")
+    # 5 rows from fixture period_table (cross-site)
+    # 0 us_nodes because site has no US
+    assert len(state.rows) == 5
+    us_nodes = [el for el in state.nodes if not el.data.get("is_swimlane")]
+    assert len(us_nodes) == 0
+    # 5 swimlane parents in nodes
+    swimlane_nodes = [el for el in state.nodes if el.data.get("is_swimlane")]
+    assert len(swimlane_nodes) == 5
