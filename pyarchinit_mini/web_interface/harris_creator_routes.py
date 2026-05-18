@@ -694,31 +694,31 @@ def api_load_state(site: str):
     # DB (no site_table row), versus 200 + empty state when site exists but
     # has no US yet. Spec §7.1 mentions 404 for site_not_found — current
     # behavior returns 200 + empty.
+    group_by = request.args.get("group_by", "period_phase")
     try:
         session = _get_session()
-        state = SwimlaneState.load(session, site)
+        state = SwimlaneState.load(session, site, group_by=group_by)
         return jsonify({
             "site": state.site,
-            "rows": [{
-                "row_id": r.row_id,
-                "period_name": r.period_name,
-                "phase_name": r.phase_name,
-                "color": r.color,
-                "start_date": r.start_date,
-                "end_date": r.end_date,
-                "source": r.source,
-            } for r in state.rows],
-            "nodes": [{
-                "data": el.data,
-                "classes": el.classes,
-                "position": el.position,
-            } for el in state.nodes],
-            "edges": [{
-                "data": el.data,
-                "classes": el.classes,
-            } for el in state.edges],
+            "group_by": state.group_by,
+            "rows": [
+                {
+                    "row_id": r.row_id,
+                    "period_name": r.period_name,
+                    "phase_name": r.phase_name,
+                    "color": r.color,
+                    "start_date": r.start_date,
+                    "end_date": r.end_date,
+                    "source": r.source,
+                }
+                for r in state.rows
+            ],
+            "nodes": [{"data": el.data, "position": el.position} for el in state.nodes],
+            "edges": [{"data": el.data} for el in state.edges],
             "pending_changes": state.pending_changes,
         }), 200
+    except ValueError as e:
+        return jsonify({"error": "validation", "message": str(e)}), 400
     except SwimlaneError as e:
         return jsonify({"error": "swimlane", "message": str(e)}), 500
     except Exception as e:

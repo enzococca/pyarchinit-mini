@@ -68,3 +68,21 @@ def test_harris_positions_within_lanes(session):
         assert src.position["y"] <= tgt.position["y"], (
             f"{src.data['id']} should be above {tgt.data['id']}"
         )
+
+
+def test_api_load_accepts_group_by(tmp_path, monkeypatch):
+    from flask import Flask
+    from pyarchinit_mini.web_interface.harris_creator_routes import harris_creator_bp
+
+    db_path = str(DB_FIX)
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_path}")
+    app = Flask(__name__)
+    app.config["TESTING"] = True
+    app.register_blueprint(harris_creator_bp)
+    cli = app.test_client()
+
+    r = cli.get("/harris-creator/api/load/Volterra?group_by=none")
+    assert r.status_code == 200, r.get_data(as_text=True)
+    body = r.get_json()
+    assert body["group_by"] == "none"
+    assert len(body["rows"]) == 1
