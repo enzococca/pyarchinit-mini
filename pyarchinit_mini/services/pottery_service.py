@@ -114,6 +114,7 @@ class PotteryService:
 
     # ---------- Listing & Filtering ----------
     _FILTERABLE = ("sito", "area", "us", "form", "fabric", "ware", "material")
+    _FILTERABLE_INT = ("id_number", "anno")
 
     def _apply_filters(self, q, filters: Optional[Dict[str, Any]]):
         if not filters:
@@ -124,6 +125,16 @@ class PotteryService:
                 continue
             col = getattr(Pottery, k)
             q = q.filter(col == v)
+        for k in self._FILTERABLE_INT:
+            v = filters.get(k)
+            if v in (None, ""):
+                continue
+            try:
+                ival = int(v)
+            except (TypeError, ValueError):
+                continue  # silently drop non-numeric input
+            col = getattr(Pottery, k)
+            q = q.filter(col == ival)
         q_text = filters.get("q")
         if q_text:
             like = f"%{q_text}%"
