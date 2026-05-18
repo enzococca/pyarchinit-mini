@@ -1,0 +1,82 @@
+"""One-shot generator for yEd Extended Matrix test fixtures.
+Run once; commit the generated files.
+"""
+from pathlib import Path
+
+FIX = Path(__file__).parent / "yed_graphml"
+FIX.mkdir(parents=True, exist_ok=True)
+
+MINIMAL = """<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:y="http://www.yworks.com/xml/graphml">
+  <key attr.name="pyarchinit.epochs_meta" attr.type="string" for="graph" id="d0"/>
+  <key attr.name="EMID" attr.type="string" for="node" id="d4"/>
+  <key attr.name="pyarchinit.us" attr.type="string" for="node" id="d6"/>
+  <key attr.name="pyarchinit.area" attr.type="string" for="node" id="d7"/>
+  <key attr.name="pyarchinit.sito" attr.type="string" for="node" id="d8"/>
+  <key attr.name="pyarchinit.unita_tipo" attr.type="string" for="node" id="d9"/>
+  <key attr.name="pyarchinit.periodo_iniziale" attr.type="string" for="node" id="d10"/>
+  <key attr.name="pyarchinit.fase_iniziale" attr.type="string" for="node" id="d11"/>
+  <key attr.name="pyarchinit.node_uuid" attr.type="string" for="node" id="d16"/>
+  <key for="node" id="d31" yfiles.type="nodegraphics"/>
+  <graph edgedefault="directed" id="G">
+    <data key="d0"><![CDATA[[{"name":"P1","periodo":"1","fase":"a","datazione_estesa":"Iron Age"}]]]></data>
+    <node id="n1">
+      <data key="d4">uuid-001</data>
+      <data key="d6">1</data>
+      <data key="d7">A</data>
+      <data key="d8">TestSite</data>
+      <data key="d9">US</data>
+      <data key="d10">1</data>
+      <data key="d11">a</data>
+      <data key="d16">uuid-001</data>
+    </node>
+    <node id="n2">
+      <data key="d4">uuid-002</data>
+      <data key="d6">2</data>
+      <data key="d7">A</data>
+      <data key="d8">TestSite</data>
+      <data key="d9">US</data>
+      <data key="d10">1</data>
+      <data key="d11">a</data>
+      <data key="d16">uuid-002</data>
+    </node>
+    <node id="n3">
+      <data key="d4">uuid-003</data>
+      <data key="d6">3</data>
+      <data key="d7">A</data>
+      <data key="d8">TestSite</data>
+      <data key="d9">USVs</data>
+      <data key="d10">1</data>
+      <data key="d11">a</data>
+      <data key="d16">uuid-003</data>
+    </node>
+    <edge id="e1" source="n1" target="n2"/>
+    <edge id="e2" source="n2" target="n3"/>
+  </graph>
+</graphml>
+"""
+
+VANILLA = """<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:y="http://www.yworks.com/xml/graphml">
+  <key for="node" id="d6" yfiles.type="nodegraphics"/>
+  <graph edgedefault="directed" id="G">
+    <node id="n1">
+      <data key="d6"><y:ShapeNode><y:NodeLabel>plain</y:NodeLabel></y:ShapeNode></data>
+    </node>
+  </graph>
+</graphml>
+"""
+
+MALFORMED = """<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <graph edgedefault="directed" id="G">
+    <node id="n1">
+      <data key="d6">incomplete
+"""
+
+(FIX / "minimal.graphml").write_text(MINIMAL, encoding="utf-8")
+(FIX / "vanilla_yed.graphml").write_text(VANILLA, encoding="utf-8")
+(FIX / "malformed.graphml").write_text(MALFORMED, encoding="utf-8")
+print(f"Wrote 3 fixtures to {FIX}")

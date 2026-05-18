@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ _('Import Result') }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1><i class="fas fa-check-circle text-success"></i> {{ _('Import Result') }}</h1>
+
+  {% if result.errors %}
+  <div class="alert alert-danger">
+    <strong>{{ _('Errors') }}:</strong>
+    <ul>{% for e in result.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <ul class="list-group mb-3">
+    <li class="list-group-item">{{ _('Sites created') }}: {{ result.sites_created }}</li>
+    <li class="list-group-item">{{ _('Periodizations created') }}: {{ result.periodizations_created }}, {{ _('updated') }}: {{ result.periodizations_updated }}</li>
+    <li class="list-group-item">{{ _('US created') }}: {{ result.us_created }}, {{ _('updated') }}: {{ result.us_updated }}</li>
+    <li class="list-group-item">{{ _('Relationships created') }}: {{ result.relationships_created }}</li>
+    <li class="list-group-item">{{ _('Duration') }}: {{ result.duration_ms }} ms</li>
+  </ul>
+
+  <a href="{{ url_for('yed_import.index') }}" class="btn btn-primary">
+    {{ _('Import another file') }}
+  </a>
+</div>
+{% endblock %}

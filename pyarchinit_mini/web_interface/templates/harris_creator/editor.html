@@ -175,6 +175,17 @@
             </small>
         </div>
         <div>
+            <select id="group-by-selector" class="form-select form-select-sm" style="display:inline-block;width:auto;margin-right:8px" title="Group lanes by (changes will re-layout the canvas)">
+              <option value="period_phase" selected>Period + Phase</option>
+              <option value="struttura">Struttura</option>
+              <option value="attivita">Attività</option>
+              <option value="settore">Settore</option>
+              <option value="area">Area</option>
+              <option value="ambient">Ambient</option>
+              <option value="saggio">Saggio</option>
+              <option value="quad_par">Quad/Par</option>
+              <option value="none">No grouping</option>
+            </select>
             <button class="btn btn-success btn-sm" id="save-btn" title="Save to database">
                 <i class="fas fa-save"></i> Save
             </button>
@@ -421,7 +432,7 @@
           </thead>
           <tbody>
             <tr><th>Trigger</th><td>Auto-regenerated on every US save (Spec&nbsp;2)</td><td>On-demand when you click the button (Spec&nbsp;3-bis)</td></tr>
-            <tr><th>File</th><td><code>data/paradata/&lt;site&gt;/stratigraphy.graphml</code></td><td><code>data/exports/harris_yed/&lt;site&gt;-harris-yed.graphml</code></td></tr>
+            <tr><th>File</th><td><code>data/paradata/&lt;site&gt;/stratigraphy.graphml</code></td><td><code>data/exports/harris_yed/&lt;site&gt;-extmatrix.graphml</code></td></tr>
             <tr><th>Schema</th><td>s3dgraphy clean &mdash; canonical EM nodes (StratigraphicNode) and edges (<code>overlies</code>, <code>abuts</code>, <code>is_after</code>, &hellip;)</td><td>yEd-flavored &mdash; <code>y:TableNode</code> + <code>y:Rows</code> for swimlanes, <code>y:ShapeNode</code> children with VocabProvider colors</td></tr>
             <tr><th>Audience</th><td>EM Datacenter, 3D pipeline, Heriverse, programmatic consumers</td><td>Humans using <strong>yEd Desktop</strong> for review/printing</td></tr>
             <tr><th>Round-trip</th><td>Yes (s3dgraphy reader)</td><td>No (one-way export for presentation)</td></tr>
@@ -752,5 +763,26 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }, 1000);
 });
+
+document.getElementById('group-by-selector')?.addEventListener('change', (ev) => {
+  const site = window._currentSite;
+  if (!site) return;
+  loadSwimlaneStateWithGroupBy(site, ev.target.value);
+});
+
+async function loadSwimlaneStateWithGroupBy(site, group_by) {
+  try {
+    const url = `/harris-creator/api/load/${encodeURIComponent(site)}?group_by=${encodeURIComponent(group_by)}`;
+    const r = await fetch(url);
+    if (!r.ok) {
+      alert(`Load failed: ${await r.text()}`);
+      return;
+    }
+    const state = await r.json();
+    renderSwimlaneState(state);
+  } catch (e) {
+    alert(`Error: ${e.message}`);
+  }
+}
 </script>
 {% endblock %}

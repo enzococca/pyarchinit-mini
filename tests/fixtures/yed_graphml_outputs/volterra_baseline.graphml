@@ -1,74 +1,174 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:y="http://www.yworks.com/xml/graphml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd">
-  <key for="node" id="d6" yfiles.type="nodegraphics"/>
-  <key for="edge" id="d10" yfiles.type="edgegraphics"/>
-  <graph id="G" edgedefault="directed">
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:java="http://www.yworks.com/xml/yfiles-common/1.0/java" xmlns:sys="http://www.yworks.com/xml/yfiles-common/markup/primitives/2.0" xmlns:x="http://www.yworks.com/xml/yfiles-common/markup/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:y="http://www.yworks.com/xml/graphml" xmlns:yed="http://www.yworks.com/xml/yed/3" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd">
+  <key id="d0" for="graph" attr.name="pyarchinit.epochs_meta" attr.type="string"/>
+  <key id="d1" for="port" yfiles.type="portgraphics"/>
+  <key id="d2" for="port" yfiles.type="portgeometry"/>
+  <key id="d3" for="port" yfiles.type="portuserdata"/>
+  <key id="d4" for="node" attr.name="EMID" attr.type="string"/>
+  <key id="d5" for="node" attr.name="URI" attr.type="string"/>
+  <key id="d6" for="node" attr.name="pyarchinit.us" attr.type="string"/>
+  <key id="d7" for="node" attr.name="pyarchinit.area" attr.type="string"/>
+  <key id="d8" for="node" attr.name="pyarchinit.sito" attr.type="string"/>
+  <key id="d9" for="node" attr.name="pyarchinit.unita_tipo" attr.type="string"/>
+  <key id="d10" for="node" attr.name="pyarchinit.periodo_iniziale" attr.type="string"/>
+  <key id="d11" for="node" attr.name="pyarchinit.fase_iniziale" attr.type="string"/>
+  <key id="d12" for="node" attr.name="pyarchinit.rapporti" attr.type="string"/>
+  <key id="d13" for="node" attr.name="pyarchinit.d_stratigrafica" attr.type="string"/>
+  <key id="d14" for="node" attr.name="pyarchinit.d_interpretativa" attr.type="string"/>
+  <key id="d15" for="node" attr.name="pyarchinit.documentazione" attr.type="string"/>
+  <key id="d16" for="node" attr.name="pyarchinit.node_uuid" attr.type="string"/>
+  <key id="d17" for="node" attr.name="pyarchinit.struttura" attr.type="string"/>
+  <key id="d18" for="node" attr.name="pyarchinit.attivita" attr.type="string"/>
+  <key id="d19" for="node" attr.name="pyarchinit.settore" attr.type="string"/>
+  <key id="d20" for="node" attr.name="pyarchinit.ambient" attr.type="string"/>
+  <key id="d21" for="node" attr.name="pyarchinit.saggio" attr.type="string"/>
+  <key id="d22" for="node" attr.name="pyarchinit.quad_par" attr.type="string"/>
+  <key id="d23" for="node" attr.name="pyarchinit.datazione_estesa" attr.type="string"/>
+  <key id="d24" for="node" attr.name="pyarchinit.periodo" attr.type="string"/>
+  <key id="d25" for="node" attr.name="pyarchinit.fase" attr.type="string"/>
+  <key id="d26" for="node" attr.name="pyarchinit.cron_iniziale" attr.type="string"/>
+  <key id="d27" for="node" attr.name="pyarchinit.cron_finale" attr.type="string"/>
+  <key id="d28" for="node" attr.name="pyarchinit.datazione_estesa" attr.type="string"/>
+  <key id="d29" for="node" attr.name="url" attr.type="string"/>
+  <key id="d30" for="node" attr.name="description" attr.type="string"/>
+  <key id="d31" for="node" yfiles.type="nodegraphics"/>
+  <key id="d32" for="graphml" yfiles.type="resources"/>
+  <key id="d33" for="edge" attr.name="EMID" attr.type="string"/>
+  <key id="d34" for="edge" attr.name="URI" attr.type="string"/>
+  <key id="d35" for="edge" attr.name="url" attr.type="string"/>
+  <key id="d36" for="edge" attr.name="description" attr.type="string"/>
+  <key id="d37" for="edge" yfiles.type="edgegraphics"/>
+  <graph edgedefault="directed" id="G">
     <node id="swimlane_root" yfiles.foldertype="group">
-      <data key="d6">
-        <y:TableNode>
-          <y:Geometry height="800" width="2000" x="0" y="0"/>
-          <y:Fill color="#FAFAFA" transparent="false"/>
-          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+      <data key="d4">swimlane-root-Volterra</data>
+      <data key="d8">Volterra</data>
+      <data key="d30">Stratigrafia</data>
+      <data key="d31">
+        <y:TableNode configuration="YED_TABLE_NODE">
+          <y:Geometry height="1060.0" width="2000.0" x="0.0" y="0.0"/>
+          <y:Fill color="#ECF5FF" color2="#0042F440" transparent="false"/>
+          <y:BorderStyle hasColor="false" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" xml:space="preserve">Archaeological Site [ID:Volterra]</y:NodeLabel>
           <y:Table>
+            <y:Insets bottom="0.0" bottomF="0.0" left="0.0" leftF="0.0" right="0.0" rightF="0.0" top="24.0" topF="24.0"/>
+            <y:Columns/>
             <y:Rows>
-              <y:Row id="row_medieval_b" height="80.0" minimumHeight="40.0"/>
-              <y:Row id="row_medieval_a" height="80.0" minimumHeight="40.0"/>
-              <y:Row id="row_late-antiquity_a" height="80.0" minimumHeight="40.0"/>
-              <y:Row id="row_roman_b" height="80.0" minimumHeight="40.0"/>
-              <y:Row id="row_roman_a" height="80.0" minimumHeight="40.0"/>
+              <y:Row id="row_medieval_b" height="200" minimumHeight="80.0" nodeLabelMaxWidth="0.0"/>
+              <y:Row id="row_medieval_a" height="200" minimumHeight="80.0" nodeLabelMaxWidth="0.0"/>
+              <y:Row id="row_late-antiquity_a" height="200" minimumHeight="80.0" nodeLabelMaxWidth="0.0"/>
+              <y:Row id="row_roman_b" height="200" minimumHeight="80.0" nodeLabelMaxWidth="0.0"/>
+              <y:Row id="row_roman_a" height="200" minimumHeight="80.0" nodeLabelMaxWidth="0.0"/>
             </y:Rows>
-            <y:Columns>
-              <y:Column id="col_main" width="1900.0"/>
-            </y:Columns>
           </y:Table>
         </y:TableNode>
       </data>
-      <graph id="swimlane_root:" edgedefault="directed">
+      <graph edgedefault="directed" id="swimlane_root::graph">
         <node id="us_1">
-          <data key="d6">
+          <data key="d4"></data>
+          <data key="d5"/>
+          <data key="d6"></data>
+          <data key="d7"></data>
+          <data key="d8">Volterra</data>
+          <data key="d9">US</data>
+          <data key="d10"></data>
+          <data key="d11"></data>
+          <data key="d12"></data>
+          <data key="d13"></data>
+          <data key="d14"></data>
+          <data key="d15"></data>
+          <data key="d16"></data>
+          <data key="d17"></data>
+          <data key="d18"></data>
+          <data key="d19"></data>
+          <data key="d20"></data>
+          <data key="d21"></data>
+          <data key="d22"></data>
+          <data key="d23"></data>
+          <data key="d31">
             <y:ShapeNode>
-              <y:Geometry x="50" y="20" width="80" height="50"/>
+              <y:Geometry height="30.0" width="80.0" x="0" y="0"/>
               <y:Fill color="#F0F0F0" transparent="false"/>
-              <y:BorderStyle color="#540909" type="line" width="3.0"/>
-              <y:NodeLabel fontSize="12">US1</y:NodeLabel>
+              <y:BorderStyle color="#540909" type="solid" width="3.0"/>
+              <y:NodeLabel>US1</y:NodeLabel>
               <y:Shape type="rectangle"/>
             </y:ShapeNode>
           </data>
         </node>
         <node id="us_2">
-          <data key="d6">
+          <data key="d4"></data>
+          <data key="d5"/>
+          <data key="d6"></data>
+          <data key="d7"></data>
+          <data key="d8">Volterra</data>
+          <data key="d9">US</data>
+          <data key="d10"></data>
+          <data key="d11"></data>
+          <data key="d12"></data>
+          <data key="d13"></data>
+          <data key="d14"></data>
+          <data key="d15"></data>
+          <data key="d16"></data>
+          <data key="d17"></data>
+          <data key="d18"></data>
+          <data key="d19"></data>
+          <data key="d20"></data>
+          <data key="d21"></data>
+          <data key="d22"></data>
+          <data key="d23"></data>
+          <data key="d31">
             <y:ShapeNode>
-              <y:Geometry x="50" y="20" width="80" height="50"/>
+              <y:Geometry height="30.0" width="80.0" x="0" y="0"/>
               <y:Fill color="#F0F0F0" transparent="false"/>
-              <y:BorderStyle color="#540909" type="line" width="3.0"/>
-              <y:NodeLabel fontSize="12">US2</y:NodeLabel>
+              <y:BorderStyle color="#540909" type="solid" width="3.0"/>
+              <y:NodeLabel>US2</y:NodeLabel>
               <y:Shape type="rectangle"/>
             </y:ShapeNode>
           </data>
         </node>
         <node id="us_3">
-          <data key="d6">
+          <data key="d4"></data>
+          <data key="d5"/>
+          <data key="d6"></data>
+          <data key="d7"></data>
+          <data key="d8">Volterra</data>
+          <data key="d9">USVs</data>
+          <data key="d10"></data>
+          <data key="d11"></data>
+          <data key="d12"></data>
+          <data key="d13"></data>
+          <data key="d14"></data>
+          <data key="d15"></data>
+          <data key="d16"></data>
+          <data key="d17"></data>
+          <data key="d18"></data>
+          <data key="d19"></data>
+          <data key="d20"></data>
+          <data key="d21"></data>
+          <data key="d22"></data>
+          <data key="d23"></data>
+          <data key="d31">
             <y:ShapeNode>
-              <y:Geometry x="50" y="20" width="80" height="50"/>
-              <y:Fill color="#CCCCCC" transparent="false"/>
-              <y:BorderStyle color="#0546CC" type="line" width="3.0"/>
-              <y:NodeLabel fontSize="12">USVs3</y:NodeLabel>
-              <y:Shape type="parallelogram"/>
+              <y:Geometry height="30.0" width="80.0" x="0" y="0"/>
+              <y:Fill color="#F0F0F0" transparent="false"/>
+              <y:BorderStyle color="#540909" type="solid" width="3.0"/>
+              <y:NodeLabel>USVs3</y:NodeLabel>
+              <y:Shape type="rectangle"/>
             </y:ShapeNode>
           </data>
         </node>
       </graph>
     </node>
-
     <edge id="e1" source="us_2" target="us_1">
-      <data key="d10">
-        <y:GenericEdge>
+      <data key="d36">overlies</data>
+      <data key="d37">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
           <y:EdgeLabel>overlies</y:EdgeLabel>
-        </y:GenericEdge>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
       </data>
     </edge>
-
   </graph>
 </graphml>

@@ -11,9 +11,69 @@ from typing import Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from .row_provider import Row, RowProvider
+from .row_provider import Row, RowProvider, PERIOD_COLORS
 from .compound_layout import derive_row_id, initial_node_position
+from .harris_layout import compute_harris_positions
 from .exceptions import SwimlaneStateError
+
+
+_VALID_GROUP_BY = frozenset({
+    "period_phase",
+    "struttura", "attivita", "settore", "area",
+    "ambient", "saggio", "quad_par",
+    "none",
+})
+
+_DISTINCT_FIELD_COLS = {
+    "struttura": "struttura",
+    "attivita": "attivita",
+    "settore": "settore",
+    "area": "area",
+    "ambient": "ambient",
+    "saggio": "saggio",
+    "quad_par": "quad_par",
+}
+
+
+def _build_lanes_by_distinct(session, site: str, col: str) -> list:
+    """Return one Row per DISTINCT value of us_table.<col> for the site."""
+    try:
+        rows = session.execute(
+            text(f"SELECT DISTINCT COALESCE({col}, '') AS v FROM us_table "
+                 f"WHERE sito = :sito ORDER BY v"),
+            {"sito": site},
+        ).fetchall()
+    except Exception:
+        # Column doesn't exist in this DB schema — return single fallback lane
+        rows = []
+
+    out = []
+    for i, r in enumerate(rows):
+        value = r[0] or ""
+        if not value:
+            value = "(unset)"
+        safe = value.lower().replace(" ", "_").replace("/", "_")
+        row_id = "row_" + safe if safe else "row_unset"
+        out.append(Row(
+            row_id=row_id,
+            period_name=value,
+            phase_name=None,
+            start_date=None,
+            end_date=None,
+            color=PERIOD_COLORS[i % len(PERIOD_COLORS)],
+            source=f"distinct_{col}",
+        ))
+    if not out:
+        out.append(Row(
+            row_id="row_unset",
+            period_name="(unset)",
+            phase_name=None,
+            start_date=None,
+            end_date=None,
+            color=PERIOD_COLORS[0],
+            source=f"distinct_{col}",
+        ))
+    return out
 
 
 @dataclass
@@ -30,6 +90,7 @@ class EditorState:
     nodes: list
     edges: list
     pending_changes: dict
+    group_by: str = "period_phase"
 
 
 @dataclass
@@ -42,15 +103,36 @@ class SaveResult:
 
 class SwimlaneState:
     @staticmethod
-    def load(session: Session, site: str) -> EditorState:
-        """Load editor state for site. Empty state if site has no data."""
+    def load(session: Session, site: str, *, group_by: str = "period_phase") -> EditorState:
+        """Load editor state for site, organised by group_by.
+
+        group_by must be one of the 9 values in _VALID_GROUP_BY.
+        Raises ValueError for unknown values.
+        """
+        if group_by not in _VALID_GROUP_BY:
+            raise ValueError(f"invalid group_by: {group_by!r}")
+
         # TODO(Spec-4): per-site period_table isolation. Currently period_table
         # is cross-site (any site sees all rows). When a user creates a row in
         # site A, it appears in site B's editor too. Add a `sito` column to
         # period_table with backward-compat migration if isolation becomes
         # load-bearing.
-        provider = RowProvider(session, site)
-        rows = provider.list_rows()
+        if group_by == "period_phase":
+            provider = RowProvider(session, site)
+            rows = provider.list_rows()
+        elif group_by == "none":
+            rows = [Row(
+                row_id="row_default",
+                period_name="All",
+                phase_name=None,
+                start_date=None,
+                end_date=None,
+                color=PERIOD_COLORS[0],
+                source="virtual_none",
+            )]
+        else:
+            col = _DISTINCT_FIELD_COLS[group_by]
+            rows = _build_lanes_by_distinct(session, site, col)
 
         # Resolve unit_type → visual_style via VocabProvider once per request,
         # cached. The editor's Cytoscape style uses `data(color)` and
@@ -105,17 +187,52 @@ class SwimlaneState:
                 return {"color": "#CCCCCC", "shape": "rectangle",
                         "border_color": "#333333", "border_style": "solid"}
 
-        # Load US records for site
-        us_rows = session.execute(text(
-            "SELECT id_us, sito, area, us, unita_tipo, rapporti, node_uuid, "
-            "periodo_iniziale, fase_iniziale, "
-            "d_stratigrafica, datazione, file_path "
-            "FROM us_table WHERE sito = :sito ORDER BY id_us"
-        ), {"sito": site}).fetchall()
+        # Load US records for site.
+        # Try extended SELECT (with distinct-field columns) first; fall back to
+        # the base schema if those columns don't exist (older DB fixtures).
+        _HAS_EXTRA_COLS = True
+        try:
+            us_rows = session.execute(text(
+                "SELECT id_us, sito, area, us, unita_tipo, rapporti, node_uuid, "
+                "periodo_iniziale, fase_iniziale, "
+                "d_stratigrafica, datazione, file_path, "
+                "struttura, attivita, settore, ambient, saggio, quad_par "
+                "FROM us_table WHERE sito = :sito ORDER BY id_us"
+            ), {"sito": site}).fetchall()
+        except Exception:
+            _HAS_EXTRA_COLS = False
+            us_rows = session.execute(text(
+                "SELECT id_us, sito, area, us, unita_tipo, rapporti, node_uuid, "
+                "periodo_iniziale, fase_iniziale, "
+                "d_stratigrafica, datazione, file_path "
+                "FROM us_table WHERE sito = :sito ORDER BY id_us"
+            ), {"sito": site}).fetchall()
+
+        # Column index map for distinct-field group_by values (only valid when
+        # _HAS_EXTRA_COLS is True).
+        _col_index_map = {
+            "area": 2, "struttura": 12, "attivita": 13, "settore": 14,
+            "ambient": 15, "saggio": 16, "quad_par": 17,
+        }
+
+        def _parent_row_id_for(r) -> str:
+            if group_by == "period_phase":
+                return derive_row_id(r[7], r[8])  # periodo, fase
+            if group_by == "none":
+                return "row_default"
+            if not _HAS_EXTRA_COLS:
+                return "row_unset"
+            idx = _col_index_map[group_by]
+            raw = r[idx] or ""
+            if not raw:
+                return "row_unset"
+            safe = raw.lower().replace(" ", "_").replace("/", "_")
+            return "row_" + safe
 
         nodes: list[CytoscapeElement] = []
-        us_num_to_node_id: dict[int, str] = {}
-        row_counts: dict[str, int] = {}
+        # Keys stored as strings because us_table.us is TEXT (alphanumeric
+        # codes are supported). All lookups must use str(us_num).
+        us_num_to_node_id: dict[str, str] = {}
 
         for r in us_rows:
             id_us = r[0]
@@ -123,19 +240,10 @@ class SwimlaneState:
             unita_tipo = r[4] or "US"
             periodo = r[7]
             fase = r[8]
-            parent_row_id = derive_row_id(periodo, fase)
+            parent_row_id = _parent_row_id_for(r)
 
             node_id = f"us_{id_us}"
-            us_num_to_node_id[us_num] = node_id
-
-            idx = row_counts.get(parent_row_id, 0)
-            row_counts[parent_row_id] = idx + 1
-
-            # Build a minimal row-like object for initial_node_position
-            class _RowLike:
-                row_id = parent_row_id
-
-            pos = initial_node_position(_RowLike(), idx)
+            us_num_to_node_id[str(us_num)] = node_id
 
             style = _style_for(unita_tipo)
             nodes.append(CytoscapeElement(
@@ -162,7 +270,7 @@ class SwimlaneState:
                     "datazione": r[10] or "",
                     "file_path": r[11] or "",
                 },
-                position=pos,
+                position=None,
             ))
 
         # Add swimlane parent (compound) elements — one per row
@@ -186,12 +294,34 @@ class SwimlaneState:
             session, site, us_num_to_node_id, existing=edges,
         ))
 
+        # Compute topologically-ranked positions via harris_layout.
+        hl_nodes = [
+            {"id": el.data["id"], "lane": el.data["parent"]}
+            for el in nodes if not el.data.get("is_swimlane")
+        ]
+        hl_edges = [
+            {"source": e.data["source"], "target": e.data["target"], "label": e.data["label"]}
+            for e in edges
+        ]
+        lane_widths = {row.row_id: 300 for row in rows}
+        positions = compute_harris_positions(
+            hl_nodes, hl_edges,
+            lane_id_for=lambda n: n["lane"],
+            lane_widths=lane_widths,
+        )
+        for el in nodes:
+            if el.data.get("is_swimlane"):
+                continue
+            x, y = positions.get(el.data["id"], (0.0, 0.0))
+            el.position = {"x": x, "y": y}
+
         return EditorState(
             site=site,
             rows=rows,
             nodes=nodes,
             edges=edges,
             pending_changes={"us_updates": [], "us_inserts": [], "us_deletes": []},
+            group_by=group_by,
         )
 
     @staticmethod
@@ -229,7 +359,7 @@ class SwimlaneState:
             rapporti = r[5] or ""
             if not rapporti.strip():
                 continue
-            source_node_id = us_num_to_node_id.get(us_num)
+            source_node_id = us_num_to_node_id.get(str(us_num))
             if source_node_id is None:
                 continue
 
@@ -240,11 +370,8 @@ class SwimlaneState:
                 edge_name, target_us = registry.parse_rapporti_token(tok)
                 if edge_name is None or target_us is None:
                     continue
-                try:
-                    target_int = int(target_us)
-                except (ValueError, TypeError):
-                    continue
-                target_node_id = us_num_to_node_id.get(target_int)
+                # us_table.us is TEXT; lookup by string for type consistency.
+                target_node_id = us_num_to_node_id.get(str(target_us))
                 if target_node_id is None:
                     continue
 
@@ -322,15 +449,12 @@ class SwimlaneState:
 
         for r in rows:
             us_from, us_to, rel_type = r[0], r[1], r[2]
-            if not rel_type:
+            if not rel_type or us_from is None or us_to is None:
                 continue
-            try:
-                u_from_int = int(us_from)
-                u_to_int = int(us_to)
-            except (ValueError, TypeError):
-                continue
-            source_id = us_num_to_node_id.get(u_from_int)
-            target_id = us_num_to_node_id.get(u_to_int)
+            # us_table.us is TEXT (alphanumeric); us_relationships_table
+            # stores it the same way. String lookup is consistent.
+            source_id = us_num_to_node_id.get(str(us_from))
+            target_id = us_num_to_node_id.get(str(us_to))
             if not source_id or not target_id:
                 continue
 
