@@ -1,8 +1,64 @@
 {% extends "base.html" %}
+{% block title %}{{ _('Import Preview') }}{% endblock %}
 {% block content %}
 <div class="container py-4">
-  <h2>Preview</h2>
-  <p>plan_id: {{ plan_id }}</p>
-  <p>{{ plan.us_records|length }} US records</p>
+  <h1><i class="fas fa-eye"></i> {{ _('Import Preview') }}</h1>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>{{ _('Sites') }}</h5>
+      <ul>
+        {% for s in plan.sites %}
+          <li>{{ s.sito }} — {% if s.da_creare %}<span class="badge bg-success">{{ _('to create') }}</span>{% else %}<span class="badge bg-secondary">{{ _('exists') }}</span>{% endif %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>{{ _('Periodizations') }} ({{ plan.periodizations|length }})</h5>
+      <p>{{ plan.periodizations|selectattr('action','equalto','create')|list|length }} {{ _('to create') }},
+         {{ plan.periodizations|selectattr('action','equalto','update')|list|length }} {{ _('to update') }}</p>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>{{ _('US records') }} ({{ plan.us_records|length }})</h5>
+      <p>{{ plan.us_records|selectattr('action','equalto','create')|list|length }} {{ _('to create') }},
+         {{ plan.us_records|selectattr('action','equalto','update')|list|length }} {{ _('to update') }}</p>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>{{ _('Relationships') }} ({{ plan.relationships|length }})</h5>
+    </div>
+  </div>
+
+  {% if plan.warnings %}
+  <div class="alert alert-warning">
+    <strong>{{ _('Warnings') }}:</strong>
+    <ul>{% for w in plan.warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  {% if plan.conflicts %}
+  <div class="alert alert-danger">
+    <strong>{{ _('Conflicts') }}:</strong>
+    <ul>{% for c in plan.conflicts %}<li>{{ c }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <form action="{{ url_for('yed_import.apply') }}" method="post">
+    <input type="hidden" name="plan_id" value="{{ plan_id }}"/>
+    <button type="submit" class="btn btn-primary">
+      <i class="fas fa-check"></i> {{ _('Apply') }}
+    </button>
+    <a href="{{ url_for('yed_import.index') }}" class="btn btn-outline-secondary">
+      {{ _('Cancel') }}
+    </a>
+  </form>
 </div>
 {% endblock %}

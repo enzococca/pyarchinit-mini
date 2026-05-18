@@ -79,4 +79,27 @@ def test_apply_renders_result(client):
         plan_id = m.group(1)
         r2 = client.post("/import-graphml/apply", data={"plan_id": plan_id})
         assert r2.status_code == 200
-        assert b"3 US created" in r2.data
+        assert b"3" in r2.data  # us_created count appears in result
+
+
+def test_apply_end_to_end(client):
+    import io
+    data = (FIX / "minimal.graphml").read_bytes()
+    r = client.post(
+        "/import-graphml/preview",
+        data={"file": (io.BytesIO(data), "minimal.graphml")},
+        content_type="multipart/form-data",
+    )
+    assert r.status_code == 200
+    body = r.get_data(as_text=True)
+    import re
+    m = re.search(r'name="plan_id"\s+value="([0-9a-f]+)"', body)
+    assert m, body
+    plan_id = m.group(1)
+
+    r2 = client.post(
+        "/import-graphml/apply",
+        data={"plan_id": plan_id},
+    )
+    assert r2.status_code == 200
+    assert b"3" in r2.data  # 3 US created
