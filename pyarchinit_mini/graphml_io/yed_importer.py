@@ -228,24 +228,31 @@ class ImportResult:
 def apply_import_plan(plan: ImportPlan, session: Session) -> ImportResult:
     """Apply the plan in one transaction. Best-effort auto-regen after."""
     import time
+    from datetime import datetime
     start = time.time()
     result = ImportResult()
+    # pyarchinit-mini tables have NOT NULL audit columns (created_at,
+    # updated_at) populated by SQLAlchemy event listeners that don't fire
+    # for raw text() INSERTs. Set them explicitly.
+    now = datetime.utcnow()
     try:
         for s in plan.sites:
             if s["da_creare"]:
                 session.execute(text(
-                    "INSERT INTO site_table (sito) VALUES (:s)"
-                ), {"s": s["sito"]})
+                    "INSERT INTO site_table (sito, created_at, updated_at) "
+                    "VALUES (:s, :now, :now)"
+                ), {"s": s["sito"], "now": now})
                 result.sites_created += 1
 
         for p in plan.periodizations:
             if p["action"] == "create":
                 session.execute(text(
                     "INSERT INTO periodizzazione_table "
-                    "(sito, periodo_iniziale, fase_iniziale, datazione_estesa) "
-                    "VALUES (:s, :p, :f, :d)"
+                    "(sito, periodo_iniziale, fase_iniziale, datazione_estesa, "
+                    " created_at, updated_at) "
+                    "VALUES (:s, :p, :f, :d, :now, :now)"
                 ), {"s": p["sito"], "p": p["periodo"], "f": p["fase"],
-                    "d": p["datazione_estesa"]})
+                    "d": p["datazione_estesa"], "now": now})
                 result.periodizations_created += 1
             else:
                 result.periodizations_updated += 1
@@ -256,9 +263,11 @@ def apply_import_plan(plan: ImportPlan, session: Session) -> ImportResult:
                     "INSERT INTO us_table (sito, area, us, unita_tipo, "
                     "node_uuid, periodo_iniziale, fase_iniziale, "
                     "d_stratigrafica, rapporti, datazione, "
-                    "struttura, attivita, settore, ambient, saggio, quad_par) "
+                    "struttura, attivita, settore, ambient, saggio, quad_par, "
+                    "created_at, updated_at) "
                     "VALUES (:sito, :area, :us, :ut, :uuid, :p, :f, :ds, :rap, :dz, "
-                    ":struttura, :attivita, :settore, :ambient, :saggio, :quad_par)"
+                    ":struttura, :attivita, :settore, :ambient, :saggio, :quad_par, "
+                    ":now, :now)"
                 ), {
                     "sito": r["sito"], "area": r["area"], "us": r["us"],
                     "ut": r["unita_tipo"], "uuid": r["node_uuid"] or None,
@@ -268,17 +277,20 @@ def apply_import_plan(plan: ImportPlan, session: Session) -> ImportResult:
                     "struttura": r["struttura"], "attivita": r["attivita"],
                     "settore": r["settore"], "ambient": r["ambient"],
                     "saggio": r["saggio"], "quad_par": r["quad_par"],
+                    "now": now,
                 })
                 result.us_created += 1
             else:
-                # Update by node_uuid if present, else by (sito, us)
+                # Update by node_uuid if present, else by (sito, us). Always
+                # bump updated_at; created_at stays.
                 if r["node_uuid"]:
                     session.execute(text(
                         "UPDATE us_table SET sito=:sito, area=:area, us=:us, "
                         "unita_tipo=:ut, periodo_iniziale=:p, fase_iniziale=:f, "
                         "d_stratigrafica=:ds, rapporti=:rap, datazione=:dz, "
                         "struttura=:struttura, attivita=:attivita, settore=:settore, "
-                        "ambient=:ambient, saggio=:saggio, quad_par=:quad_par "
+                        "ambient=:ambient, saggio=:saggio, quad_par=:quad_par, "
+                        "updated_at=:now "
                         "WHERE node_uuid = :uuid"
                     ), {
                         "sito": r["sito"], "area": r["area"], "us": r["us"],
@@ -288,7 +300,7 @@ def apply_import_plan(plan: ImportPlan, session: Session) -> ImportResult:
                         "struttura": r["struttura"], "attivita": r["attivita"],
                         "settore": r["settore"], "ambient": r["ambient"],
                         "saggio": r["saggio"], "quad_par": r["quad_par"],
-                        "uuid": r["node_uuid"],
+                        "uuid": r["node_uuid"], "now": now,
                     })
                 else:
                     session.execute(text(
@@ -296,7 +308,8 @@ def apply_import_plan(plan: ImportPlan, session: Session) -> ImportResult:
                         "fase_iniziale=:f, d_stratigrafica=:ds, rapporti=:rap, "
                         "datazione=:dz, struttura=:struttura, attivita=:attivita, "
                         "settore=:settore, ambient=:ambient, saggio=:saggio, "
-                        "quad_par=:quad_par WHERE sito=:sito AND us=:us"
+                        "quad_par=:quad_par, updated_at=:now "
+                        "WHERE sito=:sito AND us=:us"
                     ), {"ut": r["unita_tipo"],
                         "p": r["periodo_iniziale"], "f": r["fase_iniziale"],
                         "ds": r["d_stratigrafica"], "rap": r["rapporti"],
@@ -304,7 +317,7 @@ def apply_import_plan(plan: ImportPlan, session: Session) -> ImportResult:
                         "struttura": r["struttura"], "attivita": r["attivita"],
                         "settore": r["settore"], "ambient": r["ambient"],
                         "saggio": r["saggio"], "quad_par": r["quad_par"],
-                        "sito": r["sito"], "us": r["us"]})
+                        "sito": r["sito"], "us": r["us"], "now": now})
                 result.us_updated += 1
 
         seen_rel = set()
@@ -313,17 +326,26 @@ def apply_import_plan(plan: ImportPlan, session: Session) -> ImportResult:
             if key in seen_rel:
                 continue
             seen_rel.add(key)
+            # us_relationships_table has us_from / us_to as INTEGER NOT NULL —
+            # skip relationships whose endpoints aren't numeric (alphanumeric
+            # US codes can't be represented in that table).
+            try:
+                us_from_int = int(rel["us_from"])
+                us_to_int = int(rel["us_to"])
+            except (ValueError, TypeError):
+                continue
             # Dedupe against DB
             exists = session.execute(text(
                 "SELECT 1 FROM us_relationships_table "
                 "WHERE sito=:s AND us_from=:f AND us_to=:t AND relationship_type=:r LIMIT 1"
-            ), {"s": rel["sito"], "f": rel["us_from"], "t": rel["us_to"], "r": rel["type"]}).fetchone()
+            ), {"s": rel["sito"], "f": us_from_int, "t": us_to_int, "r": rel["type"]}).fetchone()
             if not exists:
                 session.execute(text(
                     "INSERT INTO us_relationships_table "
-                    "(sito, us_from, us_to, relationship_type) "
-                    "VALUES (:s, :f, :t, :r)"
-                ), {"s": rel["sito"], "f": rel["us_from"], "t": rel["us_to"], "r": rel["type"]})
+                    "(sito, us_from, us_to, relationship_type, created_at, updated_at) "
+                    "VALUES (:s, :f, :t, :r, :now, :now)"
+                ), {"s": rel["sito"], "f": us_from_int, "t": us_to_int,
+                    "r": rel["type"], "now": now})
                 result.relationships_created += 1
         session.commit()
     except Exception as e:
