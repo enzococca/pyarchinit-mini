@@ -89,8 +89,17 @@ def _trigger_graph_regen(site: str, *, session: Any) -> None:
         )
     except Exception:
         logger.exception("regen failed for site=%s", site)
-        # Cache update (regen_status:<site>) happens in the Flask layer
-        # (see graph_routes); auto_regen is decoupled from Flask cache.
+        # Surface failure for UI banner. Decoupled from Flask: only writes
+        # if Flask context is available, otherwise silently logged-only.
+        # The actual banner template render is a Spec 3 task — this just makes
+        # the failure state retrievable from the cache for any future banner consumer.
+        try:
+            from flask import current_app
+            cache = current_app.config.get("CACHE")  # optional Flask-Caching obj
+            if cache is not None:
+                cache.set(f"regen_status:{site}", {"status": "error"}, timeout=86400)
+        except Exception:
+            pass
 
 
 def force_regen_all_touched_sites() -> None:
