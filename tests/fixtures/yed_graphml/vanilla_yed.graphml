@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:y="http://www.yworks.com/xml/graphml">
+  <key for="node" id="d6" yfiles.type="nodegraphics"/>
+  <graph edgedefault="directed" id="G">
+    <node id="n1">
+      <data key="d6"><y:ShapeNode><y:NodeLabel>plain</y:NodeLabel></y:ShapeNode></data>
+    </node>
+  </graph>
+</graphml>
