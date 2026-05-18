@@ -588,6 +588,8 @@ def create_app():
     csrf.exempt(three_d_builder_bp)
     csrf.exempt(excel_import_bp)
     csrf.exempt(em_node_config_bp)
+    csrf.exempt(paradata_ui_bp)   # Spec 2 — form POSTs (no token in templates)
+    csrf.exempt(yed_import_bp)    # Spec 7 — upload + preview/apply forms
 
     # Exempt JSON API routes from CSRF check
     @app.after_request
