@@ -2293,3 +2293,36 @@ The vocab is exposed to the browser via:
 - `GET /api/v1/vocab/edge-types?lang=it`
 - `GET /api/v1/vocab/visual-style/<unit_type>`
 - `GET /api/v1/vocab/diagnostics` (admin-only)
+
+## Graph projection & paradata
+
+Since 2.3.0-alpha, pyarchinit-mini-web auto-generates the stratigraphic graph
+as a GraphML file every time you save a US/USM record. Output lives at
+`data/paradata/<site_slug>/stratigraphy.graphml`.
+
+Paradata (authors, licenses, embargoes, documents, epochs) are stored in a
+JSON sidecar:
+```
+data/paradata/<site_slug>/paradata.json
+```
+because s3dgraphy 0.1.42's GraphML exporter does not round-trip standalone
+paradata nodes. The JSON sidecar IS committed to git.
+
+### Paradata editing
+
+Visit `/paradata/<site>/{authors,licenses,embargoes,documents,epochs}` to
+manage paradata. REST endpoints under `/api/v1/paradata/<site>/...` mirror
+the UI. See `docs/PARADATA_GUIDE.md`.
+
+### Graph import
+
+`/sites/<site>/graph/import-preview` accepts a GraphML upload; you see a
+preview of planned INSERT/UPDATE/SKIP and must confirm via
+`/sites/<site>/graph/import-apply` before any DB write.
+
+### Auto-regen control
+
+- Disable globally: `export PYARCHINIT_DISABLE_AUTO_REGEN=1`
+- Disable during bulk ops: `with graphproj.auto_regen.disable_regen():`
+
+See `docs/GRAPH_AUTO_REGEN.md`.
