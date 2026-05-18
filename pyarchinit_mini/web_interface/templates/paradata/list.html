@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ kind|capitalize }} — {{ site }}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="p-4">
+  <h1>{{ kind|capitalize }} for site {{ site }}</h1>
+  <a href="{{ url_for('paradata_ui.new', site=site, kind=kind) }}" class="btn btn-primary mb-3">New {{ kind|capitalize }}</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        {% for col in columns %}<th>{{ col|capitalize }}</th>{% endfor %}
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        {% for col in columns %}<td>{{ item.get(col, '') }}</td>{% endfor %}
+        <td>
+          <a href="{{ url_for('paradata_ui.edit', site=site, kind=kind, node_id=item.node_id) }}" class="btn btn-sm btn-secondary">Edit</a>
+          <form action="{{ url_for('paradata_ui.delete', site=site, kind=kind, node_id=item.node_id) }}" method="post" style="display:inline">
+            <button class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

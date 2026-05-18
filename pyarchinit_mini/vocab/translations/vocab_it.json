@@ -10,19 +10,19 @@
     "RSF": {"label": "RSF", "description": "Spoglio (Reperto Reimpiegato)"}
   },
   "edge_types": {
-    "covers": {"label": "copre"},
+    "overlies": {"label": "copre"},
     "cuts": {"label": "taglia"},
     "fills": {"label": "riempie"},
     "is_after": {"label": "è dopo"},
     "has_same_time": {"label": "uguale a"},
-    "leans_against": {"label": "si appoggia a"}
+    "abuts": {"label": "si appoggia a"}
   },
   "edge_type_aliases": {
-    "covers": ["copre"],
+    "overlies": ["copre"],
     "is_after": ["coperto da", "coperta da", "tagliato da", "tagliata da"],
     "cuts": ["taglia"],
     "fills": ["riempie"],
-    "leans_against": ["si appoggia a", "si appoggia"],
+    "abuts": ["si appoggia a", "si appoggia"],
     "has_same_time": ["uguale a"]
   }
 }

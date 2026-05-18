@@ -1,3 +1,61 @@
+## [2.3.0-alpha] - 2026-05-18
+
+### Added (IT)
+- Modulo `pyarchinit_mini/graphproj/` con `GraphProjector` (DB → s3dgraphy.Graph),
+  `ParadataStore` (storage per-sito su filesystem), `GraphIngestor` (preview/apply
+  bidirezionale con staleness check), `auto_regen` (hook post-commit), edge_registry,
+  filesystem helpers.
+- Modulo `pyarchinit_mini/graphml_io/` con writer/reader delegati a
+  `s3dgraphy.exporter.graphml.GraphMLExporter` / `s3dgraphy.importer.import_graphml.GraphMLImporter`.
+- Auto-regen di `data/paradata/<site_slug>/stratigraphy.graphml` su ogni save US/USM
+  (best-effort, errori isolati). Disabilitabile con `PYARCHINIT_DISABLE_AUTO_REGEN=1`
+  o col context manager `auto_regen.disable_regen()`.
+- 5 pagine HTML CRUD per paradata (authors, licenses, embargoes, documents, epochs)
+  con form Bootstrap.
+- REST API completa `/api/v1/paradata/<site>/{authors,licenses,embargoes,documents,epochs}`.
+- Route web `/sites/<site>/graph/{view,download,import-preview,import-apply}` con
+  preview 2-fasi obbligatorio per l'import GraphML + snapshot staleness check.
+
+### Changed
+- `pyarchinit_mini/graphml_converter/{graphml_builder, graphml_exporter,
+  pure_networkx_exporter, converter}.py` marcati deprecati (emettono
+  `DeprecationWarning` all'import). Verranno rimossi in Spec 3.
+- `harris_creator_routes.py` refactored: il branch `graphml` ora usa
+  `GraphProjector.populate_graph()` + `graphml_io.writer.write_graphml()`
+  invece di passare attraverso `HarrisMatrixGenerator.export_to_graphml()` /
+  `GraphMLBuilder`.
+- Edge canonical names allineati a s3dgraphy 0.1.42: `covers` → `overlies`,
+  `leans_against` → `abuts`. Fix del bug latente Spec 1 in
+  `vocab_{en,it}.json` e `s3d_converter._LEGACY_CODE_MAP`.
+
+### Architecture note (paradata storage)
+s3dgraphy 0.1.42's GraphML exporter does not round-trip standalone paradata
+nodes (AuthorNode, etc.) — they're only serialised when wrapped in
+ParadataNodeGroup. Spec 2 therefore adopted a **JSON sidecar pattern**:
+paradata entities live in `data/paradata/<site_slug>/paradata.json`
+(committed to git), while the auto-regenerated `stratigraphy.graphml` is
+purely the stratigraphic projection. Paradata are exposed via REST/UI but
+not embedded in the GraphML output.
+
+### Added (EN)
+- New `pyarchinit_mini/graphproj/` package: GraphProjector, ParadataStore,
+  GraphIngestor (2-phase preview/apply), auto_regen post-commit hook,
+  edge_registry, filesystem helpers.
+- New `pyarchinit_mini/graphml_io/` package delegating to s3dgraphy.
+- Auto-regen of stratigraphy.graphml on US/USM save, error-isolated.
+- 5 paradata CRUD HTML pages + REST API.
+- Graph routes: view, download, import-preview, import-apply with snapshot
+  staleness check (409 on stale).
+- Deprecation warnings on 4 legacy writers.
+
+### Dependencies
+- No new dependencies. Uses s3dgraphy 0.1.42 (bumped in 2.2.0-alpha).
+
+### Spec / Plan
+- Spec: `docs/superpowers/specs/2026-05-17-spec-2-local-graph-paradata-design.md`
+- Plan: `docs/superpowers/plans/2026-05-17-spec-2-local-graph-paradata.md`
+- Spec 2 of 4 for the s3dgraphy bidirectional bridge work.
+
 ## [2.2.0-alpha] - 2026-05-17
 
 ### Added (IT)

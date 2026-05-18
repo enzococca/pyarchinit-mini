@@ -24,7 +24,7 @@ def test_lookup_returns_abbreviation_when_no_translation_anywhere():
 
 def test_edge_type_label_translation():
     i18n = VocabI18n(translations_dir=Path("pyarchinit_mini/vocab/translations"))
-    label = i18n.edge_type_label("covers", lang="it")
+    label = i18n.edge_type_label("overlies", lang="it")
     assert label == "copre"
 
 

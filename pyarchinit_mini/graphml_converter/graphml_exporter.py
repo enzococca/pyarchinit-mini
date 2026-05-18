@@ -17,6 +17,7 @@
  *   (at your option) any later version.                                    *                                                                       *
  ***************************************************************************/
 """
+import warnings as _spec2_warnings
 import random
 import sys
 import locale
@@ -24,6 +25,13 @@ import optparse
 from . import dot_parser as dot
 import xml.dom.minidom as F
 from xml.dom.minidom import *
+
+_spec2_warnings.warn(
+    "pyarchinit_mini.graphml_converter.graphml_exporter is deprecated; use "
+    "pyarchinit_mini.graphml_io.writer instead. This module will be removed in Spec 3.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 # Usage message
 usgmsg = "Usage: graphml_exporter [options] infile.dot outfile.graphml"
