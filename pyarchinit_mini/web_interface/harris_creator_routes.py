@@ -633,6 +633,8 @@ from flask import g
 from pyarchinit_mini.harris_swimlane.row_provider import RowProvider
 from pyarchinit_mini.harris_swimlane.swimlane_state import SwimlaneState
 from pyarchinit_mini.harris_swimlane.exceptions import SwimlaneError, RowProviderError
+from pyarchinit_mini.harris_swimlane.period_sync_service import PeriodSyncService
+from pyarchinit_mini.harris_swimlane.exceptions import PeriodSyncError
 
 
 def _get_session():
@@ -718,4 +720,41 @@ def api_save_state(site: str):
         return jsonify({"error": "swimlane", "message": str(e)}), 500
     except Exception as e:
         logger.exception("api_save_state failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
+
+
+@harris_creator_bp.post("/api/swimlanes/<site>")
+def api_create_row(site: str):
+    """Create a new swimlane row (upsert period_table). site param is for
+    URL consistency; period_table is currently cross-site."""
+    payload = request.get_json(silent=True) or {}
+    period_name = payload.get("period_name", "")
+    phase_name = payload.get("phase_name") or None
+    start_date = payload.get("start_date")
+    end_date = payload.get("end_date")
+    try:
+        session = _get_session()
+        svc = PeriodSyncService(session)
+        row = svc.upsert_row(
+            period_name=period_name, phase_name=phase_name,
+            start_date=start_date, end_date=end_date,
+        )
+        return jsonify({
+            "row_id": row.row_id,
+            "period_name": row.period_name,
+            "phase_name": row.phase_name,
+            "start_date": row.start_date,
+            "end_date": row.end_date,
+            "color": row.color,
+            "source": row.source,
+        }), 201
+    except PeriodSyncError as e:
+        return jsonify({
+            "error": "validation",
+            "message": str(e),
+            "period_name": e.period_name,
+            "phase_name": e.phase_name,
+        }), 400
+    except Exception as e:
+        logger.exception("api_create_row failed")
         return jsonify({"error": "internal", "message": str(e)}), 500
