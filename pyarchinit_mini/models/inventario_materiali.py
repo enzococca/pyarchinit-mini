@@ -97,6 +97,9 @@ class InventarioMateriali(BaseModel):
     photo_id = Column(Text)
     drawing_id = Column(Text)
 
+    # Spec 1: stable node identity for s3dgraphy/EM graph round-trip
+    node_uuid = Column(String(36))
+
     # Relationships
     site_ref = relationship("Site", foreign_keys=[sito],
                            primaryjoin="InventarioMateriali.sito == Site.sito")

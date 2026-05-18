@@ -1,3 +1,45 @@
+## [2.4.4] - 2026-05-18
+
+### Fixed (IT)
+- Nodi US dell'editor swimlane ora hanno `data.color` (risolto via
+  `VocabProvider.get_visual_style().fill_color`). Stop ai warning Cytoscape
+  "no mapping for property background-color with data field color".
+- Edge stratigrafici deduplicati: `_build_edges` ora ignora le coppie
+  doppie `(source, target, edge_name)` e tratta gli inversi `overlies` /
+  `is_after` come la stessa relazione (un solo arco invece di due).
+- Editor lancia un layout `dagre` dopo `cy.add()` + `cy.fit()`, così gli US
+  si distribuiscono dentro le row e gli archi diventano visibili.
+
+### Added (IT)
+- Modelli SQLAlchemy `US`, `InventarioMateriali`, `Periodizzazione` ora
+  definiscono la colonna `node_uuid = Column(String(36))`. Un DB nuovo
+  creato via `Base.metadata.create_all()` nasce con la colonna corretta.
+- `DatabaseMigrations.migrate_all_tables()` chiama automaticamente le 3
+  migration di Spec 1 (`_2026_05_node_uuid_schema`, `_node_uuid_backfill`,
+  `_vocab_alignment`) idempotentemente. Conseguenza: i DB esistenti
+  (SQLite o PostgreSQL) vengono aggiornati al primo avvio del web —
+  nessun bisogno di lanciare manualmente `pyarchinit-mini-migrate-vocab`.
+
+### Fixed (EN)
+- US nodes in the swimlane editor now carry `data.color`, resolved through
+  `VocabProvider.get_visual_style().fill_color`. Eliminates Cytoscape
+  warnings about missing color mapping.
+- Stratigraphic edges deduplicated: `_build_edges` ignores duplicate
+  `(source, target, edge_name)` triples and treats `overlies` / `is_after`
+  inverse pairs as the same edge (one arrow, not two).
+- Editor runs a `dagre` layout after `cy.add()` plus a `cy.fit()` so US
+  children spread inside their swimlane row and edges become visible.
+
+### Added (EN)
+- SQLAlchemy models `US`, `InventarioMateriali`, `Periodizzazione` now
+  declare `node_uuid = Column(String(36))`. New DBs created via
+  `Base.metadata.create_all()` have the column from the start.
+- `DatabaseMigrations.migrate_all_tables()` now invokes the 3 Spec 1
+  migrations (`node_uuid_schema`, `node_uuid_backfill`, `vocab_alignment`)
+  idempotently. Existing SQLite or PostgreSQL DBs get auto-upgraded on
+  the first web startup — no need to run `pyarchinit-mini-migrate-vocab`
+  by hand.
+
 ## [2.4.3] - 2026-05-18
 
 ### Fixed (IT)
