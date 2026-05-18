@@ -1,3 +1,27 @@
+## [2.4.6] - 2026-05-18
+
+### Fixed (IT)
+- Editor swimlane su DB SQLite locali tornava HTTP 500 "no such column:
+  periodo" perché `period_table` era stata creata dal modello SQLAlchemy
+  con lo schema legacy `period_name/phase_name/start_date/end_date`.
+  Nuova migration `_2026_05_period_table_schema` aggiunge le colonne
+  reali pyarchinit (`periodo`, `fase`, `datazione`, `descrizione`,
+  `sito`) e backfilla `periodo ← period_name`, `fase ← phase_name`.
+  Auto-applicata dal `migrate_all_tables()`.
+- Modello SQLAlchemy `Period` aggiornato per dichiarare entrambi i set
+  di colonne (legacy + reale), così `Base.metadata.create_all()` su DB
+  nuovi parte già con lo schema corretto.
+
+### Fixed (EN)
+- Swimlane editor on local SQLite DBs returned HTTP 500 "no such column:
+  periodo" because `period_table` was created with the legacy schema
+  (`period_name/phase_name/...`). New `_2026_05_period_table_schema`
+  migration adds the real pyarchinit columns (`periodo`, `fase`,
+  `datazione`, `descrizione`, `sito`) and backfills them from legacy
+  ones. Auto-applied by `migrate_all_tables()`.
+- SQLAlchemy `Period` model now declares both legacy and real column
+  sets, so freshly-created DBs start with the right shape.
+
 ## [2.4.5] - 2026-05-18
 
 ### Changed (IT)
