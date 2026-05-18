@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from .row_provider import Row, RowProvider, PERIOD_COLORS
 from .compound_layout import derive_row_id, initial_node_position
+from .harris_layout import compute_harris_positions
 from .exceptions import SwimlaneStateError
 
 
@@ -230,7 +231,6 @@ class SwimlaneState:
 
         nodes: list[CytoscapeElement] = []
         us_num_to_node_id: dict[int, str] = {}
-        row_counts: dict[str, int] = {}
 
         for r in us_rows:
             id_us = r[0]
@@ -242,15 +242,6 @@ class SwimlaneState:
 
             node_id = f"us_{id_us}"
             us_num_to_node_id[us_num] = node_id
-
-            idx = row_counts.get(parent_row_id, 0)
-            row_counts[parent_row_id] = idx + 1
-
-            # Build a minimal row-like object for initial_node_position
-            class _RowLike:
-                row_id = parent_row_id
-
-            pos = initial_node_position(_RowLike(), idx)
 
             style = _style_for(unita_tipo)
             nodes.append(CytoscapeElement(
@@ -277,7 +268,7 @@ class SwimlaneState:
                     "datazione": r[10] or "",
                     "file_path": r[11] or "",
                 },
-                position=pos,
+                position=None,
             ))
 
         # Add swimlane parent (compound) elements — one per row
@@ -300,6 +291,27 @@ class SwimlaneState:
         edges.extend(SwimlaneState._build_edges_from_relationships_table(
             session, site, us_num_to_node_id, existing=edges,
         ))
+
+        # Compute topologically-ranked positions via harris_layout.
+        hl_nodes = [
+            {"id": el.data["id"], "lane": el.data["parent"]}
+            for el in nodes if not el.data.get("is_swimlane")
+        ]
+        hl_edges = [
+            {"source": e.data["source"], "target": e.data["target"], "label": e.data["label"]}
+            for e in edges
+        ]
+        lane_widths = {row.row_id: 300 for row in rows}
+        positions = compute_harris_positions(
+            hl_nodes, hl_edges,
+            lane_id_for=lambda n: n["lane"],
+            lane_widths=lane_widths,
+        )
+        for el in nodes:
+            if el.data.get("is_swimlane"):
+                continue
+            x, y = positions.get(el.data["id"], (0.0, 0.0))
+            el.position = {"x": x, "y": y}
 
         return EditorState(
             site=site,

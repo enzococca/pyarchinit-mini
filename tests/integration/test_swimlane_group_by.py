@@ -48,3 +48,23 @@ def test_group_by_distinct_field_runs(session, gb):
     assert state.group_by == gb
     # Fixture has no values in these columns → 1 lane "(missing)"
     assert len(state.rows) >= 1
+
+
+def test_harris_positions_within_lanes(session):
+    state = SwimlaneState.load(session, "Volterra")
+    # Nodes within the same lane must have ascending y when there is an
+    # edge between them (older below newer).
+    by_id = {n.data["id"]: n for n in state.nodes if not n.data.get("is_swimlane")}
+    for e in state.edges:
+        if e.data.get("label") != "overlies":
+            continue
+        src = by_id.get(e.data["source"])
+        tgt = by_id.get(e.data["target"])
+        if not src or not tgt:
+            continue
+        if src.data.get("parent") != tgt.data.get("parent"):
+            continue
+        # source overlies target → source must be above target (smaller y).
+        assert src.position["y"] <= tgt.position["y"], (
+            f"{src.data['id']} should be above {tgt.data['id']}"
+        )
