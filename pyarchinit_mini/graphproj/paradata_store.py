@@ -95,6 +95,12 @@ class ParadataStore:
 
     def _write_json(self, data: dict) -> None:
         """Atomically persist the JSON sidecar."""
+        # NOTE: _write_json does NOT acquire its own flock — callers
+        # (_generic_add/update/delete + add_author/update_author/delete_author)
+        # must hold the flock around the load → mutate → write sequence.
+        # TODO(Spec-3): consider making this enforced via a stack-frame inspection
+        # or by inverting the contract (helper holds the lock, callers use a
+        # context manager).
         self._dir.mkdir(parents=True, exist_ok=True)
         tmp = self._json_path.with_suffix(self._json_path.suffix + ".tmp")
         try:

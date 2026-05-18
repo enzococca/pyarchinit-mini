@@ -186,6 +186,9 @@ def save_matrix():
             "relationships_created": 15
         }
     """
+    # TODO(Spec-3): replace debug print() calls with logger.debug per
+    # final review nit. Lines below contain prints kept from initial dev.
+
     # Debug logging
     print(f"[DEBUG] Content-Type: {request.content_type}")
     print(f"[DEBUG] Request data: {request.data}")
