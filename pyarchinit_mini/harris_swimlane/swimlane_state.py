@@ -185,8 +185,98 @@ class SwimlaneState:
 
     @staticmethod
     def save(session: Session, site: str, state: dict) -> SaveResult:
-        """Stub for Task 11."""
-        raise NotImplementedError("save() implemented in Task 11")
+        """Apply pending_changes to DB. Transaction-wrapped.
+
+        Body:
+          {
+            "pending_us_updates": [{"us": int, "periodo_iniziale": str, "fase_iniziale": str}, ...],
+            "pending_us_inserts": [{"sito", "us", "unita_tipo", "periodo_iniziale", "fase_iniziale", ...}, ...],
+            "pending_us_deletes": [{"us": int}, ...],
+          }
+
+        After commit: triggers Spec 2 auto_regen for stratigraphy.graphml.
+        """
+        updates = state.get("pending_us_updates", [])
+        inserts = state.get("pending_us_inserts", [])
+        deletes = state.get("pending_us_deletes", [])
+
+        updated = 0
+        inserted = 0
+        deleted = 0
+        errors: list[str] = []
+
+        try:
+            for u in updates:
+                try:
+                    session.execute(text(
+                        "UPDATE us_table SET periodo_iniziale=:p, fase_iniziale=:ph "
+                        "WHERE us=:us AND sito=:sito"
+                    ), {
+                        "p": u.get("periodo_iniziale"),
+                        "ph": u.get("fase_iniziale"),
+                        "us": u["us"],
+                        "sito": site,
+                    })
+                    updated += 1
+                except Exception as e:
+                    errors.append(f"update us={u.get('us')}: {e}")
+
+            for ins in inserts:
+                try:
+                    node_uuid = ins.get("node_uuid")
+                    if not node_uuid:
+                        try:
+                            from pyarchinit_mini.database.utils import generate_node_uuid
+                            node_uuid = generate_node_uuid()
+                        except Exception:
+                            node_uuid = None
+                    session.execute(text(
+                        "INSERT INTO us_table (sito, area, us, unita_tipo, "
+                        "periodo_iniziale, fase_iniziale, node_uuid) "
+                        "VALUES (:sito, :area, :us, :ut, :p, :ph, :uuid)"
+                    ), {
+                        "sito": ins.get("sito", site),
+                        "area": ins.get("area"),
+                        "us": ins["us"],
+                        "ut": ins.get("unita_tipo", "US"),
+                        "p": ins.get("periodo_iniziale"),
+                        "ph": ins.get("fase_iniziale"),
+                        "uuid": node_uuid,
+                    })
+                    inserted += 1
+                except Exception as e:
+                    errors.append(f"insert us={ins.get('us')}: {e}")
+
+            for d in deletes:
+                try:
+                    session.execute(text(
+                        "DELETE FROM us_table WHERE us=:us AND sito=:sito"
+                    ), {"us": d["us"], "sito": site})
+                    deleted += 1
+                except Exception as e:
+                    errors.append(f"delete us={d.get('us')}: {e}")
+
+            if errors:
+                session.rollback()
+                updated = inserted = deleted = 0
+            else:
+                session.commit()
+                # Spec 2 auto-regen — best-effort
+                try:
+                    from pyarchinit_mini.graphproj.auto_regen import _trigger_graph_regen
+                    _trigger_graph_regen(site, session=session)
+                except Exception:
+                    pass
+        except Exception as e:
+            session.rollback()
+            raise SwimlaneStateError(f"save failed: {e}", op="save") from e
+
+        return SaveResult(
+            updated=updated,
+            inserted=inserted,
+            deleted=deleted,
+            errors=tuple(errors),
+        )
 
 
 def _row_label(row: Row) -> str:
