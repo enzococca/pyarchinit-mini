@@ -777,6 +777,11 @@ class DatabaseMigrations:
                             ('us_table', 'id_us', 'us_table_id_us_seq'),
                             ('inventario_materiali_table', 'id_invmat', 'inventario_materiali_table_id_invmat_seq'),
                             ('users', 'id', 'users_id_seq'),
+                            # Spec-3-bis & QGIS pyarchinit interop
+                            ('periodizzazione_table', 'id_perfas', 'periodizzazione_table_id_perfas_seq'),
+                            ('period_table', 'id_period', 'period_table_id_period_seq'),
+                            ('us_relationships_table', 'id_relationship', 'us_relationships_table_id_relationship_seq'),
+                            ('harris_matrix_table', 'id_matrix', 'harris_matrix_table_id_matrix_seq'),
                         ]:
                             try:
                                 max_id = session.execute(text(f'SELECT MAX({pk}) FROM {table}')).scalar() or 0
