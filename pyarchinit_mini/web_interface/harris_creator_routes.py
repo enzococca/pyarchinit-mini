@@ -369,6 +369,14 @@ def save_matrix():
             # Explicitly commit all changes
             db.commit()
 
+            # Spec 2: auto-regen stratigraphy.graphml after Harris Creator save.
+            # Best-effort; _trigger_graph_regen already catches its own errors.
+            try:
+                from pyarchinit_mini.graphproj.auto_regen import _trigger_graph_regen
+                _trigger_graph_regen(site_name, session=db)
+            except Exception:
+                pass
+
             return jsonify({
                 'success': True,
                 'message': f'Successfully saved Harris Matrix',
