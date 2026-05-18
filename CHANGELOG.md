@@ -1,3 +1,57 @@
+## [2.4.0-alpha] - 2026-05-18
+
+### Added (IT)
+- Modulo `pyarchinit_mini/harris_swimlane/` (5 moduli: row_provider,
+  swimlane_state, period_sync_service, compound_layout, exceptions) per
+  l'editor swimlane di Harris Matrix.
+- `pyarchinit_mini/graphml_io/yed_writer.py` — nuovo emitter
+  yEd-flavored con `y:TableNode + y:Rows + y:ShapeNode`, separato
+  dall'export s3dgraphy clean di Spec 2.
+- 5 nuove route REST per il Harris Creator:
+  `GET/POST /api/swimlanes/<site>`, `GET /api/load/<site>`,
+  `POST /api/save/<site>`, `GET /api/export/<site>/yed-graphml`.
+- Editor `/harris-creator/editor` ora carica swimlane automaticamente
+  (row da `period_table` priorità → fallback distinct values), supporta
+  drag-drop tra row, creazione interattiva di nuove row, save esplicito
+  con auto-regen (Spec 2) post-commit.
+- Export yEd GraphML on-demand → `data/exports/harris_yed/<slug>-harris-yed.graphml`.
+
+### Added (EN)
+- New `pyarchinit_mini/harris_swimlane/` package — backend for Harris
+  Matrix swimlane editing.
+- New `pyarchinit_mini/graphml_io/yed_writer.py` — yEd-flavored GraphML
+  emitter (TableNode + Rows + ShapeNode), separate from Spec 2's
+  s3dgraphy delegate.
+- 5 new REST endpoints under `/harris-creator/api/`.
+- Editor loads swimlanes auto from `period_table` (fallback distinct);
+  drag-drop between rows; interactive row creation; explicit Save with
+  Spec 2 auto-regen. On-demand yEd export.
+
+### Changed
+- `harris_creator_routes.py` extended additively — existing routes
+  unchanged.
+- `editor.html` extended additively — Cytoscape compound nodes,
+  swimlane parents, new toolbar buttons.
+
+### Architecture note
+Two GraphML outputs now coexist:
+- `data/paradata/<slug>/stratigraphy.graphml` (Spec 2 auto-regen,
+  s3dgraphy clean, EM-canonical)
+- `data/exports/harris_yed/<slug>-harris-yed.graphml` (Spec 3-bis,
+  on-demand, yEd-flavored with TableNode)
+
+Legacy `pure_networkx_exporter` stays deprecated (was deprecated in
+Spec 2 PR8). NOT resurrected.
+
+### Dependencies
+- No new dependencies.
+
+### Spec / Plan
+- Spec: `docs/superpowers/specs/2026-05-18-harris-swimlane-template-design.md`
+- Plan: `docs/superpowers/plans/2026-05-18-harris-swimlane-template.md`
+- Spec 3-bis (auxiliary): independent of Spec 3 (SyncEngine + EM
+  Datacenter, on hold pending Datacenter readiness).
+
 ## [2.3.0-alpha] - 2026-05-18
 
 ### Added (IT)
