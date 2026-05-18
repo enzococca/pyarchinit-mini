@@ -123,5 +123,68 @@ class GraphIngestor:
         )
 
     def apply(self, plan: IngestPlan) -> IngestResult:
-        """Stub for Task 15."""
-        raise NotImplementedError("apply() implemented in Task 15")
+        """Execute the plan. Transaction-wrapped. Verifies snapshot freshness.
+
+        Raises IngestStaleError if the DB has changed since preview was
+        computed (snapshot_revision mismatch). Caller should re-run preview.
+
+        On per-row error, the whole transaction is rolled back and
+        IngestResult.errors is populated.
+        """
+        current = self._current_snapshot_revision()
+        if current != plan.snapshot_revision:
+            raise IngestStaleError(expected=plan.snapshot_revision, actual=current)
+
+        inserted = 0
+        updated = 0
+        errors: list[str] = []
+
+        try:
+            for entry in plan.inserts:
+                try:
+                    self.session.execute(text(
+                        "INSERT INTO us_table (sito, us, unita_tipo, node_uuid) "
+                        "VALUES (:sito, :us, :unita_tipo, :node_uuid)"
+                    ), {
+                        "sito": self.site,
+                        "us": entry.after["us"],
+                        "unita_tipo": entry.after["unita_tipo"],
+                        "node_uuid": entry.after["node_uuid"] or entry.node_uuid,
+                    })
+                    inserted += 1
+                except Exception as e:
+                    errors.append(f"insert {entry.semantic_id}: {e}")
+
+            for entry in plan.updates:
+                try:
+                    self.session.execute(text(
+                        "UPDATE us_table SET us=:us, unita_tipo=:unita_tipo "
+                        "WHERE node_uuid=:node_uuid AND sito=:sito"
+                    ), {
+                        "sito": self.site,
+                        "us": entry.after["us"],
+                        "unita_tipo": entry.after["unita_tipo"],
+                        "node_uuid": entry.node_uuid,
+                    })
+                    updated += 1
+                except Exception as e:
+                    errors.append(f"update {entry.semantic_id}: {e}")
+
+            skipped = len(plan.skips_local_newer) + len(plan.skips_locked)
+
+            if errors:
+                self.session.rollback()
+                inserted = updated = 0
+            else:
+                self.session.commit()
+        except Exception:
+            self.session.rollback()
+            raise
+
+        return IngestResult(
+            plan=plan,
+            inserted=inserted,
+            updated=updated,
+            skipped=skipped,
+            errors=tuple(errors),
+        )
