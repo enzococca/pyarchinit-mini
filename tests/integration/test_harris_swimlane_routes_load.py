@@ -69,6 +69,9 @@ def test_get_load_empty_site(client):
     r = client.get("/harris-creator/api/load/UnknownSite")
     assert r.status_code == 200
     data = r.get_json()
-    # SwimlaneState.load returns empty when no US for site
-    assert data["nodes"] == []
+    # Fix 2 (review): empty site still returns period_table rows + swimlane
+    # parent nodes so the user can drag-create US into them.
     assert data["edges"] == []
+    us_nodes = [n for n in data["nodes"] if not n["data"].get("is_swimlane")]
+    assert us_nodes == []  # no US for unknown site
+    # swimlane parents may be present (cross-site period_table); that's intentional
