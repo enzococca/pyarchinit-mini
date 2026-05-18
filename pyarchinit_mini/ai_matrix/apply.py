@@ -81,9 +81,9 @@ def apply_ai_plan(plan: AIPlan, sito: str, db_session) -> ApplyResult:
             continue
         existing_rel = db_session.execute(text("""
             SELECT 1 FROM us_relationships_table
-            WHERE sito_from = :s AND sito_to = :s
+            WHERE sito_from = :sf AND sito_to = :st
               AND us_from = :uf AND us_to = :ut AND tipo_relazione = :t
-        """), {"s": sito, "uf": us_from, "ut": us_to, "t": e.tipo}).fetchone()
+        """), {"sf": sito, "st": sito, "uf": us_from, "ut": us_to, "t": e.tipo}).fetchone()
         if existing_rel:
             result.edges_skipped += 1
             continue
@@ -91,8 +91,8 @@ def apply_ai_plan(plan: AIPlan, sito: str, db_session) -> ApplyResult:
             INSERT INTO us_relationships_table
                 (sito_from, sito_to, us_from, us_to, tipo_relazione,
                  created_at, updated_at)
-            VALUES (:s, :s, :uf, :ut, :t, :now, :now)
-        """), {"s": sito, "uf": us_from, "ut": us_to, "t": e.tipo, "now": now})
+            VALUES (:sf, :st, :uf, :ut, :t, :now, :now)
+        """), {"sf": sito, "st": sito, "uf": us_from, "ut": us_to, "t": e.tipo, "now": now})
         result.edges_imported += 1
 
     db_session.commit()

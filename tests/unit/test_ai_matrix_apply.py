@@ -159,3 +159,8 @@ def test_apply_skips_duplicate_edges(db_session):
     result = apply_ai_plan(plan2, "S", db_session)
     assert result.edges_imported == 0
     assert result.edges_skipped == 1
+    # Assert no duplicate row was inserted
+    count = db_session.execute(text(
+        "SELECT COUNT(*) FROM us_relationships_table"
+    )).fetchone()[0]
+    assert count == 1
