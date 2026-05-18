@@ -52,6 +52,7 @@ def upload():
     try:
         result = extract(image_bytes, text_hint, provider)
     except Exception as e:
+        current_app.logger.exception("matrix_import: extract() raised")
         flash(f"Errore AI: {e}", "error")
         return redirect(url_for("matrix_import.upload_form"))
 

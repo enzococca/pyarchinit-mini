@@ -15,8 +15,8 @@
   {% endif %}
 
   <form id="apply-form" method="post" action="{{ url_for('matrix_import.apply') }}">
-    <input type="hidden" name="plan_json" value='{{ plan_json }}'>
-    <input type="hidden" name="image_b64" value="{{ image_b64 }}">
+    <input type="hidden" name="plan_json" value="{{ plan_json|e }}">
+    <input type="hidden" name="image_b64" value="{{ image_b64|e }}">
 
     <label>Sito:
       <input type="text" name="sito" value="{{ sito }}" required>
