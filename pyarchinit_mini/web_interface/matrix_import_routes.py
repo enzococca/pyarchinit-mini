@@ -78,7 +78,114 @@ def upload():
     )
 
 
+def _apply_form_edits(
+    plan: AIPlan,
+    form,
+    selected_us_idx: set,
+    selected_edges_idx: set,
+) -> AIPlan:
+    """Build a filtered plan with user-edited values for selected rows only."""
+    from pyarchinit_mini.ai_matrix.plan import USRow, EdgeRow
+    new_us = []
+    for idx, _u in enumerate(plan.us):
+        if str(idx) not in selected_us_idx:
+            continue
+        new_us.append(USRow(
+            us_num=form.get(f"us_num_{idx}", "").strip(),
+            area=form.get(f"area_{idx}", "").strip() or None,
+            unit_type=form.get(f"unit_type_{idx}", "US").strip(),
+            descrizione=form.get(f"desc_{idx}", "").strip(),
+            fase_recente=int(form.get(f"fr_{idx}", "1") or "1"),
+            fase_iniziale=int(form.get(f"fi_{idx}", "1") or "1"),
+        ))
+    new_edges = []
+    for idx, _e in enumerate(plan.edges):
+        if str(idx) not in selected_edges_idx:
+            continue
+        new_edges.append(EdgeRow(
+            us_from=form.get(f"ef_{idx}", "").strip(),
+            us_to=form.get(f"et_{idx}", "").strip(),
+            tipo=form.get(f"etipo_{idx}", "copre").strip(),
+        ))
+    return AIPlan(
+        detected_site=plan.detected_site,
+        detected_area=plan.detected_area,
+        us=new_us, edges=new_edges,
+    )
+
+
 @matrix_import_bp.post("/apply")
 def apply():
-    """Stub — full implementation in Task 7."""
-    return ("Not implemented yet — coming in Task 7", 501)
+    plan_json_str = request.form.get("plan_json", "")
+    sito = request.form.get("sito", "").strip()
+    image_b64 = request.form.get("image_b64", "")
+
+    if not sito:
+        flash("Nome sito obbligatorio", "error")
+        return redirect(url_for("matrix_import.upload_form"))
+    if not plan_json_str:
+        flash("Plan mancante", "error")
+        return redirect(url_for("matrix_import.upload_form"))
+
+    selected_us = set(request.form.getlist("selected_us"))
+    selected_edges = set(request.form.getlist("selected_edges"))
+
+    plan = AIPlan.from_dict(json.loads(plan_json_str))
+    plan = _apply_form_edits(plan, request.form, selected_us, selected_edges)
+
+    result = apply_ai_plan(plan, sito, g.db_session)
+
+    # Save source image as media for the site (best-effort, non-blocking)
+    if image_b64:
+        try:
+            _save_image_for_site(sito, image_b64)
+        except Exception as exc:
+            current_app.logger.warning("matrix_import media save failed: %s", exc)
+
+    flash(
+        f"Importate {result.us_imported} US, {result.edges_imported} relazioni "
+        f"({result.us_skipped} US e {result.edges_skipped} relazioni saltate)",
+        "success",
+    )
+    return redirect(url_for("us.list_us", sito=sito))
+
+
+def _save_image_for_site(sito: str, image_b64: str) -> None:
+    """Best-effort: persist the source image as a Media row linked to the site.
+
+    Uses MediaService.store_and_register_media via a temporary file. Looks up
+    id_sito by sito name; if MediaService isn't wired into this app context,
+    silently no-ops (the import already committed).
+    """
+    import tempfile
+    from sqlalchemy import text as _text
+
+    row = g.db_session.execute(
+        _text("SELECT id_sito FROM site_table WHERE sito = :s"), {"s": sito}
+    ).fetchone()
+    if not row:
+        return
+    id_sito = int(row[0])
+
+    image_bytes = base64.b64decode(image_b64)
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+        tmp.write(image_bytes)
+        tmp_path = tmp.name
+
+    try:
+        media_svc = current_app.extensions.get("media_service")
+        if media_svc is None:
+            return
+        media_svc.store_and_register_media(
+            tmp_path,
+            entity_type="site",
+            entity_id=id_sito,
+            description="AI Matrix Import source",
+            tags="matrix_source,ai_import",
+        )
+    finally:
+        import os as _os
+        try:
+            _os.unlink(tmp_path)
+        except OSError:
+            pass
