@@ -627,6 +627,45 @@ from pyarchinit_mini.harris_swimlane.period_sync_service import PeriodSyncServic
 from pyarchinit_mini.harris_swimlane.exceptions import PeriodSyncError
 
 
+def _load_epochs(session, site: str) -> list[dict]:
+    """Load periodizzazione rows for the site to feed yed_writer epochs_meta.
+
+    Primary source: ``periodizzazione_table`` (populated when data is saved via
+    the Harris Creator editor).  Falls back to the distinct ``periodo_iniziale``
+    / ``fase_iniziale`` pairs from ``us_table`` so that fixture databases that
+    pre-date the periodizzazione write path (e.g. the Volterra test fixture)
+    still produce a non-empty epochs list.
+    """
+    from sqlalchemy import text
+    # ``datazione_estesa`` may not exist in older schema versions — use a
+    # NULL placeholder and handle missing column gracefully.
+    try:
+        rows = session.execute(text(
+            "SELECT DISTINCT periodo_iniziale, fase_iniziale, datazione_estesa "
+            "FROM periodizzazione_table WHERE sito = :s AND periodo_iniziale IS NOT NULL"
+        ), {"s": site}).fetchall()
+    except Exception:
+        rows = session.execute(text(
+            "SELECT DISTINCT periodo_iniziale, fase_iniziale, NULL as datazione_estesa "
+            "FROM periodizzazione_table WHERE sito = :s AND periodo_iniziale IS NOT NULL"
+        ), {"s": site}).fetchall()
+    if not rows:
+        # Fallback: derive epochs from us_table distinct values.
+        rows = session.execute(text(
+            "SELECT DISTINCT periodo_iniziale, fase_iniziale, NULL as datazione_estesa "
+            "FROM us_table WHERE sito = :s AND periodo_iniziale IS NOT NULL"
+        ), {"s": site}).fetchall()
+    out = []
+    for r in rows:
+        out.append({
+            "name": f"Period{r[0]}" + (f"_phase{r[1]}" if r[1] else ""),
+            "periodo": r[0] or "",
+            "fase": r[1] or "",
+            "datazione_estesa": r[2] or "",
+        })
+    return out
+
+
 def _get_session():
     """Get a request-scoped SQLAlchemy session for Spec 3-bis endpoints.
 
@@ -694,31 +733,31 @@ def api_load_state(site: str):
     # DB (no site_table row), versus 200 + empty state when site exists but
     # has no US yet. Spec §7.1 mentions 404 for site_not_found — current
     # behavior returns 200 + empty.
+    group_by = request.args.get("group_by", "period_phase")
     try:
         session = _get_session()
-        state = SwimlaneState.load(session, site)
+        state = SwimlaneState.load(session, site, group_by=group_by)
         return jsonify({
             "site": state.site,
-            "rows": [{
-                "row_id": r.row_id,
-                "period_name": r.period_name,
-                "phase_name": r.phase_name,
-                "color": r.color,
-                "start_date": r.start_date,
-                "end_date": r.end_date,
-                "source": r.source,
-            } for r in state.rows],
-            "nodes": [{
-                "data": el.data,
-                "classes": el.classes,
-                "position": el.position,
-            } for el in state.nodes],
-            "edges": [{
-                "data": el.data,
-                "classes": el.classes,
-            } for el in state.edges],
+            "group_by": state.group_by,
+            "rows": [
+                {
+                    "row_id": r.row_id,
+                    "period_name": r.period_name,
+                    "phase_name": r.phase_name,
+                    "color": r.color,
+                    "start_date": r.start_date,
+                    "end_date": r.end_date,
+                    "source": r.source,
+                }
+                for r in state.rows
+            ],
+            "nodes": [{"data": el.data, "position": el.position} for el in state.nodes],
+            "edges": [{"data": el.data} for el in state.edges],
             "pending_changes": state.pending_changes,
         }), 200
+    except ValueError as e:
+        return jsonify({"error": "validation", "message": str(e)}), 400
     except SwimlaneError as e:
         return jsonify({"error": "swimlane", "message": str(e)}), 500
     except Exception as e:
@@ -787,7 +826,6 @@ from datetime import datetime as _datetime
 import json as _json
 from flask import send_file as _send_file
 
-from pyarchinit_mini.graphml_io.yed_writer import write_yed_graphml
 from pyarchinit_mini.harris_swimlane.exceptions import YEDWriterError
 from pyarchinit_mini.graphproj.filesystem import slugify
 
@@ -795,16 +833,20 @@ from pyarchinit_mini.graphproj.filesystem import slugify
 @harris_creator_bp.get("/api/export/<site>/yed-graphml")
 def api_export_yed(site: str):
     """Export current swimlane state as yEd-flavored GraphML. On-demand."""
+    from pyarchinit_mini.graphml_io.yed_writer import write_extended_matrix_graphml
+    group_by = request.args.get("group_by", "period_phase")
     try:
         session = _get_session()
-        state = SwimlaneState.load(session, site)
-
+        state = SwimlaneState.load(session, site, group_by=group_by)
+        epochs = _load_epochs(session, site)
         out_dir = _Path("data/exports/harris_yed")
         out_dir.mkdir(parents=True, exist_ok=True)
         site_slug = slugify(site)
-        out_path = out_dir / f"{site_slug}-harris-yed.graphml"
-        write_yed_graphml(state, out_path)
-
+        out_path = out_dir / f"{site_slug}-extmatrix.graphml"
+        write_extended_matrix_graphml(
+            state, site_meta={"sito": site}, epochs=epochs, out=out_path,
+        )
+        # Preserve the existing _index.json upsert-by-site_slug logic.
         idx_path = out_dir / "_index.json"
         entries = []
         if idx_path.exists():
@@ -812,7 +854,6 @@ def api_export_yed(site: str):
                 entries = _json.loads(idx_path.read_text(encoding="utf-8"))
             except Exception:
                 entries = []
-        # Upsert by site_slug: at most 1 entry per site, latest export wins
         entries = [e for e in entries if e.get("site_slug") != site_slug]
         entries.append({
             "site": site,
@@ -822,17 +863,14 @@ def api_export_yed(site: str):
             "timestamp": _datetime.now().isoformat(),
         })
         idx_path.write_text(_json.dumps(entries, indent=2), encoding="utf-8")
-
         return _send_file(
-            out_path.resolve(),
-            as_attachment=True,
-            download_name=f"{site_slug}-harris-yed.graphml",
+            out_path.resolve(), as_attachment=True,
+            download_name=f"{site_slug}-extmatrix.graphml",
             mimetype="application/xml",
         )
     except YEDWriterError as e:
-        return jsonify({"error": "yed_writer", "message": str(e)}), 500
-    except SwimlaneError as e:
-        return jsonify({"error": "swimlane", "message": str(e)}), 500
+        return jsonify({"error": "writer", "message": str(e)}), 500
+    except ValueError as e:
+        return jsonify({"error": "validation", "message": str(e)}), 400
     except Exception as e:
-        logger.exception("api_export_yed failed")
         return jsonify({"error": "internal", "message": str(e)}), 500

@@ -29,3 +29,11 @@ class YEDWriterError(SwimlaneError):
     def __init__(self, *, path: str, msg: str) -> None:
         super().__init__(f"{msg} (path={path})")
         self.path = path
+
+
+class YEDImporterError(SwimlaneError):
+    """Base for yEd import errors (parsing, validation, application)."""
+
+
+class YEDImportValidationError(YEDImporterError):
+    """Caller-facing validation error during build_import_plan."""
