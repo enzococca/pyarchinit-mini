@@ -44,6 +44,11 @@ class SwimlaneState:
     @staticmethod
     def load(session: Session, site: str) -> EditorState:
         """Load editor state for site. Empty state if site has no data."""
+        # TODO(Spec-4): per-site period_table isolation. Currently period_table
+        # is cross-site (any site sees all rows). When a user creates a row in
+        # site A, it appears in site B's editor too. Add a `sito` column to
+        # period_table with backward-compat migration if isolation becomes
+        # load-bearing.
         provider = RowProvider(session, site)
         rows = provider.list_rows()
 
