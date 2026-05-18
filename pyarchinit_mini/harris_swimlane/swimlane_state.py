@@ -52,6 +52,27 @@ class SwimlaneState:
         provider = RowProvider(session, site)
         rows = provider.list_rows()
 
+        # Resolve unit_type → fill_color via VocabProvider once per request so
+        # the editor's `'background-color': data(color)` style renders properly.
+        try:
+            from pyarchinit_mini.vocab.provider import VocabProvider
+            _vocab = VocabProvider.instance()
+            _color_cache: dict[str, str] = {}
+
+            def _color_for(ut: str) -> str:
+                if ut in _color_cache:
+                    return _color_cache[ut]
+                try:
+                    style = _vocab.get_visual_style(ut)
+                    c = getattr(style, "fill_color", None) or "#CCCCCC"
+                except Exception:
+                    c = "#CCCCCC"
+                _color_cache[ut] = c
+                return c
+        except Exception:
+            def _color_for(ut: str) -> str:
+                return "#CCCCCC"
+
         # Load US records for site
         us_rows = session.execute(text(
             "SELECT id_us, sito, area, us, unita_tipo, rapporti, node_uuid, "
@@ -89,6 +110,7 @@ class SwimlaneState:
                     "label": f"{unita_tipo}{us_num}",
                     "parent": parent_row_id,
                     "unit_type": unita_tipo,
+                    "color": _color_for(unita_tipo),
                     "period": periodo,
                     "phase": fase,
                     "us": us_num,
@@ -124,15 +146,33 @@ class SwimlaneState:
 
     @staticmethod
     def _build_edges(us_rows, us_num_to_node_id: dict) -> list[CytoscapeElement]:
-        """Parse rapporti for each US via EdgeRegistry (Spec 1)."""
+        """Parse rapporti for each US via EdgeRegistry, deduplicating canonical
+        triples ``(source, target, edge_name)``.
+
+        pyarchinit stores stratigraphic relationships from both sides
+        (``A copre B`` on row A AND ``B coperto da A`` on row B). Both tokens
+        resolve to the same canonical edge ``A overlies B`` — without
+        deduplication the editor renders the same arrow twice.
+
+        Symmetric edge types (``has_same_time``) are deduped on the
+        unordered pair so the bidirectional view doesn't show 2 lines.
+        """
         try:
             from pyarchinit_mini.graphproj.edge_registry import EdgeRegistry
             registry = EdgeRegistry()
         except Exception:
             return []
 
+        # Edges where direction is meaningless (twins).
+        SYMMETRIC = {"has_same_time"}
+        # Edges that are inverses of each other (A overlies B ≡ B is_after A
+        # in stratigraphic Harris semantics). When pyarchinit stores both
+        # sides on different US rows, the editor must show one arrow, not two.
+        INVERSE_PAIRS = {"overlies": "is_after", "is_after": "overlies"}
+
         edges: list[CytoscapeElement] = []
         edge_counter = 0
+        seen: set[tuple] = set()
 
         for r in us_rows:
             us_num = r[3]
@@ -157,6 +197,22 @@ class SwimlaneState:
                 target_node_id = us_num_to_node_id.get(target_int)
                 if target_node_id is None:
                     continue
+
+                if edge_name in SYMMETRIC:
+                    key = (edge_name, tuple(sorted((source_node_id, target_node_id))))
+                else:
+                    key = (edge_name, source_node_id, target_node_id)
+                if key in seen:
+                    continue
+                # Check the inverse pair (overlies vs is_after) under the same
+                # source/target pair — they represent the same edge.
+                inverse_name = INVERSE_PAIRS.get(edge_name)
+                if inverse_name is not None:
+                    inverse_key = (inverse_name, target_node_id, source_node_id)
+                    if inverse_key in seen:
+                        continue
+                seen.add(key)
+
                 edge_counter += 1
                 edges.append(CytoscapeElement(data={
                     "id": f"e{edge_counter}",

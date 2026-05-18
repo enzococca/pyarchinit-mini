@@ -803,12 +803,51 @@ class DatabaseMigrations:
             except Exception as e:
                 logger.warning(f"TMA thesaurus trigger failed: {e}")
 
+            # Spec 1 (node_uuid + vocab alignment) — auto-applied so fresh
+            # installs and upgraded existing DBs both get the swimlane editor
+            # working without a manual `pyarchinit-mini-migrate-vocab` step.
+            try:
+                total_migrations += self._migrate_spec1_node_uuid_and_vocab()
+            except Exception as e:
+                logger.warning(f"Spec 1 node_uuid/vocab migration failed: {e}")
+
             logger.info(f"All migrations completed. Total migrations applied: {total_migrations}")
             return total_migrations
 
         except Exception as e:
             logger.error(f"Error during database migrations: {e}")
             raise
+
+    def _migrate_spec1_node_uuid_and_vocab(self) -> int:
+        """Apply Spec 1 migrations idempotently: node_uuid schema, backfill,
+        vocab alignment (USVA/USVB→USVs, USVC→USVn). Each underlying script
+        is a no-op when nothing needs changing, so this is safe to call on
+        every startup."""
+        import importlib
+
+        pkg = "pyarchinit_mini.database.migrations"
+        scripts = [
+            f"{pkg}._2026_05_node_uuid_schema",
+            f"{pkg}._2026_05_node_uuid_backfill",
+            f"{pkg}._2026_05_vocab_alignment",
+        ]
+        url = str(self.connection.engine.url)
+        applied = 0
+        for mod_path in scripts:
+            try:
+                mod = importlib.import_module(mod_path)
+                report = mod.run(url, dry_run=False)
+                status = getattr(report, "status", "ok")
+                if status == "ok":
+                    rows = getattr(report, "rows_updated", None)
+                    tables = getattr(report, "tables_changed", None)
+                    mappings = getattr(report, "mappings", None)
+                    if rows or tables or mappings:
+                        applied += 1
+                        logger.info(f"{mod_path}: {tables or rows or mappings}")
+            except Exception as e:
+                logger.warning(f"{mod_path} failed: {e}")
+        return applied
 
     def get_table_info(self, table_name: str) -> Dict[str, Any]:
         """Get information about a table structure"""

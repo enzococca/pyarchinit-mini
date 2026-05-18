@@ -196,8 +196,11 @@ class US(BaseModel):
     rapporti2 = Column(Text)
     doc_usv = Column(Text)
 
+    # Spec 1: stable node identity for s3dgraphy/EM graph round-trip
+    node_uuid = Column(String(36))
+
     # Relationships
-    site_ref = relationship("Site", foreign_keys=[sito], 
+    site_ref = relationship("Site", foreign_keys=[sito],
                            primaryjoin="US.sito == Site.sito")
     
     def __repr__(self):

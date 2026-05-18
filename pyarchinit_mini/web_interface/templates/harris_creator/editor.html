@@ -519,6 +519,25 @@ function renderSwimlaneState(state) {
         });
     });
 
+    // Run dagre layout inside each swimlane row so US nodes spread out
+    // horizontally and stratigraphic edges become visible. Without a layout
+    // pass, all US children of a row get stacked at the row's centroid and
+    // the edges collapse into invisible zero-length segments.
+    try {
+        cy.layout({
+            name: 'dagre',
+            rankDir: 'LR',
+            nodeSep: 50,
+            rankSep: 80,
+            fit: false,
+        }).run();
+    } catch (e) {
+        console.warn('dagre layout failed, falling back to grid:', e);
+        cy.layout({name: 'grid'}).run();
+    }
+    // Fit viewport so the user actually sees the rows + nodes + edges.
+    cy.fit(undefined, 30);
+
     // Save state references for later use
     window._currentSite = state.site;
     window._pendingChanges = state.pending_changes || {

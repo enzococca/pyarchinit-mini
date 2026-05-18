@@ -92,7 +92,10 @@ class Periodizzazione(BaseModel):
     # Confidence and notes
     affidabilita = Column(String(50))       # 'alta', 'media', 'bassa'
     note = Column(Text)
-    
+
+    # Spec 1: stable node identity for s3dgraphy/EM graph round-trip
+    node_uuid = Column(String(36))
+
     # Relationships
     site_ref = relationship("Site", foreign_keys=[sito])
     initial_period = relationship("Period", foreign_keys=[period_id_initial])
