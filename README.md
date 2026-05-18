@@ -2329,7 +2329,7 @@ See `docs/GRAPH_AUTO_REGEN.md`.
 
 ## Harris Swimlane Editor
 
-Since 2.4.0-alpha, the Harris Matrix Creator at `/harris-creator/editor`
+Since 2.4.0, the Harris Matrix Creator at `/harris-creator/editor`
 displays stratigraphic graphs with **yEd-like swimlanes** — horizontal
 rows representing periods+phases. Existing US records are auto-placed
 in their row based on `periodo_iniziale + fase_iniziale`. Users can

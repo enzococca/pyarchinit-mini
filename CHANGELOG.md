@@ -1,4 +1,4 @@
-## [2.4.0-alpha] - 2026-05-18
+## [2.4.0] - 2026-05-18
 
 ### Added (IT)
 - Modulo `pyarchinit_mini/harris_swimlane/` (5 moduli: row_provider,
