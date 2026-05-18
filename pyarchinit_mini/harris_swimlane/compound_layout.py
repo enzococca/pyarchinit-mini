@@ -43,6 +43,8 @@ def initial_node_position(row, index_in_row: int) -> dict:
 
 
 def compute_row_positions(rows) -> dict:
+    # TODO(Spec-4): row heights are currently fixed (ROW_HEIGHT_BASE).
+    # Could be proportional to US count per row for better visual density.
     dated = [r for r in rows if r.start_date is not None]
     undated = [r for r in rows if r.start_date is None]
     dated_sorted = sorted(dated, key=lambda r: -r.start_date)

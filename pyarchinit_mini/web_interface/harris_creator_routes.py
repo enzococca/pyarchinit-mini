@@ -680,6 +680,10 @@ def api_get_swimlanes(site: str):
 @harris_creator_bp.get("/api/load/<site>")
 def api_load_state(site: str):
     """Load full editor state (rows + nodes + edges) as Cytoscape JSON."""
+    # TODO(Spec-4): consider returning 404 when site is genuinely not in the
+    # DB (no site_table row), versus 200 + empty state when site exists but
+    # has no US yet. Spec §7.1 mentions 404 for site_not_found — current
+    # behavior returns 200 + empty.
     try:
         session = _get_session()
         state = SwimlaneState.load(session, site)
