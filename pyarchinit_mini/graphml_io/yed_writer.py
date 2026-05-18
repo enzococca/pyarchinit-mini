@@ -91,8 +91,52 @@ def _render_epochs_meta(epochs: list[dict]) -> str:
 
 
 def _render_table_root(state, site_meta: dict) -> str:
-    """Stub — filled in Task 8."""
-    return ''
+    """Emit the y:TableNode group node containing all swimlane rows."""
+    sito = site_meta.get("sito", "Unknown")
+    rows_xml = []
+    row_height = 200
+    for i, row in enumerate(state.rows):
+        rid = escape(row.row_id)
+        rows_xml.append(
+            f'              <y:Row id="{rid}" height="{row_height}" '
+            f'minimumHeight="80.0" nodeLabelMaxWidth="0.0"/>'
+        )
+
+    # Compute table geometry.
+    height = max(len(state.rows) * row_height + 60, 200)
+    width = 2000
+
+    parts = [
+        '    <node id="swimlane_root" yfiles.foldertype="group">',
+        f'      <data key="d4"><![CDATA[swimlane-root-{sito}]]></data>',
+        f'      <data key="d8">{escape(sito)}</data>',
+        '      <data key="d30">Stratigrafia</data>',
+        '      <data key="d31">',
+        '        <y:TableNode configuration="YED_TABLE_NODE">',
+        f'          <y:Geometry height="{height}.0" width="{width}.0" x="0.0" y="0.0"/>',
+        '          <y:Fill color="#ECF5FF" color2="#0042F440" transparent="false"/>',
+        '          <y:BorderStyle hasColor="false" type="line" width="1.0"/>',
+        f'          <y:NodeLabel alignment="center" autoSizePolicy="content" '
+        f'fontFamily="Dialog" fontSize="15" fontStyle="plain" hasBackgroundColor="false" '
+        f'hasLineColor="false" horizontalTextPosition="center" iconTextGap="4" '
+        f'modelName="internal" modelPosition="t" textColor="#000000" '
+        f'verticalTextPosition="bottom" visible="true" xml:space="preserve">'
+        f'Archaeological Site [ID:{escape(sito)}]</y:NodeLabel>',
+        '          <y:Table>',
+        '            <y:Insets bottom="0.0" bottomF="0.0" left="0.0" leftF="0.0" '
+        'right="0.0" rightF="0.0" top="24.0" topF="24.0"/>',
+        '            <y:Columns/>',
+        '            <y:Rows>',
+        *rows_xml,
+        '            </y:Rows>',
+        '          </y:Table>',
+        '        </y:TableNode>',
+        '      </data>',
+        '      <graph edgedefault="directed" id="swimlane_root::graph">',
+    ]
+    # Note: closing of <graph> + </node> happens in _render_us_nodes (Task 9)
+    # because US nodes are children of this nested graph.
+    return "\n".join(parts)
 
 
 def _render_us_nodes(state) -> str:
