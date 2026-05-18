@@ -70,6 +70,9 @@ from pyarchinit_mini.web_interface.paradata_ui_routes import paradata_ui_bp
 # Import yEd GraphML import blueprint (Spec 7)
 from pyarchinit_mini.web_interface.yed_import_routes import yed_import_bp
 
+# Import AI Matrix Import blueprint (Spec 10)
+from pyarchinit_mini.web_interface.matrix_import_routes import matrix_import_bp
+
 # Import WebSocket events
 from pyarchinit_mini.web_interface.socketio_events import (
     init_socketio_events,
@@ -587,7 +590,6 @@ def create_app():
     app.register_blueprint(yed_import_bp)
 
     # Spec 10 — AI Matrix Import
-    from pyarchinit_mini.web_interface.matrix_import_routes import matrix_import_bp
     app.register_blueprint(matrix_import_bp)
 
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
