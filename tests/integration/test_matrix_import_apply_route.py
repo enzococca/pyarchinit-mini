@@ -130,3 +130,35 @@ def test_apply_rejects_missing_sito(client_and_session):
     assert r.status_code in (302, 303)
     # Should redirect back to upload form, not /us/list
     assert "/us/list" not in r.headers.get("Location", "")
+
+
+def test_apply_rejects_malformed_plan_json(client_and_session):
+    client, _ = client_and_session
+    r = client.post("/matrix-import/apply", data={
+        "plan_json": "not valid json {{{",
+        "sito": "S",
+    }, follow_redirects=False)
+    assert r.status_code in (302, 303)
+    assert "/us/list" not in r.headers.get("Location", "")
+
+
+def test_apply_rejects_empty_selection(client_and_session):
+    client, Session = client_and_session
+    plan = _plan_json(
+        us_rows=[{"us_num": "1", "area": "A", "unit_type": "USM",
+                  "descrizione": "x", "fase_recente": 1, "fase_iniziale": 1}],
+        edges=[],
+    )
+    # No selected_us / selected_edges in form data → empty filtered plan
+    r = client.post("/matrix-import/apply", data={
+        "plan_json": plan,
+        "sito": "S",
+        # no selected_us, no selected_edges
+    }, follow_redirects=False)
+    assert r.status_code in (302, 303)
+    assert "/us/list" not in r.headers.get("Location", "")
+    # Verify no us_table row was created
+    s = Session()
+    rows = s.execute(text("SELECT us FROM us_table")).fetchall()
+    assert len(rows) == 0
+    # site might still be created — that's OK (apply_ai_plan never ran)

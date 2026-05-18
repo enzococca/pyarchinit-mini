@@ -130,8 +130,17 @@ def apply():
     selected_us = set(request.form.getlist("selected_us"))
     selected_edges = set(request.form.getlist("selected_edges"))
 
-    plan = AIPlan.from_dict(json.loads(plan_json_str))
+    try:
+        plan = AIPlan.from_dict(json.loads(plan_json_str))
+    except (json.JSONDecodeError, TypeError) as e:
+        current_app.logger.warning("matrix_import: malformed plan_json: %s", e)
+        flash("Plan malformato — riprova l'analisi", "error")
+        return redirect(url_for("matrix_import.upload_form"))
     plan = _apply_form_edits(plan, request.form, selected_us, selected_edges)
+
+    if not plan.us and not plan.edges:
+        flash("Nessuna riga selezionata — controlla almeno una US o relazione", "error")
+        return redirect(url_for("matrix_import.upload_form"))
 
     result = apply_ai_plan(plan, sito, g.db_session)
 
