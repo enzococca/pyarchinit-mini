@@ -81,3 +81,27 @@ def test_plan_includes_relationships(session):
     parsed = parse_extended_matrix(FIX / "minimal.graphml")
     plan = build_import_plan(parsed, session)
     assert len(plan.relationships) == 2
+
+
+def test_apply_inserts_new_records(session):
+    from sqlalchemy import text
+    from pyarchinit_mini.graphml_io.yed_importer import apply_import_plan
+    parsed = parse_extended_matrix(FIX / "minimal.graphml")
+    plan = build_import_plan(parsed, session)
+    result = apply_import_plan(plan, session)
+    assert result.us_created == 3
+    assert result.sites_created == 1
+    count = session.execute(text("SELECT COUNT(*) FROM us_table")).scalar()
+    assert count == 3
+
+
+def test_apply_is_idempotent(session):
+    from pyarchinit_mini.graphml_io.yed_importer import apply_import_plan
+    parsed = parse_extended_matrix(FIX / "minimal.graphml")
+    plan1 = build_import_plan(parsed, session)
+    apply_import_plan(plan1, session)
+
+    plan2 = build_import_plan(parsed, session)
+    result2 = apply_import_plan(plan2, session)
+    assert result2.us_created == 0
+    assert result2.us_updated == 3
