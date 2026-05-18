@@ -109,6 +109,10 @@ def force_regen_all_touched_sites() -> None:
     explicitly for each returned site, providing its session, because
     auto_regen has no way to obtain a Session from thread-local storage.
     """
+    # TODO(Spec-3): currently a no-op footgun — caller must invoke
+    # _trigger_graph_regen per site manually. Wire properly when
+    # excel_import_routes adopts disable_regen() context (Spec 2 plan
+    # known gap #2).
     sites = _drain_touched_sites()
     if not sites:
         return
