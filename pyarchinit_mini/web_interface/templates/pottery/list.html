@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Pottery{% endblock %}
 
+{% block extra_css %}
+<style>
+.pottery-mini-carousel {
+  display: flex; gap: 4px; max-width: 200px;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 2px;
+}
+.pottery-mini-carousel > a { scroll-snap-align: start; flex: 0 0 auto; }
+.pottery-mini-carousel::-webkit-scrollbar { height: 4px; }
+.pottery-mini-carousel::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid mt-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -14,12 +27,14 @@
   </div>
 
   <form method="get" class="row g-2 mb-3">
-    <div class="col-md-2"><input class="form-control form-control-sm" type="text" name="sito" value="{{ filters.sito or '' }}" placeholder="Sito"></div>
-    <div class="col-md-1"><input class="form-control form-control-sm" type="text" name="area" value="{{ filters.area or '' }}" placeholder="Area"></div>
-    <div class="col-md-1"><input class="form-control form-control-sm" type="number" name="us" value="{{ filters.us or '' }}" placeholder="US"></div>
-    <div class="col-md-2"><input class="form-control form-control-sm" type="text" name="form" value="{{ filters.form or '' }}" placeholder="Forma" list="dl-forms"></div>
-    <div class="col-md-2"><input class="form-control form-control-sm" type="text" name="fabric" value="{{ filters.fabric or '' }}" placeholder="Impasto" list="dl-fabrics"></div>
-    <div class="col-md-3"><input class="form-control form-control-sm" type="text" name="q" value="{{ filters.q or '' }}" placeholder="Ricerca testo libero"></div>
+    <div class="col-md-2"><input class="form-control form-control-sm" type="text"   name="sito"      value="{{ filters.sito or '' }}" placeholder="Sito"></div>
+    <div class="col-md-1"><input class="form-control form-control-sm" type="text"   name="area"      value="{{ filters.area or '' }}" placeholder="Area"></div>
+    <div class="col-md-1"><input class="form-control form-control-sm" type="number" name="us"        value="{{ filters.us or '' }}" placeholder="US"></div>
+    <div class="col-md-1"><input class="form-control form-control-sm" type="number" name="id_number" value="{{ filters.id_number or '' }}" placeholder="ID num" min="0"></div>
+    <div class="col-md-1"><input class="form-control form-control-sm" type="number" name="anno"      value="{{ filters.anno or '' }}" placeholder="Anno" min="1900" max="2099"></div>
+    <div class="col-md-2"><input class="form-control form-control-sm" type="text"   name="form"      value="{{ filters.form or '' }}" placeholder="Forma" list="dl-forms"></div>
+    <div class="col-md-1"><input class="form-control form-control-sm" type="text"   name="fabric"    value="{{ filters.fabric or '' }}" placeholder="Impasto" list="dl-fabrics"></div>
+    <div class="col-md-2"><input class="form-control form-control-sm" type="text"   name="q"         value="{{ filters.q or '' }}" placeholder="Ricerca"></div>
     <div class="col-md-1"><button class="btn btn-sm btn-secondary">Filtra</button></div>
     <datalist id="dl-forms"></datalist>
     <datalist id="dl-fabrics"></datalist>
@@ -39,10 +54,20 @@
         <td>{{ p.form or '' }}</td><td>{{ p.fabric or '' }}</td>
         <td>{{ p.ware or '' }}</td><td>{{ p.qty or '' }}</td>
         <td>
-          {% if p.id_rep in media_ids %}
-            <span class="badge bg-success" title="Media allegati"><i class="fas fa-paperclip"></i> Sì</span>
+          {% set media_list = media_by_pottery.get(p.id_rep, []) %}
+          {% if media_list %}
+            <div class="pottery-mini-carousel" role="list">
+              {% for m in media_list %}
+                <a class="glightbox" data-gallery="pot-{{ p.id_rep }}"
+                   href="{{ m.url }}" data-title="{{ m.media_name }}" role="listitem">
+                  <img src="{{ m.thumb_url or m.url }}" alt="" loading="lazy"
+                       width="48" height="48"
+                       style="object-fit:cover;border-radius:3px"/>
+                </a>
+              {% endfor %}
+            </div>
           {% else %}
-            <span class="badge bg-secondary" title="Nessun media">No</span>
+            <span class="badge bg-secondary">No</span>
           {% endif %}
         </td>
         <td>
@@ -85,5 +110,10 @@ fetch("/api/pottery/fabrics").then(r=>r.ok?r.json():{values:[]}).then(o=>{
   const dl = document.getElementById("dl-fabrics");
   (o.values||[]).forEach(v => { const opt=document.createElement("option"); opt.value=v; dl.appendChild(opt); });
 }).catch(()=>{});
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.GLightbox) {
+    GLightbox({ selector: '.pottery-mini-carousel a.glightbox' });
+  }
+});
 </script>
 {% endblock %}
