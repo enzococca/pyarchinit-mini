@@ -638,10 +638,19 @@ from pyarchinit_mini.harris_swimlane.exceptions import PeriodSyncError
 
 
 def _get_session():
-    """Helper: get session from Flask g or fall back to get_db_session()."""
+    """Get the request-bound SQLAlchemy session.
+
+    Requires the Flask app to set g.db_session in a before_request hook
+    (the production app does this; tests do too). Raises if not set —
+    fails loud rather than silently returning a context-manager generator
+    that downstream callers will treat as a Session.
+    """
     db = getattr(g, "db_session", None)
     if db is None:
-        db = get_db_session()
+        raise RuntimeError(
+            "g.db_session not set. The Flask app must set it in a "
+            "before_request hook before invoking Spec 3-bis endpoints."
+        )
     return db
 
 
