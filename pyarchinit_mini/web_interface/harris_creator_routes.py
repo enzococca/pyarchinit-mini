@@ -758,8 +758,7 @@ def api_save_state(site: str):
 
 @harris_creator_bp.post("/api/swimlanes/<site>")
 def api_create_row(site: str):
-    """Create a new swimlane row (upsert period_table). site param is for
-    URL consistency; period_table is currently cross-site."""
+    """Create a new swimlane row (upsert period_table for this site)."""
     payload = request.get_json(silent=True) or {}
     period_name = payload.get("period_name", "")
     phase_name = payload.get("phase_name") or None
@@ -767,7 +766,7 @@ def api_create_row(site: str):
     end_date = payload.get("end_date")
     try:
         session = _get_session()
-        svc = PeriodSyncService(session)
+        svc = PeriodSyncService(session, site=site)
         row = svc.upsert_row(
             period_name=period_name, phase_name=phase_name,
             start_date=start_date, end_date=end_date,

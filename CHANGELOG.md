@@ -1,3 +1,30 @@
+## [2.4.3] - 2026-05-18
+
+### Fixed (IT)
+- `RowProvider` e `PeriodSyncService` ora usano lo schema reale di pyarchinit
+  per `period_table` (`periodo` / `fase` / `datazione` / `sito`) invece dello
+  schema ipotetico Spec 3-bis (`period_name` / `phase_name` / `start_date` /
+  `end_date`). Risolve l'HTTP 500 "la colonna 'period_name' non esiste"
+  visto in produzione su PostgreSQL `pyarchinit_v2`.
+- `period_table` viene ora filtrato per `sito` (con fallback a righe
+  cross-site se `sito` IS NULL/''). `start_date` / `end_date` numerici non
+  esistono in produzione: nella Row dataclass restano `None` e il sort è
+  alfabetico per `(periodo, fase)`. Le date numeriche passate da `+ New
+  Row` vengono serializzate nella colonna `datazione` come `start..end`.
+- Fixture sintetica `sqlite_volterra_30us_with_periods.db` e i test
+  associati (row_provider, period_sync, state_load, integration routes)
+  rigenerati con lo schema reale.
+
+### Fixed (EN)
+- `RowProvider` and `PeriodSyncService` now use pyarchinit's real
+  `period_table` schema (`periodo` / `fase` / `datazione` / `sito`).
+  Fixes the HTTP 500 "column 'period_name' does not exist" against the
+  production PostgreSQL DB.
+- Numeric `start_date` / `end_date` are no longer expected as columns; the
+  Row dataclass leaves them `None`, rows are sorted alphabetically by
+  `(periodo, fase)`, and date inputs from the editor are serialized into
+  the existing `datazione` text column as `start..end`.
+
 ## [2.4.2] - 2026-05-18
 
 ### Fixed (IT)

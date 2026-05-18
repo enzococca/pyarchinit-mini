@@ -9,12 +9,15 @@ from sqlalchemy.orm import sessionmaker
 def client_and_db(tmp_path):
     db = tmp_path / "rc.db"
     conn = sqlite3.connect(db)
+    # Real pyarchinit schema: periodo / fase / datazione / sito.
     conn.executescript("""
     CREATE TABLE period_table (
         id_period INTEGER PRIMARY KEY AUTOINCREMENT,
-        period_name TEXT NOT NULL, phase_name TEXT,
-        start_date INTEGER, end_date INTEGER,
-        description TEXT, chronology TEXT
+        sito TEXT,
+        periodo TEXT,
+        fase TEXT,
+        datazione TEXT,
+        descrizione TEXT
     );
     """)
     conn.commit()

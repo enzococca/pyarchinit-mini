@@ -55,18 +55,28 @@ class RowProvider:
         return None
 
     def _load_from_period_table(self) -> list[Row]:
+        """Load rows from ``period_table`` using the real pyarchinit schema.
+
+        pyarchinit's ``period_table`` ships with columns ``periodo`` /
+        ``fase`` / ``datazione`` / ``sito`` — there are no numeric
+        ``start_date`` / ``end_date`` columns, so we leave those as ``None``
+        and sort alphabetically. The ``sito`` column is filtered when
+        present (cross-site rows with NULL/empty ``sito`` are still kept,
+        matching legacy pyarchinit behaviour).
+        """
         # SQLite < 3.30 doesn't support NULLS LAST. Sort in Python for portability.
-        result = self.session.execute(text(
-            "SELECT period_name, phase_name, start_date, end_date "
-            "FROM period_table"
-        )).fetchall()
-        # Sort: by start_date DESC, NULL last; tiebreaker by period_name, phase_name
-        def sort_key(r):
-            start = r[2]
-            return (0 if start is not None else 1,
-                    -start if start is not None else 0,
-                    r[0] or "", r[1] or "")
-        sorted_result = sorted(result, key=sort_key)
+        result = self.session.execute(
+            text(
+                "SELECT periodo, fase, datazione "
+                "FROM period_table "
+                "WHERE sito = :sito OR sito IS NULL OR sito = ''"
+            ),
+            {"sito": self.site},
+        ).fetchall()
+        sorted_result = sorted(
+            (r for r in result if r[0]),
+            key=lambda r: (r[0] or "", r[1] or ""),
+        )
         out = []
         for i, r in enumerate(sorted_result):
             period = r[0]
@@ -76,8 +86,8 @@ class RowProvider:
                 row_id=row_id,
                 period_name=period,
                 phase_name=phase,
-                start_date=r[2],
-                end_date=r[3],
+                start_date=None,
+                end_date=None,
                 color=PERIOD_COLORS[i % len(PERIOD_COLORS)],
                 source="period_table",
             ))
