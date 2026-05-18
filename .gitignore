@@ -201,3 +201,11 @@ data/paradata/**/*.tmp
 data/paradata/**/imports/*
 data/paradata/_regen.log
 data/paradata/_metrics.sqlite
+
+# Visual companion for brainstorming sessions
+.superpowers/
+
+# Spec 3-bis: Harris Swimlane on-demand exports (derived artifacts)
+data/exports/harris_yed/**/*.graphml
+data/exports/harris_yed/_index.json
+data/exports/harris_yed/*.tmp
