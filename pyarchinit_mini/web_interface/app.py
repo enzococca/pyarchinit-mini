@@ -579,6 +579,10 @@ def create_app():
     app.register_blueprint(paradata_bp)
     app.register_blueprint(paradata_ui_bp)
 
+    # Register language switcher blueprint (Spec 8)
+    from pyarchinit_mini.i18n.lang_routes import lang_bp
+    app.register_blueprint(lang_bp)
+
     # Register yEd GraphML import blueprint (Spec 7)
     app.register_blueprint(yed_import_bp)
 
@@ -590,6 +594,7 @@ def create_app():
     csrf.exempt(em_node_config_bp)
     csrf.exempt(paradata_ui_bp)   # Spec 2 — form POSTs (no token in templates)
     csrf.exempt(yed_import_bp)    # Spec 7 — upload + preview/apply forms
+    csrf.exempt(lang_bp)            # Spec 8 — POST /set-language/<lang>
 
     # Exempt JSON API routes from CSRF check
     @app.after_request
