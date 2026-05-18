@@ -230,7 +230,9 @@ class SwimlaneState:
             return "row_" + safe
 
         nodes: list[CytoscapeElement] = []
-        us_num_to_node_id: dict[int, str] = {}
+        # Keys stored as strings because us_table.us is TEXT (alphanumeric
+        # codes are supported). All lookups must use str(us_num).
+        us_num_to_node_id: dict[str, str] = {}
 
         for r in us_rows:
             id_us = r[0]
@@ -241,7 +243,7 @@ class SwimlaneState:
             parent_row_id = _parent_row_id_for(r)
 
             node_id = f"us_{id_us}"
-            us_num_to_node_id[us_num] = node_id
+            us_num_to_node_id[str(us_num)] = node_id
 
             style = _style_for(unita_tipo)
             nodes.append(CytoscapeElement(
@@ -357,7 +359,7 @@ class SwimlaneState:
             rapporti = r[5] or ""
             if not rapporti.strip():
                 continue
-            source_node_id = us_num_to_node_id.get(us_num)
+            source_node_id = us_num_to_node_id.get(str(us_num))
             if source_node_id is None:
                 continue
 
@@ -368,11 +370,8 @@ class SwimlaneState:
                 edge_name, target_us = registry.parse_rapporti_token(tok)
                 if edge_name is None or target_us is None:
                     continue
-                try:
-                    target_int = int(target_us)
-                except (ValueError, TypeError):
-                    continue
-                target_node_id = us_num_to_node_id.get(target_int)
+                # us_table.us is TEXT; lookup by string for type consistency.
+                target_node_id = us_num_to_node_id.get(str(target_us))
                 if target_node_id is None:
                     continue
 
@@ -450,15 +449,12 @@ class SwimlaneState:
 
         for r in rows:
             us_from, us_to, rel_type = r[0], r[1], r[2]
-            if not rel_type:
+            if not rel_type or us_from is None or us_to is None:
                 continue
-            try:
-                u_from_int = int(us_from)
-                u_to_int = int(us_to)
-            except (ValueError, TypeError):
-                continue
-            source_id = us_num_to_node_id.get(u_from_int)
-            target_id = us_num_to_node_id.get(u_to_int)
+            # us_table.us is TEXT (alphanumeric); us_relationships_table
+            # stores it the same way. String lookup is consistent.
+            source_id = us_num_to_node_id.get(str(us_from))
+            target_id = us_num_to_node_id.get(str(us_to))
             if not source_id or not target_id:
                 continue
 

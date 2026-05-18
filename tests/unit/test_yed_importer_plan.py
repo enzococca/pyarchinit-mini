@@ -16,23 +16,29 @@ def session(tmp_path):
     db = tmp_path / "plan.db"
     conn = sqlite3.connect(db)
     conn.executescript("""
-    CREATE TABLE site_table (id_sito INTEGER PRIMARY KEY, sito TEXT);
+    CREATE TABLE site_table (
+      id_sito INTEGER PRIMARY KEY, sito TEXT,
+      created_at DATETIME, updated_at DATETIME
+    );
     CREATE TABLE us_table (
       id_us INTEGER PRIMARY KEY, sito TEXT, area TEXT, us TEXT, unita_tipo TEXT,
       d_stratigrafica TEXT, datazione TEXT, file_path TEXT,
       rapporti TEXT, node_uuid TEXT,
       periodo_iniziale TEXT, fase_iniziale TEXT,
       struttura TEXT, attivita TEXT, settore TEXT,
-      ambient TEXT, saggio TEXT, quad_par TEXT
+      ambient TEXT, saggio TEXT, quad_par TEXT,
+      created_at DATETIME, updated_at DATETIME
     );
     CREATE TABLE periodizzazione_table (
       id_periodizzazione INTEGER PRIMARY KEY,
       sito TEXT, periodo_iniziale TEXT, fase_iniziale TEXT,
-      datazione_estesa TEXT
+      datazione_estesa TEXT,
+      created_at DATETIME, updated_at DATETIME
     );
     CREATE TABLE us_relationships_table (
       id_relationship INTEGER PRIMARY KEY,
-      sito TEXT, us_from TEXT, us_to TEXT, relationship_type TEXT
+      sito TEXT, us_from INTEGER, us_to INTEGER, relationship_type TEXT,
+      created_at DATETIME, updated_at DATETIME
     );
     """)
     conn.commit(); conn.close()
