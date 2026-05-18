@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:y="http://www.yworks.com/xml/graphml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd">
+  <key for="node" id="d6" yfiles.type="nodegraphics"/>
+  <key for="edge" id="d10" yfiles.type="edgegraphics"/>
+  <graph id="G" edgedefault="directed">
+    <node id="swimlane_root" yfiles.foldertype="group">
+      <data key="d6">
+        <y:TableNode>
+          <y:Geometry height="800" width="2000" x="0" y="0"/>
+          <y:Fill color="#FAFAFA" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:Table>
+            <y:Rows>
+              <y:Row id="row_medieval_b" height="80.0" minimumHeight="40.0"/>
+              <y:Row id="row_medieval_a" height="80.0" minimumHeight="40.0"/>
+              <y:Row id="row_late-antiquity_a" height="80.0" minimumHeight="40.0"/>
+              <y:Row id="row_roman_b" height="80.0" minimumHeight="40.0"/>
+              <y:Row id="row_roman_a" height="80.0" minimumHeight="40.0"/>
+            </y:Rows>
+            <y:Columns>
+              <y:Column id="col_main" width="1900.0"/>
+            </y:Columns>
+          </y:Table>
+        </y:TableNode>
+      </data>
+      <graph id="swimlane_root:" edgedefault="directed">
+        <node id="us_1">
+          <data key="d6">
+            <y:ShapeNode>
+              <y:Geometry x="50" y="20" width="80" height="50"/>
+              <y:Fill color="#F0F0F0" transparent="false"/>
+              <y:BorderStyle color="#540909" type="line" width="3.0"/>
+              <y:NodeLabel fontSize="12">US1</y:NodeLabel>
+              <y:Shape type="rectangle"/>
+            </y:ShapeNode>
+          </data>
+        </node>
+        <node id="us_2">
+          <data key="d6">
+            <y:ShapeNode>
+              <y:Geometry x="50" y="20" width="80" height="50"/>
+              <y:Fill color="#F0F0F0" transparent="false"/>
+              <y:BorderStyle color="#540909" type="line" width="3.0"/>
+              <y:NodeLabel fontSize="12">US2</y:NodeLabel>
+              <y:Shape type="rectangle"/>
+            </y:ShapeNode>
+          </data>
+        </node>
+        <node id="us_3">
+          <data key="d6">
+            <y:ShapeNode>
+              <y:Geometry x="50" y="20" width="80" height="50"/>
+              <y:Fill color="#CCCCCC" transparent="false"/>
+              <y:BorderStyle color="#0546CC" type="line" width="3.0"/>
+              <y:NodeLabel fontSize="12">USVs3</y:NodeLabel>
+              <y:Shape type="parallelogram"/>
+            </y:ShapeNode>
+          </data>
+        </node>
+      </graph>
+    </node>
+
+    <edge id="e1" source="us_2" target="us_1">
+      <data key="d10">
+        <y:GenericEdge>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel>overlies</y:EdgeLabel>
+        </y:GenericEdge>
+      </data>
+    </edge>
+
+  </graph>
+</graphml>
