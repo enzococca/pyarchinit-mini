@@ -108,7 +108,7 @@ def _render_table_root(state, site_meta: dict) -> str:
 
     parts = [
         '    <node id="swimlane_root" yfiles.foldertype="group">',
-        f'      <data key="d4"><![CDATA[swimlane-root-{sito}]]></data>',
+        f'      <data key="d4">{escape(f"swimlane-root-{sito}")}</data>',
         f'      <data key="d8">{escape(sito)}</data>',
         '      <data key="d30">Stratigrafia</data>',
         '      <data key="d31">',
@@ -140,8 +140,73 @@ def _render_table_root(state, site_meta: dict) -> str:
 
 
 def _render_us_nodes(state) -> str:
-    """Stub — filled in Task 9."""
-    return ''
+    """Emit each US node as child of the swimlane_root graph."""
+    parts = []
+    sito = state.site
+    for el in state.nodes:
+        if el.data.get("is_swimlane"):
+            continue
+        d = el.data
+        nid = escape(str(d["id"]))
+        us_num = d.get("us_number") or d.get("us") or ""
+        unit_type = d.get("unit_type") or "US"
+        node_uuid = d.get("node_uuid") or ""
+        area = d.get("area") or ""
+        periodo = d.get("period") or ""
+        fase = d.get("phase") or ""
+        rapporti = d.get("rapporti") or ""
+        d_strat = d.get("description") or ""
+        d_interp = d.get("d_interpretativa") or ""
+        documentazione = d.get("file_path") or ""
+        struttura = d.get("struttura") or ""
+        attivita = d.get("attivita") or ""
+        settore = d.get("settore") or ""
+        ambient = d.get("ambient") or ""
+        saggio = d.get("saggio") or ""
+        quad_par = d.get("quad_par") or ""
+        datazione = d.get("datazione") or ""
+        pos = el.position or {"x": 0, "y": 0}
+        x, y = pos.get("x", 0), pos.get("y", 0)
+        color = d.get("color") or "#F0F0F0"
+        border_color = d.get("border_color") or "#540909"
+        border_style = d.get("border_style") or "solid"
+        shape = d.get("shape") or "rectangle"
+
+        parts.append(f'        <node id="{nid}">')
+        parts.append(f'          <data key="d4">{escape(str(node_uuid))}</data>')
+        parts.append('          <data key="d5"/>')
+        parts.append(f'          <data key="d6">{escape(str(us_num))}</data>')
+        parts.append(f'          <data key="d7">{escape(str(area))}</data>')
+        parts.append(f'          <data key="d8">{escape(sito)}</data>')
+        parts.append(f'          <data key="d9">{escape(str(unit_type))}</data>')
+        parts.append(f'          <data key="d10">{escape(str(periodo))}</data>')
+        parts.append(f'          <data key="d11">{escape(str(fase))}</data>')
+        parts.append(f'          <data key="d12">{escape(str(rapporti))}</data>')
+        parts.append(f'          <data key="d13">{escape(str(d_strat))}</data>')
+        parts.append(f'          <data key="d14">{escape(str(d_interp))}</data>')
+        parts.append(f'          <data key="d15">{escape(str(documentazione))}</data>')
+        parts.append(f'          <data key="d16">{escape(str(node_uuid))}</data>')
+        parts.append(f'          <data key="d17">{escape(str(struttura))}</data>')
+        parts.append(f'          <data key="d18">{escape(str(attivita))}</data>')
+        parts.append(f'          <data key="d19">{escape(str(settore))}</data>')
+        parts.append(f'          <data key="d20">{escape(str(ambient))}</data>')
+        parts.append(f'          <data key="d21">{escape(str(saggio))}</data>')
+        parts.append(f'          <data key="d22">{escape(str(quad_par))}</data>')
+        parts.append(f'          <data key="d23">{escape(str(datazione))}</data>')
+        parts.append('          <data key="d31">')
+        parts.append('            <y:ShapeNode>')
+        parts.append(f'              <y:Geometry height="30.0" width="80.0" x="{x}" y="{y}"/>')
+        parts.append(f'              <y:Fill color="{color}" transparent="false"/>')
+        parts.append(f'              <y:BorderStyle color="{border_color}" type="{border_style}" width="3.0"/>')
+        parts.append(f'              <y:NodeLabel>{escape(d.get("label", str(us_num)))}</y:NodeLabel>')
+        parts.append(f'              <y:Shape type="{shape}"/>')
+        parts.append('            </y:ShapeNode>')
+        parts.append('          </data>')
+        parts.append('        </node>')
+
+    parts.append('      </graph>')  # close swimlane_root::graph (opened by Task 8)
+    parts.append('    </node>')     # close swimlane_root node (opened by Task 8)
+    return "\n".join(parts)
 
 
 def _render_edges(state) -> str:
