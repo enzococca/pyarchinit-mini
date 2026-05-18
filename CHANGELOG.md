@@ -1,3 +1,17 @@
+## [2.4.8] - 2026-05-18
+
+### Fixed (IT)
+- `loadExistingData` (legacy loader) ora deduplica le relationship triple
+  `(from_us, to_us, relationship)` e suffissa gli ID Cytoscape che
+  collidono quando la stessa coppia compare con tipi diversi. Risolve
+  l'errore "Can not create second element with ID `edge_131_136`" che
+  abortiva l'intero forEach e lasciava il canvas senza archi.
+
+### Fixed (EN)
+- Legacy `loadExistingData` now deduplicates relationship triples and
+  suffixes colliding edge IDs. Fixes "second element with ID
+  edge_X_Y" errors that previously aborted edge loading.
+
 ## [2.4.7] - 2026-05-18
 
 ### Fixed (IT)
