@@ -19,6 +19,14 @@
     </div>
   </div>
 
+  <!-- Spec 8: inline media gallery -->
+  <div id="pottery-media-grid" class="mb-4">
+    <h5><i class="fas fa-images"></i> {{ _('Media') }}</h5>
+    <div class="d-flex flex-wrap gap-2" id="pottery-thumbs">
+      <span class="text-muted">{{ _('Loading...') }}</span>
+    </div>
+  </div>
+
   <h3 class="mt-3">Description</h3>
   <div class="row g-2">
     {{ row("Site", pottery.sito) }}{{ row("Area", pottery.area) }}{{ row("US", pottery.us) }}{{ row("Sector", pottery.sector) }}
@@ -54,12 +62,29 @@
 {% block scripts %}
 <script>
 fetch("/api/media/by-entity/pottery/{{ pottery.id_rep }}")
-  .then(r => r.json())
+  .then(r => r.ok ? r.json() : { items: [] })
   .then(data => {
-    if (data.items && data.items.length > 0) {
-      console.log("Media loaded:", data.items.length, "item(s)");
+    const container = document.getElementById('pottery-thumbs');
+    const items = data.items || data || [];
+    if (!items.length) {
+      container.innerHTML = '<p class="text-muted m-0">{{ _("No media") }}</p>';
+      return;
+    }
+    container.innerHTML = items.map(m => `
+      <a class="glightbox" data-gallery="pot-detail-{{ pottery.id_rep }}"
+         href="${m.url}" data-title="${(m.media_name || m.filename || '').replace(/"/g, '&quot;')}">
+        <img src="${m.thumb_url || m.url}" alt=""
+             width="120" height="120" loading="lazy"
+             style="object-fit:cover;border-radius:4px;border:1px solid var(--border-color)"/>
+      </a>
+    `).join('');
+    if (window.GLightbox) {
+      GLightbox({ selector: '#pottery-thumbs .glightbox' });
     }
   })
-  .catch(() => {});
+  .catch(err => {
+    document.getElementById('pottery-thumbs').innerHTML =
+      '<p class="text-danger m-0">{{ _("Errore caricamento media") }}: ' + err + '</p>';
+  });
 </script>
 {% endblock %}

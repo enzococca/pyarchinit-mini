@@ -90,12 +90,47 @@ class MediaService:
             from ..utils.exceptions import DatabaseError
             raise DatabaseError(f"Failed to get Media records: {e}")
     
-    def get_media_by_entity(self, entity_type: str, entity_id: int, 
+    def get_media_by_entity(self, entity_type: str, entity_id: int,
                            page: int = 1, size: int = 10) -> List[Media]:
         """Get all media for a specific entity"""
         filters = {'entity_type': entity_type, 'entity_id': entity_id}
         return self.get_all_media(page=page, size=size, filters=filters)
-    
+
+    def get_media_for_entity_ids(
+        self, entity_type: str, entity_ids: list[int]
+    ) -> dict[int, list[dict]]:
+        """Pre-load media for many entities in one shot, returning a dict
+        keyed by entity_id with a list of media descriptors.
+
+        Avoids the N+1 problem when rendering paginated lists. Every input id
+        appears in the output (with an empty list if no media exist), so the
+        caller can safely do `out.get(id, [])` or just `out[id]`.
+
+        Each media descriptor is:
+            {"id_media": int, "media_name": str, "media_path": str,
+             "media_type": str, "url": "/media/<path>", "thumb_url": "/media/<path>"}
+        """
+        result: dict[int, list[dict]] = {eid: [] for eid in entity_ids}
+        if not entity_ids:
+            return result
+        for eid in entity_ids:
+            try:
+                items = self.get_media_by_entity(entity_type, eid)
+            except Exception:
+                items = []
+            result[eid] = [
+                {
+                    "id_media": m.id_media,
+                    "media_name": m.media_name,
+                    "media_path": m.media_path,
+                    "media_type": m.media_type,
+                    "url": f"/media/{m.media_path}",
+                    "thumb_url": f"/media/{m.media_path}",
+                }
+                for m in items
+            ]
+        return result
+
     def get_media_by_type(self, media_type: str, page: int = 1, size: int = 10) -> List[Media]:
         """Get all media of a specific type"""
         filters = {'media_type': media_type}
