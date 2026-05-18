@@ -59,3 +59,64 @@ def test_write_yed_graphml_raises_on_write_error(tmp_path):
     bad = Path("/dev/null/cannot_write_here.graphml")
     with pytest.raises(YEDWriterError):
         write_yed_graphml(state, bad)
+
+
+from pyarchinit_mini.vocab.provider import VocabProvider
+from pyarchinit_mini.harris_swimlane.swimlane_state import CytoscapeElement
+
+FIX_VOCAB = Path(__file__).parent.parent / "fixtures" / "s3dgraphy_jsons" / "0.1.42"
+
+
+@pytest.fixture(autouse=True)
+def vocab():
+    VocabProvider.reset()
+    VocabProvider.instance(json_config_dir=FIX_VOCAB)
+    yield
+    VocabProvider.reset()
+
+
+def _state_with_us():
+    row = Row(row_id="row_p1_a", period_name="P1", phase_name="a",
+              start_date=100, end_date=200, color="#FF0000", source="period_table")
+    nodes = [
+        CytoscapeElement(data={"id": "us_1", "label": "US1", "unit_type": "US",
+                                "parent": "row_p1_a"}),
+        CytoscapeElement(data={"id": "us_2", "label": "USVs2", "unit_type": "USVs",
+                                "parent": "row_p1_a"}),
+    ]
+    edges = [
+        CytoscapeElement(data={"id": "e1", "source": "us_1", "target": "us_2",
+                                "label": "overlies"}),
+    ]
+    return EditorState(site="T", rows=[row], nodes=nodes, edges=edges,
+                       pending_changes={})
+
+
+def test_write_yed_graphml_emits_us_nodes(tmp_path):
+    state = _state_with_us()
+    out = tmp_path / "n.graphml"
+    write_yed_graphml(state, out)
+    content = out.read_text(encoding="utf-8")
+    assert 'id="us_1"' in content
+    assert 'id="us_2"' in content
+    assert "y:ShapeNode" in content
+
+
+def test_write_yed_graphml_uses_vocabprovider_styles(tmp_path):
+    state = _state_with_us()
+    out = tmp_path / "n.graphml"
+    write_yed_graphml(state, out)
+    content = out.read_text(encoding="utf-8")
+    # VocabProvider 0.1.42: US fill = #F0F0F0; USVs shape = parallelogram
+    assert 'color="#F0F0F0"' in content or 'color="#f0f0f0"' in content
+    assert 'parallelogram' in content.lower()
+
+
+def test_write_yed_graphml_emits_edges(tmp_path):
+    state = _state_with_us()
+    out = tmp_path / "e.graphml"
+    write_yed_graphml(state, out)
+    content = out.read_text(encoding="utf-8")
+    assert 'source="us_1"' in content
+    assert 'target="us_2"' in content
+    assert "overlies" in content
