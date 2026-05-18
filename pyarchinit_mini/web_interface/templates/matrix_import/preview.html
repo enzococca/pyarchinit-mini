@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}">
+<head>
+  <meta charset="UTF-8">
+  <title>Preview AI Matrix Import</title>
+</head>
+<body>
+  <h1>Preview AI Matrix Import</h1>
+
+  {% if sito_needs_input %}
+    <div style="background:#ffe; border:1px solid #cc0; padding:10px">
+      <strong>&#9888;&#65039; Nome sito non rilevato.</strong>
+      Inseriscilo manualmente per continuare.
+    </div>
+  {% endif %}
+
+  <form id="apply-form" method="post" action="{{ url_for('matrix_import.apply') }}">
+    <input type="hidden" name="plan_json" value='{{ plan_json }}'>
+    <input type="hidden" name="image_b64" value="{{ image_b64 }}">
+
+    <label>Sito:
+      <input type="text" name="sito" value="{{ sito }}" required>
+    </label><br>
+
+    <h3>US estratte ({{ plan.us|length }})</h3>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>&#10003;</th><th>US</th><th>Area</th><th>Unità tipo</th>
+          <th>Descrizione</th><th>F.rec</th><th>F.ini</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for u in plan.us %}
+        <tr>
+          <td><input type="checkbox" name="selected_us" value="{{ loop.index0 }}" checked></td>
+          <td><input name="us_num_{{ loop.index0 }}" value="{{ u.us_num }}"></td>
+          <td><input name="area_{{ loop.index0 }}" value="{{ u.area or area_default }}"></td>
+          <td>
+            <select name="unit_type_{{ loop.index0 }}">
+              <option value="USM" {% if u.unit_type == 'USM' %}selected{% endif %}>USM</option>
+              <option value="USR" {% if u.unit_type == 'USR' %}selected{% endif %}>USR</option>
+              <option value="US"  {% if u.unit_type == 'US'  %}selected{% endif %}>US</option>
+            </select>
+          </td>
+          <td><input name="desc_{{ loop.index0 }}" value="{{ u.descrizione }}"></td>
+          <td><input type="number" name="fr_{{ loop.index0 }}" value="{{ u.fase_recente }}" style="width:50px"></td>
+          <td><input type="number" name="fi_{{ loop.index0 }}" value="{{ u.fase_iniziale }}" style="width:50px"></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <h3>Relazioni estratte ({{ plan.edges|length }})</h3>
+    <table border="1">
+      <thead>
+        <tr><th>&#10003;</th><th>US from</th><th>US to</th><th>Tipo</th></tr>
+      </thead>
+      <tbody>
+      {% for e in plan.edges %}
+        <tr>
+          <td><input type="checkbox" name="selected_edges" value="{{ loop.index0 }}" checked></td>
+          <td><input name="ef_{{ loop.index0 }}" value="{{ e.us_from }}"></td>
+          <td><input name="et_{{ loop.index0 }}" value="{{ e.us_to }}"></td>
+          <td>
+            <select name="etipo_{{ loop.index0 }}">
+              {% for t in ['copre','coperto da','taglia','tagliato da','riempie','riempito da','si appoggia','gli si appoggia','uguale a'] %}
+                <option value="{{ t }}" {% if e.tipo == t %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <br>
+    <button type="submit">Importa selezionate</button>
+    <a href="{{ url_for('matrix_import.upload_form') }}">Annulla</a>
+  </form>
+</body>
+</html>

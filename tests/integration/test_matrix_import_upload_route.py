@@ -67,3 +67,51 @@ def test_get_index_renders_with_sites(client):
     body = r.get_data(as_text=True)
     assert "ExistingSite" in body
     assert "matrix" in body.lower() or "AI" in body
+
+
+def test_upload_renders_preview_on_success(client, monkeypatch):
+    """Mocked AI returns valid plan → preview rendered."""
+    fake_payload = json.dumps({
+        "is_harris_matrix": True, "confidence": 0.9, "reason": "OK",
+        "detected_site": "FromImage", "detected_area": None,
+        "us": [{"us_num": "1", "area": "A", "unit_type": "USM",
+                "descrizione": "muro", "fase_recente": 1, "fase_iniziale": 1}],
+        "edges": [],
+    })
+    class FakeContent:
+        def __init__(self, t): self.text = t
+    class FakeResp:
+        content = [FakeContent(fake_payload)]
+    class FakeMessages:
+        def create(self, **kw): return FakeResp()
+    class FakeClient:
+        def __init__(self, **kw): self.messages = FakeMessages()
+    import anthropic
+    monkeypatch.setattr(anthropic, "Anthropic", FakeClient)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test")
+
+    r = client.post(
+        "/matrix-import/upload",
+        data={
+            "image": (io.BytesIO(b"\x89PNG\r\n\x1a\n" + b"x" * 100), "matrix.png"),
+            "descrizione": "",
+            "sito": "",
+            "area": "",
+            "provider": "anthropic",
+        },
+        content_type="multipart/form-data",
+    )
+    assert r.status_code == 200
+    body = r.get_data(as_text=True)
+    assert "FromImage" in body or "muro" in body
+    assert "plan_json" in body
+
+
+def test_upload_missing_file_redirects(client):
+    r = client.post(
+        "/matrix-import/upload",
+        data={"sito": "", "area": "", "provider": "anthropic"},
+        content_type="multipart/form-data",
+        follow_redirects=False,
+    )
+    assert r.status_code in (302, 303)
