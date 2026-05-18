@@ -58,3 +58,27 @@ def test_parse_handles_missing_fields_gracefully():
     assert r.plan.us == []
     assert r.plan.edges == []
     assert r.plan.detected_site is None
+
+
+def test_parse_rejects_non_numeric_confidence():
+    payload = json.dumps({
+        "is_harris_matrix": True,
+        "confidence": "very high",
+        "us": [], "edges": [],
+    })
+    r = _parse_response(payload)
+    assert r.rejected is True
+    assert "malformed" in r.reason
+
+
+def test_parse_rejects_non_numeric_fase():
+    payload = json.dumps({
+        "is_harris_matrix": True,
+        "confidence": 0.9,
+        "us": [{"us_num": "1", "area": "A", "unit_type": "US",
+                "descrizione": "x", "fase_recente": "2a", "fase_iniziale": 1}],
+        "edges": [],
+    })
+    r = _parse_response(payload)
+    assert r.rejected is True
+    assert "malformed" in r.reason
