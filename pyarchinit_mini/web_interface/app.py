@@ -67,6 +67,9 @@ from pyarchinit_mini.web_interface.graph_routes import graph_bp
 from pyarchinit_mini.web_interface.paradata_routes import paradata_bp
 from pyarchinit_mini.web_interface.paradata_ui_routes import paradata_ui_bp
 
+# Import yEd GraphML import blueprint (Spec 7)
+from pyarchinit_mini.web_interface.yed_import_routes import yed_import_bp
+
 # Import WebSocket events
 from pyarchinit_mini.web_interface.socketio_events import (
     init_socketio_events,
@@ -575,6 +578,9 @@ def create_app():
     app.register_blueprint(graph_bp)
     app.register_blueprint(paradata_bp)
     app.register_blueprint(paradata_ui_bp)
+
+    # Register yEd GraphML import blueprint (Spec 7)
+    app.register_blueprint(yed_import_bp)
 
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
     csrf.exempt(pyarchinit_import_export_bp)
