@@ -61,5 +61,6 @@ def test_yed_writer_row_count_matches_golden():
 def test_yed_writer_node_count_matches_golden():
     tree = ET.parse(GOLDEN)
     ns = {"g": "http://graphml.graphdrawing.org/xmlns"}
-    nodes = tree.findall(".//g:graph[@id='swimlane_root:']/g:node", ns)
+    # Spec 7: nested graph id is "swimlane_root::graph" (double-colon, per Extended Matrix convention)
+    nodes = tree.findall(".//g:graph[@id='swimlane_root::graph']/g:node", ns)
     assert len(nodes) == 3

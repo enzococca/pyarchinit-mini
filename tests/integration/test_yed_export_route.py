@@ -56,7 +56,7 @@ def test_get_export_returns_graphml_download(client):
     assert "<graphml" in body
     assert "y:TableNode" in body or "y:Table" in body
 
-    out_path = tmp_path / "data" / "exports" / "harris_yed" / "volterra-harris-yed.graphml"
+    out_path = tmp_path / "data" / "exports" / "harris_yed" / "volterra-extmatrix.graphml"
     assert out_path.exists()
 
 
