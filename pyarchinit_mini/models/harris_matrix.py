@@ -44,20 +44,38 @@ class USRelationships(BaseModel):
 
 class Period(BaseModel):
     """
-    Archaeological periods and phases
+    Archaeological periods and phases.
+
+    Carries BOTH the legacy field set (``period_name``/``phase_name``/
+    ``start_date``/``end_date``/``description``/``chronology``) and the
+    pyarchinit-real field set (``periodo``/``fase``/``datazione``/
+    ``descrizione``/``sito``) so the same model works whether the database
+    was created by pyarchinit-mini's create_all (legacy names) or by
+    pyarchinit QGIS (real names). The Spec-3-bis swimlane editor queries
+    the real names; the ``_2026_05_period_table_schema`` migration adds
+    those columns to existing legacy-schema DBs and backfills them.
     """
     __tablename__ = 'period_table'
-    
+
     id_period = Column(Integer, primary_key=True, autoincrement=True)
-    period_name = Column(String(200), nullable=False)
+    # Legacy column set (kept for backward compat with existing pyarchinit-mini DBs)
+    period_name = Column(String(200))
     phase_name = Column(String(200))
-    start_date = Column(Integer)  # Anno inizio
-    end_date = Column(Integer)    # Anno fine
+    start_date = Column(Integer)
+    end_date = Column(Integer)
     description = Column(Text)
-    chronology = Column(String(100))  # Sistema cronologico
-    
+    chronology = Column(String(100))
+    # Real pyarchinit column set (Spec 3-bis swimlane editor reads these)
+    sito = Column(String(350))
+    periodo = Column(String(200))
+    fase = Column(String(200))
+    datazione = Column(Text)
+    descrizione = Column(Text)
+
     def __repr__(self):
-        return f"<Period('{self.period_name}', {self.start_date}-{self.end_date})>"
+        # Prefer real-schema field when populated, fall back to legacy.
+        label = self.periodo or self.period_name or "?"
+        return f"<Period('{label}', sito={self.sito})>"
 
 class Periodizzazione(BaseModel):
     """

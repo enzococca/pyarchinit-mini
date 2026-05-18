@@ -830,6 +830,7 @@ class DatabaseMigrations:
             f"{pkg}._2026_05_node_uuid_schema",
             f"{pkg}._2026_05_node_uuid_backfill",
             f"{pkg}._2026_05_vocab_alignment",
+            f"{pkg}._2026_05_period_table_schema",
         ]
         url = str(self.connection.engine.url)
         applied = 0
