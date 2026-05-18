@@ -193,3 +193,11 @@ docs/tutorials\ 2/
 /web_interface/
 /cli_interface/
 /desktop_gui/
+
+# Spec 2: paradata derived artifacts (auto-regen output + locks + transient)
+data/paradata/**/stratigraphy.graphml
+data/paradata/**/.paradata.lock
+data/paradata/**/*.tmp
+data/paradata/**/imports/*
+data/paradata/_regen.log
+data/paradata/_metrics.sqlite
