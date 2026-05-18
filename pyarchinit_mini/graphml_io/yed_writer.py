@@ -86,10 +86,72 @@ def _build_table_rows(rows) -> str:
 
 
 def _build_us_nodes(nodes) -> str:
-    """Stub for Task 7."""
-    return ""
+    """Emit y:ShapeNode per US with VocabProvider visual styles."""
+    if not nodes:
+        return ""
+    from pyarchinit_mini.vocab.provider import VocabProvider
+    from pyarchinit_mini.vocab.types import VisualStyle
+    try:
+        provider = VocabProvider.instance()
+    except Exception:
+        provider = None
+
+    lines = []
+    for el in nodes:
+        nid = el.data.get("id", "")
+        label = el.data.get("label", nid)
+        unit_type = el.data.get("unit_type", "US")
+        if provider:
+            style = provider.get_visual_style(unit_type)
+        else:
+            style = VisualStyle.fallback()
+        fill = style.fill_color
+        border = style.border_color
+        shape = style.shape
+        lines.append(
+            f'        <node id="{nid}">\n'
+            f'          <data key="d6">\n'
+            f'            <y:ShapeNode>\n'
+            f'              <y:Geometry x="50" y="20" width="80" height="50"/>\n'
+            f'              <y:Fill color="{fill}" transparent="false"/>\n'
+            f'              <y:BorderStyle color="{border}" type="line" width="3.0"/>\n'
+            f'              <y:NodeLabel fontSize="12">{_xml_escape(label)}</y:NodeLabel>\n'
+            f'              <y:Shape type="{shape}"/>\n'
+            f'            </y:ShapeNode>\n'
+            f'          </data>\n'
+            f'        </node>'
+        )
+    return "\n".join(lines) + "\n"
 
 
 def _build_edges(state) -> str:
-    """Stub for Task 7."""
-    return ""
+    """Emit y:GenericEdge per stratigraphic edge."""
+    if not state.edges:
+        return ""
+    lines = []
+    for el in state.edges:
+        eid = el.data.get("id", "")
+        src = el.data.get("source", "")
+        tgt = el.data.get("target", "")
+        lbl = el.data.get("label", "")
+        lines.append(
+            f'    <edge id="{eid}" source="{src}" target="{tgt}">\n'
+            f'      <data key="d10">\n'
+            f'        <y:GenericEdge>\n'
+            f'          <y:LineStyle color="#000000" type="line" width="1.0"/>\n'
+            f'          <y:Arrows source="none" target="standard"/>\n'
+            f'          <y:EdgeLabel>{_xml_escape(lbl)}</y:EdgeLabel>\n'
+            f'        </y:GenericEdge>\n'
+            f'      </data>\n'
+            f'    </edge>'
+        )
+    return "\n".join(lines) + "\n"
+
+
+def _xml_escape(s: str) -> str:
+    """Minimal XML escape for safe content embedding."""
+    return (str(s)
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;"))
