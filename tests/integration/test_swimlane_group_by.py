@@ -1,0 +1,50 @@
+"""Integration tests for SwimlaneState.load(group_by=...) — 9 valid values."""
+from pathlib import Path
+import pytest
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from pyarchinit_mini.harris_swimlane.swimlane_state import SwimlaneState
+
+DB_FIX = Path(__file__).parent.parent / "fixtures" / "databases" / "sqlite_volterra_30us_with_periods.db"
+
+
+@pytest.fixture
+def session():
+    eng = create_engine(f"sqlite:///{DB_FIX}")
+    s = sessionmaker(bind=eng)()
+    yield s
+    s.close()
+
+
+def test_default_group_by_is_period_phase(session):
+    state = SwimlaneState.load(session, "Volterra")
+    assert state.group_by == "period_phase"
+    assert len(state.rows) == 5
+
+
+def test_group_by_period_phase_explicit(session):
+    state = SwimlaneState.load(session, "Volterra", group_by="period_phase")
+    assert state.group_by == "period_phase"
+    assert len(state.rows) == 5
+
+
+def test_group_by_none_returns_single_lane(session):
+    state = SwimlaneState.load(session, "Volterra", group_by="none")
+    assert state.group_by == "none"
+    assert len(state.rows) == 1
+    assert state.rows[0].row_id == "row_default"
+
+
+def test_group_by_invalid_raises(session):
+    with pytest.raises(ValueError, match="invalid group_by"):
+        SwimlaneState.load(session, "Volterra", group_by="not_a_valid_value")
+
+
+@pytest.mark.parametrize("gb", ["struttura", "attivita", "settore", "area", "ambient", "saggio", "quad_par"])
+def test_group_by_distinct_field_runs(session, gb):
+    state = SwimlaneState.load(session, "Volterra", group_by=gb)
+    assert state.group_by == gb
+    # Fixture has no values in these columns → 1 lane "(missing)"
+    assert len(state.rows) >= 1
