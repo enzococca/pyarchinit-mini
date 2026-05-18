@@ -179,6 +179,11 @@ create_*.py
 !pyarchinit_mini/mcp_server/tools/create_harris_matrix_tool.py
 !pyarchinit_mini/mcp_server/tools/create_database_tool.py
 
+# Top-level test/scratch scripts (one-off, not the test suite)
+/test_*.py
+/import_metro_c_now.py
+/CLAUDE_DESKTOP_*.md
+
 # Documentation duplicates and build files
 docs/*\ 2.*
 docs/*\ 2/
