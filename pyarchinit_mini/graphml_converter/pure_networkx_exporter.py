@@ -4,12 +4,20 @@ Complete GraphML export without Graphviz dependency
 Produces yEd-compatible Extended Matrix output with period clustering
 """
 
+import warnings as _spec2_warnings
 import networkx as nx
 from typing import Dict, List, Tuple, Optional
 from collections import defaultdict
 from xml.etree.ElementTree import Element
 
 from .graphml_builder import GraphMLBuilder
+
+_spec2_warnings.warn(
+    "pyarchinit_mini.graphml_converter.pure_networkx_exporter is deprecated; use "
+    "pyarchinit_mini.graphml_io.writer instead. This module will be removed in Spec 3.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 class PureNetworkXExporter:
