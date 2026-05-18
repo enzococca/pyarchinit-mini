@@ -752,41 +752,57 @@ function loadExistingData() {
             });
         });
 
-        // Add edges
+        // Add edges. pyarchinit may store multiple relationship rows between
+        // the same (from_us, to_us) pair (e.g. 'copre' + 'taglia'); Cytoscape
+        // requires unique element IDs, so we suffix collisions and dedupe
+        // the exact same triple. Without this guard the whole forEach aborted
+        // on the first duplicate and no edges were ever rendered.
+        const seenEdgeKeys = new Set();
+        let dupCounter = 0;
         relationships.forEach(relData => {
-            // Convert to strings for comparison (database may store as integers)
             const fromUsStr = String(relData.from_us);
             const toUsStr = String(relData.to_us);
 
             const sourceNode = cy.nodes().filter(n => String(n.data('us_number')) === fromUsStr).first();
             const targetNode = cy.nodes().filter(n => String(n.data('us_number')) === toUsStr).first();
 
-            if (sourceNode.length && targetNode.length) {
-                // Bilingual matching: support both Italian (symbol) and English (value) names
-                const relType = relationshipTypes.find(r =>
-                    r.symbol === relData.relationship || r.value === relData.relationship
-                ) || relationshipTypes[0];
-
-                // Determine edge category from the relationship name
-                const edgeCategory = getEdgeCategory(relData.relationship);
-
-                cy.add({
-                    group: 'edges',
-                    data: {
-                        id: `edge_${relData.from_us}_${relData.to_us}`,
-                        source: sourceNode.id(),
-                        target: targetNode.id(),
-                        label: relType.symbol,
-                        relationship: relData.relationship,
-                        relationshipType: relType.value,  // Store English value for saving
-                        edgeCategory: edgeCategory,
-                        style: relType.style,
-                        arrow: relType.arrow
-                    }
-                });
-            } else {
+            if (!sourceNode.length || !targetNode.length) {
                 console.warn('Could not find nodes for relationship:', relData);
+                return;
             }
+
+            const relType = relationshipTypes.find(r =>
+                r.symbol === relData.relationship || r.value === relData.relationship
+            ) || relationshipTypes[0];
+            const edgeCategory = getEdgeCategory(relData.relationship);
+
+            // Triple key (from, to, type) deduplicates true repeats.
+            const tripleKey = `${fromUsStr}|${toUsStr}|${relData.relationship || ''}`;
+            if (seenEdgeKeys.has(tripleKey)) return;
+            seenEdgeKeys.add(tripleKey);
+
+            // Build a unique element ID; suffix collisions when (from,to) pair
+            // is reused with a different relationship type.
+            let edgeId = `edge_${relData.from_us}_${relData.to_us}`;
+            if (cy.getElementById(edgeId).length > 0) {
+                dupCounter += 1;
+                edgeId = `${edgeId}_${dupCounter}`;
+            }
+
+            cy.add({
+                group: 'edges',
+                data: {
+                    id: edgeId,
+                    source: sourceNode.id(),
+                    target: targetNode.id(),
+                    label: relType.symbol,
+                    relationship: relData.relationship,
+                    relationshipType: relType.value,
+                    edgeCategory: edgeCategory,
+                    style: relType.style,
+                    arrow: relType.arrow
+                }
+            });
         });
 
         // Apply automatic layout
