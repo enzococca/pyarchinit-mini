@@ -22,6 +22,11 @@ from pyarchinit_mini.harris_swimlane.exceptions import YEDWriterError
 from pyarchinit_mini.graphml_io.yed_keys import KEYS, KeyDef
 
 
+def _attr(val) -> str:
+    """Escape a value safe to use as an XML attribute (handles double quotes too)."""
+    return escape(str(val), {'"': '&quot;'})
+
+
 def write_extended_matrix_graphml(
     state: Any,
     *,
@@ -96,7 +101,7 @@ def _render_table_root(state, site_meta: dict) -> str:
     rows_xml = []
     row_height = 200
     for i, row in enumerate(state.rows):
-        rid = escape(row.row_id)
+        rid = _attr(row.row_id)
         rows_xml.append(
             f'              <y:Row id="{rid}" height="{row_height}" '
             f'minimumHeight="80.0" nodeLabelMaxWidth="0.0"/>'
@@ -147,7 +152,7 @@ def _render_us_nodes(state) -> str:
         if el.data.get("is_swimlane"):
             continue
         d = el.data
-        nid = escape(str(d["id"]))
+        nid = _attr(d["id"])
         us_num = d.get("us_number") or d.get("us") or ""
         unit_type = d.get("unit_type") or "US"
         node_uuid = d.get("node_uuid") or ""
@@ -210,8 +215,27 @@ def _render_us_nodes(state) -> str:
 
 
 def _render_edges(state) -> str:
-    """Stub — filled in Task 10."""
-    return ''
+    parts = []
+    for el in state.edges:
+        d = el.data
+        eid = _attr(d.get("id", ""))
+        source = _attr(d.get("source", ""))
+        target = _attr(d.get("target", ""))
+        label = d.get("label", "")
+        parts.append(f'    <edge id="{eid}" source="{source}" target="{target}">')
+        parts.append(f'      <data key="d36">{escape(str(label))}</data>')
+        parts.append('      <data key="d37">')
+        parts.append('        <y:PolyLineEdge>')
+        parts.append('          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>')
+        parts.append('          <y:LineStyle color="#000000" type="line" width="1.0"/>')
+        parts.append('          <y:Arrows source="none" target="standard"/>')
+        if label:
+            parts.append(f'          <y:EdgeLabel>{escape(str(label))}</y:EdgeLabel>')
+        parts.append('          <y:BendStyle smoothed="false"/>')
+        parts.append('        </y:PolyLineEdge>')
+        parts.append('      </data>')
+        parts.append('    </edge>')
+    return "\n".join(parts)
 
 
 # Deprecated thin wrapper for one release.
