@@ -1,3 +1,25 @@
+## [2.4.7] - 2026-05-18
+
+### Fixed (IT)
+- Editor swimlane carica anche gli edge da `us_relationships_table` (Spec 3-bis
+  ora unisce `us_table.rapporti` + tabella dedicata via EdgeRegistry). Risolve
+  "0 edges" su siti come Ravenna dove tutte le 1085+ relazioni stanno nella
+  tabella relationships e `rapporti` è vuoto.
+- Auto-fix sequence PostgreSQL al startup esteso a `periodizzazione_table`,
+  `period_table`, `us_relationships_table`, `harris_matrix_table`. Risolve
+  l'HTTP 500 "UniqueViolation periodizzazione_table_pkey" che bloccava il
+  Save Swimlane e di conseguenza l'export GraphML (il file scaricato era
+  vuoto perché la transazione era rollbacked).
+
+### Fixed (EN)
+- Swimlane editor now reads edges from `us_relationships_table` too, not
+  just `us_table.rapporti`. Fixes "0 edges" on sites where everything is
+  in the dedicated relationships table.
+- PostgreSQL sequence auto-sync extended to periodizzazione_table,
+  period_table, us_relationships_table, harris_matrix_table. Fixes the
+  HTTP 500 UniqueViolation that blocked Save Swimlane / GraphML export
+  on Adarte.
+
 ## [2.4.6] - 2026-05-18
 
 ### Fixed (IT)

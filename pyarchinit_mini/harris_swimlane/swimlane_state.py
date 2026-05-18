@@ -179,8 +179,12 @@ class SwimlaneState:
                 classes="swimlane",
             ))
 
-        # Build edges from rapporti via EdgeRegistry
+        # Build edges from rapporti (legacy text) AND us_relationships_table
+        # (dedicated table — pyarchinit's primary store for relationships).
         edges = SwimlaneState._build_edges(us_rows, us_num_to_node_id)
+        edges.extend(SwimlaneState._build_edges_from_relationships_table(
+            session, site, us_num_to_node_id, existing=edges,
+        ))
 
         return EditorState(
             site=site,
@@ -268,6 +272,91 @@ class SwimlaneState:
                 }))
 
         return edges
+
+    @staticmethod
+    def _build_edges_from_relationships_table(
+        session: Session, site: str, us_num_to_node_id: dict, *, existing
+    ) -> list[CytoscapeElement]:
+        """Read stratigraphic relationships from ``us_relationships_table``.
+
+        pyarchinit stores edges in a dedicated table (``us_from`` / ``us_to``
+        / ``relationship_type``) — for sites like Ravenna with 1000+
+        relationships, ``us_table.rapporti`` text is empty and everything
+        lives here. We translate ``relationship_type`` through the same
+        VocabProvider alias mapping used for ``rapporti`` tokens, and the
+        same dedupe / inverse-pair rules apply.
+        """
+        try:
+            from pyarchinit_mini.graphproj.edge_registry import EdgeRegistry
+            registry = EdgeRegistry()
+        except Exception:
+            return []
+
+        SYMMETRIC = {"has_same_time"}
+        INVERSE_PAIRS = {"overlies": "is_after", "is_after": "overlies"}
+
+        # Seed seen-set with edges already produced from rapporti so we don't
+        # duplicate the same relation across the two sources.
+        seen: set[tuple] = set()
+        for el in existing:
+            ename = el.data.get("label")
+            s = el.data.get("source")
+            t = el.data.get("target")
+            if not ename or not s or not t:
+                continue
+            if ename in SYMMETRIC:
+                seen.add((ename, tuple(sorted((s, t)))))
+            else:
+                seen.add((ename, s, t))
+
+        try:
+            rows = session.execute(text(
+                "SELECT us_from, us_to, relationship_type "
+                "FROM us_relationships_table WHERE sito = :sito"
+            ), {"sito": site}).fetchall()
+        except Exception:
+            return []
+
+        out: list[CytoscapeElement] = []
+        edge_counter = len(existing)
+
+        for r in rows:
+            us_from, us_to, rel_type = r[0], r[1], r[2]
+            if not rel_type:
+                continue
+            try:
+                u_from_int = int(us_from)
+                u_to_int = int(us_to)
+            except (ValueError, TypeError):
+                continue
+            source_id = us_num_to_node_id.get(u_from_int)
+            target_id = us_num_to_node_id.get(u_to_int)
+            if not source_id or not target_id:
+                continue
+
+            edge_name = registry.resolve_italian_alias(str(rel_type)) or rel_type
+
+            if edge_name in SYMMETRIC:
+                key = (edge_name, tuple(sorted((source_id, target_id))))
+            else:
+                key = (edge_name, source_id, target_id)
+            if key in seen:
+                continue
+            inverse_name = INVERSE_PAIRS.get(edge_name)
+            if inverse_name is not None:
+                inverse_key = (inverse_name, target_id, source_id)
+                if inverse_key in seen:
+                    continue
+            seen.add(key)
+
+            edge_counter += 1
+            out.append(CytoscapeElement(data={
+                "id": f"e{edge_counter}",
+                "source": source_id,
+                "target": target_id,
+                "label": edge_name,
+            }))
+        return out
 
     @staticmethod
     def save(session: Session, site: str, state: dict) -> SaveResult:
