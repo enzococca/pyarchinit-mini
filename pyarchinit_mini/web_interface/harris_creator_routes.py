@@ -624,3 +624,78 @@ def get_periods():
     except Exception as e:
         logger.warning(f"get_periods failed (non-fatal): {e}")
         return jsonify([])  # Return empty list — periods dropdown is optional
+
+
+# === Spec 3-bis: Harris Swimlane Editor endpoints ===
+
+from flask import g
+
+from pyarchinit_mini.harris_swimlane.row_provider import RowProvider
+from pyarchinit_mini.harris_swimlane.swimlane_state import SwimlaneState
+from pyarchinit_mini.harris_swimlane.exceptions import SwimlaneError, RowProviderError
+
+
+def _get_session():
+    """Helper: get session from Flask g or fall back to get_db_session()."""
+    db = getattr(g, "db_session", None)
+    if db is None:
+        db = get_db_session()
+    return db
+
+
+@harris_creator_bp.get("/api/swimlanes/<site>")
+def api_get_swimlanes(site: str):
+    """List swimlane rows for the site."""
+    try:
+        session = _get_session()
+        provider = RowProvider(session, site)
+        rows = provider.list_rows()
+        return jsonify([{
+            "row_id": r.row_id,
+            "period_name": r.period_name,
+            "phase_name": r.phase_name,
+            "start_date": r.start_date,
+            "end_date": r.end_date,
+            "color": r.color,
+            "source": r.source,
+        } for r in rows]), 200
+    except RowProviderError as e:
+        return jsonify({"error": "row_provider", "message": str(e)}), 500
+    except Exception as e:
+        logger.exception("api_get_swimlanes failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
+
+
+@harris_creator_bp.get("/api/load/<site>")
+def api_load_state(site: str):
+    """Load full editor state (rows + nodes + edges) as Cytoscape JSON."""
+    try:
+        session = _get_session()
+        state = SwimlaneState.load(session, site)
+        return jsonify({
+            "site": state.site,
+            "rows": [{
+                "row_id": r.row_id,
+                "period_name": r.period_name,
+                "phase_name": r.phase_name,
+                "color": r.color,
+                "start_date": r.start_date,
+                "end_date": r.end_date,
+                "source": r.source,
+            } for r in state.rows],
+            "nodes": [{
+                "data": el.data,
+                "classes": el.classes,
+                "position": el.position,
+            } for el in state.nodes],
+            "edges": [{
+                "data": el.data,
+                "classes": el.classes,
+            } for el in state.edges],
+            "pending_changes": state.pending_changes,
+        }), 200
+    except SwimlaneError as e:
+        return jsonify({"error": "swimlane", "message": str(e)}), 500
+    except Exception as e:
+        logger.exception("api_load_state failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
