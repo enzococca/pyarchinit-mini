@@ -62,6 +62,11 @@ from pyarchinit_mini.web_interface.three_d_builder_routes import three_d_builder
 # Import Vocab routes
 from pyarchinit_mini.web_interface.vocab_routes import vocab_bp
 
+# Import Graph, Paradata, and Paradata UI routes (Spec 2)
+from pyarchinit_mini.web_interface.graph_routes import graph_bp
+from pyarchinit_mini.web_interface.paradata_routes import paradata_bp
+from pyarchinit_mini.web_interface.paradata_ui_routes import paradata_ui_bp
+
 # Import WebSocket events
 from pyarchinit_mini.web_interface.socketio_events import (
     init_socketio_events,
@@ -565,6 +570,11 @@ def create_app():
     # Register 3D Builder blueprints
     app.register_blueprint(three_d_builder_bp)  # API routes
     app.register_blueprint(three_d_builder_ui_bp)  # UI routes
+
+    # Register Graph, Paradata, and Paradata UI blueprints (Spec 2)
+    app.register_blueprint(graph_bp)
+    app.register_blueprint(paradata_bp)
+    app.register_blueprint(paradata_ui_bp)
 
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
     csrf.exempt(pyarchinit_import_export_bp)
