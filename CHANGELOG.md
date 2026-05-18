@@ -1,3 +1,25 @@
+## [2.7.0] - 2026-05-18
+
+### Added (IT)
+- **AI Matrix Import** (`/matrix-import/`): nuova feature che usa Vision API
+  (Anthropic Claude Sonnet 4.7 o OpenAI GPT-5.5) per estrarre US e relazioni
+  stratigrafiche da un'immagine di un Harris matrix. Include validation gate
+  (l'AI rifiuta immagini che non sono matrici), preview editabile prima del
+  commit, e auto-creazione del sito se nuovo.
+- L'immagine sorgente viene salvata come media legato al sito.
+- Toggle Anthropic / OpenAI nel form di upload.
+- Required env vars: `ANTHROPIC_API_KEY` e/o `OPENAI_API_KEY`, `AI_PROVIDER` opzionale.
+
+### Added (EN)
+- **AI Matrix Import** (`/matrix-import/`): new feature that uses Vision API
+  (Anthropic Claude Sonnet 4.7 or OpenAI GPT-5.5) to extract stratigraphic
+  units and relationships from an image of a Harris matrix. Includes a
+  validation gate (the AI rejects non-matrix images), editable preview
+  before commit, and auto-creation of the site if new.
+- Source image saved as media linked to the site.
+- Anthropic / OpenAI toggle in the upload form.
+- Required env vars: `ANTHROPIC_API_KEY` and/or `OPENAI_API_KEY`, optional `AI_PROVIDER`.
+
 ## [2.6.0] - 2026-05-18
 
 ### Changed (IT)
