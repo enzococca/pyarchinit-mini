@@ -167,6 +167,10 @@
             <button class="btn btn-warning btn-sm" id="export-png-btn" title="Export as PNG">
                 <i class="fas fa-image"></i> PNG
             </button>
+            <!-- Spec 3-bis: Harris Swimlane controls -->
+            <button onclick="showNewRowModal()" class="btn btn-primary btn-sm" title="Add a new swimlane row">+ New Row</button>
+            <button onclick="saveSwimlaneState()" class="btn btn-success btn-sm" title="Save swimlane changes">&#128190; Save Swimlane</button>
+            <button onclick="exportYedGraphml()" class="btn btn-info btn-sm" title="Export yEd GraphML">&#11015; Export yEd GraphML</button>
             <a href="{{ url_for('harris_creator.index') }}" class="btn btn-outline-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
@@ -384,4 +388,241 @@
 
 <!-- Editor JavaScript -->
 <script src="{{ url_for('static', filename='js/harris_creator_editor.js') }}"></script>
+
+<script>
+// === Spec 3-bis: Harris Swimlane integration ===
+
+async function loadSwimlaneState(site) {
+    try {
+        const r = await fetch(`/harris-creator/api/load/${encodeURIComponent(site)}`);
+        if (!r.ok) {
+            console.error("Failed to load swimlane state:", await r.text());
+            return;
+        }
+        const state = await r.json();
+        renderSwimlaneState(state);
+    } catch (e) {
+        console.error("loadSwimlaneState error:", e);
+    }
+}
+
+function renderSwimlaneState(state) {
+    if (typeof cy === 'undefined') {
+        console.warn("Cytoscape not initialized yet — skipping renderSwimlaneState");
+        return;
+    }
+
+    // Clear existing elements
+    cy.elements().remove();
+
+    const swimlaneNodes = state.nodes.filter(el => el.data.is_swimlane);
+    const usNodes = state.nodes.filter(el => !el.data.is_swimlane);
+
+    // Add compound parents first (swimlanes)
+    if (swimlaneNodes.length > 0) {
+        cy.add(swimlaneNodes.map(el => ({
+            group: 'nodes',
+            data: el.data,
+            classes: 'swimlane',
+        })));
+    }
+
+    // Add US children with parent
+    if (usNodes.length > 0) {
+        cy.add(usNodes.map(el => ({
+            group: 'nodes',
+            data: el.data,
+            position: el.position || undefined,
+        })));
+    }
+
+    // Add edges
+    if (state.edges && state.edges.length > 0) {
+        cy.add(state.edges.map(el => ({
+            group: 'edges',
+            data: el.data,
+        })));
+    }
+
+    // Apply swimlane styling on the parent compound nodes
+    cy.nodes('.swimlane').forEach(n => {
+        const color = n.data('color') || '#EEEEEE';
+        n.style({
+            'background-color': color,
+            'background-opacity': 0.2,
+            'border-color': color,
+            'border-width': 2,
+            'label': n.data('label'),
+            'text-valign': 'top',
+            'text-halign': 'left',
+            'padding': 10,
+            'font-size': '14px',
+            'font-weight': 'bold',
+        });
+    });
+
+    // Save state references for later use
+    window._currentSite = state.site;
+    window._pendingChanges = state.pending_changes || {
+        us_updates: [], us_inserts: [], us_deletes: []
+    };
+
+    console.log(`Loaded swimlane state for ${state.site}: ${state.rows.length} rows, ${usNodes.length} US, ${state.edges.length} edges`);
+}
+
+// Auto-load on page ready if ?site=... in URL
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const site = params.get('site');
+    if (site) {
+        // Wait briefly for Cytoscape to init then load
+        const tryLoad = (retries) => {
+            if (typeof cy !== 'undefined') {
+                loadSwimlaneState(site);
+            } else if (retries > 0) {
+                setTimeout(() => tryLoad(retries - 1), 200);
+            } else {
+                console.warn("Cytoscape never initialized, swimlane load skipped");
+            }
+        };
+        tryLoad(10);
+    }
+});
+</script>
+
+<script>
+// === Spec 3-bis: drag-drop + pending changes + Save + +New Row + Export ===
+
+function setupSwimlaneDragHandlers() {
+    if (typeof cy === 'undefined') return;
+
+    cy.on('dragfree', 'node', function(evt) {
+        const node = evt.target;
+        if (node.hasClass('swimlane')) return;  // ignore parent drags
+
+        const newParent = node.parent().id() || null;
+        const oldParent = node.data('_lastParent') || node.data('parent');
+
+        if (newParent && newParent !== oldParent) {
+            const usId = node.data('us');
+            const parentEl = cy.getElementById(newParent);
+            const update = {
+                us: usId,
+                periodo_iniziale: parentEl.data('period_name'),
+                fase_iniziale: parentEl.data('phase_name'),
+            };
+            // Replace any existing pending update for this US
+            if (!window._pendingChanges) {
+                window._pendingChanges = {us_updates: [], us_inserts: [], us_deletes: []};
+            }
+            window._pendingChanges.us_updates = window._pendingChanges.us_updates.filter(
+                u => u.us !== usId
+            );
+            window._pendingChanges.us_updates.push(update);
+            node.data('_lastParent', newParent);
+            showUnsavedIndicator();
+        }
+    });
+}
+
+function showUnsavedIndicator() {
+    let ind = document.getElementById('swimlane-unsaved-indicator');
+    if (!ind) {
+        ind = document.createElement('div');
+        ind.id = 'swimlane-unsaved-indicator';
+        ind.style.cssText = 'position:fixed;top:10px;right:10px;background:#FFC107;padding:8px 16px;border-radius:4px;z-index:9999;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.2)';
+        ind.textContent = '● Unsaved changes';
+        document.body.appendChild(ind);
+    }
+    ind.style.display = 'block';
+}
+
+function hideUnsavedIndicator() {
+    const ind = document.getElementById('swimlane-unsaved-indicator');
+    if (ind) ind.style.display = 'none';
+}
+
+async function saveSwimlaneState() {
+    const site = window._currentSite;
+    if (!site) {
+        alert('No site loaded. Open editor with ?site=<name>');
+        return;
+    }
+    try {
+        const r = await fetch(`/harris-creator/api/save/${encodeURIComponent(site)}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(window._pendingChanges || {}),
+        });
+        if (!r.ok) {
+            alert(`Save failed: ${await r.text()}`);
+            return;
+        }
+        const result = await r.json();
+        alert(`Saved: ${result.updated} updates, ${result.inserted} inserts, ${result.deleted} deletes`);
+        if (result.errors && result.errors.length > 0) {
+            console.error('Save errors:', result.errors);
+            alert('Some errors occurred — check console.');
+        }
+        hideUnsavedIndicator();
+        window._pendingChanges = {us_updates: [], us_inserts: [], us_deletes: []};
+        // Reload to capture side effects (auto_regen, etc.)
+        loadSwimlaneState(site);
+    } catch (e) {
+        alert(`Save error: ${e.message}`);
+    }
+}
+
+function showNewRowModal() {
+    const site = window._currentSite;
+    if (!site) {
+        alert('No site loaded.');
+        return;
+    }
+    const period = prompt('Period name:');
+    if (!period) return;
+    const phase = prompt('Phase name (optional):') || null;
+    const startStr = prompt('Start date (year, optional, negative for BCE):');
+    const endStr = prompt('End date (year, optional):');
+    const start = startStr && startStr.trim() ? parseInt(startStr, 10) : null;
+    const end = endStr && endStr.trim() ? parseInt(endStr, 10) : null;
+
+    fetch(`/harris-creator/api/swimlanes/${encodeURIComponent(site)}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            period_name: period,
+            phase_name: phase,
+            start_date: start,
+            end_date: end,
+        }),
+    }).then(r => {
+        if (!r.ok) {
+            return r.text().then(t => alert(`Create row failed: ${t}`));
+        }
+        return r.json().then(row => {
+            alert(`Created row: ${row.row_id}`);
+            loadSwimlaneState(site);
+        });
+    }).catch(e => alert(`Network error: ${e.message}`));
+}
+
+function exportYedGraphml() {
+    const site = window._currentSite;
+    if (!site) {
+        alert('No site loaded.');
+        return;
+    }
+    window.location.href = `/harris-creator/api/export/${encodeURIComponent(site)}/yed-graphml`;
+}
+
+// Hook into editor init
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if (typeof cy !== 'undefined') {
+            setupSwimlaneDragHandlers();
+        }
+    }, 1000);
+});
+</script>
 {% endblock %}
