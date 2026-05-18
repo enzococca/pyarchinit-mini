@@ -1,3 +1,20 @@
+## [2.4.2] - 2026-05-18
+
+### Fixed (IT)
+- `_get_session()` (Spec 3-bis endpoints) ora acquisisce la sessione DB in modo
+  lazy via `get_db_session()` se nessun before_request hook ha pre-impostato
+  `g.db_session`. Risolve l'errore HTTP 500 "g.db_session not set" che
+  bloccava load / save / + Row / Export yEd su Adarte in 2.4.0-2.4.1.
+- Aggiunto `teardown_request` sul blueprint che rilascia la sessione lazy
+  alla fine della request.
+
+### Fixed (EN)
+- `_get_session()` now lazily opens a DB session via `get_db_session()` when no
+  before_request hook has bound one to `g.db_session`. Fixes the HTTP 500
+  "g.db_session not set" that broke load / save / + Row / Export on production
+  in 2.4.0-2.4.1.
+- Added `teardown_request` hook releasing the lazy session at request end.
+
 ## [2.4.1] - 2026-05-18
 
 ### Fixed (IT)
