@@ -2326,3 +2326,33 @@ preview of planned INSERT/UPDATE/SKIP and must confirm via
 - Disable during bulk ops: `with graphproj.auto_regen.disable_regen():`
 
 See `docs/GRAPH_AUTO_REGEN.md`.
+
+## Harris Swimlane Editor
+
+Since 2.4.0-alpha, the Harris Matrix Creator at `/harris-creator/editor`
+displays stratigraphic graphs with **yEd-like swimlanes** — horizontal
+rows representing periods+phases. Existing US records are auto-placed
+in their row based on `periodo_iniziale + fase_iniziale`. Users can
+drag US records between rows, create new rows interactively, and save
+back to the DB.
+
+Row source priority:
+1. `period_table` (formal definitions)
+2. Fallback: distinct `(periodo_iniziale, fase_iniziale)` from
+   `periodizzazione_table` + `us_table`
+
+### Two GraphML outputs
+
+- `data/paradata/<site>/stratigraphy.graphml` (Spec 2, auto-regen):
+  s3dgraphy clean, EM-canonical, for the EM Datacenter
+- `data/exports/harris_yed/<site>-harris-yed.graphml` (Spec 3-bis,
+  on-demand): yEd-flavored with `y:TableNode`, for users editing in
+  yEd Desktop
+
+### Auto-regen integration
+
+Save endpoint also triggers Spec 2's auto_regen for
+`stratigraphy.graphml`, keeping the canonical output consistent with
+DB state.
+
+See `docs/HARRIS_SWIMLANE.md` and `docs/YED_INTEGRATION.md`.

@@ -624,3 +624,206 @@ def get_periods():
     except Exception as e:
         logger.warning(f"get_periods failed (non-fatal): {e}")
         return jsonify([])  # Return empty list — periods dropdown is optional
+
+
+# === Spec 3-bis: Harris Swimlane Editor endpoints ===
+
+from flask import g
+
+from pyarchinit_mini.harris_swimlane.row_provider import RowProvider
+from pyarchinit_mini.harris_swimlane.swimlane_state import SwimlaneState
+from pyarchinit_mini.harris_swimlane.exceptions import SwimlaneError, RowProviderError
+from pyarchinit_mini.harris_swimlane.period_sync_service import PeriodSyncService
+from pyarchinit_mini.harris_swimlane.exceptions import PeriodSyncError
+
+
+def _get_session():
+    """Get the request-bound SQLAlchemy session.
+
+    Requires the Flask app to set g.db_session in a before_request hook
+    (the production app does this; tests do too). Raises if not set —
+    fails loud rather than silently returning a context-manager generator
+    that downstream callers will treat as a Session.
+    """
+    db = getattr(g, "db_session", None)
+    if db is None:
+        raise RuntimeError(
+            "g.db_session not set. The Flask app must set it in a "
+            "before_request hook before invoking Spec 3-bis endpoints."
+        )
+    return db
+
+
+@harris_creator_bp.get("/api/swimlanes/<site>")
+def api_get_swimlanes(site: str):
+    """List swimlane rows for the site."""
+    try:
+        session = _get_session()
+        provider = RowProvider(session, site)
+        rows = provider.list_rows()
+        return jsonify([{
+            "row_id": r.row_id,
+            "period_name": r.period_name,
+            "phase_name": r.phase_name,
+            "start_date": r.start_date,
+            "end_date": r.end_date,
+            "color": r.color,
+            "source": r.source,
+        } for r in rows]), 200
+    except RowProviderError as e:
+        return jsonify({"error": "row_provider", "message": str(e)}), 500
+    except Exception as e:
+        logger.exception("api_get_swimlanes failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
+
+
+@harris_creator_bp.get("/api/load/<site>")
+def api_load_state(site: str):
+    """Load full editor state (rows + nodes + edges) as Cytoscape JSON."""
+    # TODO(Spec-4): consider returning 404 when site is genuinely not in the
+    # DB (no site_table row), versus 200 + empty state when site exists but
+    # has no US yet. Spec §7.1 mentions 404 for site_not_found — current
+    # behavior returns 200 + empty.
+    try:
+        session = _get_session()
+        state = SwimlaneState.load(session, site)
+        return jsonify({
+            "site": state.site,
+            "rows": [{
+                "row_id": r.row_id,
+                "period_name": r.period_name,
+                "phase_name": r.phase_name,
+                "color": r.color,
+                "start_date": r.start_date,
+                "end_date": r.end_date,
+                "source": r.source,
+            } for r in state.rows],
+            "nodes": [{
+                "data": el.data,
+                "classes": el.classes,
+                "position": el.position,
+            } for el in state.nodes],
+            "edges": [{
+                "data": el.data,
+                "classes": el.classes,
+            } for el in state.edges],
+            "pending_changes": state.pending_changes,
+        }), 200
+    except SwimlaneError as e:
+        return jsonify({"error": "swimlane", "message": str(e)}), 500
+    except Exception as e:
+        logger.exception("api_load_state failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
+
+
+@harris_creator_bp.post("/api/save/<site>")
+def api_save_state(site: str):
+    """Save pending_changes for site. Triggers Spec 2 auto_regen on success."""
+    try:
+        payload = request.get_json(silent=True) or {}
+        session = _get_session()
+        result = SwimlaneState.save(session, site, payload)
+        return jsonify({
+            "updated": result.updated,
+            "inserted": result.inserted,
+            "deleted": result.deleted,
+            "errors": list(result.errors),
+        }), 200
+    except SwimlaneError as e:
+        return jsonify({"error": "swimlane", "message": str(e)}), 500
+    except Exception as e:
+        logger.exception("api_save_state failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
+
+
+@harris_creator_bp.post("/api/swimlanes/<site>")
+def api_create_row(site: str):
+    """Create a new swimlane row (upsert period_table). site param is for
+    URL consistency; period_table is currently cross-site."""
+    payload = request.get_json(silent=True) or {}
+    period_name = payload.get("period_name", "")
+    phase_name = payload.get("phase_name") or None
+    start_date = payload.get("start_date")
+    end_date = payload.get("end_date")
+    try:
+        session = _get_session()
+        svc = PeriodSyncService(session)
+        row = svc.upsert_row(
+            period_name=period_name, phase_name=phase_name,
+            start_date=start_date, end_date=end_date,
+        )
+        return jsonify({
+            "row_id": row.row_id,
+            "period_name": row.period_name,
+            "phase_name": row.phase_name,
+            "start_date": row.start_date,
+            "end_date": row.end_date,
+            "color": row.color,
+            "source": row.source,
+        }), 201
+    except PeriodSyncError as e:
+        return jsonify({
+            "error": "validation",
+            "message": str(e),
+            "period_name": e.period_name,
+            "phase_name": e.phase_name,
+        }), 400
+    except Exception as e:
+        logger.exception("api_create_row failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
+
+
+from pathlib import Path as _Path
+from datetime import datetime as _datetime
+import json as _json
+from flask import send_file as _send_file
+
+from pyarchinit_mini.graphml_io.yed_writer import write_yed_graphml
+from pyarchinit_mini.harris_swimlane.exceptions import YEDWriterError
+from pyarchinit_mini.graphproj.filesystem import slugify
+
+
+@harris_creator_bp.get("/api/export/<site>/yed-graphml")
+def api_export_yed(site: str):
+    """Export current swimlane state as yEd-flavored GraphML. On-demand."""
+    try:
+        session = _get_session()
+        state = SwimlaneState.load(session, site)
+
+        out_dir = _Path("data/exports/harris_yed")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        site_slug = slugify(site)
+        out_path = out_dir / f"{site_slug}-harris-yed.graphml"
+        write_yed_graphml(state, out_path)
+
+        idx_path = out_dir / "_index.json"
+        entries = []
+        if idx_path.exists():
+            try:
+                entries = _json.loads(idx_path.read_text(encoding="utf-8"))
+            except Exception:
+                entries = []
+        # Upsert by site_slug: at most 1 entry per site, latest export wins
+        entries = [e for e in entries if e.get("site_slug") != site_slug]
+        entries.append({
+            "site": site,
+            "site_slug": site_slug,
+            "file_path": str(out_path),
+            "file_size": out_path.stat().st_size,
+            "timestamp": _datetime.now().isoformat(),
+        })
+        idx_path.write_text(_json.dumps(entries, indent=2), encoding="utf-8")
+
+        return _send_file(
+            out_path.resolve(),
+            as_attachment=True,
+            download_name=f"{site_slug}-harris-yed.graphml",
+            mimetype="application/xml",
+        )
+    except YEDWriterError as e:
+        return jsonify({"error": "yed_writer", "message": str(e)}), 500
+    except SwimlaneError as e:
+        return jsonify({"error": "swimlane", "message": str(e)}), 500
+    except Exception as e:
+        logger.exception("api_export_yed failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
