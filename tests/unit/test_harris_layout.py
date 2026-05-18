@@ -108,3 +108,20 @@ def test_non_topo_edge_label_does_not_rank():
     )
     # 'fills' is not in _TOPO_EDGE_LABELS — both treated as orphans, same rank.
     assert positions["n1"][1] == positions["n2"][1]
+
+
+import inspect
+
+from pyarchinit_mini.harris_swimlane import harris_layout as _harris_layout_mod
+
+
+def test_compute_harris_positions_default_v_gap_is_40():
+    """Spec 9: bumped v_gap default 20 → 40 for orthogonal edge breathing room."""
+    sig = inspect.signature(_harris_layout_mod.compute_harris_positions)
+    assert sig.parameters["v_gap"].default == 40
+
+
+def test_compute_harris_positions_default_h_gap_is_50():
+    """Spec 9: bumped h_gap default 30 → 50 for orthogonal edge breathing room."""
+    sig = inspect.signature(_harris_layout_mod.compute_harris_positions)
+    assert sig.parameters["h_gap"].default == 50

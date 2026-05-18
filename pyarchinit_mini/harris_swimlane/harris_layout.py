@@ -25,8 +25,8 @@ def compute_harris_positions(
     lane_widths: dict[str, int],
     node_w: int = 80,
     node_h: int = 30,
-    h_gap: int = 30,
-    v_gap: int = 20,
+    h_gap: int = 50,
+    v_gap: int = 40,
 ) -> dict[str, tuple[float, float]]:
     """Compute (x, y) for every node, confined within its lane.
 
