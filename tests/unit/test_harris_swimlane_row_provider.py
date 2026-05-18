@@ -8,18 +8,16 @@ from sqlalchemy.orm import sessionmaker
 from pyarchinit_mini.harris_swimlane.row_provider import Row, RowProvider
 
 
-@pytest.fixture
-def session_with_period_table(tmp_path):
-    db = tmp_path / "rp.db"
-    conn = sqlite3.connect(db)
+def _make_db_with_real_schema(db_path):
+    """Create the 3 tables matching the real pyarchinit schema used in prod."""
+    conn = sqlite3.connect(db_path)
     conn.execute("""CREATE TABLE period_table (
         id_period INTEGER PRIMARY KEY,
-        period_name TEXT NOT NULL,
-        phase_name TEXT,
-        start_date INTEGER,
-        end_date INTEGER,
-        description TEXT,
-        chronology TEXT
+        sito TEXT,
+        periodo TEXT,
+        fase TEXT,
+        datazione TEXT,
+        descrizione TEXT
     )""")
     conn.execute("""CREATE TABLE periodizzazione_table (
         id_periodizzazione INTEGER PRIMARY KEY,
@@ -32,14 +30,21 @@ def session_with_period_table(tmp_path):
         sito TEXT, us INTEGER,
         periodo_iniziale TEXT, fase_iniziale TEXT
     )""")
+    return conn
+
+
+@pytest.fixture
+def session_with_period_table(tmp_path):
+    db = tmp_path / "rp.db"
+    conn = _make_db_with_real_schema(db)
     rows = [
-        ("Roman Imperial", "early", -27, 100),
-        ("Roman Imperial", "late", 100, 476),
-        ("Medieval", "early", 476, 1000),
+        ("Volterra", "Roman Imperial", "early", "-27..100"),
+        ("Volterra", "Roman Imperial", "late", "100..476"),
+        ("Volterra", "Medieval", "early", "476..1000"),
     ]
     for r in rows:
         conn.execute(
-            "INSERT INTO period_table (period_name, phase_name, start_date, end_date) VALUES (?,?,?,?)",
+            "INSERT INTO period_table (sito, periodo, fase, datazione) VALUES (?,?,?,?)",
             r,
         )
     conn.commit()
@@ -54,22 +59,7 @@ def session_with_period_table(tmp_path):
 @pytest.fixture
 def session_fallback_only(tmp_path):
     db = tmp_path / "rp_fb.db"
-    conn = sqlite3.connect(db)
-    conn.execute("""CREATE TABLE period_table (
-        id_period INTEGER PRIMARY KEY, period_name TEXT, phase_name TEXT,
-        start_date INTEGER, end_date INTEGER, description TEXT, chronology TEXT
-    )""")
-    conn.execute("""CREATE TABLE periodizzazione_table (
-        id_periodizzazione INTEGER PRIMARY KEY,
-        sito TEXT, area TEXT, us INTEGER,
-        periodo_iniziale TEXT, fase_iniziale TEXT,
-        periodo_finale TEXT, fase_finale TEXT
-    )""")
-    conn.execute("""CREATE TABLE us_table (
-        id_us INTEGER PRIMARY KEY,
-        sito TEXT, us INTEGER,
-        periodo_iniziale TEXT, fase_iniziale TEXT
-    )""")
+    conn = _make_db_with_real_schema(db)
     pz = [
         ("Volterra", "A", 1, "Roman", "a", None, None),
         ("Volterra", "A", 2, "Medieval", "b", None, None),
@@ -89,13 +79,20 @@ def session_fallback_only(tmp_path):
     s.close()
 
 
-def test_list_rows_from_period_table_sorted_recent_first(session_with_period_table):
+def test_list_rows_from_period_table_sorted_alphabetically(session_with_period_table):
+    # Real period_table has no numeric start_date/end_date — we sort by
+    # (periodo, fase) alphabetically and leave numeric dates as None.
     rows = RowProvider(session_with_period_table, "Volterra").list_rows()
     assert len(rows) == 3
     assert rows[0].period_name == "Medieval"
+    assert rows[0].phase_name == "early"
     assert rows[1].period_name == "Roman Imperial"
-    assert rows[1].phase_name == "late"
-    assert rows[2].phase_name == "early"
+    assert rows[1].phase_name == "early"
+    assert rows[2].period_name == "Roman Imperial"
+    assert rows[2].phase_name == "late"
+    for r in rows:
+        assert r.start_date is None
+        assert r.end_date is None
 
 
 def test_list_rows_source_period_table(session_with_period_table):

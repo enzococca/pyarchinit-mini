@@ -18,10 +18,11 @@ c = conn.cursor()
 c.executescript("""
 CREATE TABLE period_table (
     id_period INTEGER PRIMARY KEY AUTOINCREMENT,
-    period_name TEXT NOT NULL,
-    phase_name TEXT,
-    start_date INTEGER, end_date INTEGER,
-    description TEXT, chronology TEXT
+    sito TEXT,
+    periodo TEXT NOT NULL,
+    fase TEXT,
+    datazione TEXT,
+    descrizione TEXT
 );
 CREATE TABLE periodizzazione_table (
     id_periodizzazione INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,24 +40,24 @@ CREATE TABLE us_table (
 );
 """)
 
-# 5 (period, phase) rows
+# 5 (periodo, fase) rows on the production schema
 periods = [
-    ("Roman", "a", -27, 100),
-    ("Roman", "b", 100, 300),
-    ("Late Antiquity", "a", 300, 600),
-    ("Medieval", "a", 600, 1200),
-    ("Medieval", "b", 1200, 1500),
+    ("Roman", "a", "-27..100"),
+    ("Roman", "b", "100..300"),
+    ("Late Antiquity", "a", "300..600"),
+    ("Medieval", "a", "600..1200"),
+    ("Medieval", "b", "1200..1500"),
 ]
-for p, ph, sd, ed in periods:
+for p, ph, dz in periods:
     c.execute(
-        "INSERT INTO period_table (period_name, phase_name, start_date, end_date) VALUES (?,?,?,?)",
-        (p, ph, sd, ed),
+        "INSERT INTO period_table (sito, periodo, fase, datazione) VALUES (?,?,?,?)",
+        ("Volterra", p, ph, dz),
     )
 
 # 30 US distributed
 us_records = []
 for i in range(30):
-    period, phase, _, _ = periods[i % 5]
+    period, phase, _ = periods[i % 5]
     rapporti = f"copre {1000 + (i+1) % 30}" if i % 3 == 0 else ""
     us_records.append(
         ("Volterra", "A", 1000 + i, "US",
@@ -76,11 +77,11 @@ print(f"Wrote {DB} (30 US, 5 periods)")
 # Reference shape for SwimlaneState.load test
 cytoscape = {
     "rows": [
-        {"row_id": "row_medieval_b", "period_name": "Medieval", "phase_name": "b"},
-        {"row_id": "row_medieval_a", "period_name": "Medieval", "phase_name": "a"},
         {"row_id": "row_late-antiquity_a", "period_name": "Late Antiquity", "phase_name": "a"},
-        {"row_id": "row_roman_b", "period_name": "Roman", "phase_name": "b"},
+        {"row_id": "row_medieval_a", "period_name": "Medieval", "phase_name": "a"},
+        {"row_id": "row_medieval_b", "period_name": "Medieval", "phase_name": "b"},
         {"row_id": "row_roman_a", "period_name": "Roman", "phase_name": "a"},
+        {"row_id": "row_roman_b", "period_name": "Roman", "phase_name": "b"},
     ],
     "nodes_count": 30,
     "edges_count_at_least": 5,

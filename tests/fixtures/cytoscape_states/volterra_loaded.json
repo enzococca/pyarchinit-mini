@@ -1,9 +1,9 @@
 {
   "rows": [
     {
-      "row_id": "row_medieval_b",
-      "period_name": "Medieval",
-      "phase_name": "b"
+      "row_id": "row_late-antiquity_a",
+      "period_name": "Late Antiquity",
+      "phase_name": "a"
     },
     {
       "row_id": "row_medieval_a",
@@ -11,19 +11,19 @@
       "phase_name": "a"
     },
     {
-      "row_id": "row_late-antiquity_a",
-      "period_name": "Late Antiquity",
-      "phase_name": "a"
-    },
-    {
-      "row_id": "row_roman_b",
-      "period_name": "Roman",
+      "row_id": "row_medieval_b",
+      "period_name": "Medieval",
       "phase_name": "b"
     },
     {
       "row_id": "row_roman_a",
       "period_name": "Roman",
       "phase_name": "a"
+    },
+    {
+      "row_id": "row_roman_b",
+      "period_name": "Roman",
+      "phase_name": "b"
     }
   ],
   "nodes_count": 30,

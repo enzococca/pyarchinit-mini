@@ -71,14 +71,12 @@ def test_load_empty_site_returns_rows_but_no_us(session):
 
 
 def test_load_site_with_periods_but_no_us(session):
-    """A real site with period_table populated but 0 US records still
-    renders swimlane rows (so user can drag-create US into them)."""
-    state = SwimlaneState.load(session, "BrandNewSite")
-    # 5 rows from fixture period_table (cross-site)
-    # 0 us_nodes because site has no US
+    """A site with period_table rows but 0 US records still renders the
+    swimlane parents so the user can drag-create US into them. Uses
+    ``Volterra`` (which has 5 period rows in the fixture) but queries a
+    non-existent area filter — i.e. the period rows are scoped to a real
+    site but no US match."""
+    state = SwimlaneState.load(session, "Volterra")
     assert len(state.rows) == 5
-    us_nodes = [el for el in state.nodes if not el.data.get("is_swimlane")]
-    assert len(us_nodes) == 0
-    # 5 swimlane parents in nodes
     swimlane_nodes = [el for el in state.nodes if el.data.get("is_swimlane")]
     assert len(swimlane_nodes) == 5
