@@ -586,6 +586,10 @@ def create_app():
     # Register yEd GraphML import blueprint (Spec 7)
     app.register_blueprint(yed_import_bp)
 
+    # Spec 10 — AI Matrix Import
+    from pyarchinit_mini.web_interface.matrix_import_routes import matrix_import_bp
+    app.register_blueprint(matrix_import_bp)
+
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
     csrf.exempt(pyarchinit_import_export_bp)
     csrf.exempt(harris_creator_bp)
@@ -595,6 +599,7 @@ def create_app():
     csrf.exempt(paradata_ui_bp)   # Spec 2 — form POSTs (no token in templates)
     csrf.exempt(yed_import_bp)    # Spec 7 — upload + preview/apply forms
     csrf.exempt(lang_bp)            # Spec 8 — POST /set-language/<lang>
+    csrf.exempt(matrix_import_bp)  # Spec 10 — upload + preview/apply forms
 
     # Exempt JSON API routes from CSRF check
     @app.after_request
