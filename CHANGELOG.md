@@ -1,3 +1,38 @@
+## [2.5.1] - 2026-05-18
+
+### Added (IT)
+- Pottery list: anteprima media in linea con mini-carousel CSS scroll-snap
+  (thumb 48x48 + GLightbox). N+1 evitato con pre-load batch via
+  `MediaService.get_media_for_entity_ids`.
+- Pottery filtri: nuovi input `id_number` e `anno` (esatti, integer cast
+  con guard `try/except`).
+- Pottery detail: galleria thumbnail inline (120x120, GLightbox) sopra i
+  campi della scheda.
+- Nuovo blueprint `pyarchinit_mini/i18n/lang_routes.py` con
+  `POST /set-language/<lang>` che salva session e fa redirect al referrer.
+  Lo switcher di lingua diventa `<form>` POST: preserva la query string
+  corrente (filtri/ricerca non si perdono più al cambio lingua).
+
+### Changed (IT)
+- `templates/components/language_switcher.html`: `<a>` sostituiti con form POST.
+- `PotteryService._FILTERABLE_INT` aggiunto con `id_number`, `anno`.
+- `pottery_routes.FILTER_KEYS` esteso con `id_number`, `anno`.
+
+### Added (EN)
+- Pottery list: inline media preview with CSS scroll-snap mini-carousel
+  (48x48 thumbs + GLightbox). Batch pre-load avoids N+1.
+- Pottery filters: new `id_number` + `anno` exact-match inputs with
+  integer cast guard.
+- Pottery detail: inline thumbnail gallery (120x120, GLightbox).
+- New `pyarchinit_mini/i18n/lang_routes.py` blueprint: `POST /set-language/<lang>`
+  saves session + redirects to referrer, preserving the URL query string
+  (filters/search no longer lost on language switch).
+
+### Changed (EN)
+- Language switcher templates: anchors replaced with POST forms.
+- `PotteryService._FILTERABLE_INT` introduces `id_number`, `anno`.
+- `pottery_routes.FILTER_KEYS` extended.
+
 ## [2.5.0] - 2026-05-18
 
 ### Added (IT)
