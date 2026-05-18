@@ -63,6 +63,26 @@
     padding: 15px;
     width: 300px;
     overflow-y: auto;
+    transition: width 0.2s ease, padding 0.2s ease;
+}
+#properties-panel.collapsed {
+    width: 36px;
+    padding: 6px 4px;
+    overflow: hidden;
+}
+#properties-panel.collapsed > *:not(.props-toggle-bar) {
+    display: none !important;
+}
+.props-toggle-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+#properties-panel.collapsed .props-toggle-bar {
+    justify-content: center;
+}
+#properties-panel.collapsed .props-toggle-bar button .toggle-label {
+    display: none;
 }
 
 .property-field {
@@ -280,6 +300,12 @@
 
         <!-- Right Properties Panel -->
         <div id="properties-panel">
+            <div class="props-toggle-bar">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="togglePropertiesPanel()" title="Hide/show Properties panel">
+                    <i class="fas fa-angle-double-right"></i>
+                    <span class="toggle-label">Hide</span>
+                </button>
+            </div>
             <h6 class="mb-3"><i class="fas fa-cog"></i> Properties</h6>
 
             <div id="no-selection" class="text-center text-muted py-5">
@@ -441,6 +467,31 @@
 // Initialize _currentSite server-side from hidden input so Save/+ Row/Export
 // work even if loadSwimlaneState() never succeeds (e.g. DB migration pending).
 window._currentSite = (document.getElementById('site-name') || {}).value || null;
+
+// Properties panel collapse/expand (persists choice in localStorage).
+function togglePropertiesPanel() {
+    const panel = document.getElementById('properties-panel');
+    if (!panel) return;
+    const collapsed = panel.classList.toggle('collapsed');
+    try { localStorage.setItem('harris_props_collapsed', collapsed ? '1' : '0'); } catch (e) {}
+    const icon = panel.querySelector('.props-toggle-bar button i');
+    if (icon) {
+        icon.classList.toggle('fa-angle-double-right', !collapsed);
+        icon.classList.toggle('fa-angle-double-left', collapsed);
+    }
+    const lbl = panel.querySelector('.props-toggle-bar .toggle-label');
+    if (lbl) lbl.textContent = collapsed ? 'Show' : 'Hide';
+    if (typeof cy !== 'undefined') {
+        setTimeout(() => { try { cy.resize(); cy.fit(undefined, 30); } catch(e){} }, 220);
+    }
+}
+window.addEventListener('DOMContentLoaded', () => {
+    try {
+        if (localStorage.getItem('harris_props_collapsed') === '1') {
+            togglePropertiesPanel();
+        }
+    } catch (e) {}
+});
 
 async function loadSwimlaneState(site) {
     try {
