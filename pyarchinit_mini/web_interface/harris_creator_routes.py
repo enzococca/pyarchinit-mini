@@ -699,3 +699,23 @@ def api_load_state(site: str):
     except Exception as e:
         logger.exception("api_load_state failed")
         return jsonify({"error": "internal", "message": str(e)}), 500
+
+
+@harris_creator_bp.post("/api/save/<site>")
+def api_save_state(site: str):
+    """Save pending_changes for site. Triggers Spec 2 auto_regen on success."""
+    try:
+        payload = request.get_json(silent=True) or {}
+        session = _get_session()
+        result = SwimlaneState.save(session, site, payload)
+        return jsonify({
+            "updated": result.updated,
+            "inserted": result.inserted,
+            "deleted": result.deleted,
+            "errors": list(result.errors),
+        }), 200
+    except SwimlaneError as e:
+        return jsonify({"error": "swimlane", "message": str(e)}), 500
+    except Exception as e:
+        logger.exception("api_save_state failed")
+        return jsonify({"error": "internal", "message": str(e)}), 500
