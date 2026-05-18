@@ -1,3 +1,40 @@
+## [2.4.1] - 2026-05-18
+
+### Fixed (IT)
+- Editor Harris Matrix: `window._currentSite` ora inizializzato server-side
+  dall'hidden input `#site-name`, quindi i pulsanti Save / + New Row /
+  Export yEd GraphML funzionano anche se `/api/load/<site>` fallisce (caso
+  tipico: migration `node_uuid` non ancora applicata sul DB di produzione).
+- Editor Harris Matrix: se `/api/load/<site>` ritorna errore, il corpo
+  della risposta viene mostrato in un alert con suggerimento di lanciare
+  `pyarchinit-mini-migrate-vocab --apply` (prima era silenzioso).
+- Editor Harris Matrix: messaggio "No site loaded" sostituito con
+  istruzione esplicita di tornare all'indice del Creator.
+
+### Added (IT)
+- Nuova pagina `/paradata/` (sezione Tools): picker sito + bottoni rapidi
+  ai 5 tipi di paradata (authors, licenses, embargoes, documents, epochs).
+  Link aggiunto sia al dropdown navbar che alla sidebar laterale.
+- Modal di aiuto nell'editor Harris (icona "?") che spiega la differenza
+  tra GraphML (s3dgraphy clean, auto-regen, per Datacenter/3D), Export
+  yEd GraphML (TableNode swimlane, on-demand, per yEd Desktop), DOT
+  (Graphviz), PNG (snapshot raster).
+- Tooltip migliorati su tutti i pulsanti di export.
+
+### Fixed (EN)
+- Harris Matrix Editor: `window._currentSite` is now initialised server-side
+  from hidden input `#site-name`, so Save / + New Row / Export buttons work
+  even when `/api/load/<site>` fails (typical when the `node_uuid` migration
+  is still pending on production).
+- Harris Matrix Editor: failed swimlane loads now surface the backend error
+  body in an alert with a hint to run `pyarchinit-mini-migrate-vocab`.
+
+### Added (EN)
+- New `/paradata/` landing page (Tools section): site picker + quick links
+  to the 5 paradata kinds. Sidebar entries added.
+- Help modal explaining the four export formats (GraphML, yEd GraphML,
+  DOT, PNG) accessible via a question-mark icon on the editor toolbar.
+
 ## [2.4.0] - 2026-05-18
 
 ### Added (IT)
