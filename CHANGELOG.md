@@ -1,3 +1,44 @@
+## [2.5.0] - 2026-05-18
+
+### Added (IT)
+- Editor swimlane: dropdown "Group by" con 9 valori (period_phase | struttura
+  | attivita | settore | area | ambient | saggio | quad_par | none).
+  Cambiando valore le lane si ricostruiscono e i nodi US si ridistribuiscono
+  con un layout Harris-classico server-side.
+- Nuovo modulo `harris_swimlane/harris_layout.py` — ordinamento topologico
+  per dipendenze stratigrafiche (`overlies` / `is_after`), recent in alto.
+- Nuovo `graphml_io/yed_importer.py` — parse + build_import_plan +
+  apply_import_plan per round-trip da Extended Matrix → DB. Idempotente,
+  preview 2-fasi, upsert by `node_uuid`.
+- Nuova pagina `/import-graphml/` (upload + preview + apply). Sidebar entry
+  sia in navbar che laterale (sezione Tools).
+
+### Changed (IT)
+- `graphml_io/yed_writer.py` riscritto: emette file Extended Matrix
+  byte-compat con pyarchinit QGIS (38 keys d0..d37, `y:TableNode
+  YED_TABLE_NODE`, `pyarchinit.epochs_meta`, `pyarchinit.*` per ogni nodo
+  US). Vecchio `write_yed_graphml` mantenuto come wrapper deprecato.
+- API `/harris-creator/api/load/<site>` accetta `?group_by=...` query
+  param (default `period_phase`, retro-compat).
+- API `/harris-creator/api/export/<site>/yed-graphml` accetta `?group_by=...`
+  e popola `epochs_meta` da `periodizzazione_table`.
+- Path output cambia in `data/exports/harris_yed/<slug>-extmatrix.graphml`
+  (era `<slug>-harris-yed.graphml`).
+
+### Added (EN)
+- Editor "Group by" dropdown with 9 values; lanes rebuild + Harris-classic
+  re-layout on change.
+- New `harris_swimlane/harris_layout.py` — server-side topological
+  positioning.
+- New `graphml_io/yed_importer.py` — round-trip yEd → DB.
+- New `/import-graphml/` page (upload + preview + apply).
+
+### Changed (EN)
+- `graphml_io/yed_writer.py` rewritten — emits 38-key Extended Matrix
+  byte-compat with pyarchinit.
+- `/api/load` and `/api/export` accept `?group_by=...`.
+- Export output path renamed `*-extmatrix.graphml`.
+
 ## [2.4.8] - 2026-05-18
 
 ### Fixed (IT)
