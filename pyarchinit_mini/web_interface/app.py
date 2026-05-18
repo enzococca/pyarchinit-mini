@@ -39,6 +39,7 @@ from pyarchinit_mini.utils.stratigraphic_validator import StratigraphicValidator
 from pyarchinit_mini.pdf_export.pdf_generator import PDFGenerator
 from pyarchinit_mini.media_manager.media_handler import MediaHandler
 from pyarchinit_mini.graphml_converter import convert_dot_content_to_graphml
+from pyarchinit_mini.graphproj.auto_regen import _trigger_graph_regen
 
 # Import authentication routes
 from pyarchinit_mini.web_interface.auth_routes import auth_bp, init_login_manager, write_permission_required, admin_required
@@ -60,6 +61,11 @@ from pyarchinit_mini.web_interface.three_d_builder_routes import three_d_builder
 
 # Import Vocab routes
 from pyarchinit_mini.web_interface.vocab_routes import vocab_bp
+
+# Import Graph, Paradata, and Paradata UI routes (Spec 2)
+from pyarchinit_mini.web_interface.graph_routes import graph_bp
+from pyarchinit_mini.web_interface.paradata_routes import paradata_bp
+from pyarchinit_mini.web_interface.paradata_ui_routes import paradata_ui_bp
 
 # Import WebSocket events
 from pyarchinit_mini.web_interface.socketio_events import (
@@ -564,6 +570,11 @@ def create_app():
     # Register 3D Builder blueprints
     app.register_blueprint(three_d_builder_bp)  # API routes
     app.register_blueprint(three_d_builder_ui_bp)  # UI routes
+
+    # Register Graph, Paradata, and Paradata UI blueprints (Spec 2)
+    app.register_blueprint(graph_bp)
+    app.register_blueprint(paradata_bp)
+    app.register_blueprint(paradata_ui_bp)
 
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
     csrf.exempt(pyarchinit_import_export_bp)
@@ -1128,6 +1139,14 @@ def create_app():
 
                 us = us_service.create_us(us_data)
 
+                # Spec 2: auto-regen stratigraphy.graphml post-commit.
+                # get_session() already closed; open a fresh session for regen.
+                try:
+                    with db_manager.connection.get_session() as _regen_session:
+                        _trigger_graph_regen(us_data['sito'], session=_regen_session)
+                except Exception:
+                    pass
+
                 # Synchronize rapporti field to us_relationships_table
                 try:
                     with db_manager.connection.get_session() as session:
@@ -1375,6 +1394,14 @@ def create_app():
                         update_data['file_path'] = f"DoSC/{filename}"
 
                 us_service.update_us(us_id, update_data)
+
+                # Spec 2: auto-regen stratigraphy.graphml post-commit.
+                # get_session() already closed; open a fresh session for regen.
+                try:
+                    with db_manager.connection.get_session() as _regen_session:
+                        _trigger_graph_regen(update_data['sito'], session=_regen_session)
+                except Exception:
+                    pass
 
                 # Synchronize rapporti field to us_relationships_table
                 try:

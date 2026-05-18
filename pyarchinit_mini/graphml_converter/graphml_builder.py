@@ -4,6 +4,7 @@ Constructs complete GraphML XML with yEd-compatible structures
 No Graphviz dependency required
 """
 
+import warnings as _spec2_warnings
 import networkx as nx
 from typing import Dict, List, Tuple, Optional
 from xml.etree.ElementTree import Element, SubElement, ElementTree
@@ -12,6 +13,13 @@ from xml.dom import minidom
 from .yed_template import YEdTemplate
 from .em_palette import EMPalette
 from .svg_resources import SVGResources
+
+_spec2_warnings.warn(
+    "pyarchinit_mini.graphml_converter.graphml_builder is deprecated; use "
+    "pyarchinit_mini.graphml_io.writer instead. This module will be removed in Spec 3.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 class GraphMLBuilder:
