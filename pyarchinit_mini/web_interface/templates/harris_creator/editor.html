@@ -175,6 +175,17 @@
             </small>
         </div>
         <div>
+            <select id="group-by-selector" class="form-select form-select-sm" style="display:inline-block;width:auto;margin-right:8px" title="Group lanes by (changes will re-layout the canvas)">
+              <option value="period_phase" selected>Period + Phase</option>
+              <option value="struttura">Struttura</option>
+              <option value="attivita">Attività</option>
+              <option value="settore">Settore</option>
+              <option value="area">Area</option>
+              <option value="ambient">Ambient</option>
+              <option value="saggio">Saggio</option>
+              <option value="quad_par">Quad/Par</option>
+              <option value="none">No grouping</option>
+            </select>
             <button class="btn btn-success btn-sm" id="save-btn" title="Save to database">
                 <i class="fas fa-save"></i> Save
             </button>
@@ -752,5 +763,26 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }, 1000);
 });
+
+document.getElementById('group-by-selector')?.addEventListener('change', (ev) => {
+  const site = window._currentSite;
+  if (!site) return;
+  loadSwimlaneStateWithGroupBy(site, ev.target.value);
+});
+
+async function loadSwimlaneStateWithGroupBy(site, group_by) {
+  try {
+    const url = `/harris-creator/api/load/${encodeURIComponent(site)}?group_by=${encodeURIComponent(group_by)}`;
+    const r = await fetch(url);
+    if (!r.ok) {
+      alert(`Load failed: ${await r.text()}`);
+      return;
+    }
+    const state = await r.json();
+    renderSwimlaneState(state);
+  } catch (e) {
+    alert(`Error: ${e.message}`);
+  }
+}
 </script>
 {% endblock %}
