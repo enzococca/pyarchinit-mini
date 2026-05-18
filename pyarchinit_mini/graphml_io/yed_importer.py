@@ -209,3 +209,126 @@ def build_import_plan(parsed: ParsedGraphML, session: Session) -> ImportPlan:
         })
 
     return plan
+
+
+@dataclass
+class ImportResult:
+    sites_created: int = 0
+    sites_updated: int = 0
+    periodizations_created: int = 0
+    periodizations_updated: int = 0
+    us_created: int = 0
+    us_updated: int = 0
+    us_skipped: int = 0
+    relationships_created: int = 0
+    duration_ms: int = 0
+    errors: list[str] = field(default_factory=list)
+
+
+def apply_import_plan(plan: ImportPlan, session: Session) -> ImportResult:
+    """Apply the plan in one transaction. Best-effort auto-regen after."""
+    import time
+    start = time.time()
+    result = ImportResult()
+    try:
+        for s in plan.sites:
+            if s["da_creare"]:
+                session.execute(text(
+                    "INSERT INTO site_table (sito) VALUES (:s)"
+                ), {"s": s["sito"]})
+                result.sites_created += 1
+
+        for p in plan.periodizations:
+            if p["action"] == "create":
+                session.execute(text(
+                    "INSERT INTO periodizzazione_table "
+                    "(sito, periodo_iniziale, fase_iniziale, datazione_estesa) "
+                    "VALUES (:s, :p, :f, :d)"
+                ), {"s": p["sito"], "p": p["periodo"], "f": p["fase"],
+                    "d": p["datazione_estesa"]})
+                result.periodizations_created += 1
+            else:
+                result.periodizations_updated += 1
+
+        for r in plan.us_records:
+            if r["action"] == "create":
+                session.execute(text(
+                    "INSERT INTO us_table (sito, area, us, unita_tipo, "
+                    "node_uuid, periodo_iniziale, fase_iniziale, "
+                    "d_stratigrafica, rapporti, datazione, "
+                    "struttura, attivita, settore, ambient, saggio, quad_par) "
+                    "VALUES (:sito, :area, :us, :ut, :uuid, :p, :f, :ds, :rap, :dz, "
+                    ":struttura, :attivita, :settore, :ambient, :saggio, :quad_par)"
+                ), {
+                    "sito": r["sito"], "area": r["area"], "us": r["us"],
+                    "ut": r["unita_tipo"], "uuid": r["node_uuid"] or None,
+                    "p": r["periodo_iniziale"], "f": r["fase_iniziale"],
+                    "ds": r["d_stratigrafica"], "rap": r["rapporti"],
+                    "dz": r["datazione"],
+                    "struttura": r["struttura"], "attivita": r["attivita"],
+                    "settore": r["settore"], "ambient": r["ambient"],
+                    "saggio": r["saggio"], "quad_par": r["quad_par"],
+                })
+                result.us_created += 1
+            else:
+                # Update by node_uuid if present, else by (sito, us)
+                if r["node_uuid"]:
+                    session.execute(text(
+                        "UPDATE us_table SET sito=:sito, area=:area, us=:us, "
+                        "unita_tipo=:ut, periodo_iniziale=:p, fase_iniziale=:f, "
+                        "d_stratigrafica=:ds, rapporti=:rap, datazione=:dz, "
+                        "struttura=:struttura, attivita=:attivita, settore=:settore, "
+                        "ambient=:ambient, saggio=:saggio, quad_par=:quad_par "
+                        "WHERE node_uuid = :uuid"
+                    ), {
+                        "sito": r["sito"], "area": r["area"], "us": r["us"],
+                        "ut": r["unita_tipo"],
+                        "p": r["periodo_iniziale"], "f": r["fase_iniziale"],
+                        "ds": r["d_stratigrafica"], "rap": r["rapporti"], "dz": r["datazione"],
+                        "struttura": r["struttura"], "attivita": r["attivita"],
+                        "settore": r["settore"], "ambient": r["ambient"],
+                        "saggio": r["saggio"], "quad_par": r["quad_par"],
+                        "uuid": r["node_uuid"],
+                    })
+                else:
+                    session.execute(text(
+                        "UPDATE us_table SET unita_tipo=:ut, periodo_iniziale=:p, "
+                        "fase_iniziale=:f, d_stratigrafica=:ds, rapporti=:rap, "
+                        "datazione=:dz, struttura=:struttura, attivita=:attivita, "
+                        "settore=:settore, ambient=:ambient, saggio=:saggio, "
+                        "quad_par=:quad_par WHERE sito=:sito AND us=:us"
+                    ), {"ut": r["unita_tipo"],
+                        "p": r["periodo_iniziale"], "f": r["fase_iniziale"],
+                        "ds": r["d_stratigrafica"], "rap": r["rapporti"],
+                        "dz": r["datazione"],
+                        "struttura": r["struttura"], "attivita": r["attivita"],
+                        "settore": r["settore"], "ambient": r["ambient"],
+                        "saggio": r["saggio"], "quad_par": r["quad_par"],
+                        "sito": r["sito"], "us": r["us"]})
+                result.us_updated += 1
+
+        seen_rel = set()
+        for rel in plan.relationships:
+            key = (rel["sito"], rel["us_from"], rel["us_to"], rel["type"])
+            if key in seen_rel:
+                continue
+            seen_rel.add(key)
+            # Dedupe against DB
+            exists = session.execute(text(
+                "SELECT 1 FROM us_relationships_table "
+                "WHERE sito=:s AND us_from=:f AND us_to=:t AND relationship_type=:r LIMIT 1"
+            ), {"s": rel["sito"], "f": rel["us_from"], "t": rel["us_to"], "r": rel["type"]}).fetchone()
+            if not exists:
+                session.execute(text(
+                    "INSERT INTO us_relationships_table "
+                    "(sito, us_from, us_to, relationship_type) "
+                    "VALUES (:s, :f, :t, :r)"
+                ), {"s": rel["sito"], "f": rel["us_from"], "t": rel["us_to"], "r": rel["type"]})
+                result.relationships_created += 1
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        result.errors.append(str(e))
+
+    result.duration_ms = int((time.time() - start) * 1000)
+    return result
