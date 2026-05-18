@@ -69,3 +69,15 @@ def test_get_export_updates_index_json(client):
     assert isinstance(data, list)
     assert len(data) >= 1
     assert data[0]["site"] == "Volterra"
+
+
+def test_get_export_index_dedupes_by_site(client):
+    cli, tmp_path = client
+    # Export twice for same site
+    cli.get("/harris-creator/api/export/Volterra/yed-graphml")
+    cli.get("/harris-creator/api/export/Volterra/yed-graphml")
+    idx = tmp_path / "data" / "exports" / "harris_yed" / "_index.json"
+    data = json.loads(idx.read_text())
+    # Should have exactly 1 entry (deduped by site_slug), latest timestamp
+    volterra_entries = [e for e in data if e.get("site_slug") == "volterra"]
+    assert len(volterra_entries) == 1

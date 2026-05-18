@@ -799,6 +799,8 @@ def api_export_yed(site: str):
                 entries = _json.loads(idx_path.read_text(encoding="utf-8"))
             except Exception:
                 entries = []
+        # Upsert by site_slug: at most 1 entry per site, latest export wins
+        entries = [e for e in entries if e.get("site_slug") != site_slug]
         entries.append({
             "site": site,
             "site_slug": site_slug,
