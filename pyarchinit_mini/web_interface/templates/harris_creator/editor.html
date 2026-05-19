@@ -213,6 +213,85 @@
         </div>
     </div>
 
+    <!-- Swimlane Toolbar: Raggruppamento + Export menu + Import -->
+    <div class="btn-toolbar mb-2 mt-2 align-items-center" role="toolbar" id="swimlane-toolbar">
+      <div class="input-group me-2" style="max-width: 280px">
+        <span class="input-group-text">{{ _("Raggruppamento") }}</span>
+        <select id="group-by-select" class="form-select" onchange="reloadSwimlaneWithGrouping()">
+          <option value="none" selected>{{ _("nessuno") }}</option>
+          <option value="area">{{ _("area") }}</option>
+          <option value="settore">{{ _("settore") }}</option>
+          <option value="quadrato">{{ _("quadrato") }}</option>
+          <option value="attivita">{{ _("attività") }}</option>
+          <option value="strutture">{{ _("strutture") }}</option>
+        </select>
+      </div>
+      <div class="btn-group me-2">
+        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-download"></i> {{ _("Export") }}
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#" onclick="exportSwimlane('yed-graphml'); return false;">yEd GraphML (.graphml)</a></li>
+          <li><a class="dropdown-item" href="#" onclick="exportSwimlane('heriverse-json'); return false;">Heriverse / ATON (.json)</a></li>
+        </ul>
+      </div>
+      <div class="btn-group me-2">
+        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('matrix-import-file').click()">
+          <i class="fas fa-upload"></i> {{ _("Import") }}
+        </button>
+        <input type="file" id="matrix-import-file" accept=".graphml,.json" style="display:none" onchange="importMatrixFile(this.files[0])">
+      </div>
+    </div>
+    <script>
+    (function() {
+      var SITE = "{{ site_name | default('') | e }}";
+      if (!SITE) {
+        var m = window.location.pathname.match(/\/harris-creator\/([^/?]+)/);
+        SITE = m ? decodeURIComponent(m[1]) : "";
+      }
+      // Restore current group_by selection from URL
+      var urlParams = new URLSearchParams(window.location.search);
+      var currentGroupBy = urlParams.get('group_by') || 'none';
+      var sel = document.getElementById('group-by-select');
+      if (sel) sel.value = currentGroupBy;
+
+      window.reloadSwimlaneWithGrouping = function() {
+        var g = document.getElementById('group-by-select').value;
+        var url = new URL(window.location.href);
+        url.searchParams.set('group_by', g);
+        window.location.href = url.toString();
+      };
+      window.exportSwimlane = function(fmt) {
+        var g = document.getElementById('group-by-select').value;
+        window.location.href = '/harris-creator/api/export/' + encodeURIComponent(SITE) + '/' + fmt + '?group_by=' + encodeURIComponent(g);
+      };
+      window.importMatrixFile = function(file) {
+        if (!file) return;
+        var fmt = file.name.toLowerCase().endsWith('.json') ? 'json' : 'graphml';
+        var fd = new FormData();
+        fd.append('file', file);
+        fetch('/harris-creator/api/import/' + encodeURIComponent(SITE) + '/' + fmt, {
+          method: 'POST',
+          body: fd,
+        })
+        .then(function(r) { return r.json().then(function(j) { return {ok: r.ok, body: j}; }); })
+        .then(function(res) {
+          if (res.ok) {
+            alert(
+              'Import OK: ' + res.body.imported_us + ' US, ' +
+              res.body.imported_edges + ' edges, ' +
+              res.body.stubs_created + ' stubs.'
+            );
+            window.location.reload();
+          } else {
+            alert('Import error: ' + JSON.stringify(res.body));
+          }
+        })
+        .catch(function(err) { alert('Import failed: ' + err); });
+      };
+    })();
+    </script>
+
     <!-- Editor Layout -->
     <div id="editor-container" class="mt-3">
         <!-- Left Toolbar -->
