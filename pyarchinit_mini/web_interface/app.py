@@ -70,6 +70,9 @@ from pyarchinit_mini.web_interface.paradata_ui_routes import paradata_ui_bp
 # Import yEd GraphML import blueprint (Spec 7)
 from pyarchinit_mini.web_interface.yed_import_routes import yed_import_bp
 
+# Import AI Matrix Import blueprint (Spec 10)
+from pyarchinit_mini.web_interface.matrix_import_routes import matrix_import_bp
+
 # Import WebSocket events
 from pyarchinit_mini.web_interface.socketio_events import (
     init_socketio_events,
@@ -399,6 +402,7 @@ def create_app():
 
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'your-secret-key-here'
+    app.config.setdefault("MAX_CONTENT_LENGTH", 16 * 1024 * 1024)  # 16MB cap on uploads
     # Use centralized ~/.pyarchinit_mini directory
     pyarchinit_home = Path.home() / '.pyarchinit_mini'
     app.config['UPLOAD_FOLDER'] = str(pyarchinit_home / 'web_interface' / 'static' / 'uploads')
@@ -586,6 +590,9 @@ def create_app():
     # Register yEd GraphML import blueprint (Spec 7)
     app.register_blueprint(yed_import_bp)
 
+    # Spec 10 — AI Matrix Import
+    app.register_blueprint(matrix_import_bp)
+
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
     csrf.exempt(pyarchinit_import_export_bp)
     csrf.exempt(harris_creator_bp)
@@ -595,6 +602,7 @@ def create_app():
     csrf.exempt(paradata_ui_bp)   # Spec 2 — form POSTs (no token in templates)
     csrf.exempt(yed_import_bp)    # Spec 7 — upload + preview/apply forms
     csrf.exempt(lang_bp)            # Spec 8 — POST /set-language/<lang>
+    csrf.exempt(matrix_import_bp)  # Spec 10 — upload + preview/apply forms
 
     # Exempt JSON API routes from CSRF check
     @app.after_request
