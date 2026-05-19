@@ -319,6 +319,31 @@ function initCytoscape() {
                     'target-arrow-color': '#2E86AB',
                     'target-arrow-shape': 'none'
                 }
+            },
+            // Palette-driven styles: applied when node/edge carries a `style` data object
+            // from the /api/load response (overrides defaults above).
+            {
+                selector: 'node[style]',
+                style: {
+                    'shape': 'data(style.shape)',
+                    'background-color': 'data(style.backgroundColor)',
+                    'border-color': 'data(style.borderColor)',
+                    'border-width': 'data(style.borderWidth)',
+                    'border-style': 'data(style.lineStyle)',
+                    'color': 'data(style.fontColor)',
+                    'font-size': 'data(style.fontSize)',
+                }
+            },
+            {
+                selector: 'edge[style]',
+                style: {
+                    'line-color': 'data(style.lineColor)',
+                    'width': 'data(style.lineWidth)',
+                    'line-style': 'data(style.lineStyle)',
+                    'target-arrow-shape': 'data(style.targetArrowShape)',
+                    'source-arrow-shape': 'data(style.sourceArrowShape)',
+                    'target-arrow-color': 'data(style.lineColor)',
+                }
             }
         ],
 

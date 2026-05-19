@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Tuple
 
 from pyarchinit_mini.em_palette import get_palette
+from pyarchinit_mini.graphproj.rapporti_codec import display_label
 from pyarchinit_mini.graphproj.s3d_projector import ProjectedGraph
 
 
@@ -73,7 +74,8 @@ def to_cytoscape(graph: ProjectedGraph) -> Dict[str, Any]:
                 "id": f"{e.source_id}__{e.canonical}__{e.target_id}",
                 "source": e.source_id,
                 "target": e.target_id,
-                "label": e.canonical,
+                "label": display_label(e.canonical, locale="it"),
+                "canonical": e.canonical,
             },
             "style": {
                 "lineColor": es.line_color,

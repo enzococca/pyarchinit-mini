@@ -626,20 +626,20 @@ function renderSwimlaneState(state) {
         })));
     }
 
-    // Add US children with parent
+    // Add US children with parent — pass palette style so cytoscape data(style.*) selectors apply
     if (usNodes.length > 0) {
         cy.add(usNodes.map(el => ({
             group: 'nodes',
-            data: el.data,
+            data: { ...el.data, style: el.style || undefined },
             position: el.position || undefined,
         })));
     }
 
-    // Add edges
+    // Add edges — pass palette style for line-color, line-style, arrow-shape etc.
     if (state.edges && state.edges.length > 0) {
         cy.add(state.edges.map(el => ({
             group: 'edges',
-            data: el.data,
+            data: { ...el.data, style: el.style || undefined },
         })));
     }
 

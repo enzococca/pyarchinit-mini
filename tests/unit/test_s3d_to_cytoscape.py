@@ -37,7 +37,8 @@ def test_to_cytoscape_edge_has_style_from_palette():
     e = out["edges"][0]
     assert "style" in e
     assert "lineColor" in e["style"]
-    assert e["data"]["label"] == "overlies"
+    assert e["data"]["label"] == "Copre"
+    assert e["data"]["canonical"] == "overlies"
     assert e["data"]["source"] == "us_1"
     assert e["data"]["target"] == "us_2"
 

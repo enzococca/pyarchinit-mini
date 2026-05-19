@@ -46,6 +46,44 @@ _IT_EXTRAS: Dict[str, str] = {
     "gli si appoggia": "is_before",
 }
 
+# Canonical → italian display label (for swimlane web + GraphML edge labels).
+CANONICAL_TO_ITALIAN: Dict[str, str] = {
+    "overlies": "Copre",
+    "is_after": "Coperto da",
+    "cuts": "Taglia",
+    "is_cut_by": "Tagliato da",
+    "fills": "Riempie",
+    "is_filled_by": "Riempito da",
+    "abuts": "Si appoggia a",
+    "is_abutted_by": "Gli si appoggia",
+    "has_same_time": "Uguale a",
+    "is_bonded_to": "Si lega a",
+    "is_before": "Anteriore a",
+}
+
+# Canonical → english display label.
+CANONICAL_TO_ENGLISH: Dict[str, str] = {
+    "overlies": "Covers",
+    "is_after": "Covered by",
+    "cuts": "Cuts",
+    "is_cut_by": "Cut by",
+    "fills": "Fills",
+    "is_filled_by": "Filled by",
+    "abuts": "Leans on",
+    "is_abutted_by": "Leant on by",
+    "has_same_time": "Same as",
+    "is_bonded_to": "Bonded to",
+    "is_before": "Before",
+}
+
+
+def display_label(canonical: str, locale: str = "it") -> str:
+    """Return the localized display label for a canonical relation name."""
+    if locale.lower().startswith("en"):
+        return CANONICAL_TO_ENGLISH.get(canonical, canonical)
+    return CANONICAL_TO_ITALIAN.get(canonical, canonical)
+
+
 # English fallbacks (Al-Khutm-style data).
 _EN_TO_CANONICAL: Dict[str, str] = {
     "covers": "overlies",
