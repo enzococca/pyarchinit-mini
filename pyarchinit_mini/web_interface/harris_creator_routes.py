@@ -733,7 +733,7 @@ def api_load_state(site: str):
     # DB (no site_table row), versus 200 + empty state when site exists but
     # has no US yet. Spec §7.1 mentions 404 for site_not_found — current
     # behavior returns 200 + empty.
-    group_by = request.args.get("group_by", "period_phase")
+    group_by = request.args.get("group_by", "none")
     try:
         session = _get_session()
         state = SwimlaneState.load(session, site, group_by=group_by)
@@ -752,8 +752,8 @@ def api_load_state(site: str):
                 }
                 for r in state.rows
             ],
-            "nodes": [{"data": el.data, "position": el.position} for el in state.nodes],
-            "edges": [{"data": el.data} for el in state.edges],
+            "nodes": [{"data": el.data, "style": getattr(el, "style", None), "position": el.position} for el in state.nodes],
+            "edges": [{"data": el.data, "style": getattr(el, "style", None)} for el in state.edges],
             "pending_changes": state.pending_changes,
         }), 200
     except ValueError as e:
