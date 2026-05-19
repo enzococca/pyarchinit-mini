@@ -24,12 +24,12 @@ def _make_app(tmp_path):
         conn.execute(text("""CREATE TABLE us_table (
             id_us INTEGER PRIMARY KEY AUTOINCREMENT,
             sito TEXT, area TEXT, us TEXT, unita_tipo TEXT,
-            d_stratigrafica TEXT, fase_recente INT, fase_iniziale INT,
+            descrizione TEXT, fase_finale TEXT, fase_iniziale TEXT,
             created_at DATETIME, updated_at DATETIME)"""))
         conn.execute(text("""CREATE TABLE us_relationships_table (
-            id_rel INTEGER PRIMARY KEY AUTOINCREMENT,
-            sito_from TEXT, sito_to TEXT, us_from INT, us_to INT,
-            tipo_relazione TEXT, created_at DATETIME, updated_at DATETIME)"""))
+            id_relationship INTEGER PRIMARY KEY AUTOINCREMENT,
+            sito TEXT, us_from INT, us_to INT,
+            relationship_type TEXT, created_at DATETIME, updated_at DATETIME)"""))
     Session = sessionmaker(bind=engine)
     app = Flask(__name__, template_folder=str(_APP_TEMPLATES))
     app.config["TESTING"] = True
@@ -92,7 +92,7 @@ def test_apply_commits_us_and_edges(client_and_session):
     assert row[0] == "TestSite"
     us = s.execute(text("SELECT us, area FROM us_table")).fetchone()
     assert us[0] == "1" and us[1] == "A"
-    e = s.execute(text("SELECT us_from, us_to, tipo_relazione FROM us_relationships_table")).fetchone()
+    e = s.execute(text("SELECT us_from, us_to, relationship_type FROM us_relationships_table")).fetchone()
     assert e[0] == 1 and e[1] == 2 and e[2] == "copre"
 
 
