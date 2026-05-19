@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:java="http://www.yworks.com/xml/yfiles-common/1.0/java"
+         xmlns:sys="http://www.yworks.com/xml/yfiles-common/markup/primitives/2.0"
+         xmlns:x="http://www.yworks.com/xml/yfiles-common/markup/2.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:y="http://www.yworks.com/xml/graphml"
+         xmlns:yed="http://www.yworks.com/xml/yed/3"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd">
+  <!--Minimal EM palette fixture for unit tests — 5 unit-type nodes + 1 edge-->
+  <key for="port" id="d0" yfiles.type="portgraphics"/>
+  <key for="port" id="d1" yfiles.type="portgeometry"/>
+  <key for="port" id="d2" yfiles.type="portuserdata"/>
+  <key attr.name="yed.palette.node.name" attr.type="string" for="node" id="d3"/>
+  <key attr.name="Palette ToolTip" attr.type="string" for="node" id="d4"/>
+  <key attr.name="url" attr.type="string" for="node" id="d5"/>
+  <key attr.name="description" attr.type="string" for="node" id="d6"/>
+  <key for="node" id="d7" yfiles.type="nodegraphics"/>
+  <key for="graphml" id="d8" yfiles.type="resources"/>
+  <key attr.name="yed.palette.edge.name" attr.type="string" for="edge" id="d9"/>
+  <key attr.name="Palette ToolTip" attr.type="string" for="edge" id="d10"/>
+  <key attr.name="url" attr.type="string" for="edge" id="d11"/>
+  <key attr.name="description" attr.type="string" for="edge" id="d12"/>
+  <key for="edge" id="d13" yfiles.type="edgegraphics"/>
+  <graph edgedefault="directed" id="G">
+
+    <!-- USM — Unita Stratigrafica Muraria: white fill, dark-red border, rectangle -->
+    <node id="n1">
+      <data key="d3" xml:space="preserve">USM</data>
+      <data key="d4" xml:space="preserve"/>
+      <data key="d7">
+        <y:ShapeNode>
+          <y:Geometry height="30.0" width="90.0" x="0.0" y="0.0"/>
+          <y:Fill color="#FFFFFF" transparent="false"/>
+          <y:BorderStyle color="#9B3333" type="line" width="4.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog"
+                       fontSize="12" fontStyle="plain" hasBackgroundColor="false"
+                       hasLineColor="false" height="18.0" horizontalTextPosition="center"
+                       iconTextGap="4" modelName="internal" modelPosition="c"
+                       textColor="#000000" verticalTextPosition="bottom" visible="true"
+                       width="44.0" x="23.0" xml:space="preserve" y="6.0">USM</y:NodeLabel>
+          <y:Shape type="rectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+
+    <!-- USD — Unita Stratigrafica di Distruzione: white fill, orange border, roundrectangle -->
+    <node id="n2">
+      <data key="d3" xml:space="preserve">USD</data>
+      <data key="d4" xml:space="preserve"/>
+      <data key="d7">
+        <y:ShapeNode>
+          <y:Geometry height="30.0" width="90.0" x="120.0" y="0.0"/>
+          <y:Fill color="#FFFFFF" transparent="false"/>
+          <y:BorderStyle color="#D86400" type="line" width="4.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog"
+                       fontSize="12" fontStyle="plain" hasBackgroundColor="false"
+                       hasLineColor="false" height="18.0" horizontalTextPosition="center"
+                       iconTextGap="4" modelName="internal" modelPosition="c"
+                       textColor="#000000" verticalTextPosition="bottom" visible="true"
+                       width="44.0" x="23.0" xml:space="preserve" y="6.0">USD</y:NodeLabel>
+          <y:Shape type="roundrectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+
+    <!-- USV — Unita Stratigrafica Verticale: black fill, blue border, parallelogram -->
+    <node id="n3">
+      <data key="d3" xml:space="preserve">USV</data>
+      <data key="d4" xml:space="preserve"/>
+      <data key="d7">
+        <y:ShapeNode>
+          <y:Geometry height="30.0" width="65.0" x="240.0" y="0.0"/>
+          <y:Fill color="#000000" transparent="false"/>
+          <y:BorderStyle color="#248FE7" type="line" width="4.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog"
+                       fontSize="12" fontStyle="plain" hasBackgroundColor="false"
+                       hasLineColor="false" height="18.0" horizontalTextPosition="center"
+                       iconTextGap="4" modelName="internal" modelPosition="c"
+                       textColor="#FFFFFF" verticalTextPosition="bottom" visible="true"
+                       width="49.0" x="8.0" xml:space="preserve" y="6.0">USV</y:NodeLabel>
+          <y:Shape type="parallelogram"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+
+    <!-- SF — Superficie di Frequentazione: white fill, yellow border, octagon -->
+    <node id="n4">
+      <data key="d3" xml:space="preserve">SF</data>
+      <data key="d4" xml:space="preserve"/>
+      <data key="d7">
+        <y:ShapeNode>
+          <y:Geometry height="30.0" width="64.0" x="335.0" y="0.0"/>
+          <y:Fill color="#FFFFFF" transparent="false"/>
+          <y:BorderStyle color="#D8BD30" type="line" width="4.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog"
+                       fontSize="12" fontStyle="plain" hasBackgroundColor="false"
+                       hasLineColor="false" height="18.0" horizontalTextPosition="center"
+                       iconTextGap="4" modelName="internal" modelPosition="c"
+                       textColor="#000000" verticalTextPosition="bottom" visible="true"
+                       width="32.0" x="16.0" xml:space="preserve" y="6.0">SF</y:NodeLabel>
+          <y:Shape type="octagon"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+
+    <!-- VSF — Vuoto Stratigrafico di Frequentazione: black fill, gold border, octagon -->
+    <node id="n5">
+      <data key="d3" xml:space="preserve">VSF</data>
+      <data key="d4" xml:space="preserve"/>
+      <data key="d7">
+        <y:ShapeNode>
+          <y:Geometry height="30.0" width="65.0" x="419.0" y="0.0"/>
+          <y:Fill color="#000000" transparent="false"/>
+          <y:BorderStyle color="#B19F61" type="line" width="4.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog"
+                       fontSize="12" fontStyle="plain" hasBackgroundColor="false"
+                       hasLineColor="false" height="18.0" horizontalTextPosition="center"
+                       iconTextGap="4" modelName="internal" modelPosition="c"
+                       textColor="#FFFFFF" verticalTextPosition="bottom" visible="true"
+                       width="40.0" x="12.0" xml:space="preserve" y="6.0">VSF</y:NodeLabel>
+          <y:Shape type="octagon"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+
+    <!-- Dummy source/target nodes for the edge -->
+    <node id="n6">
+      <data key="d7">
+        <y:ShapeNode>
+          <y:Geometry height="20.0" width="20.0" x="0.0" y="60.0"/>
+          <y:Fill color="#CCCCCC" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog"
+                       fontSize="10" fontStyle="plain" hasBackgroundColor="false"
+                       hasLineColor="false" height="4.0" horizontalTextPosition="center"
+                       iconTextGap="4" modelName="internal" modelPosition="c"
+                       textColor="#000000" verticalTextPosition="bottom" visible="false"
+                       width="4.0" x="8.0" xml:space="preserve" y="8.0"/>
+          <y:Shape type="rectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+
+    <node id="n7">
+      <data key="d7">
+        <y:ShapeNode>
+          <y:Geometry height="20.0" width="20.0" x="120.0" y="60.0"/>
+          <y:Fill color="#CCCCCC" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog"
+                       fontSize="10" fontStyle="plain" hasBackgroundColor="false"
+                       hasLineColor="false" height="4.0" horizontalTextPosition="center"
+                       iconTextGap="4" modelName="internal" modelPosition="c"
+                       textColor="#000000" verticalTextPosition="bottom" visible="false"
+                       width="4.0" x="8.0" xml:space="preserve" y="8.0"/>
+          <y:Shape type="rectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+
+    <!-- overlies edge: solid black line, standard arrow target -->
+    <edge id="e0" source="n6" target="n7">
+      <data key="d9" xml:space="preserve">overlies</data>
+      <data key="d10" xml:space="preserve"/>
+      <data key="d13">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel"
+                       distance="2.0" fontFamily="Dialog" fontSize="12"
+                       fontStyle="plain" hasBackgroundColor="false"
+                       hasLineColor="false" height="18.0"
+                       horizontalTextPosition="center" iconTextGap="4"
+                       modelName="custom" preferredPlacement="anywhere"
+                       ratio="0.5" textColor="#000000"
+                       verticalTextPosition="bottom" visible="true"
+                       width="52.0" x="14.0" xml:space="preserve"
+                       y="20.0">overlies<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/></y:ModelParameter></y:EdgeLabel>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+
+  </graph>
+</graphml>
