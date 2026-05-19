@@ -37,11 +37,6 @@ def _make_app(tmp_path):
     app.jinja_env.globals.setdefault("get_locale", lambda: "it")
     app.jinja_env.globals.setdefault("csrf_token", lambda: "t")
 
-    @app.before_request
-    def _s():
-        from flask import g
-        g.db_session = Session()
-
     # Stub the us.list_us endpoint that apply redirects to
     from flask import Blueprint
     us_bp = Blueprint("us", __name__)
@@ -55,7 +50,8 @@ def _make_app(tmp_path):
 
 
 @pytest.fixture
-def client_and_session(tmp_path):
+def client_and_session(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path}/a.db")
     app, Session = _make_app(tmp_path)
     return app.test_client(), Session
 

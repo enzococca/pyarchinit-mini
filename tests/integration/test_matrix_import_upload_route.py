@@ -18,6 +18,7 @@ def client(tmp_path, monkeypatch):
     from sqlalchemy import create_engine, text
     from sqlalchemy.orm import sessionmaker
     db_path = tmp_path / "mi.db"
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_path}")
     engine = create_engine(f"sqlite:///{db_path}")
     with engine.begin() as conn:
         conn.execute(text("""
@@ -51,11 +52,6 @@ def client(tmp_path, monkeypatch):
     app.jinja_env.globals.setdefault("_", lambda s: s)
     app.jinja_env.globals.setdefault("get_locale", lambda: "it")
     app.jinja_env.globals.setdefault("csrf_token", lambda: "test-csrf")
-
-    @app.before_request
-    def _attach_session():
-        from flask import g
-        g.db_session = Session()
 
     app.register_blueprint(matrix_import_bp)
     yield app.test_client()

@@ -7,7 +7,7 @@ import os
 
 from flask import (
     Blueprint, request, render_template, redirect, url_for,
-    flash, g, current_app,
+    flash, current_app,
 )
 from sqlalchemy import text
 
@@ -23,11 +23,21 @@ matrix_import_bp = Blueprint(
 )
 
 
+def _get_session():
+    """Mirror of yed_import_routes._get_session: app db_manager else env DATABASE_URL."""
+    if hasattr(current_app, "db_manager"):
+        return current_app.db_manager.connection.get_session()
+    from pyarchinit_mini.database.connection import DatabaseConnection
+    db_url = os.getenv("DATABASE_URL", "sqlite:///pyarchinit_mini.db")
+    return DatabaseConnection.from_url(db_url).get_session()
+
+
 @matrix_import_bp.route("/")
 def upload_form():
-    sites = g.db_session.execute(
-        text("SELECT sito FROM site_table ORDER BY sito")
-    ).fetchall()
+    with _get_session() as db:
+        sites = db.execute(
+            text("SELECT sito FROM site_table ORDER BY sito")
+        ).fetchall()
     return render_template(
         "matrix_import/upload.html",
         sites=[r[0] for r in sites],
@@ -147,14 +157,15 @@ def apply():
         flash("Nessuna riga selezionata — controlla almeno una US o relazione", "error")
         return redirect(url_for("matrix_import.upload_form"))
 
-    result = apply_ai_plan(plan, sito, g.db_session)
+    with _get_session() as db:
+        result = apply_ai_plan(plan, sito, db)
 
-    # Save source image as media for the site (best-effort, non-blocking)
-    if image_b64:
-        try:
-            _save_image_for_site(sito, image_b64)
-        except Exception as exc:
-            current_app.logger.warning("matrix_import media save failed: %s", exc)
+        # Save source image as media for the site (best-effort, non-blocking)
+        if image_b64:
+            try:
+                _save_image_for_site(db, sito, image_b64)
+            except Exception as exc:
+                current_app.logger.warning("matrix_import media save failed: %s", exc)
 
     flash(
         f"Importate {result.us_imported} US, {result.edges_imported} relazioni "
@@ -164,7 +175,7 @@ def apply():
     return redirect(url_for("us.list_us", sito=sito))
 
 
-def _save_image_for_site(sito: str, image_b64: str) -> None:
+def _save_image_for_site(db, sito: str, image_b64: str) -> None:
     """Best-effort: persist the source image as a Media row linked to the site.
 
     Uses MediaService.store_and_register_media via a temporary file. Looks up
@@ -174,7 +185,7 @@ def _save_image_for_site(sito: str, image_b64: str) -> None:
     import tempfile
     from sqlalchemy import text as _text
 
-    row = g.db_session.execute(
+    row = db.execute(
         _text("SELECT id_sito FROM site_table WHERE sito = :s"), {"s": sito}
     ).fetchone()
     if not row:
