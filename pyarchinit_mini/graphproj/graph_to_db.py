@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from sqlalchemy import text
@@ -56,7 +56,7 @@ def write_graph(
     source_label: str = "import",
 ) -> WriteResult:
     result = WriteResult()
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     origin_tag = f"{source_label}_{now}"
 
     # Ensure site row exists (sqlite-compatible: SELECT then INSERT)
