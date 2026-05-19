@@ -217,7 +217,7 @@ WRITE:
 | Rapporti malformed (read time) | `try/except` `ast.literal_eval`; log warning; skip that US's edges; UI shows other edges normally. |
 | Imported edge references missing US | Auto-create stub: `INSERT us_table (sito, us, area, unita_tipo="US", descrizione="Imported placeholder", data_origine="import_<source>_<ts>")`. Counted in `stubs_created`. |
 | Unknown inverse (no `INVERSE_PAIRS` entry) | Write forward, skip inverse, log; accumulated in `inverses_skipped`. |
-| UPSERT conflict on `(sito, us, area)` | `INSERT ON CONFLICT DO UPDATE` for unita_tipo/descrizione/periodo; `rapporti` field is append+dedup, never overwritten. |
+| UPSERT conflict on `(sito, us, area)` | SQLAlchemy `insert().on_conflict_do_update()` (postgres) or equivalent SQLite ≥3.24 `INSERT OR REPLACE` for unita_tipo/descrizione/periodo; `rapporti` field is append+dedup, never overwritten. |
 | Invalid `group_by` param | `400 {error: "bad_param", valid: ["none","area","settore","quadrato","attivita","strutture"]}`. |
 | Site doesn't exist on export | `404 {error: "site_not_found"}`. |
 
@@ -275,3 +275,6 @@ WRITE:
 - Do we want s3dgraphy version pin > 0.1.42 if the project's GraphMLImporter API has changed? Verify during writing-plans.
 - Does s3dgraphy's `GraphMLExporter` accept a template base, or do we wrap with `YEdTemplate` post-process? Verify during writing-plans by reading exporter source.
 - Audit log location: `~/.pyarchinit_mini/logs/matrix_import.jsonl` — does logging infrastructure exist or do we need to add it? Verify during writing-plans.
+- Which `us_table` columns link a US to a period? On Adarte postgres `us_table` has `fase_iniziale` and `fase_finale` (text fields). Verify whether `periodo_iniziale` exists alongside (per legacy pyarchinit schemas) or whether the projector must join on `fase_iniziale → period_table.fase` to derive periodo. The fallback "Periodo 1" logic depends on this resolution.
+- Backward compatibility note: the Adarte post-upgrade patch (`patch_pyarchinit_post_upgrade.py`) has a Section 27 that breaks on postgres and Section 28 that needs bilingual matching. The new s3dgraphy pipeline must natively include the bilingual + extras matching so those patches become NO-OPs (no `MARKER MISSING` failures). Plan a step to either gate Section 27/28 by Python version detection or remove from the patch script entirely.
+- Adarte regression test baseline: legacy currently emits 4066 edges on Rimini_RN_2020_21_Museo_Fellini. The new pipeline must produce ≥ 4060 edges (±5 tolerance, same label distribution within ±10% per label).
