@@ -127,6 +127,15 @@ class S3DProjector:
                     return r.row_id
         return cls._ensure_fallback_row(graph).row_id
 
+    # Ordered list of (description_col, phase_col) pairs to try.
+    # Older fixture DBs use d_stratigrafica + periodo_iniziale; newer use descrizione + fase_iniziale.
+    _COLUMN_VARIANTS = [
+        ("descrizione", "fase_iniziale"),
+        ("d_stratigrafica", "fase_iniziale"),
+        ("d_stratigrafica", "periodo_iniziale"),
+        ("NULL", "NULL"),  # ultimate fallback
+    ]
+
     @classmethod
     def _load_us_nodes(cls, session: Session, site: str, graph: ProjectedGraph) -> None:
         col = cls._SUB_GROUP_COLUMN.get(graph.group_by, "")
@@ -134,19 +143,44 @@ class S3DProjector:
         extra_select = ""
         if col and col != "area":
             extra_select = f", {col}"
-        sql = (f"SELECT id_us, sito, area, us, unita_tipo, descrizione, fase_iniziale"
-               f"{extra_select} FROM us_table WHERE sito = :s")
-        try:
-            rows = session.execute(text(sql), {"s": site}).fetchall()
-        except Exception as exc:
-            # Column doesn't exist in this schema — retry without it
-            logger.warning("us_table column %r missing; sub_group falls back to None: %s",
-                           col, exc)
-            session.rollback()
-            sql_fb = ("SELECT id_us, sito, area, us, unita_tipo, descrizione, fase_iniziale "
-                      "FROM us_table WHERE sito = :s")
-            rows = session.execute(text(sql_fb), {"s": site}).fetchall()
-            extra_select = ""
+
+        rows = None
+        for desc_col, phase_col in cls._COLUMN_VARIANTS:
+            sql = (
+                f"SELECT id_us, sito, area, us, unita_tipo, {desc_col}, {phase_col}"
+                f"{extra_select} FROM us_table WHERE sito = :s"
+            )
+            try:
+                rows = session.execute(text(sql), {"s": site}).fetchall()
+                break
+            except Exception as exc:
+                logger.warning(
+                    "us_table column variant (%s, %s) failed; trying next: %s",
+                    desc_col, phase_col, exc,
+                )
+                try:
+                    session.rollback()
+                except Exception:
+                    pass
+                if extra_select:
+                    # Also try without the sub-group column
+                    try:
+                        sql_no_sg = (
+                            f"SELECT id_us, sito, area, us, unita_tipo, {desc_col}, {phase_col} "
+                            f"FROM us_table WHERE sito = :s"
+                        )
+                        rows = session.execute(text(sql_no_sg), {"s": site}).fetchall()
+                        extra_select = ""
+                        break
+                    except Exception:
+                        try:
+                            session.rollback()
+                        except Exception:
+                            pass
+
+        if rows is None:
+            logger.error("Could not load us_table for site %r with any column variant", site)
+            rows = []
         for r in rows:
             unit_type = r[4] or "US"
             row_id = cls._resolve_row_id(r[6], graph)

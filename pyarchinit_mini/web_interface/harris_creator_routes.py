@@ -832,45 +832,20 @@ from pyarchinit_mini.graphproj.filesystem import slugify
 
 @harris_creator_bp.get("/api/export/<site>/yed-graphml")
 def api_export_yed(site: str):
-    """Export current swimlane state as yEd-flavored GraphML. On-demand."""
-    from pyarchinit_mini.graphml_io.yed_writer import write_extended_matrix_graphml
-    group_by = request.args.get("group_by", "period_phase")
+    """Export site stratigraphy as yEd-flavored GraphML using the EM palette template."""
+    from flask import Response
+    from pyarchinit_mini.graphproj.s3d_projector import S3DProjector
+    from pyarchinit_mini.graphproj.graphml_writer import write_graphml
+    group_by = request.args.get("group_by", "none")
     try:
         session = _get_session()
-        state = SwimlaneState.load(session, site, group_by=group_by)
-        epochs = _load_epochs(session, site)
-        out_dir = _Path("data/exports/harris_yed")
-        out_dir.mkdir(parents=True, exist_ok=True)
-        site_slug = slugify(site)
-        out_path = out_dir / f"{site_slug}-extmatrix.graphml"
-        write_extended_matrix_graphml(
-            state, site_meta={"sito": site}, epochs=epochs, out=out_path,
+        projected = S3DProjector.from_site(session, site, group_by=group_by)
+        data = write_graphml(projected)
+        return Response(
+            data,
+            mimetype="application/graphml+xml",
+            headers={"Content-Disposition": f"attachment; filename={site}.graphml"},
         )
-        # Preserve the existing _index.json upsert-by-site_slug logic.
-        idx_path = out_dir / "_index.json"
-        entries = []
-        if idx_path.exists():
-            try:
-                entries = _json.loads(idx_path.read_text(encoding="utf-8"))
-            except Exception:
-                entries = []
-        entries = [e for e in entries if e.get("site_slug") != site_slug]
-        entries.append({
-            "site": site,
-            "site_slug": site_slug,
-            "file_path": str(out_path),
-            "file_size": out_path.stat().st_size,
-            "timestamp": _datetime.now().isoformat(),
-        })
-        idx_path.write_text(_json.dumps(entries, indent=2), encoding="utf-8")
-        return _send_file(
-            out_path.resolve(), as_attachment=True,
-            download_name=f"{site_slug}-extmatrix.graphml",
-            mimetype="application/xml",
-        )
-    except YEDWriterError as e:
-        return jsonify({"error": "writer", "message": str(e)}), 500
-    except ValueError as e:
-        return jsonify({"error": "validation", "message": str(e)}), 400
     except Exception as e:
-        return jsonify({"error": "internal", "message": str(e)}), 500
+        logger.exception("export yed-graphml failed")
+        return jsonify({"error": "export_failed", "message": str(e)}), 500
