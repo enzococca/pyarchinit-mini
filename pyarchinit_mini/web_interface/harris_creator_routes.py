@@ -849,3 +849,66 @@ def api_export_yed(site: str):
     except Exception as e:
         logger.exception("export yed-graphml failed")
         return jsonify({"error": "export_failed", "message": str(e)}), 500
+
+
+@harris_creator_bp.get("/api/export/<site>/heriverse-json")
+def api_export_heriverse(site: str):
+    """Export site stratigraphy as Heriverse/ATON JSON (single format covers both)."""
+    from flask import Response
+    import os as _os
+    import tempfile
+    from pyarchinit_mini.s3d_integration.s3d_converter import S3DConverter
+    try:
+        session = _get_session()
+        # Fetch US rows as dicts using a column-variant fallback (mirrors S3DProjector)
+        _VARIANTS = [
+            "id_us, sito, area, us, unita_tipo, d_stratigrafica, d_interpretativa, "
+            "interpretazione, anno_scavo, scavato, periodo_iniziale, fase_iniziale, rapporti",
+            "id_us, sito, area, us, unita_tipo, descrizione, NULL AS d_interpretativa, "
+            "NULL AS interpretazione, NULL AS anno_scavo, NULL AS scavato, "
+            "fase_iniziale, fase_iniziale, rapporti",
+            "id_us, sito, area, us, unita_tipo, NULL AS d_stratigrafica, "
+            "NULL AS d_interpretativa, NULL AS interpretazione, NULL AS anno_scavo, "
+            "NULL AS scavato, NULL AS periodo_iniziale, NULL AS fase_iniziale, NULL AS rapporti",
+        ]
+        us_list = []
+        for cols in _VARIANTS:
+            try:
+                from sqlalchemy import text as _text
+                rows = session.execute(
+                    _text(f"SELECT {cols} FROM us_table WHERE sito = :s"),
+                    {"s": site},
+                ).fetchall()
+                _keys = [
+                    "id_us", "sito", "area", "us", "unita_tipo",
+                    "d_stratigrafica", "d_interpretativa", "interpretazione",
+                    "anno_scavo", "scavato", "periodo_iniziale", "fase_iniziale", "rapporti",
+                ]
+                us_list = [dict(zip(_keys, r)) for r in rows]
+                break
+            except Exception:
+                try:
+                    session.rollback()
+                except Exception:
+                    pass
+        converter = S3DConverter()
+        graph = converter.create_graph_from_us(us_list, site_name=site)
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+            tmp_path = tmp.name
+        try:
+            converter.export_to_heriverse_json(graph, output_path=tmp_path)
+            with open(tmp_path, "rb") as f:
+                data = f.read()
+        finally:
+            try:
+                _os.unlink(tmp_path)
+            except OSError:
+                pass
+        return Response(
+            data,
+            mimetype="application/json",
+            headers={"Content-Disposition": f"attachment; filename={site}_heriverse.json"},
+        )
+    except Exception as e:
+        logger.exception("export heriverse failed")
+        return jsonify({"error": "export_failed", "message": str(e)}), 500
