@@ -92,6 +92,14 @@
                                 </a></li>
                             </ul>
                         </div>
+                        <a href="/harris-creator/api/export/{{ site.sito | urlencode }}/yed-graphml"
+                           class="btn btn-sm btn-outline-secondary" title="{{ _('Export yEd GraphML') }}">
+                          <i class="fas fa-file-code"></i>
+                        </a>
+                        <a href="/harris-creator/api/export/{{ site.sito | urlencode }}/heriverse-json"
+                           class="btn btn-sm btn-outline-secondary" title="{{ _('Export Heriverse / ATON') }}">
+                          <i class="fas fa-cube"></i>
+                        </a>
                         <button class="btn btn-danger btn-sm delete-site-btn"
                                 data-site-id="{{ site.id_sito }}"
                                 data-site-name="{{ site.sito }}"
