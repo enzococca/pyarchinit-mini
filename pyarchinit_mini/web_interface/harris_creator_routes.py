@@ -912,3 +912,32 @@ def api_export_heriverse(site: str):
     except Exception as e:
         logger.exception("export heriverse failed")
         return jsonify({"error": "export_failed", "message": str(e)}), 500
+
+
+@harris_creator_bp.post("/api/import/<site>/graphml")
+def api_import_graphml(site: str):
+    """Import yEd GraphML; writes us_table rows and rapporti (4-tuple + inverses)."""
+    from pyarchinit_mini.graphproj.graphml_reader import parse_graphml
+    from pyarchinit_mini.graphproj.graph_to_db import write_graph
+    f = request.files.get("file")
+    if f is None or not f.filename:
+        return jsonify({"error": "no_file"}), 400
+    try:
+        projected = parse_graphml(f.read(), target_site=site)
+    except Exception as e:
+        logger.warning("import graphml parse failed: %s", e)
+        return jsonify({"error": "parse_error", "detail": str(e)}), 400
+    try:
+        session = _get_session()
+        result = write_graph(projected, target_site=site, session=session, source_label="graphml")
+        return jsonify({
+            "imported_us": result.imported_us,
+            "imported_edges": result.imported_edges,
+            "inverses_written": result.inverses_written,
+            "stubs_created": result.stubs_created,
+            "inverses_skipped": result.inverses_skipped,
+            "errors": result.errors,
+        }), 200
+    except Exception as e:
+        logger.exception("import graphml write failed")
+        return jsonify({"error": "write_failed", "message": str(e)}), 500
