@@ -27,24 +27,23 @@ def db_session(tmp_path):
             CREATE TABLE us_table (
                 id_us INTEGER PRIMARY KEY AUTOINCREMENT,
                 sito TEXT NOT NULL,
-                area TEXT NOT NULL,
+                area TEXT,
                 us TEXT NOT NULL,
                 unita_tipo TEXT,
-                d_stratigrafica TEXT,
-                fase_recente INTEGER,
-                fase_iniziale INTEGER,
+                descrizione TEXT,
+                fase_finale TEXT,
+                fase_iniziale TEXT,
                 created_at DATETIME,
                 updated_at DATETIME
             )
         """))
         conn.execute(text("""
             CREATE TABLE us_relationships_table (
-                id_rel INTEGER PRIMARY KEY AUTOINCREMENT,
-                sito_from TEXT,
-                sito_to TEXT,
+                id_relationship INTEGER PRIMARY KEY AUTOINCREMENT,
+                sito TEXT,
                 us_from INTEGER,
                 us_to INTEGER,
-                tipo_relazione TEXT,
+                relationship_type TEXT,
                 created_at DATETIME,
                 updated_at DATETIME
             )
@@ -126,7 +125,7 @@ def test_apply_imports_int_edges(db_session):
     result = apply_ai_plan(plan, "S", db_session)
     assert result.edges_imported == 1
     row = db_session.execute(text(
-        "SELECT us_from, us_to, tipo_relazione FROM us_relationships_table"
+        "SELECT us_from, us_to, relationship_type FROM us_relationships_table"
     )).fetchone()
     assert row[0] == 1 and row[1] == 2 and row[2] == "copre"
 

@@ -33,14 +33,14 @@ def client(tmp_path, monkeypatch):
             CREATE TABLE us_table (
                 id_us INTEGER PRIMARY KEY AUTOINCREMENT,
                 sito TEXT, area TEXT, us TEXT, unita_tipo TEXT,
-                d_stratigrafica TEXT, fase_recente INT, fase_iniziale INT,
+                descrizione TEXT, fase_finale TEXT, fase_iniziale TEXT,
                 created_at DATETIME, updated_at DATETIME)
         """))
         conn.execute(text("""
             CREATE TABLE us_relationships_table (
-                id_rel INTEGER PRIMARY KEY AUTOINCREMENT,
-                sito_from TEXT, sito_to TEXT, us_from INT, us_to INT,
-                tipo_relazione TEXT, created_at DATETIME, updated_at DATETIME)
+                id_relationship INTEGER PRIMARY KEY AUTOINCREMENT,
+                sito TEXT, us_from INT, us_to INT,
+                relationship_type TEXT, created_at DATETIME, updated_at DATETIME)
         """))
         conn.execute(text(
             "INSERT INTO site_table (sito, created_at, updated_at) VALUES ('ExistingSite', :n, :n)"

@@ -58,17 +58,20 @@ def apply_ai_plan(plan: AIPlan, sito: str, db_session) -> ApplyResult:
             continue
         db_session.execute(text("""
             INSERT INTO us_table
-                (sito, area, us, unita_tipo, d_stratigrafica,
-                 fase_recente, fase_iniziale, created_at, updated_at)
-            VALUES (:sito, :area, :us, :ut, :desc, :fr, :fi, :now, :now)
+                (sito, area, us, unita_tipo, descrizione,
+                 fase_finale, fase_iniziale, created_at, updated_at)
+            VALUES (:sito, :area, :us, :ut, :desc, :ffin, :fini, :now, :now)
         """), {
             "sito": sito, "area": u.area, "us": u.us_num, "ut": unit_type,
-            "desc": u.descrizione, "fr": u.fase_recente, "fi": u.fase_iniziale,
+            "desc": u.descrizione,
+            "ffin": str(u.fase_recente) if u.fase_recente is not None else None,
+            "fini": str(u.fase_iniziale) if u.fase_iniziale is not None else None,
             "now": now,
         })
         result.us_imported += 1
 
     # Step 3: us_relationships_table
+    # Schema: sito (single), us_from (int), us_to (int), relationship_type, created_at, updated_at
     for e in plan.edges:
         try:
             us_from = int(e.us_from)
@@ -81,18 +84,18 @@ def apply_ai_plan(plan: AIPlan, sito: str, db_session) -> ApplyResult:
             continue
         existing_rel = db_session.execute(text("""
             SELECT 1 FROM us_relationships_table
-            WHERE sito_from = :sf AND sito_to = :st
-              AND us_from = :uf AND us_to = :ut AND tipo_relazione = :t
-        """), {"sf": sito, "st": sito, "uf": us_from, "ut": us_to, "t": e.tipo}).fetchone()
+            WHERE sito = :s
+              AND us_from = :uf AND us_to = :ut AND relationship_type = :t
+        """), {"s": sito, "uf": us_from, "ut": us_to, "t": e.tipo}).fetchone()
         if existing_rel:
             result.edges_skipped += 1
             continue
         db_session.execute(text("""
             INSERT INTO us_relationships_table
-                (sito_from, sito_to, us_from, us_to, tipo_relazione,
+                (sito, us_from, us_to, relationship_type,
                  created_at, updated_at)
-            VALUES (:sf, :st, :uf, :ut, :t, :now, :now)
-        """), {"sf": sito, "st": sito, "uf": us_from, "ut": us_to, "t": e.tipo, "now": now})
+            VALUES (:s, :uf, :ut, :t, :now, :now)
+        """), {"s": sito, "uf": us_from, "ut": us_to, "t": e.tipo, "now": now})
         result.edges_imported += 1
 
     db_session.commit()
