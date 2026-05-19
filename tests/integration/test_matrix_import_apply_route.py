@@ -43,13 +43,10 @@ def _make_app(tmp_path):
     app.jinja_env.globals.setdefault("get_locale", lambda: "it")
     app.jinja_env.globals.setdefault("csrf_token", lambda: "t")
 
-    # Stub the us.list_us endpoint that apply redirects to
-    from flask import Blueprint
-    us_bp = Blueprint("us", __name__)
-    @us_bp.route("/us/list")
-    def list_us():
+    # Stub the us_list endpoint that apply redirects to
+    @app.route("/us", endpoint="us_list")
+    def _us_list_stub():
         return "us list page"
-    app.register_blueprint(us_bp)
 
     app.register_blueprint(matrix_import_bp)
     return app, Session

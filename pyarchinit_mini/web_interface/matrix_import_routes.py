@@ -199,7 +199,7 @@ def apply():
         f"({result.us_skipped} US e {result.edges_skipped} relazioni saltate)",
         "success",
     )
-    return redirect(url_for("us.list_us", sito=sito))
+    return redirect(url_for("us_list", sito=sito))
 
 
 def _save_image_for_site(db, sito: str, image_b64: str) -> None:
