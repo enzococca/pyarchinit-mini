@@ -59,7 +59,9 @@ def test_api_load_emits_edges_with_style(client):
     body = r.get_json()
     assert len(body["edges"]) >= 1
     e = body["edges"][0]
-    assert e["data"]["label"] in {"overlies", "is_after"}
+    # Edge labels are italianized for the swimlane UI (locale=it); canonical kept in data.canonical
+    assert e["data"]["label"] in {"Copre", "Coperto da"}
+    assert e["data"]["canonical"] in {"overlies", "is_after"}
     assert "style" in e
     assert isinstance(e["style"], dict)
     assert "lineColor" in e["style"]
