@@ -18,7 +18,7 @@ from typing import Dict, List, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from pyarchinit_mini.graphproj.rapporti_codec import parse_rapporti, SYMMETRIC
+from pyarchinit_mini.graphproj.rapporti_codec import parse_rapporti, SYMMETRIC, INVERSE_PAIRS
 
 
 logger = logging.getLogger(__name__)
@@ -228,3 +228,50 @@ class S3DProjector:
                     continue
                 seen.add(key)
                 graph.edges.append(Edge(source_id=src_id, target_id=tgt_id, canonical=rap.canonical))
+
+        # === Step A: Inverse dedup — drop the redundant inverse direction ===
+        # E.g., if (overlies, A→B) exists, drop (is_after, B→A).
+        forward_keys: set = set()
+        for e in graph.edges:
+            if e.canonical in SYMMETRIC:
+                continue
+            forward_keys.add((e.canonical, e.source_id, e.target_id))
+        kept: List[Edge] = []
+        for e in graph.edges:
+            if e.canonical in SYMMETRIC:
+                kept.append(e)
+                continue
+            inv = INVERSE_PAIRS.get(e.canonical)
+            # If the forward counterpart of this inverse is already in the set, drop it
+            if inv is not None and (inv, e.target_id, e.source_id) in forward_keys:
+                if e.canonical > inv:
+                    continue  # drop; the lexicographically-first orientation wins
+            kept.append(e)
+        graph.edges = kept
+
+        # === Step B: Transitive reduction per canonical type ===
+        # If A→B and B→C exist under the same canonical, drop A→C.
+        try:
+            import networkx as nx
+            reduced: List[Edge] = []
+            by_canon: Dict[str, List[Edge]] = {}
+            for e in graph.edges:
+                by_canon.setdefault(e.canonical, []).append(e)
+            for canon, edges in by_canon.items():
+                if canon in SYMMETRIC:
+                    reduced.extend(edges)
+                    continue
+                dg = nx.DiGraph()
+                for ed in edges:
+                    dg.add_edge(ed.source_id, ed.target_id)
+                try:
+                    tr = nx.transitive_reduction(dg)
+                    keep_set = set(tr.edges())
+                    for ed in edges:
+                        if (ed.source_id, ed.target_id) in keep_set:
+                            reduced.append(ed)
+                except nx.NetworkXError:
+                    reduced.extend(edges)
+            graph.edges = reduced
+        except ImportError:
+            pass  # networkx not available; skip reduction

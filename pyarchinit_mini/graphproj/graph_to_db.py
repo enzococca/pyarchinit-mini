@@ -15,27 +15,12 @@ from pyarchinit_mini.graphproj.rapporti_codec import (
     INVERSE_PAIRS,
     SYMMETRIC,
     Rapporto,
+    CANONICAL_TO_ITALIAN,
 )
 from pyarchinit_mini.graphproj.s3d_projector import ProjectedGraph, Node
 
 
 logger = logging.getLogger(__name__)
-
-
-# Canonical → italian display label (used when serializing).
-CANONICAL_TO_ITALIAN: Dict[str, str] = {
-    "overlies": "Copre",
-    "is_after": "Coperto da",
-    "cuts": "Taglia",
-    "is_cut_by": "Tagliato da",
-    "fills": "Riempie",
-    "is_filled_by": "Riempito da",
-    "abuts": "Si appoggia a",
-    "is_abutted_by": "Gli si appoggia",
-    "has_same_time": "Uguale a",
-    "is_bonded_to": "Si lega a",
-    "is_before": "Anteriore a",
-}
 
 
 @dataclass

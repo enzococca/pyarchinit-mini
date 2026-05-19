@@ -319,6 +319,31 @@ function initCytoscape() {
                     'target-arrow-color': '#2E86AB',
                     'target-arrow-shape': 'none'
                 }
+            },
+            // Palette-driven styles: applied when node/edge carries a `style` data object
+            // from the /api/load response (overrides defaults above).
+            {
+                selector: 'node[style]',
+                style: {
+                    'shape': 'data(style.shape)',
+                    'background-color': 'data(style.backgroundColor)',
+                    'border-color': 'data(style.borderColor)',
+                    'border-width': 'data(style.borderWidth)',
+                    'border-style': 'data(style.lineStyle)',
+                    'color': 'data(style.fontColor)',
+                    'font-size': 'data(style.fontSize)',
+                }
+            },
+            {
+                selector: 'edge[style]',
+                style: {
+                    'line-color': 'data(style.lineColor)',
+                    'width': 'data(style.lineWidth)',
+                    'line-style': 'data(style.lineStyle)',
+                    'target-arrow-shape': 'data(style.targetArrowShape)',
+                    'source-arrow-shape': 'data(style.sourceArrowShape)',
+                    'target-arrow-color': 'data(style.lineColor)',
+                }
             }
         ],
 
@@ -858,15 +883,10 @@ function setupEventListeners() {
     // Save button
     document.getElementById('save-btn').addEventListener('click', saveMatrix);
 
-    // Export buttons
-    document.getElementById('export-graphml-btn').addEventListener('click', () => exportMatrix('graphml'));
-    document.getElementById('export-dot-btn').addEventListener('click', () => exportMatrix('dot'));
-
-    // Export PNG button
-    const exportPngBtn = document.getElementById('export-png-btn');
-    if (exportPngBtn) {
-        exportPngBtn.addEventListener('click', exportPNG);
-    }
+    // Export buttons (legacy standalone buttons — null-safe; new dropdown items bound in template)
+    document.getElementById('export-graphml-btn')?.addEventListener('click', () => exportMatrix('graphml'));
+    document.getElementById('export-dot-btn')?.addEventListener('click', () => exportMatrix('dot'));
+    document.getElementById('export-png-btn')?.addEventListener('click', exportPNG);
 
     // Resize Cytoscape on window resize (e.g., sidebar toggle)
     window.addEventListener('resize', function() {
