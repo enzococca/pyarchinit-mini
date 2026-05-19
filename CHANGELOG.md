@@ -1,3 +1,21 @@
+## 2.9.0 — 2026-05-19
+
+### Fixed — Swimlane UI/UX cleanup (post-2.8.0 feedback)
+- **Toolbar consolidated**: removed duplicate `swimlane-toolbar` block. Single `Esporta` dropdown now contains yEd GraphML (.graphml), Heriverse/ATON JSON (.json), Graphviz DOT, PNG. `Importa` button accepts both .graphml and .json. The existing `group-by-selector` now uses the new vocabulary: Nessun raggruppamento / Area / Settore / Quadrato / Attività / Strutture (was: Period+Phase / Struttura / Attivita / Settore / Area / Ambient / Saggio / Quad-Par / No grouping).
+- **Edge labels italianized**: swimlane web + GraphML export now show `Copre`/`Coperto da`/`Taglia`/`Tagliato da`/`Riempie`/`Riempito da`/`Si appoggia a`/`Gli si appoggia`/`Uguale a`/`Si lega a`/`Anteriore a` (locale `it`) or `Covers`/`Covered by`/etc (locale `en`) instead of canonical `overlies`/`is_after`/`cuts`/etc. Canonical kept in `data.canonical` for JS class hooks.
+- **Inverse-edge dedup**: when both `A overlies B` and `B is_after A` exist (data redundancy), draw only the forward direction — no more overlapping labels at the same midpoint.
+- **Transitive reduction**: if A→B→C exists, A→C is no longer drawn (per-canonical, only for DAGs). Applied via `networkx.transitive_reduction`. Adarte fixture: 516 → 343 edges (clean Harris Matrix layout).
+- **Palette-driven frontend rendering**: cytoscape selectors `node[style]` and `edge[style]` now read `data.style.{shape,backgroundColor,borderColor,borderWidth,lineColor,…}` from the `/api/load` payload and apply them. US nodes finally appear with their palette colors/shapes (USM red border, USV octagonal, …) instead of default gray.
+- **GraphML export rewritten**: now produces the proper Harris Matrix Creator format via `pyarchinit_mini.graphml_io.yed_writer.write_extended_matrix_graphml` — TableNode wrapper with `<y:Rows>` per period/fase (colored backgrounds, rotated labels like "Periodo 1 - Fase 1"), nodes positioned inside their period row, palette styles, italianized edge labels. Previously the writer just appended nodes to the palette template without TableNode rows.
+
+### Internals
+- New `rapporti_codec.CANONICAL_TO_ITALIAN`/`CANONICAL_TO_ENGLISH`/`display_label(canonical, locale)` (moved from `graph_to_db.py`).
+- `s3d_projector._load_edges` post-process: inverse dedup + per-canonical `nx.transitive_reduction` (skipped for SYMMETRIC and cyclic graphs).
+- `s3d_to_cytoscape` edges now carry `data.label` (italian display) AND `data.canonical` (English canonical for JS hooks).
+- `graphml_writer.write_graphml` now bridges to the existing `yed_writer.write_extended_matrix_graphml` via a temp file.
+- `harris_creator_editor.js`: 2 new cytoscape selectors (`node[style]`, `edge[style]`) read palette properties from element data.
+- `editor.html`: removed `swimlane-toolbar` div + duplicate `group-by-select` + standalone `export-graphml-btn`/`export-dot-btn`/`export-png-btn` + `exportYedGraphml()` button; replaced with one unified `Esporta` dropdown + `Importa` button.
+
 ## 2.8.0 — 2026-05-19
 
 ### Added — EM Palette + Multi-Format Swimlane Round-Trip
