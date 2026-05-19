@@ -1,53 +1,69 @@
-<!DOCTYPE html>
-<html lang="{{ get_locale() }}">
-<head>
-  <meta charset="UTF-8">
-  <title>AI Matrix Import</title>
-</head>
-<body>
-  <h1>AI Matrix Import</h1>
-  <p>Carica un'immagine di un Harris Matrix e l'AI estrarrà le US e le relazioni stratigrafiche.</p>
+{% extends "base.html" %}
+{% block title %}{{ _('AI Matrix Import') }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1><i class="fas fa-brain"></i> {{ _('AI Matrix Import') }}</h1>
+  <p class="text-muted">
+    {{ _("Carica un'immagine di un Harris Matrix (foto, scan o schizzo) e l'AI estrarrà le US e le relazioni stratigrafiche. L'immagine viene validata prima di qualsiasi inserimento in DB.") }}
+  </p>
 
-  <form method="post" enctype="multipart/form-data" action="{{ url_for('matrix_import.upload') }}">
-    <label>Immagine: <input type="file" name="image" accept="image/*" required></label><br>
+  <form method="post" enctype="multipart/form-data"
+        action="{{ url_for('matrix_import.upload') }}" class="card p-4">
 
-    <label>Sito esistente:
-      <select name="sito" id="sito-select">
-        <option value="">-- seleziona o lascia vuoto --</option>
+    <div class="mb-3">
+      <label class="form-label">{{ _('Immagine del matrix') }} <span class="text-danger">*</span></label>
+      <input type="file" name="image" accept="image/*" required class="form-control">
+      <div class="form-text">PNG / JPG / WEBP / GIF — max 10 MB.</div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ _('Sito') }}</label>
+      <select name="sito" id="sito-select" class="form-select">
+        <option value="">{{ _('-- seleziona o lascia vuoto --') }}</option>
         {% for s in sites %}
           <option value="{{ s }}">{{ s }}</option>
         {% endfor %}
-        <option value="__NEW__">+ Nuovo sito</option>
+        <option value="__NEW__">{{ _('+ Nuovo sito') }}</option>
       </select>
-    </label><br>
+      <div class="form-text">{{ _("Se vuoto e l'AI non riesce a leggerlo dall'immagine, te lo chiederà nella preview.") }}</div>
+    </div>
 
-    <label id="sito-new-wrapper" style="display:none">Nome nuovo sito:
-      <input type="text" name="sito_new">
-    </label><br>
+    <div class="mb-3" id="sito-new-wrapper" style="display:none">
+      <label class="form-label">{{ _('Nome nuovo sito') }}</label>
+      <input type="text" name="sito_new" class="form-control" placeholder="es. Foro Boario">
+    </div>
 
-    <label>Area (default per tutte le US):
-      <input type="text" name="area" placeholder="es. Saggio 3">
-    </label><br>
+    <div class="mb-3">
+      <label class="form-label">{{ _('Area (default per tutte le US)') }}</label>
+      <input type="text" name="area" class="form-control" placeholder="es. Saggio 3">
+    </div>
 
-    <label>Descrizione contesto (opzionale):
-      <textarea name="descrizione" rows="3" cols="40"></textarea>
-    </label><br>
+    <div class="mb-3">
+      <label class="form-label">{{ _('Descrizione contesto (opzionale)') }}</label>
+      <textarea name="descrizione" rows="3" class="form-control"
+                placeholder="es. Il sito ha 3 fasi: muratura medievale, livello romano, sterile"></textarea>
+    </div>
 
-    <label>Provider:
-      <select name="provider">
-        <option value="anthropic" {% if default_provider == 'anthropic' %}selected{% endif %}>Anthropic (Claude)</option>
-        <option value="openai" {% if default_provider == 'openai' %}selected{% endif %}>OpenAI (GPT)</option>
+    <div class="mb-3">
+      <label class="form-label">{{ _('Provider AI') }}</label>
+      <select name="provider" class="form-select">
+        <option value="anthropic" {% if default_provider == 'anthropic' %}selected{% endif %}>Anthropic (Claude Sonnet 4.7)</option>
+        <option value="openai" {% if default_provider == 'openai' %}selected{% endif %}>OpenAI (GPT-5.5)</option>
       </select>
-    </label><br>
+    </div>
 
-    <button type="submit">Analizza con AI</button>
+    <button type="submit" class="btn btn-primary">
+      <i class="fas fa-magic"></i> {{ _('Analizza con AI') }}
+    </button>
   </form>
+</div>
+{% endblock %}
 
-  <script>
-    document.getElementById('sito-select').addEventListener('change', function() {
-      document.getElementById('sito-new-wrapper').style.display =
-        this.value === '__NEW__' ? 'inline' : 'none';
-    });
-  </script>
-</body>
-</html>
+{% block extra_js %}
+<script>
+  document.getElementById('sito-select').addEventListener('change', function() {
+    document.getElementById('sito-new-wrapper').style.display =
+      this.value === '__NEW__' ? 'block' : 'none';
+  });
+</script>
+{% endblock %}

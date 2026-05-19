@@ -1,15 +1,22 @@
-<!DOCTYPE html>
-<html lang="{{ get_locale() }}">
-<head>
-  <meta charset="UTF-8">
-  <title>Immagine non riconosciuta</title>
-</head>
-<body>
-  <h1>&#9888;&#65039; Immagine non riconosciuta come Harris Matrix</h1>
-  <p><strong>Motivo dall'AI:</strong> {{ reason }}</p>
-  <p><strong>Confidence:</strong> {{ "%.0f"|format(confidence * 100) }}%</p>
-  <p>L'immagine caricata non è stata riconosciuta come un Harris matrix
-     stratigrafico. Niente è stato salvato nel database.</p>
-  <a href="{{ url_for('matrix_import.upload_form') }}">&#8592; Torna al modulo di upload</a>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}{{ _('Immagine non riconosciuta') }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="alert alert-warning">
+    <h1 class="alert-heading">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ _('Immagine non riconosciuta come Harris Matrix') }}
+    </h1>
+    <hr>
+    <p><strong>{{ _("Motivo dall'AI:") }}</strong> {{ reason }}</p>
+    <p><strong>{{ _('Confidence:') }}</strong> {{ "%.0f"|format(confidence * 100) }}%</p>
+    <p class="mb-0">
+      {{ _("L'immagine caricata non è stata riconosciuta come un Harris matrix stratigrafico. Niente è stato salvato nel database.") }}
+    </p>
+  </div>
+
+  <a href="{{ url_for('matrix_import.upload_form') }}" class="btn btn-primary">
+    <i class="fas fa-arrow-left"></i> {{ _('Torna al modulo di upload') }}
+  </a>
+</div>
+{% endblock %}

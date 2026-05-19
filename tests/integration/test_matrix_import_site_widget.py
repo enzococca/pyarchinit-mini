@@ -12,6 +12,7 @@ from pyarchinit_mini.web_interface.matrix_import_routes import matrix_import_bp
 
 
 _APP_TEMPLATES = Path(__file__).parent.parent.parent / "pyarchinit_mini" / "web_interface" / "templates"
+_TEST_TEMPLATES = Path(__file__).parent.parent / "templates"
 
 
 @pytest.fixture
@@ -27,6 +28,11 @@ def client(tmp_path, monkeypatch):
     app = Flask(__name__, template_folder=str(_APP_TEMPLATES))
     app.config["TESTING"] = True
     app.config["SECRET_KEY"] = "t"
+    from jinja2 import ChoiceLoader, FileSystemLoader
+    app.jinja_loader = ChoiceLoader([
+        FileSystemLoader(str(_TEST_TEMPLATES)),
+        FileSystemLoader(str(_APP_TEMPLATES)),
+    ])
     app.jinja_env.globals.setdefault("_", lambda s: s)
     app.jinja_env.globals.setdefault("get_locale", lambda: "it")
     app.jinja_env.globals.setdefault("csrf_token", lambda: "t")
