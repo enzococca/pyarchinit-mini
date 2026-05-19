@@ -1,3 +1,23 @@
+## [2.7.1] - 2026-05-19
+
+### Fixed (IT)
+- **AI Matrix Import** post-merge hotfix: la 2.7.0 era inservibile in produzione per 4 bug scoperti al primo uso reale.
+  - `g.db_session` non viene mai popolato in produzione: ora si usa `_get_session()` context manager (stesso pattern di `yed_import_routes`).
+  - Le chiavi API AI vivono nella tabella `app_settings` (gestita dalla UI Admin), non solo in env: bootstrap automatico in `os.environ` prima di chiamare l'extractor.
+  - Schema `us_table` corretto: `descrizione` (Text) invece di `d_stratigrafica` (String); `fase_finale` invece del campo inventato `fase_recente`; cast int→str per le fasi (colonne TEXT).
+  - Schema `us_relationships_table` corretto: colonna `sito` singola (non `sito_from`/`sito_to`), `relationship_type` (non `tipo_relazione`), `id_relationship` (non `id_rel`).
+  - Endpoint redirect: `us_list` (bare route) invece di `us.list_us` (blueprint inesistente).
+  - Template (upload/preview/rejected) ora estendono `base.html` con styling Bootstrap, navbar e icone Font Awesome.
+
+### Fixed (EN)
+- **AI Matrix Import** post-merge hotfix: 2.7.0 was unusable in production due to 4 bugs caught on first real use.
+  - `g.db_session` was never populated in production: now uses `_get_session()` context manager (same pattern as `yed_import_routes`).
+  - AI API keys live in the `app_settings` table (managed via UI Admin), not only in env: automatic bootstrap into `os.environ` before extractor call.
+  - Corrected `us_table` schema: `descrizione` (Text) instead of `d_stratigrafica` (String); `fase_finale` instead of made-up `fase_recente`; int→str cast for phases (TEXT columns).
+  - Corrected `us_relationships_table` schema: single `sito` column (not `sito_from`/`sito_to`), `relationship_type` (not `tipo_relazione`), `id_relationship` (not `id_rel`).
+  - Redirect endpoint: `us_list` (bare route) instead of `us.list_us` (non-existent blueprint).
+  - Templates (upload/preview/rejected) now extend `base.html` with Bootstrap styling, navbar, and Font Awesome icons.
+
 ## [2.7.0] - 2026-05-18
 
 ### Added (IT)
