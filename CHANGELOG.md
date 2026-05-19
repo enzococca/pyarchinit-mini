@@ -1,3 +1,25 @@
+## 2.9.1 — 2026-05-19
+
+### Fixed — Harris Matrix proper rendering (post-2.9.0 feedback)
+- **Edge direction normalized to forward**: was reading "Coperto da" / "Tagliato da" etc. on the swimlane. Harris convention is recent→ancient with forward labels. Now every inverse canonical (`is_after`, `is_cut_by`, `is_filled_by`, `is_abutted_by`) is auto-swapped to its forward (`overlies`/`cuts`/`fills`/`abuts`) with source/target reversed. User reads "Copre" / "Taglia" / "Riempie" / "Si appoggia a".
+- **Arrows now visible**: was missing because cytoscape's `data(style.targetArrowShape)` dot-notation accessor didn't resolve nested objects. All palette/edge fields flattened into top-level data keys (`shape`, `bgcolor`, `bordercolor`, `linecolor`, `arrowtarget`, …). Selectors `node[shape]`, `edge[linecolor]` etc. now match reliably.
+- **Palette node styling visible**: USM/USD/USV/SF/VSF/TSU now appear with their palette shape + colors (was plain gray rectangles). Same flattening fix.
+- **Period rows as compound swimlanes**: every US node is a child of its `period_row_N` compound parent (visible as a horizontal lane on the canvas with label "Periodo X — Fase Y — Datazione"). Sub-groupings (area/settore/quadrato/attivita/strutture) nest INSIDE period rows as sub-clusters.
+- **Symmetric edges without arrows**: `has_same_time` / `is_bonded_to` now render as solid lines, no arrow heads, thicker stroke for visibility.
+- **Vertical layout**: dagre `rankDir: "TB"` (top-to-bottom) — newer US on top, older on bottom.
+- **Cuts dashed**: `cuts` edges get `line-style: dashed` (Harris convention).
+
+### Fixed — Vocabulary corrections
+- `vocab_it.json` had `"tagliato da"` mapping to `is_after` (wrong) — corrected to `is_cut_by`.
+- `_IT_EXTRAS` had `"riempito da"` → `"is_after"` (wrong) — corrected to `is_filled_by`.
+- `_IT_EXTRAS` had `"gli si appoggia"` → `"is_before"` (wrong) — corrected to `is_abutted_by`.
+
+### Internals
+- New constant `rapporti_codec.REVERSE_TO_FORWARD: Dict[str, str]` lookup.
+- `s3d_projector._load_edges` normalizes inverse direction before dedup.
+- `s3d_to_cytoscape.to_cytoscape` emits flat data fields + ALWAYS-on period row compounds (even with `group_by=none`).
+- `harris_creator_editor.js` rebuilt cytoscape style selectors against flat data; layout switched to `rankDir: "TB"`.
+
 ## 2.9.0 — 2026-05-19
 
 ### Fixed — Swimlane UI/UX cleanup (post-2.8.0 feedback)
