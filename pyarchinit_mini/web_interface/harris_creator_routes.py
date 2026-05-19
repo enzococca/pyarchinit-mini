@@ -752,8 +752,8 @@ def api_load_state(site: str):
                 }
                 for r in state.rows
             ],
-            "nodes": [{"data": el.data, "position": el.position} for el in state.nodes],
-            "edges": [{"data": el.data} for el in state.edges],
+            "nodes": [{"data": el.data, "style": getattr(el, "style", None), "position": el.position} for el in state.nodes],
+            "edges": [{"data": el.data, "style": getattr(el, "style", None)} for el in state.edges],
             "pending_changes": state.pending_changes,
         }), 200
     except ValueError as e:
@@ -832,45 +832,170 @@ from pyarchinit_mini.graphproj.filesystem import slugify
 
 @harris_creator_bp.get("/api/export/<site>/yed-graphml")
 def api_export_yed(site: str):
-    """Export current swimlane state as yEd-flavored GraphML. On-demand."""
-    from pyarchinit_mini.graphml_io.yed_writer import write_extended_matrix_graphml
-    group_by = request.args.get("group_by", "period_phase")
+    """Export site stratigraphy as yEd-flavored GraphML.
+
+    Pipeline selection honours SWIMLANE_PIPELINE env var:
+      - "s3dgraphy" (default): S3DProjector → EM palette graphml_writer
+      - "legacy": SwimlaneState.load → write_extended_matrix_graphml
+    """
+    import os as _os
+    from flask import Response
+    group_by = request.args.get("group_by", "none")
+    pipeline = _os.environ.get("SWIMLANE_PIPELINE", "s3dgraphy").lower()
     try:
         session = _get_session()
-        state = SwimlaneState.load(session, site, group_by=group_by)
-        epochs = _load_epochs(session, site)
-        out_dir = _Path("data/exports/harris_yed")
-        out_dir.mkdir(parents=True, exist_ok=True)
-        site_slug = slugify(site)
-        out_path = out_dir / f"{site_slug}-extmatrix.graphml"
-        write_extended_matrix_graphml(
-            state, site_meta={"sito": site}, epochs=epochs, out=out_path,
+        if pipeline == "legacy":
+            from pyarchinit_mini.harris_swimlane.swimlane_state import SwimlaneState
+            from pyarchinit_mini.graphml_io.yed_writer import write_extended_matrix_graphml
+            import tempfile, pathlib
+            state = SwimlaneState.load(session, site, group_by=group_by)
+            epochs = _load_epochs(session, site)
+            with tempfile.TemporaryDirectory() as td:
+                out = pathlib.Path(td) / f"{site}.graphml"
+                write_extended_matrix_graphml(
+                    state,
+                    site_meta={"sito": site},
+                    epochs=epochs,
+                    out=out,
+                )
+                data = out.read_bytes()
+        else:
+            from pyarchinit_mini.graphproj.s3d_projector import S3DProjector
+            from pyarchinit_mini.graphproj.graphml_writer import write_graphml
+            # Map legacy group_by values that S3DProjector doesn't accept
+            from pyarchinit_mini.graphproj.s3d_projector import VALID_GROUP_BY as S3D_VALID
+            s3d_group_by = group_by if group_by in S3D_VALID else "none"
+            projected = S3DProjector.from_site(session, site, group_by=s3d_group_by)
+            data = write_graphml(projected)
+        return Response(
+            data,
+            mimetype="application/graphml+xml",
+            headers={"Content-Disposition": f"attachment; filename={site}.graphml"},
         )
-        # Preserve the existing _index.json upsert-by-site_slug logic.
-        idx_path = out_dir / "_index.json"
-        entries = []
-        if idx_path.exists():
-            try:
-                entries = _json.loads(idx_path.read_text(encoding="utf-8"))
-            except Exception:
-                entries = []
-        entries = [e for e in entries if e.get("site_slug") != site_slug]
-        entries.append({
-            "site": site,
-            "site_slug": site_slug,
-            "file_path": str(out_path),
-            "file_size": out_path.stat().st_size,
-            "timestamp": _datetime.now().isoformat(),
-        })
-        idx_path.write_text(_json.dumps(entries, indent=2), encoding="utf-8")
-        return _send_file(
-            out_path.resolve(), as_attachment=True,
-            download_name=f"{site_slug}-extmatrix.graphml",
-            mimetype="application/xml",
-        )
-    except YEDWriterError as e:
-        return jsonify({"error": "writer", "message": str(e)}), 500
-    except ValueError as e:
-        return jsonify({"error": "validation", "message": str(e)}), 400
     except Exception as e:
-        return jsonify({"error": "internal", "message": str(e)}), 500
+        logger.exception("export yed-graphml failed")
+        return jsonify({"error": "export_failed", "message": str(e)}), 500
+
+
+@harris_creator_bp.get("/api/export/<site>/heriverse-json")
+def api_export_heriverse(site: str):
+    """Export site stratigraphy as Heriverse/ATON JSON (single format covers both)."""
+    from flask import Response
+    import os as _os
+    import tempfile
+    from pyarchinit_mini.s3d_integration.s3d_converter import S3DConverter
+    try:
+        session = _get_session()
+        # Fetch US rows as dicts using a column-variant fallback (mirrors S3DProjector)
+        _VARIANTS = [
+            "id_us, sito, area, us, unita_tipo, d_stratigrafica, d_interpretativa, "
+            "interpretazione, anno_scavo, scavato, periodo_iniziale, fase_iniziale, rapporti",
+            "id_us, sito, area, us, unita_tipo, descrizione, NULL AS d_interpretativa, "
+            "NULL AS interpretazione, NULL AS anno_scavo, NULL AS scavato, "
+            "fase_iniziale, fase_iniziale, rapporti",
+            "id_us, sito, area, us, unita_tipo, NULL AS d_stratigrafica, "
+            "NULL AS d_interpretativa, NULL AS interpretazione, NULL AS anno_scavo, "
+            "NULL AS scavato, NULL AS periodo_iniziale, NULL AS fase_iniziale, NULL AS rapporti",
+        ]
+        us_list = []
+        for cols in _VARIANTS:
+            try:
+                from sqlalchemy import text as _text
+                rows = session.execute(
+                    _text(f"SELECT {cols} FROM us_table WHERE sito = :s"),
+                    {"s": site},
+                ).fetchall()
+                _keys = [
+                    "id_us", "sito", "area", "us", "unita_tipo",
+                    "d_stratigrafica", "d_interpretativa", "interpretazione",
+                    "anno_scavo", "scavato", "periodo_iniziale", "fase_iniziale", "rapporti",
+                ]
+                us_list = [dict(zip(_keys, r)) for r in rows]
+                break
+            except Exception:
+                try:
+                    session.rollback()
+                except Exception:
+                    pass
+        converter = S3DConverter()
+        graph = converter.create_graph_from_us(us_list, site_name=site)
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+            tmp_path = tmp.name
+        try:
+            converter.export_to_heriverse_json(graph, output_path=tmp_path)
+            with open(tmp_path, "rb") as f:
+                data = f.read()
+        finally:
+            try:
+                _os.unlink(tmp_path)
+            except OSError:
+                pass
+        return Response(
+            data,
+            mimetype="application/json",
+            headers={"Content-Disposition": f"attachment; filename={site}_heriverse.json"},
+        )
+    except Exception as e:
+        logger.exception("export heriverse failed")
+        return jsonify({"error": "export_failed", "message": str(e)}), 500
+
+
+@harris_creator_bp.post("/api/import/<site>/graphml")
+def api_import_graphml(site: str):
+    """Import yEd GraphML; writes us_table rows and rapporti (4-tuple + inverses)."""
+    from pyarchinit_mini.graphproj.graphml_reader import parse_graphml
+    from pyarchinit_mini.graphproj.graph_to_db import write_graph
+    f = request.files.get("file")
+    if f is None or not f.filename:
+        return jsonify({"error": "no_file"}), 400
+    try:
+        projected = parse_graphml(f.read(), target_site=site)
+    except Exception as e:
+        logger.warning("import graphml parse failed: %s", e)
+        return jsonify({"error": "parse_error", "detail": str(e)}), 400
+    try:
+        session = _get_session()
+        result = write_graph(projected, target_site=site, session=session, source_label="graphml")
+        return jsonify({
+            "imported_us": result.imported_us,
+            "imported_edges": result.imported_edges,
+            "inverses_written": result.inverses_written,
+            "stubs_created": result.stubs_created,
+            "inverses_skipped": result.inverses_skipped,
+            "errors": result.errors,
+        }), 200
+    except Exception as e:
+        logger.exception("import graphml write failed")
+        return jsonify({"error": "write_failed", "message": str(e)}), 500
+
+
+@harris_creator_bp.post("/api/import/<site>/json")
+def api_import_heriverse_json(site: str):
+    """Import Heriverse/ATON JSON; writes us_table + rapporti (4-tuple + inverses)."""
+    from pyarchinit_mini.graphproj.heriverse_parser import parse_heriverse
+    from pyarchinit_mini.graphproj.graph_to_db import write_graph
+    f = request.files.get("file")
+    if f is None or not f.filename:
+        return jsonify({"error": "no_file"}), 400
+    try:
+        projected = parse_heriverse(f.read().decode("utf-8"))
+        # Override site to the URL parameter
+        projected.site = site
+        for n in projected.nodes:
+            n.sito = site
+    except Exception as e:
+        logger.warning("import json parse failed: %s", e)
+        return jsonify({"error": "parse_error", "detail": str(e)}), 400
+    try:
+        session = _get_session()
+        result = write_graph(projected, target_site=site, session=session, source_label="json")
+        return jsonify({
+            "imported_us": result.imported_us,
+            "imported_edges": result.imported_edges,
+            "inverses_written": result.inverses_written,
+            "stubs_created": result.stubs_created,
+            "inverses_skipped": result.inverses_skipped,
+        }), 200
+    except Exception as e:
+        logger.exception("import json write failed")
+        return jsonify({"error": "write_failed", "message": str(e)}), 500

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2><i class="fas fa-tools"></i> {{ _("Matrix Tools") }}</h2>
+  <p class="text-muted">{{ _("Importa o esporta la stratigrafia di un sito in formato GraphML (yEd) o Heriverse/ATON JSON.") }}</p>
+
+  <div class="card mb-4">
+    <div class="card-header"><i class="fas fa-download"></i> {{ _("Export") }}</div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">{{ _("Sito") }}</label>
+        <select id="export-site" class="form-select">
+          {% for s in sites %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <button class="btn btn-primary me-2" onclick="exportSite('yed-graphml')"><i class="fas fa-file-code"></i> yEd GraphML</button>
+      <button class="btn btn-primary" onclick="exportSite('heriverse-json')"><i class="fas fa-cube"></i> Heriverse / ATON</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><i class="fas fa-upload"></i> {{ _("Import") }}</div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">{{ _("Sito di destinazione") }}</label>
+        <select id="import-site" class="form-select">
+          {% for s in sites %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">{{ _("File (.graphml o .json)") }}</label>
+        <input type="file" id="import-file" class="form-control" accept=".graphml,.json">
+      </div>
+      <button class="btn btn-success" onclick="importFile()"><i class="fas fa-upload"></i> {{ _("Carica") }}</button>
+      <div id="import-result" class="mt-3"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function exportSite(fmt) {
+  var site = document.getElementById('export-site').value;
+  if (!site) { alert('{{ _("Scegli un sito") }}'); return; }
+  window.location.href = '/harris-creator/api/export/' + encodeURIComponent(site) + '/' + fmt;
+}
+function importFile() {
+  var site = document.getElementById('import-site').value;
+  var f = document.getElementById('import-file').files[0];
+  var box = document.getElementById('import-result');
+  if (!site || !f) {
+    box.innerHTML = '<div class="alert alert-warning">{{ _("Scegli sito e file") }}</div>';
+    return;
+  }
+  var fmt = f.name.toLowerCase().endsWith('.json') ? 'json' : 'graphml';
+  var fd = new FormData();
+  fd.append('file', f);
+  box.innerHTML = '<div class="alert alert-info">{{ _("Caricamento in corso...") }}</div>';
+  fetch('/harris-creator/api/import/' + encodeURIComponent(site) + '/' + fmt, {
+    method: 'POST', body: fd
+  })
+  .then(function(r) { return r.json().then(function(j) { return {ok: r.ok, body: j}; }); })
+  .then(function(res) {
+    if (res.ok) {
+      box.innerHTML =
+        '<div class="alert alert-success">' +
+        '{{ _("Import OK") }} — ' +
+        '{{ _("US") }}: ' + res.body.imported_us + ', ' +
+        '{{ _("Edges") }}: ' + res.body.imported_edges + ', ' +
+        '{{ _("Stubs creati") }}: ' + res.body.stubs_created +
+        '</div>';
+    } else {
+      box.innerHTML = '<div class="alert alert-danger">' + JSON.stringify(res.body) + '</div>';
+    }
+  })
+  .catch(function(e) {
+    box.innerHTML = '<div class="alert alert-danger">' + e + '</div>';
+  });
+}
+</script>
+{% endblock %}

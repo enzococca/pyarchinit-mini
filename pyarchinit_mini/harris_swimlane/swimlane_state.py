@@ -2,9 +2,17 @@
 
 Load: row_provider + us_table -> EditorState (Cytoscape-shaped).
 Save: full impl in Task 11 (currently NotImplementedError).
+
+Pipeline selection via SWIMLANE_PIPELINE env var:
+  - "s3dgraphy" (default): S3DProjector + to_cytoscape pipeline
+  - "legacy": historical pipeline
+
+On any exception in the new pipeline, falls back to legacy automatically.
 """
 from __future__ import annotations
 
+import logging
+import os
 from dataclasses import dataclass
 from typing import Optional
 
@@ -15,6 +23,8 @@ from .row_provider import Row, RowProvider, PERIOD_COLORS
 from .compound_layout import derive_row_id, initial_node_position
 from .harris_layout import compute_harris_positions
 from .exceptions import SwimlaneStateError
+
+logger = logging.getLogger(__name__)
 
 
 _VALID_GROUP_BY = frozenset({
@@ -81,6 +91,7 @@ class CytoscapeElement:
     data: dict
     classes: str = ""
     position: Optional[dict] = None
+    style: Optional[dict] = None
 
 
 @dataclass
@@ -104,7 +115,79 @@ class SaveResult:
 class SwimlaneState:
     @staticmethod
     def load(session: Session, site: str, *, group_by: str = "period_phase") -> EditorState:
-        """Load editor state for site, organised by group_by.
+        """Load swimlane state. Dispatcher honouring SWIMLANE_PIPELINE env var.
+
+        - SWIMLANE_PIPELINE=s3dgraphy (default): use S3DProjector + to_cytoscape.
+          Falls back to legacy on any exception.
+        - SWIMLANE_PIPELINE=legacy: use the historical pipeline.
+
+        group_by must be one of the 9 values in _VALID_GROUP_BY.
+        Raises ValueError for unknown values.
+        """
+        if group_by not in _VALID_GROUP_BY:
+            raise ValueError(f"invalid group_by: {group_by!r}")
+
+        pipeline = os.environ.get("SWIMLANE_PIPELINE", "s3dgraphy").lower()
+        if pipeline == "s3dgraphy":
+            try:
+                return SwimlaneState._load_via_s3dgraphy(session, site, group_by)
+            except Exception:
+                logger.exception("s3dgraphy pipeline failed; falling back to legacy")
+        return SwimlaneState._load_legacy(session, site, group_by=group_by)
+
+    @staticmethod
+    def _load_via_s3dgraphy(session: Session, site: str, group_by: str) -> EditorState:
+        """New pipeline: S3DProjector → ProjectedGraph → to_cytoscape → EditorState."""
+        from pyarchinit_mini.graphproj.s3d_projector import S3DProjector, VALID_GROUP_BY as S3D_VALID
+        from pyarchinit_mini.graphproj.s3d_to_cytoscape import to_cytoscape
+
+        # Map legacy group_by values to the new vocabulary; unknown → "none"
+        new_group_by = group_by if group_by in S3D_VALID else "none"
+        projected = S3DProjector.from_site(session, site, group_by=new_group_by)
+        cyto = to_cytoscape(projected)
+        return SwimlaneState._make_state_from_cytoscape(site, group_by, cyto)
+
+    @staticmethod
+    def _make_state_from_cytoscape(site: str, group_by: str, cyto: dict) -> EditorState:
+        """Build an EditorState from the dict produced by to_cytoscape()."""
+        rows: list[Row] = []
+        for r in cyto["rows"]:
+            label = r.get("label") or (r.get("periodo") or "")
+            rows.append(Row(
+                row_id=r["row_id"],
+                period_name=r.get("periodo") or label,
+                phase_name=r.get("fase"),
+                start_date=None,
+                end_date=None,
+                color=PERIOD_COLORS[len(rows) % len(PERIOD_COLORS)],
+                source="period_table" if not r.get("is_fallback") else "fallback",
+            ))
+
+        nodes: list[CytoscapeElement] = []
+        for n in cyto["nodes"]:
+            el = CytoscapeElement(data=n["data"], position=None)
+            # Stamp palette style so /api/load can pass it through
+            el.style = n.get("style")
+            nodes.append(el)
+
+        edges: list[CytoscapeElement] = []
+        for e in cyto["edges"]:
+            el = CytoscapeElement(data=e["data"])
+            el.style = e.get("style")
+            edges.append(el)
+
+        return EditorState(
+            site=site,
+            group_by=group_by,
+            rows=rows,
+            nodes=nodes,
+            edges=edges,
+            pending_changes={"us_updates": [], "us_inserts": [], "us_deletes": []},
+        )
+
+    @staticmethod
+    def _load_legacy(session: Session, site: str, *, group_by: str = "period_phase") -> EditorState:
+        """Historical pipeline (preserved verbatim). Handles all group_by variants.
 
         group_by must be one of the 9 values in _VALID_GROUP_BY.
         Raises ValueError for unknown values.

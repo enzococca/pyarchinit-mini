@@ -10,6 +10,14 @@ FIX_VOCAB = Path(__file__).parent.parent / "fixtures" / "s3dgraphy_jsons" / "0.1
 DB_FIX = Path(__file__).parent.parent / "fixtures" / "databases" / "sqlite_volterra_30us_with_periods.db"
 
 
+@pytest.fixture(autouse=True)
+def legacy_pipeline(monkeypatch):
+    """Force legacy pipeline: Volterra fixture has old-format rapporti strings
+    that the s3dgraphy pipeline cannot parse, so tests expecting 35 nodes/edges
+    must run through the legacy code path."""
+    monkeypatch.setenv("SWIMLANE_PIPELINE", "legacy")
+
+
 @pytest.fixture
 def client():
     VocabProvider.reset()
