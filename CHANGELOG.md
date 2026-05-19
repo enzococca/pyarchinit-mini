@@ -1,3 +1,29 @@
+## 2.8.0 — 2026-05-19
+
+### Added — EM Palette + Multi-Format Swimlane Round-Trip
+- **EM palette is now the canonical style source** for swimlane rendering, GraphML export, and Heriverse/ATON JSON export. Palette loaded from `pyarchinit_mini/graphml_converter/templates/EM_palette.graphml` (3246-line canonical version) with `PaletteLoader` cache + SIGHUP hot-reload + fallback to minimal hardcoded defaults if missing.
+- **`SWIMLANE_PIPELINE=s3dgraphy|legacy` feature flag** (default `s3dgraphy`) with automatic legacy fallback on exception. Set to `legacy` to roll back instantly.
+- **New endpoints**:
+  - `GET /harris-creator/api/export/<site>/heriverse-json` — Heriverse/ATON JSON (single format).
+  - `POST /harris-creator/api/import/<site>/graphml` — yEd GraphML import that writes 4-tuple rapporti and inverses on BOTH involved US.
+  - `POST /harris-creator/api/import/<site>/json` — Heriverse JSON import (same write path).
+- **Standalone `/matrix-tools` page** for import/export operations (site picker + format radio + file uploader).
+- **Per-site export buttons** (GraphML, Heriverse) in sites list.
+- **Swimlane toolbar**: grouping dropdown (none/area/settore/quadrato/attività/strutture), export menu, import file picker.
+- **Bilingual rapporti parser**: reads both legacy 2-tuple `[rel, us]` and new 4-tuple `[rel, us, area, sito]`; always writes 4-tuple. Italian aliases include extras (`riempito da`, `si lega a`, `gli si appoggia`) absent from `vocab_it.json`.
+- **Automatic stub US creation** when import edges reference missing rows; counted in result.
+
+### Changed
+- Swimlane rows are now always periods (with "Periodo 1" fallback when `period_table` is empty or a US has no period match); the old `group_by=period_phase|struttura|...` registry collapses to a sub-grouping selector within rows. Legacy `group_by` values still work via the `legacy` pipeline.
+- `/api/load/<site>` response includes a `style` dict per node and edge, derived from the EM palette (shape, fill color, border color, line style, arrow heads).
+
+### Internals
+- New modules: `pyarchinit_mini/em_palette/` (loader, styles), `pyarchinit_mini/graphproj/` (rapporti_codec, s3d_projector, s3d_to_cytoscape, graph_to_db, heriverse_parser, graphml_reader, graphml_writer).
+- New tests: 13 test files across `tests/unit/` and `tests/integration/`, plus a regression fixture (`tests/fixtures/adarte_regression_dump.sql`) anonymized from `Rimini_RN_2020_21_Museo_Fellini` (100 US, 516 edges, 8 distinct canonical labels validated end-to-end).
+
+### Migration notes
+- The `patch_pyarchinit_post_upgrade.py` post-upgrade script's Section 27 (`swimlane.row_provider_schema`) and Section 28 (`swimlane.build_edges_literal`) still apply, but their fixes are now native to the s3dgraphy pipeline. After this upgrade, Sections 27/28 are no-ops if the legacy file no longer has the markers.
+
 ## [2.7.1] - 2026-05-19
 
 ### Fixed (IT)
