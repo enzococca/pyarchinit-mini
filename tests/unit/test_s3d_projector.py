@@ -178,3 +178,93 @@ def test_sub_group_graceful_when_column_missing(tmp_path):
     g = S3DProjector.from_site(s, "S", group_by="settore")
     # No crash; sub_group falls back to None
     assert g.nodes[0].sub_group is None
+
+
+# ---------------------------------------------------------------------------
+# Fix A — inverse-to-forward direction normalization
+# ---------------------------------------------------------------------------
+
+def _make_inverse_session(tmp_path, rapporti_str):
+    """Helper: two-US DB where US 1 carries the given rapporti string."""
+    engine = create_engine(f"sqlite:///{tmp_path}/inv.db")
+    with engine.begin() as conn:
+        conn.execute(text("""CREATE TABLE site_table (id_sito INTEGER PRIMARY KEY, sito TEXT)"""))
+        conn.execute(text("""CREATE TABLE period_table (
+            id_period INTEGER PRIMARY KEY, sito TEXT, periodo TEXT, fase TEXT, datazione TEXT)"""))
+        conn.execute(text("""CREATE TABLE us_table (
+            id_us INTEGER PRIMARY KEY AUTOINCREMENT,
+            sito TEXT, area TEXT, us TEXT, unita_tipo TEXT,
+            descrizione TEXT, fase_iniziale TEXT, fase_finale TEXT, rapporti TEXT)"""))
+        conn.execute(text(
+            "INSERT INTO us_table (sito, area, us, unita_tipo, rapporti) "
+            f"VALUES ('S','A','1','USM','{rapporti_str}')"
+        ))
+        conn.execute(text(
+            "INSERT INTO us_table (sito, area, us, unita_tipo) VALUES ('S','A','2','USM')"
+        ))
+    return sessionmaker(bind=engine)()
+
+
+def test_normalize_inverse_coperto_da(tmp_path):
+    """'Coperto da' (is_after) on US 1 → emits Edge(2→1, 'overlies') not Edge(1→2, 'is_after')."""
+    s = _make_inverse_session(tmp_path, '[[\"Coperto da\", \"2\"]]')
+    g = S3DProjector.from_site(s, "S")
+    assert len(g.edges) == 1
+    e = g.edges[0]
+    by_us = {n.us: n.node_id for n in g.nodes}
+    assert e.canonical == "overlies", f"Expected 'overlies', got {e.canonical!r}"
+    assert e.source_id == by_us["2"], "source should be US 2 (the overlying one)"
+    assert e.target_id == by_us["1"], "target should be US 1 (the covered one)"
+
+
+def test_normalize_inverse_tagliato_da(tmp_path):
+    """'Tagliato da' (is_cut_by) on US 1 → emits Edge(2→1, 'cuts')."""
+    s = _make_inverse_session(tmp_path, '[[\"Tagliato da\", \"2\"]]')
+    g = S3DProjector.from_site(s, "S")
+    assert len(g.edges) == 1
+    e = g.edges[0]
+    by_us = {n.us: n.node_id for n in g.nodes}
+    assert e.canonical == "cuts"
+    assert e.source_id == by_us["2"]
+    assert e.target_id == by_us["1"]
+
+
+def test_normalize_inverse_riempito_da(tmp_path):
+    """'Riempito da' (is_filled_by) on US 1 → emits Edge(2→1, 'fills')."""
+    s = _make_inverse_session(tmp_path, '[[\"Riempito da\", \"2\"]]')
+    g = S3DProjector.from_site(s, "S")
+    assert len(g.edges) == 1
+    e = g.edges[0]
+    by_us = {n.us: n.node_id for n in g.nodes}
+    assert e.canonical == "fills"
+    assert e.source_id == by_us["2"]
+    assert e.target_id == by_us["1"]
+
+
+def test_no_inverse_canonicals_in_graph(tmp_path):
+    """After normalization, no inverse canonical names appear in graph.edges."""
+    from pyarchinit_mini.graphproj.rapporti_codec import REVERSE_TO_FORWARD
+    # Give both US a mix of inverse rapporti
+    engine = create_engine(f"sqlite:///{tmp_path}/mix.db")
+    with engine.begin() as conn:
+        conn.execute(text("""CREATE TABLE site_table (id_sito INTEGER PRIMARY KEY, sito TEXT)"""))
+        conn.execute(text("""CREATE TABLE period_table (
+            id_period INTEGER PRIMARY KEY, sito TEXT, periodo TEXT, fase TEXT, datazione TEXT)"""))
+        conn.execute(text("""CREATE TABLE us_table (
+            id_us INTEGER PRIMARY KEY AUTOINCREMENT,
+            sito TEXT, area TEXT, us TEXT, unita_tipo TEXT,
+            descrizione TEXT, fase_iniziale TEXT, fase_finale TEXT, rapporti TEXT)"""))
+        conn.execute(text(
+            "INSERT INTO us_table (sito, area, us, unita_tipo, rapporti) "
+            "VALUES ('S','A','1','USM','[[\"Coperto da\",\"2\"],[\"Tagliato da\",\"3\"]]')"
+        ))
+        conn.execute(text(
+            "INSERT INTO us_table (sito, area, us, unita_tipo) VALUES ('S','A','2','USM')"
+        ))
+        conn.execute(text(
+            "INSERT INTO us_table (sito, area, us, unita_tipo) VALUES ('S','A','3','USM')"
+        ))
+    s = sessionmaker(bind=engine)()
+    g = S3DProjector.from_site(s, "S")
+    inverse_found = [e.canonical for e in g.edges if e.canonical in REVERSE_TO_FORWARD]
+    assert inverse_found == [], f"Inverse canonicals still present: {inverse_found}"

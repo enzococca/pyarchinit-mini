@@ -13,6 +13,15 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+# Inverse canonicals that must be converted to their forward counterpart by
+# swapping source and target.  Only directional (non-symmetric) inverses.
+REVERSE_TO_FORWARD: Dict[str, str] = {
+    "is_after": "overlies",
+    "is_cut_by": "cuts",
+    "is_filled_by": "fills",
+    "is_abutted_by": "abuts",
+}
+
 
 logger = logging.getLogger(__name__)
 
@@ -36,14 +45,18 @@ INVERSE_PAIRS: Dict[str, str] = {
 # Italian aliases that are NOT in vocab_it.json (observed in live Adarte data
 # on Rimini_RN_2020_21_Museo_Fellini).
 _IT_EXTRAS: Dict[str, str] = {
-    "riempito da": "is_after",
+    # Inverse directional aliases (will be swapped to forward by REVERSE_TO_FORWARD)
+    "riempito da": "is_filled_by",   # was wrongly "is_after" — fixed
+    "tagliato da": "is_cut_by",      # was missing
+    "coperto da": "is_after",        # explicit fallback in case EdgeRegistry misses it
+    # Symmetric / other
     "si lega a": "is_bonded_to",
     "si lega_a": "is_bonded_to",
     "connesso a": "is_bonded_to",
     "connesso_a": "is_bonded_to",
     "anteriore a": "is_before",
     "posteriore a": "is_after",
-    "gli si appoggia": "is_before",
+    "gli si appoggia": "is_abutted_by",  # was "is_before" — fixed to proper inverse
 }
 
 # Canonical → italian display label (for swimlane web + GraphML edge labels).

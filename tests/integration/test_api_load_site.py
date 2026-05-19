@@ -41,38 +41,51 @@ def client(tmp_path, monkeypatch):
 
 
 def test_api_load_returns_palette_styled_nodes(client):
+    """US nodes carry flat palette fields in data (Fix B); no nested style dict."""
     r = client.get("/harris-creator/api/load/S")
     assert r.status_code == 200, r.data[:300]
     body = r.get_json()
     assert "nodes" in body and "edges" in body
-    assert len(body["nodes"]) >= 2
-    node = body["nodes"][0]
-    assert "style" in node
-    assert isinstance(node["style"], dict)
-    assert "shape" in node["style"]
-    assert "backgroundColor" in node["style"]
+    # Period row compound + 2 US nodes = at least 3 total
+    us_nodes = [n for n in body["nodes"] if n["data"].get("us")]
+    assert len(us_nodes) >= 2
+    node = us_nodes[0]
+    # Flat palette keys in data (Fix B)
+    assert "shape" in node["data"], f"Expected flat 'shape' in data, got keys: {list(node['data'].keys())}"
+    assert "bgcolor" in node["data"]
+    assert node["data"]["bgcolor"].startswith("#")
+    # No nested style dict
+    assert "style" not in node, "flat-field contract: no nested 'style' key on node"
 
 
-def test_api_load_emits_edges_with_style(client):
+def test_api_load_emits_edges_with_flat_fields(client):
+    """Edges carry flat palette fields in data (Fix B); direction normalized to forward."""
     r = client.get("/harris-creator/api/load/S")
     assert r.status_code == 200
     body = r.get_json()
     assert len(body["edges"]) >= 1
     e = body["edges"][0]
-    # Edge labels are italianized for the swimlane UI (locale=it); canonical kept in data.canonical
-    assert e["data"]["label"] in {"Copre", "Coperto da"}
-    assert e["data"]["canonical"] in {"overlies", "is_after"}
-    assert "style" in e
-    assert isinstance(e["style"], dict)
-    assert "lineColor" in e["style"]
+    # After Fix A, only forward canonicals: 'Copre' / 'overlies'
+    assert e["data"]["label"] == "Copre", f"Expected 'Copre', got {e['data']['label']!r}"
+    assert e["data"]["canonical"] == "overlies", f"Expected 'overlies', got {e['data']['canonical']!r}"
+    # Flat palette keys in data (Fix B)
+    assert "linecolor" in e["data"], f"Expected flat 'linecolor' in data, got keys: {list(e['data'].keys())}"
+    assert "arrowtarget" in e["data"]
+    # No nested style dict
+    assert "style" not in e, "flat-field contract: no nested 'style' key on edge"
 
 
 def test_api_load_with_group_by_area_yields_compound_parents(client):
+    """Period row + sub-cluster compounds present when group_by=area (Fix C/D)."""
     r = client.get("/harris-creator/api/load/S?group_by=area")
     assert r.status_code == 200
     body = r.get_json()
-    parents = [n for n in body["nodes"] if n["data"].get("compound")]
-    assert len(parents) >= 1
+    # At minimum: 1 period-row compound always present (Fix C)
+    period_rows = [n for n in body["nodes"] if n["data"].get("is_period_row")]
+    assert len(period_rows) >= 1
+    # With group_by=area and US in area 'A', also a sub-cluster compound
+    all_compounds = [n for n in body["nodes"] if n["data"].get("compound")]
+    assert len(all_compounds) >= 1
 
 
 def test_api_load_unknown_site_returns_empty(client):
