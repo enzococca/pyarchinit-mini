@@ -32,6 +32,31 @@ def _get_session():
     return DatabaseConnection.from_url(db_url).get_session()
 
 
+def _bootstrap_ai_credentials_from_settings() -> None:
+    """Copy AI keys from app_settings (UI Admin) into os.environ.
+
+    Mirror of the same bootstrap done inside the /api/ai_ask endpoint so the
+    matrix_import flow doesn't require shell-level env vars when the user has
+    configured the keys via the admin UI.
+    """
+    if not hasattr(current_app, "db_manager"):
+        return
+    try:
+        from pyarchinit_mini.services.app_setting_service import AppSettingService
+        settings = AppSettingService(current_app.db_manager)
+        provider = (settings.get("ai_provider") or "").strip().lower()
+        if provider:
+            os.environ["AI_PROVIDER"] = provider
+        openai_key = (settings.get("openai_api_key") or "").strip()
+        anthropic_key = (settings.get("anthropic_api_key") or "").strip()
+        if openai_key:
+            os.environ["OPENAI_API_KEY"] = openai_key
+        if anthropic_key:
+            os.environ["ANTHROPIC_API_KEY"] = anthropic_key
+    except Exception as exc:
+        current_app.logger.warning("matrix_import: AI settings bootstrap failed: %s", exc)
+
+
 @matrix_import_bp.route("/")
 def upload_form():
     with _get_session() as db:
@@ -58,6 +83,8 @@ def upload():
         flash("Carica un'immagine", "error")
         return redirect(url_for("matrix_import.upload_form"))
     image_bytes = image_file.read()
+
+    _bootstrap_ai_credentials_from_settings()
 
     try:
         result = extract(image_bytes, text_hint, provider)

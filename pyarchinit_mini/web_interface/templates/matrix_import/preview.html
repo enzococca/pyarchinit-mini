@@ -1,82 +1,103 @@
-<!DOCTYPE html>
-<html lang="{{ get_locale() }}">
-<head>
-  <meta charset="UTF-8">
-  <title>Preview AI Matrix Import</title>
-</head>
-<body>
-  <h1>Preview AI Matrix Import</h1>
+{% extends "base.html" %}
+{% block title %}{{ _('Preview AI Matrix Import') }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1><i class="fas fa-eye"></i> {{ _('Preview AI Matrix Import') }}</h1>
+  <p class="text-muted">
+    {{ _("Rivedi le US e le relazioni estratte. Modifica i campi se necessario, deseleziona le righe che non vuoi importare, poi clicca Importa.") }}
+  </p>
 
   {% if sito_needs_input %}
-    <div style="background:#ffe; border:1px solid #cc0; padding:10px">
-      <strong>&#9888;&#65039; Nome sito non rilevato.</strong>
-      Inseriscilo manualmente per continuare.
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle"></i>
+      <strong>{{ _('Nome sito non rilevato.') }}</strong>
+      {{ _("L'AI non l'ha letto dall'immagine e non l'hai inserito nel form. Inseriscilo qui sotto per continuare.") }}
     </div>
   {% endif %}
 
-  <form id="apply-form" method="post" action="{{ url_for('matrix_import.apply') }}">
+  <form id="apply-form" method="post" action="{{ url_for('matrix_import.apply') }}" class="card p-4">
     <input type="hidden" name="plan_json" value="{{ plan_json|e }}">
     <input type="hidden" name="image_b64" value="{{ image_b64|e }}">
 
-    <label>Sito:
-      <input type="text" name="sito" value="{{ sito }}" required>
-    </label><br>
+    <div class="mb-3">
+      <label class="form-label">{{ _('Sito') }} <span class="text-danger">*</span></label>
+      <input type="text" name="sito" value="{{ sito }}" class="form-control" required>
+    </div>
 
-    <h3>US estratte ({{ plan.us|length }})</h3>
-    <table border="1">
-      <thead>
-        <tr>
-          <th>&#10003;</th><th>US</th><th>Area</th><th>Unità tipo</th>
-          <th>Descrizione</th><th>F.rec</th><th>F.ini</th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for u in plan.us %}
-        <tr>
-          <td><input type="checkbox" name="selected_us" value="{{ loop.index0 }}" checked></td>
-          <td><input name="us_num_{{ loop.index0 }}" value="{{ u.us_num }}"></td>
-          <td><input name="area_{{ loop.index0 }}" value="{{ u.area or area_default }}"></td>
-          <td>
-            <select name="unit_type_{{ loop.index0 }}">
-              <option value="USM" {% if u.unit_type == 'USM' %}selected{% endif %}>USM</option>
-              <option value="USR" {% if u.unit_type == 'USR' %}selected{% endif %}>USR</option>
-              <option value="US"  {% if u.unit_type == 'US'  %}selected{% endif %}>US</option>
-            </select>
-          </td>
-          <td><input name="desc_{{ loop.index0 }}" value="{{ u.descrizione }}"></td>
-          <td><input type="number" name="fr_{{ loop.index0 }}" value="{{ u.fase_recente }}" style="width:50px"></td>
-          <td><input type="number" name="fi_{{ loop.index0 }}" value="{{ u.fase_iniziale }}" style="width:50px"></td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+    <h3 class="mt-4">{{ _('US estratte') }} <span class="badge bg-secondary">{{ plan.us|length }}</span></h3>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th style="width:40px"><i class="fas fa-check"></i></th>
+            <th style="width:90px">{{ _('US') }}</th>
+            <th style="width:140px">{{ _('Area') }}</th>
+            <th style="width:100px">{{ _('Unità tipo') }}</th>
+            <th>{{ _('Descrizione') }}</th>
+            <th style="width:70px">{{ _('F.rec') }}</th>
+            <th style="width:70px">{{ _('F.ini') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for u in plan.us %}
+          <tr>
+            <td class="text-center"><input type="checkbox" name="selected_us" value="{{ loop.index0 }}" checked class="form-check-input"></td>
+            <td><input name="us_num_{{ loop.index0 }}" value="{{ u.us_num }}" class="form-control form-control-sm"></td>
+            <td><input name="area_{{ loop.index0 }}" value="{{ u.area or area_default }}" class="form-control form-control-sm"></td>
+            <td>
+              <select name="unit_type_{{ loop.index0 }}" class="form-select form-select-sm">
+                <option value="USM" {% if u.unit_type == 'USM' %}selected{% endif %}>USM</option>
+                <option value="USR" {% if u.unit_type == 'USR' %}selected{% endif %}>USR</option>
+                <option value="US"  {% if u.unit_type == 'US'  %}selected{% endif %}>US</option>
+              </select>
+            </td>
+            <td><input name="desc_{{ loop.index0 }}" value="{{ u.descrizione }}" class="form-control form-control-sm"></td>
+            <td><input type="number" name="fr_{{ loop.index0 }}" value="{{ u.fase_recente }}" class="form-control form-control-sm"></td>
+            <td><input type="number" name="fi_{{ loop.index0 }}" value="{{ u.fase_iniziale }}" class="form-control form-control-sm"></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
-    <h3>Relazioni estratte ({{ plan.edges|length }})</h3>
-    <table border="1">
-      <thead>
-        <tr><th>&#10003;</th><th>US from</th><th>US to</th><th>Tipo</th></tr>
-      </thead>
-      <tbody>
-      {% for e in plan.edges %}
-        <tr>
-          <td><input type="checkbox" name="selected_edges" value="{{ loop.index0 }}" checked></td>
-          <td><input name="ef_{{ loop.index0 }}" value="{{ e.us_from }}"></td>
-          <td><input name="et_{{ loop.index0 }}" value="{{ e.us_to }}"></td>
-          <td>
-            <select name="etipo_{{ loop.index0 }}">
-              {% for t in ['copre','coperto da','taglia','tagliato da','riempie','riempito da','si appoggia','gli si appoggia','uguale a'] %}
-                <option value="{{ t }}" {% if e.tipo == t %}selected{% endif %}>{{ t }}</option>
-              {% endfor %}
-            </select>
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+    <h3 class="mt-4">{{ _('Relazioni estratte') }} <span class="badge bg-secondary">{{ plan.edges|length }}</span></h3>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th style="width:40px"><i class="fas fa-check"></i></th>
+            <th style="width:100px">{{ _('US from') }}</th>
+            <th style="width:100px">{{ _('US to') }}</th>
+            <th>{{ _('Tipo') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for e in plan.edges %}
+          <tr>
+            <td class="text-center"><input type="checkbox" name="selected_edges" value="{{ loop.index0 }}" checked class="form-check-input"></td>
+            <td><input name="ef_{{ loop.index0 }}" value="{{ e.us_from }}" class="form-control form-control-sm"></td>
+            <td><input name="et_{{ loop.index0 }}" value="{{ e.us_to }}" class="form-control form-control-sm"></td>
+            <td>
+              <select name="etipo_{{ loop.index0 }}" class="form-select form-select-sm">
+                {% for t in ['copre','coperto da','taglia','tagliato da','riempie','riempito da','si appoggia','gli si appoggia','uguale a'] %}
+                  <option value="{{ t }}" {% if e.tipo == t %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+              </select>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
-    <br>
-    <button type="submit">Importa selezionate</button>
-    <a href="{{ url_for('matrix_import.upload_form') }}">Annulla</a>
+    <div class="mt-3">
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-save"></i> {{ _('Importa selezionate') }}
+      </button>
+      <a href="{{ url_for('matrix_import.upload_form') }}" class="btn btn-outline-secondary">
+        {{ _('Annulla') }}
+      </a>
+    </div>
   </form>
-</body>
-</html>
+</div>
+{% endblock %}
