@@ -941,3 +941,35 @@ def api_import_graphml(site: str):
     except Exception as e:
         logger.exception("import graphml write failed")
         return jsonify({"error": "write_failed", "message": str(e)}), 500
+
+
+@harris_creator_bp.post("/api/import/<site>/json")
+def api_import_heriverse_json(site: str):
+    """Import Heriverse/ATON JSON; writes us_table + rapporti (4-tuple + inverses)."""
+    from pyarchinit_mini.graphproj.heriverse_parser import parse_heriverse
+    from pyarchinit_mini.graphproj.graph_to_db import write_graph
+    f = request.files.get("file")
+    if f is None or not f.filename:
+        return jsonify({"error": "no_file"}), 400
+    try:
+        projected = parse_heriverse(f.read().decode("utf-8"))
+        # Override site to the URL parameter
+        projected.site = site
+        for n in projected.nodes:
+            n.sito = site
+    except Exception as e:
+        logger.warning("import json parse failed: %s", e)
+        return jsonify({"error": "parse_error", "detail": str(e)}), 400
+    try:
+        session = _get_session()
+        result = write_graph(projected, target_site=site, session=session, source_label="json")
+        return jsonify({
+            "imported_us": result.imported_us,
+            "imported_edges": result.imported_edges,
+            "inverses_written": result.inverses_written,
+            "stubs_created": result.stubs_created,
+            "inverses_skipped": result.inverses_skipped,
+        }), 200
+    except Exception as e:
+        logger.exception("import json write failed")
+        return jsonify({"error": "write_failed", "message": str(e)}), 500
