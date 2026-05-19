@@ -66,6 +66,15 @@ VALID_GROUP_BY = frozenset({"none", "area", "settore", "quadrato", "attivita", "
 
 
 class S3DProjector:
+    _SUB_GROUP_COLUMN: Dict[str, str] = {
+        "none": "",
+        "area": "area",
+        "settore": "settore",
+        "quadrato": "quadrato",
+        "attivita": "attivita",
+        "strutture": "struttura",
+    }
+
     @classmethod
     def from_site(cls, session: Session, site: str, group_by: str = "none") -> ProjectedGraph:
         if group_by not in VALID_GROUP_BY:
@@ -120,14 +129,35 @@ class S3DProjector:
 
     @classmethod
     def _load_us_nodes(cls, session: Session, site: str, graph: ProjectedGraph) -> None:
-        rows = session.execute(
-            text("SELECT id_us, sito, area, us, unita_tipo, descrizione, fase_iniziale "
-                 "FROM us_table WHERE sito = :s"),
-            {"s": site},
-        ).fetchall()
+        col = cls._SUB_GROUP_COLUMN.get(graph.group_by, "")
+        # "area" is already in the base SELECT at index 2; other columns need an extra select.
+        extra_select = ""
+        if col and col != "area":
+            extra_select = f", {col}"
+        sql = (f"SELECT id_us, sito, area, us, unita_tipo, descrizione, fase_iniziale"
+               f"{extra_select} FROM us_table WHERE sito = :s")
+        try:
+            rows = session.execute(text(sql), {"s": site}).fetchall()
+        except Exception as exc:
+            # Column doesn't exist in this schema — retry without it
+            logger.warning("us_table column %r missing; sub_group falls back to None: %s",
+                           col, exc)
+            session.rollback()
+            sql_fb = ("SELECT id_us, sito, area, us, unita_tipo, descrizione, fase_iniziale "
+                      "FROM us_table WHERE sito = :s")
+            rows = session.execute(text(sql_fb), {"s": site}).fetchall()
+            extra_select = ""
         for r in rows:
             unit_type = r[4] or "US"
             row_id = cls._resolve_row_id(r[6], graph)
+            if graph.group_by == "none":
+                sub = None
+            elif graph.group_by == "area":
+                sub = r[2]
+            elif extra_select and len(r) > 7:
+                sub = r[7]
+            else:
+                sub = None
             graph.nodes.append(Node(
                 node_id=f"us_{r[0]}",
                 us=str(r[3]),
@@ -136,7 +166,7 @@ class S3DProjector:
                 unit_type=unit_type,
                 description=r[5],
                 row_id=row_id,
-                sub_group=None,  # populated by Task 6
+                sub_group=str(sub) if sub is not None else None,
             ))
 
     @classmethod

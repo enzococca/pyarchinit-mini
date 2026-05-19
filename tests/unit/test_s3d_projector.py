@@ -100,3 +100,81 @@ def test_edges_dedup_symmetric():
     # Only one symmetric edge, not two
     assert len(g.edges) == 1
     assert g.edges[0].canonical == "has_same_time"
+
+
+# ---------------------------------------------------------------------------
+# Task 6 — sub-grouping tests
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def session_factory_full(tmp_path):
+    """us_table schema with sub-grouping columns."""
+    engine = create_engine(f"sqlite:///{tmp_path}/full.db")
+    with engine.begin() as conn:
+        conn.execute(text("""CREATE TABLE site_table (id_sito INTEGER PRIMARY KEY, sito TEXT)"""))
+        conn.execute(text("""CREATE TABLE period_table (
+            id_period INTEGER PRIMARY KEY,
+            sito TEXT, periodo TEXT, fase TEXT, datazione TEXT)"""))
+        conn.execute(text("""CREATE TABLE us_table (
+            id_us INTEGER PRIMARY KEY AUTOINCREMENT,
+            sito TEXT, area TEXT, us TEXT, unita_tipo TEXT,
+            descrizione TEXT, fase_iniziale TEXT,
+            settore TEXT, quadrato TEXT, attivita TEXT, struttura TEXT,
+            rapporti TEXT)"""))
+    return sessionmaker(bind=engine)
+
+
+def test_sub_group_by_area(session_factory_full):
+    s = session_factory_full()
+    s.execute(text("INSERT INTO us_table (sito, area, us, unita_tipo) VALUES ('S','A1','1','USM')"))
+    s.execute(text("INSERT INTO us_table (sito, area, us, unita_tipo) VALUES ('S','A2','2','USM')"))
+    s.commit()
+    g = S3DProjector.from_site(s, "S", group_by="area")
+    by_us = {n.us: n for n in g.nodes}
+    assert by_us["1"].sub_group == "A1"
+    assert by_us["2"].sub_group == "A2"
+
+
+def test_sub_group_by_settore(session_factory_full):
+    s = session_factory_full()
+    s.execute(text("INSERT INTO us_table (sito, area, us, unita_tipo, settore) "
+                   "VALUES ('S','A','1','USM','Nord')"))
+    s.commit()
+    g = S3DProjector.from_site(s, "S", group_by="settore")
+    assert g.nodes[0].sub_group == "Nord"
+
+
+def test_sub_group_by_strutture_uses_struttura_column(session_factory_full):
+    s = session_factory_full()
+    s.execute(text("INSERT INTO us_table (sito, area, us, unita_tipo, struttura) "
+                   "VALUES ('S','A','1','USM','Edificio_A')"))
+    s.commit()
+    g = S3DProjector.from_site(s, "S", group_by="strutture")
+    assert g.nodes[0].sub_group == "Edificio_A"
+
+
+def test_sub_group_none_returns_none(session_factory_full):
+    s = session_factory_full()
+    s.execute(text("INSERT INTO us_table (sito, area, us, unita_tipo, settore) "
+                   "VALUES ('S','A','1','USM','Nord')"))
+    s.commit()
+    g = S3DProjector.from_site(s, "S", group_by="none")
+    assert g.nodes[0].sub_group is None
+
+
+def test_sub_group_graceful_when_column_missing(tmp_path):
+    """If us_table lacks the requested sub-grouping column, fall back to None."""
+    engine = create_engine(f"sqlite:///{tmp_path}/legacy.db")
+    with engine.begin() as conn:
+        # NO settore/quadrato/attivita/struttura columns
+        conn.execute(text("""CREATE TABLE site_table (id_sito INTEGER PRIMARY KEY, sito TEXT)"""))
+        conn.execute(text("""CREATE TABLE period_table (id_period INTEGER PRIMARY KEY,
+            sito TEXT, periodo TEXT, fase TEXT, datazione TEXT)"""))
+        conn.execute(text("""CREATE TABLE us_table (
+            id_us INTEGER PRIMARY KEY AUTOINCREMENT, sito TEXT, area TEXT, us TEXT,
+            unita_tipo TEXT, descrizione TEXT, fase_iniziale TEXT, rapporti TEXT)"""))
+        conn.execute(text("INSERT INTO us_table (sito,area,us,unita_tipo) VALUES ('S','A','1','USM')"))
+    s = sessionmaker(bind=engine)()
+    g = S3DProjector.from_site(s, "S", group_by="settore")
+    # No crash; sub_group falls back to None
+    assert g.nodes[0].sub_group is None
