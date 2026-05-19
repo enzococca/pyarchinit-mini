@@ -175,35 +175,36 @@
             </small>
         </div>
         <div>
-            <select id="group-by-selector" class="form-select form-select-sm" style="display:inline-block;width:auto;margin-right:8px" title="Group lanes by (changes will re-layout the canvas)">
-              <option value="period_phase" selected>Period + Phase</option>
-              <option value="struttura">Struttura</option>
-              <option value="attivita">Attività</option>
-              <option value="settore">Settore</option>
-              <option value="area">Area</option>
-              <option value="ambient">Ambient</option>
-              <option value="saggio">Saggio</option>
-              <option value="quad_par">Quad/Par</option>
-              <option value="none">No grouping</option>
+            <select id="group-by-selector" class="form-select form-select-sm" style="display:inline-block;width:auto;margin-right:8px" title="{{ _('Raggruppa per (cambia re-layout del canvas)') }}">
+              <option value="none" selected>{{ _("Nessun raggruppamento") }}</option>
+              <option value="area">{{ _("Area") }}</option>
+              <option value="settore">{{ _("Settore") }}</option>
+              <option value="quadrato">{{ _("Quadrato") }}</option>
+              <option value="attivita">{{ _("Attività") }}</option>
+              <option value="strutture">{{ _("Strutture") }}</option>
             </select>
             <button class="btn btn-success btn-sm" id="save-btn" title="Save to database">
                 <i class="fas fa-save"></i> Save
             </button>
-            <button class="btn btn-info btn-sm" id="export-graphml-btn"
-                    title="EM-canonical GraphML (s3dgraphy schema, for Datacenter / 3D pipeline)">
-                <i class="fas fa-download"></i> GraphML
+            <div class="btn-group btn-group-sm">
+              <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-download"></i> {{ _("Esporta") }}
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportSwimlane('yed-graphml'); return false;">{{ _("yEd GraphML") }} (.graphml)</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportSwimlane('heriverse-json'); return false;">{{ _("Heriverse / ATON") }} (.json)</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" id="export-dot-link">{{ _("Graphviz DOT") }} (.dot)</a></li>
+                <li><a class="dropdown-item" href="#" id="export-png-link">{{ _("PNG immagine") }}</a></li>
+              </ul>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('matrix-import-file').click()" title="{{ _('Importa GraphML o Heriverse JSON') }}">
+              <i class="fas fa-upload"></i> {{ _("Importa") }}
             </button>
-            <button class="btn btn-secondary btn-sm" id="export-dot-btn" title="Export to Graphviz DOT">
-                <i class="fas fa-download"></i> DOT
-            </button>
-            <button class="btn btn-warning btn-sm" id="export-png-btn" title="Export current view as PNG image">
-                <i class="fas fa-image"></i> PNG
-            </button>
+            <input type="file" id="matrix-import-file" accept=".graphml,.json" style="display:none" onchange="importMatrixFile(this.files[0])">
             <!-- Spec 3-bis: Harris Swimlane controls -->
             <button onclick="showNewRowModal()" class="btn btn-primary btn-sm" title="Add a new swimlane row (period + phase)">+ New Row</button>
             <button onclick="saveSwimlaneState()" class="btn btn-success btn-sm" title="Save swimlane changes back to the database">&#128190; Save Swimlane</button>
-            <button onclick="exportYedGraphml()" class="btn btn-info btn-sm"
-                    title="yEd-flavored GraphML with TableNode swimlanes (open in yEd Desktop)">&#11015; Export yEd GraphML</button>
             <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#exportFormatsHelp" title="What are these export formats?">
                 <i class="fas fa-question-circle"></i>
             </button>
@@ -213,35 +214,6 @@
         </div>
     </div>
 
-    <!-- Swimlane Toolbar: Raggruppamento + Export menu + Import -->
-    <div class="btn-toolbar mb-2 mt-2 align-items-center" role="toolbar" id="swimlane-toolbar">
-      <div class="input-group me-2" style="max-width: 280px">
-        <span class="input-group-text">{{ _("Raggruppamento") }}</span>
-        <select id="group-by-select" class="form-select" onchange="reloadSwimlaneWithGrouping()">
-          <option value="none" selected>{{ _("nessuno") }}</option>
-          <option value="area">{{ _("area") }}</option>
-          <option value="settore">{{ _("settore") }}</option>
-          <option value="quadrato">{{ _("quadrato") }}</option>
-          <option value="attivita">{{ _("attività") }}</option>
-          <option value="strutture">{{ _("strutture") }}</option>
-        </select>
-      </div>
-      <div class="btn-group me-2">
-        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="fas fa-download"></i> {{ _("Export") }}
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#" onclick="exportSwimlane('yed-graphml'); return false;">yEd GraphML (.graphml)</a></li>
-          <li><a class="dropdown-item" href="#" onclick="exportSwimlane('heriverse-json'); return false;">Heriverse / ATON (.json)</a></li>
-        </ul>
-      </div>
-      <div class="btn-group me-2">
-        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('matrix-import-file').click()">
-          <i class="fas fa-upload"></i> {{ _("Import") }}
-        </button>
-        <input type="file" id="matrix-import-file" accept=".graphml,.json" style="display:none" onchange="importMatrixFile(this.files[0])">
-      </div>
-    </div>
     <script>
     (function() {
       var SITE = "{{ site_name | default('') | e }}";
@@ -249,20 +221,8 @@
         var m = window.location.pathname.match(/\/harris-creator\/([^/?]+)/);
         SITE = m ? decodeURIComponent(m[1]) : "";
       }
-      // Restore current group_by selection from URL
-      var urlParams = new URLSearchParams(window.location.search);
-      var currentGroupBy = urlParams.get('group_by') || 'none';
-      var sel = document.getElementById('group-by-select');
-      if (sel) sel.value = currentGroupBy;
-
-      window.reloadSwimlaneWithGrouping = function() {
-        var g = document.getElementById('group-by-select').value;
-        var url = new URL(window.location.href);
-        url.searchParams.set('group_by', g);
-        window.location.href = url.toString();
-      };
       window.exportSwimlane = function(fmt) {
-        var g = document.getElementById('group-by-select').value;
+        var g = document.getElementById('group-by-selector').value;
         window.location.href = '/harris-creator/api/export/' + encodeURIComponent(SITE) + '/' + fmt + '?group_by=' + encodeURIComponent(g);
       };
       window.importMatrixFile = function(file) {
@@ -289,6 +249,13 @@
         })
         .catch(function(err) { alert('Import failed: ' + err); });
       };
+      // Re-bind legacy DOT/PNG export handlers to new dropdown items
+      document.addEventListener('DOMContentLoaded', function() {
+        var dot = document.getElementById('export-dot-link');
+        if (dot) dot.addEventListener('click', function(e) { e.preventDefault(); exportMatrix('dot'); });
+        var png = document.getElementById('export-png-link');
+        if (png) png.addEventListener('click', function(e) { e.preventDefault(); exportPNG(); });
+      });
     })();
     </script>
 

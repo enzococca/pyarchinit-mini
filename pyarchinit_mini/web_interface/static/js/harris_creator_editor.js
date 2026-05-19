@@ -883,15 +883,10 @@ function setupEventListeners() {
     // Save button
     document.getElementById('save-btn').addEventListener('click', saveMatrix);
 
-    // Export buttons
-    document.getElementById('export-graphml-btn').addEventListener('click', () => exportMatrix('graphml'));
-    document.getElementById('export-dot-btn').addEventListener('click', () => exportMatrix('dot'));
-
-    // Export PNG button
-    const exportPngBtn = document.getElementById('export-png-btn');
-    if (exportPngBtn) {
-        exportPngBtn.addEventListener('click', exportPNG);
-    }
+    // Export buttons (legacy standalone buttons — null-safe; new dropdown items bound in template)
+    document.getElementById('export-graphml-btn')?.addEventListener('click', () => exportMatrix('graphml'));
+    document.getElementById('export-dot-btn')?.addEventListener('click', () => exportMatrix('dot'));
+    document.getElementById('export-png-btn')?.addEventListener('click', exportPNG);
 
     // Resize Cytoscape on window resize (e.g., sidebar toggle)
     window.addEventListener('resize', function() {
