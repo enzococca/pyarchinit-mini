@@ -20,6 +20,14 @@ def vocab():
     VocabProvider.reset()
 
 
+@pytest.fixture(autouse=True)
+def legacy_pipeline(monkeypatch):
+    """Force legacy pipeline: these tests use the Volterra fixture whose rapporti
+    are in old string format (e.g. 'copre 1001') which the s3dgraphy pipeline
+    cannot parse.  Without this the s3dgraphy path silently returns 0 edges."""
+    monkeypatch.setenv("SWIMLANE_PIPELINE", "legacy")
+
+
 @pytest.fixture
 def session():
     eng = create_engine(f"sqlite:///{DB_FIX}")

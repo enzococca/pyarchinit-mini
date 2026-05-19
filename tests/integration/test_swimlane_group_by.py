@@ -30,7 +30,10 @@ def test_group_by_period_phase_explicit(session):
     assert len(state.rows) == 5
 
 
-def test_group_by_none_returns_single_lane(session):
+def test_group_by_none_returns_single_lane(session, monkeypatch):
+    # Legacy pipeline: "none" collapses all US into one "row_default" lane.
+    # s3dgraphy pipeline maps "none" differently and returns period_table rows.
+    monkeypatch.setenv("SWIMLANE_PIPELINE", "legacy")
     state = SwimlaneState.load(session, "Volterra", group_by="none")
     assert state.group_by == "none"
     assert len(state.rows) == 1
@@ -76,6 +79,9 @@ def test_api_load_accepts_group_by(tmp_path, monkeypatch):
 
     db_path = str(DB_FIX)
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_path}")
+    # Legacy pipeline: "none" → single row_default lane. s3dgraphy returns
+    # period_table rows regardless of group_by="none".
+    monkeypatch.setenv("SWIMLANE_PIPELINE", "legacy")
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(harris_creator_bp)
@@ -92,6 +98,8 @@ def test_api_export_yed_with_group_by(tmp_path, monkeypatch):
     from flask import Flask
     from pyarchinit_mini.web_interface.harris_creator_routes import harris_creator_bp
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{DB_FIX}")
+    # Legacy pipeline produces row_id="row_default" for group_by="none".
+    monkeypatch.setenv("SWIMLANE_PIPELINE", "legacy")
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(harris_creator_bp)
@@ -108,6 +116,8 @@ def test_export_includes_epochs_meta(tmp_path, monkeypatch):
     from flask import Flask
     from pyarchinit_mini.web_interface.harris_creator_routes import harris_creator_bp
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{DB_FIX}")
+    # Legacy pipeline produces epochs_meta (key="d0") in the graphml export.
+    monkeypatch.setenv("SWIMLANE_PIPELINE", "legacy")
     app = Flask(__name__)
     app.config["TESTING"] = True
     app.register_blueprint(harris_creator_bp)

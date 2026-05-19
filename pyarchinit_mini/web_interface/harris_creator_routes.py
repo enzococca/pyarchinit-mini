@@ -733,7 +733,7 @@ def api_load_state(site: str):
     # DB (no site_table row), versus 200 + empty state when site exists but
     # has no US yet. Spec §7.1 mentions 404 for site_not_found — current
     # behavior returns 200 + empty.
-    group_by = request.args.get("group_by", "none")
+    group_by = request.args.get("group_by", "period_phase")
     try:
         session = _get_session()
         state = SwimlaneState.load(session, site, group_by=group_by)
@@ -832,15 +832,41 @@ from pyarchinit_mini.graphproj.filesystem import slugify
 
 @harris_creator_bp.get("/api/export/<site>/yed-graphml")
 def api_export_yed(site: str):
-    """Export site stratigraphy as yEd-flavored GraphML using the EM palette template."""
+    """Export site stratigraphy as yEd-flavored GraphML.
+
+    Pipeline selection honours SWIMLANE_PIPELINE env var:
+      - "s3dgraphy" (default): S3DProjector → EM palette graphml_writer
+      - "legacy": SwimlaneState.load → write_extended_matrix_graphml
+    """
+    import os as _os
     from flask import Response
-    from pyarchinit_mini.graphproj.s3d_projector import S3DProjector
-    from pyarchinit_mini.graphproj.graphml_writer import write_graphml
     group_by = request.args.get("group_by", "none")
+    pipeline = _os.environ.get("SWIMLANE_PIPELINE", "s3dgraphy").lower()
     try:
         session = _get_session()
-        projected = S3DProjector.from_site(session, site, group_by=group_by)
-        data = write_graphml(projected)
+        if pipeline == "legacy":
+            from pyarchinit_mini.harris_swimlane.swimlane_state import SwimlaneState
+            from pyarchinit_mini.graphml_io.yed_writer import write_extended_matrix_graphml
+            import tempfile, pathlib
+            state = SwimlaneState.load(session, site, group_by=group_by)
+            epochs = _load_epochs(session, site)
+            with tempfile.TemporaryDirectory() as td:
+                out = pathlib.Path(td) / f"{site}.graphml"
+                write_extended_matrix_graphml(
+                    state,
+                    site_meta={"sito": site},
+                    epochs=epochs,
+                    out=out,
+                )
+                data = out.read_bytes()
+        else:
+            from pyarchinit_mini.graphproj.s3d_projector import S3DProjector
+            from pyarchinit_mini.graphproj.graphml_writer import write_graphml
+            # Map legacy group_by values that S3DProjector doesn't accept
+            from pyarchinit_mini.graphproj.s3d_projector import VALID_GROUP_BY as S3D_VALID
+            s3d_group_by = group_by if group_by in S3D_VALID else "none"
+            projected = S3DProjector.from_site(session, site, group_by=s3d_group_by)
+            data = write_graphml(projected)
         return Response(
             data,
             mimetype="application/graphml+xml",
