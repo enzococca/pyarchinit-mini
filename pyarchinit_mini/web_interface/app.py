@@ -593,6 +593,11 @@ def create_app():
     # Spec 10 — AI Matrix Import
     app.register_blueprint(matrix_import_bp)
 
+    # Task 17 — standalone Matrix Tools page
+    from pyarchinit_mini.web_interface.matrix_tools_routes import matrix_tools_bp
+    app.register_blueprint(matrix_tools_bp)
+    csrf.exempt(matrix_tools_bp)
+
     # Exempt PyArchInit API endpoints from CSRF protection (JSON APIs)
     csrf.exempt(pyarchinit_import_export_bp)
     csrf.exempt(harris_creator_bp)
