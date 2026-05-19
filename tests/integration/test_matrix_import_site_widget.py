@@ -16,6 +16,7 @@ _APP_TEMPLATES = Path(__file__).parent.parent.parent / "pyarchinit_mini" / "web_
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path}/w.db")
     engine = create_engine(f"sqlite:///{tmp_path}/w.db")
     with engine.begin() as conn:
         conn.execute(text("""CREATE TABLE site_table (
@@ -29,10 +30,6 @@ def client(tmp_path, monkeypatch):
     app.jinja_env.globals.setdefault("_", lambda s: s)
     app.jinja_env.globals.setdefault("get_locale", lambda: "it")
     app.jinja_env.globals.setdefault("csrf_token", lambda: "t")
-    @app.before_request
-    def _s():
-        from flask import g
-        g.db_session = Session()
     app.register_blueprint(matrix_import_bp)
     yield app.test_client()
 
