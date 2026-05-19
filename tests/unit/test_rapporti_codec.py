@@ -43,9 +43,11 @@ def test_parse_italian_extras_resolve():
         current_site="S",
     )
     cans = [r.canonical for r in items]
-    assert "is_after" in cans          # riempito da
+    # "Riempito da" is the inverse of "fills" → is_filled_by (not is_after)
+    assert "is_filled_by" in cans      # riempito da — corrected from old wrong mapping
     assert "is_bonded_to" in cans      # si lega a
-    assert "is_before" in cans         # gli si appoggia
+    # "Gli si appoggia" is the inverse of "abuts" → is_abutted_by (not is_before)
+    assert "is_abutted_by" in cans     # gli si appoggia — corrected from old wrong mapping
 
 
 def test_parse_unknown_label_yields_none():

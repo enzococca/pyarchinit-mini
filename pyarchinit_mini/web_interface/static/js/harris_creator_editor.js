@@ -320,29 +320,82 @@ function initCytoscape() {
                     'target-arrow-shape': 'none'
                 }
             },
-            // Palette-driven styles: applied when node/edge carries a `style` data object
-            // from the /api/load response (overrides defaults above).
+            // Palette-driven node styling — flat data keys (Fix B/E).
+            // Overrides the generic defaults above for US nodes loaded from /api/load.
             {
-                selector: 'node[style]',
+                selector: 'node[shape]',
                 style: {
-                    'shape': 'data(style.shape)',
-                    'background-color': 'data(style.backgroundColor)',
-                    'border-color': 'data(style.borderColor)',
-                    'border-width': 'data(style.borderWidth)',
-                    'border-style': 'data(style.lineStyle)',
-                    'color': 'data(style.fontColor)',
-                    'font-size': 'data(style.fontSize)',
+                    'shape': 'data(shape)',
+                    'background-color': 'data(bgcolor)',
+                    'border-color': 'data(bordercolor)',
+                    'border-width': 'data(borderwidth)',
+                    'border-style': 'data(borderstyle)',
+                    'color': 'data(fontcolor)',
+                    'font-size': 'data(fontsize)',
                 }
             },
+            // Period row swimlanes (Fix C/E)
             {
-                selector: 'edge[style]',
+                selector: 'node[?is_period_row]',
                 style: {
-                    'line-color': 'data(style.lineColor)',
-                    'width': 'data(style.lineWidth)',
-                    'line-style': 'data(style.lineStyle)',
-                    'target-arrow-shape': 'data(style.targetArrowShape)',
-                    'source-arrow-shape': 'data(style.sourceArrowShape)',
-                    'target-arrow-color': 'data(style.lineColor)',
+                    'shape': 'roundrectangle',
+                    'background-color': '#F5F5F5',
+                    'background-opacity': 0.3,
+                    'border-color': '#9E9E9E',
+                    'border-width': 1,
+                    'label': 'data(label)',
+                    'text-valign': 'top',
+                    'text-halign': 'left',
+                    'text-margin-x': 10,
+                    'text-margin-y': 5,
+                    'font-size': 14,
+                    'font-weight': 'bold',
+                    'padding': 30,
+                }
+            },
+            // Sub-cluster compounds nested inside period rows (Fix D/E)
+            {
+                selector: 'node[?compound][!is_period_row]',
+                style: {
+                    'shape': 'roundrectangle',
+                    'background-color': '#FAFAFA',
+                    'background-opacity': 0.5,
+                    'border-color': '#BDBDBD',
+                    'border-width': 1,
+                    'border-style': 'dashed',
+                    'label': 'data(label)',
+                    'text-valign': 'top',
+                    'font-size': 11,
+                    'padding': 10,
+                }
+            },
+            // Palette-driven edge styling — flat data keys (Fix B/E)
+            {
+                selector: 'edge[linecolor]',
+                style: {
+                    'line-color': 'data(linecolor)',
+                    'width': 'data(linewidth)',
+                    'line-style': 'data(linestyle)',
+                    'target-arrow-shape': 'data(arrowtarget)',
+                    'source-arrow-shape': 'data(arrowsource)',
+                    'target-arrow-color': 'data(linecolor)',
+                }
+            },
+            // Dashed cuts override (Fix E)
+            {
+                selector: 'edge[is_dashed = "true"]',
+                style: {
+                    'line-style': 'dashed',
+                }
+            },
+            // Symmetric edges — no arrows, double thickness (Fix E)
+            {
+                selector: 'edge[canonical = "has_same_time"], edge[canonical = "is_bonded_to"]',
+                style: {
+                    'target-arrow-shape': 'none',
+                    'source-arrow-shape': 'none',
+                    'line-style': 'solid',
+                    'width': 3,
                 }
             }
         ],

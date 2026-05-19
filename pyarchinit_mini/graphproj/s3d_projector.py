@@ -18,7 +18,7 @@ from typing import Dict, List, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from pyarchinit_mini.graphproj.rapporti_codec import parse_rapporti, SYMMETRIC, INVERSE_PAIRS
+from pyarchinit_mini.graphproj.rapporti_codec import parse_rapporti, SYMMETRIC, INVERSE_PAIRS, REVERSE_TO_FORWARD
 
 
 logger = logging.getLogger(__name__)
@@ -217,17 +217,26 @@ class S3DProjector:
             if src_id is None:
                 continue
             for rap in parse_rapporti(rapp_raw, current_site=site):
+                canonical = rap.canonical
                 tgt_id = us_index.get(rap.target_us)
                 if tgt_id is None:
                     continue
-                if rap.canonical in SYMMETRIC:
-                    key = (rap.canonical, tuple(sorted((src_id, tgt_id))))
+                # Normalize inverse → forward + swap source/target so only
+                # forward canonicals (overlies, cuts, fills, abuts) appear in
+                # graph.edges.  Symmetric edges are never swapped.
+                if canonical in REVERSE_TO_FORWARD:
+                    canonical = REVERSE_TO_FORWARD[canonical]
+                    src_id, tgt_id = tgt_id, src_id
+                if canonical in SYMMETRIC:
+                    key = (canonical, tuple(sorted((src_id, tgt_id))))
                 else:
-                    key = (rap.canonical, src_id, tgt_id)
+                    key = (canonical, src_id, tgt_id)
                 if key in seen:
                     continue
                 seen.add(key)
-                graph.edges.append(Edge(source_id=src_id, target_id=tgt_id, canonical=rap.canonical))
+                graph.edges.append(Edge(source_id=src_id, target_id=tgt_id, canonical=canonical))
+                # Reset src_id to the original for the next iteration
+                src_id = us_index.get(str(us_num))
 
         # === Step A: Inverse dedup — drop the redundant inverse direction ===
         # E.g., if (overlies, A→B) exists, drop (is_after, B→A).

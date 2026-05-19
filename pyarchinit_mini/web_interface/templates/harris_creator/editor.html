@@ -581,36 +581,57 @@ function renderSwimlaneState(state) {
     // Clear existing elements
     cy.elements().remove();
 
-    const swimlaneNodes = state.nodes.filter(el => el.data.is_swimlane);
-    const usNodes = state.nodes.filter(el => !el.data.is_swimlane);
+    // Fix G: split nodes into period row compounds, sub-cluster compounds, and US leaves.
+    // Period rows (is_period_row=true) come from new pipeline; legacy swimlane nodes
+    // (is_swimlane=true) are supported for backward compat.
+    const periodRowNodes = state.nodes.filter(el => el.data.is_period_row);
+    const clusterNodes   = state.nodes.filter(el => el.data.compound && !el.data.is_period_row && !el.data.is_swimlane);
+    const legacySwimNodes= state.nodes.filter(el => el.data.is_swimlane);
+    const usNodes        = state.nodes.filter(el => !el.data.compound && !el.data.is_swimlane);
 
-    // Add compound parents first (swimlanes)
-    if (swimlaneNodes.length > 0) {
-        cy.add(swimlaneNodes.map(el => ({
+    // 1. Period row compound parents first (Fix C/G)
+    if (periodRowNodes.length > 0) {
+        cy.add(periodRowNodes.map(el => ({
+            group: 'nodes',
+            data: el.data,   // full data object — includes is_period_row, label, etc.
+        })));
+    }
+
+    // 2. Legacy swimlane nodes (backward compat)
+    if (legacySwimNodes.length > 0) {
+        cy.add(legacySwimNodes.map(el => ({
             group: 'nodes',
             data: el.data,
             classes: 'swimlane',
         })));
     }
 
-    // Add US children with parent — pass palette style so cytoscape data(style.*) selectors apply
+    // 3. Sub-cluster compounds nested inside period rows (Fix D/G)
+    if (clusterNodes.length > 0) {
+        cy.add(clusterNodes.map(el => ({
+            group: 'nodes',
+            data: el.data,
+        })));
+    }
+
+    // 4. US leaf nodes — full data object carries flat palette fields (Fix B/G)
     if (usNodes.length > 0) {
         cy.add(usNodes.map(el => ({
             group: 'nodes',
-            data: { ...el.data, style: el.style || undefined },
+            data: el.data,
             position: el.position || undefined,
         })));
     }
 
-    // Add edges — pass palette style for line-color, line-style, arrow-shape etc.
+    // 5. Edges — full data object carries flat palette fields (Fix B/G)
     if (state.edges && state.edges.length > 0) {
         cy.add(state.edges.map(el => ({
             group: 'edges',
-            data: { ...el.data, style: el.style || undefined },
+            data: el.data,
         })));
     }
 
-    // Apply swimlane styling on the parent compound nodes
+    // Apply legacy swimlane styling for backward compat
     cy.nodes('.swimlane').forEach(n => {
         const color = n.data('color') || '#EEEEEE';
         n.style({
@@ -627,17 +648,20 @@ function renderSwimlaneState(state) {
         });
     });
 
-    // Run dagre layout inside each swimlane row so US nodes spread out
-    // horizontally and stratigraphic edges become visible. Without a layout
-    // pass, all US children of a row get stacked at the row's centroid and
-    // the edges collapse into invisible zero-length segments.
+    // Run dagre layout TB (recent → ancient, top-to-bottom) — Fix F.
+    // rankDir: 'TB' gives the classic Harris convention: most recent strata
+    // at the top, oldest at the bottom, with arrows pointing downward.
     try {
         cy.layout({
             name: 'dagre',
-            rankDir: 'LR',
+            rankDir: 'TB',
+            ranker: 'longest-path',
             nodeSep: 50,
+            edgeSep: 20,
             rankSep: 80,
-            fit: false,
+            animate: false,
+            fit: true,
+            padding: 30,
         }).run();
     } catch (e) {
         console.warn('dagre layout failed, falling back to grid:', e);

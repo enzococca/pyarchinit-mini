@@ -728,14 +728,41 @@ def api_get_swimlanes(site: str):
 
 @harris_creator_bp.get("/api/load/<site>")
 def api_load_state(site: str):
-    """Load full editor state (rows + nodes + edges) as Cytoscape JSON."""
-    # TODO(Spec-4): consider returning 404 when site is genuinely not in the
-    # DB (no site_table row), versus 200 + empty state when site exists but
-    # has no US yet. Spec §7.1 mentions 404 for site_not_found — current
-    # behavior returns 200 + empty.
-    group_by = request.args.get("group_by", "period_phase")
+    """Load full editor state (rows + nodes + edges) as Cytoscape JSON.
+
+    Pipeline selection honours SWIMLANE_PIPELINE env var:
+      - "s3dgraphy" (default): S3DProjector → flat palette fields (Fix B/C/D)
+      - "legacy": SwimlaneState.load → nested style dict (backward compat)
+    """
+    pipeline = os.environ.get("SWIMLANE_PIPELINE", "s3dgraphy").lower()
     try:
         session = _get_session()
+
+        if pipeline == "s3dgraphy":
+            # ── New pipeline: S3DProjector + flat-palette to_cytoscape ──────
+            from pyarchinit_mini.graphproj.s3d_projector import (
+                S3DProjector, VALID_GROUP_BY as S3D_VALID,
+            )
+            from pyarchinit_mini.graphproj.s3d_to_cytoscape import to_cytoscape
+
+            group_by = request.args.get("group_by", "none")
+            s3d_group_by = group_by if group_by in S3D_VALID else "none"
+            projected = S3DProjector.from_site(session, site, group_by=s3d_group_by)
+            cyto = to_cytoscape(projected)
+            # Wrap nodes/edges in the envelope renderSwimlaneState expects:
+            # each element is {data: {...}} (no nested style key — flat fields
+            # are already in data).  Pending changes not relevant for this path.
+            return jsonify({
+                "site": cyto["site"],
+                "group_by": cyto["group_by"],
+                "rows": cyto["rows"],
+                "nodes": cyto["nodes"],
+                "edges": cyto["edges"],
+                "pending_changes": {"us_updates": [], "us_inserts": [], "us_deletes": []},
+            }), 200
+
+        # ── Legacy pipeline ──────────────────────────────────────────────────
+        group_by = request.args.get("group_by", "period_phase")
         state = SwimlaneState.load(session, site, group_by=group_by)
         return jsonify({
             "site": state.site,
