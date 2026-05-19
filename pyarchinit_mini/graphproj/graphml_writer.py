@@ -1,89 +1,143 @@
-"""yEd-flavoured GraphML writer using EM_palette.graphml as the document base.
+"""yEd-flavoured GraphML writer producing the EM Harris Matrix Creator format.
 
-Strategy: load the palette XML, append site nodes/edges into the <graph> element,
-serialize. The palette's existing node/edge definitions remain in place so yEd
-opens the file with all unit types visible in the palette panel.
+Strategy (Approach A): thin bridge from ProjectedGraph to the canonical
+graphml_io.yed_writer.write_extended_matrix_graphml which already produces the
+proper TableNode / swimlane format consumed by yEd Desktop.
+
+Output:
+  - Standalone GraphML (no palette template merging)
+  - ONE group node with <y:TableNode YED_TABLE_NODE> containing one <y:Row>
+    per period row from the ProjectedGraph
+  - US nodes positioned inside their row's y-range
+  - Edges with italianized labels (Copre, Taglia, …) via rapporti_codec
 """
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
-from io import BytesIO
+import tempfile
+import os
 from pathlib import Path
 from typing import Optional
 
-from pyarchinit_mini.em_palette import get_palette
-from pyarchinit_mini.em_palette.loader import DEFAULT_PALETTE_PATH
 from pyarchinit_mini.graphproj.s3d_projector import ProjectedGraph
-
-
-NS_G = "http://graphml.graphdrawing.org/xmlns"
-NS_Y = "http://www.yworks.com/xml/graphml"
+from pyarchinit_mini.graphproj.rapporti_codec import display_label, CANONICAL_TO_ITALIAN
 
 
 def write_graphml(graph: ProjectedGraph, *, palette_path: Optional[Path] = None) -> bytes:
-    """Render the projected graph as yEd-compatible GraphML bytes."""
-    palette_path = palette_path or DEFAULT_PALETTE_PATH
-    ET.register_namespace("", NS_G)
-    ET.register_namespace("y", NS_Y)
-    tree = ET.parse(palette_path)
-    root = tree.getroot()
-    graph_el = root.find(f"{{{NS_G}}}graph")
-    if graph_el is None:
-        raise RuntimeError("Palette template missing <graph> element")
+    """Render the projected graph as yEd-compatible GraphML bytes.
 
-    palette = get_palette()
+    palette_path is accepted for backward-compatible call-sites but is ignored —
+    the new output is a standalone TableNode document, not a palette extension.
+    """
+    from pyarchinit_mini.harris_swimlane.swimlane_state import CytoscapeElement
+    from pyarchinit_mini.harris_swimlane.row_provider import Row as LegacyRow, PERIOD_COLORS
 
+    # ------------------------------------------------------------------
+    # 1. Convert ProjectedGraph.rows → legacy Row objects
+    # ------------------------------------------------------------------
+    rows: list[LegacyRow] = []
+    for i, r in enumerate(graph.rows):
+        rows.append(LegacyRow(
+            row_id=r.row_id,
+            period_name=r.periodo or r.label,
+            phase_name=r.fase,
+            start_date=None,
+            end_date=None,
+            color=PERIOD_COLORS[i % len(PERIOD_COLORS)],
+            source="period_table" if not r.is_fallback else "fallback",
+        ))
+
+    # ------------------------------------------------------------------
+    # 2. Convert ProjectedGraph.nodes → CytoscapeElement list
+    # ------------------------------------------------------------------
+    # Build a lookup: row_id → index so we can calculate y positions
+    row_index = {r.row_id: i for i, r in enumerate(graph.rows)}
+    row_height = 200
+    node_h, node_w = 30.0, 80.0
+    # Track column (x) per row so nodes in the same row are spread horizontally
+    col_counter: dict[str, int] = {}
+
+    nodes: list[CytoscapeElement] = []
     for n in graph.nodes:
-        ns = palette.get_node_style(n.unit_type)
-        node_el = ET.SubElement(graph_el, f"{{{NS_G}}}node", attrib={"id": n.node_id})
-        data_el = ET.SubElement(node_el, f"{{{NS_G}}}data", attrib={"key": "d7"})
-        shape_node = ET.SubElement(data_el, f"{{{NS_Y}}}ShapeNode")
-        ET.SubElement(
-            shape_node, f"{{{NS_Y}}}Geometry",
-            attrib={"height": "30.0", "width": "60.0", "x": "0.0", "y": "0.0"},
-        )
-        ET.SubElement(
-            shape_node, f"{{{NS_Y}}}Fill",
-            attrib={"color": ns.fill_color, "transparent": "false"},
-        )
-        ET.SubElement(
-            shape_node, f"{{{NS_Y}}}BorderStyle",
-            attrib={
-                "color": ns.border_color,
-                "type": ns.border_style,
-                "width": str(ns.border_width),
-            },
-        )
-        label = ET.SubElement(
-            shape_node, f"{{{NS_Y}}}NodeLabel",
-            attrib={"textColor": ns.font_color, "fontSize": str(ns.font_size)},
-        )
-        label.text = n.us
-        ET.SubElement(shape_node, f"{{{NS_Y}}}Shape", attrib={"type": ns.shape})
+        ri = row_index.get(n.row_id, 0)
+        col = col_counter.get(n.row_id, 0)
+        col_counter[n.row_id] = col + 1
+        x = col * (node_w + 20) + 30
+        y = ri * row_height + (row_height / 2 - node_h / 2)
 
+        nodes.append(CytoscapeElement(
+            data={
+                "id": n.node_id,
+                "us": n.us,
+                "us_number": n.us,
+                "area": n.area or "",
+                "unit_type": n.unit_type or "US",
+                "description": n.description or "",
+                "row": n.row_id,
+                "label": str(n.us),
+            },
+            position={"x": x, "y": y},
+        ))
+
+    # ------------------------------------------------------------------
+    # 3. Convert ProjectedGraph.edges → CytoscapeElement list with italian labels
+    # ------------------------------------------------------------------
+    edges: list[CytoscapeElement] = []
     for e in graph.edges:
-        es = palette.get_edge_style(e.canonical)
-        edge_el = ET.SubElement(
-            graph_el, f"{{{NS_G}}}edge",
-            attrib={
-                "id": f"{e.source_id}__{e.target_id}",
+        italian = display_label(e.canonical, locale="it")
+        edges.append(CytoscapeElement(
+            data={
+                "id": f"{e.source_id}__{e.canonical}__{e.target_id}",
                 "source": e.source_id,
                 "target": e.target_id,
+                "label": italian,
+                "canonical": e.canonical,
+                "relationship": CANONICAL_TO_ITALIAN.get(e.canonical, e.canonical),
             },
-        )
-        data_el = ET.SubElement(edge_el, f"{{{NS_G}}}data", attrib={"key": "d13"})
-        poly = ET.SubElement(data_el, f"{{{NS_Y}}}PolyLineEdge")
-        ET.SubElement(
-            poly, f"{{{NS_Y}}}LineStyle",
-            attrib={"color": es.line_color, "type": es.line_style, "width": str(es.line_width)},
-        )
-        ET.SubElement(
-            poly, f"{{{NS_Y}}}Arrows",
-            attrib={"source": es.arrow_source, "target": es.arrow_target},
-        )
-        elabel = ET.SubElement(poly, f"{{{NS_Y}}}EdgeLabel")
-        elabel.text = e.canonical
+        ))
 
-    buf = BytesIO()
-    tree.write(buf, encoding="utf-8", xml_declaration=True)
-    return buf.getvalue()
+    # ------------------------------------------------------------------
+    # 4. Build a minimal state-like object the legacy writer accepts
+    # ------------------------------------------------------------------
+    class _State:
+        def __init__(self):
+            self.site = graph.site
+            self.group_by = graph.group_by
+            self.rows = rows
+            self.nodes = nodes
+            self.edges = edges
+            self.pending_changes = {}
+
+    state = _State()
+
+    # ------------------------------------------------------------------
+    # 5. Call the canonical writer and return bytes
+    # ------------------------------------------------------------------
+    from pyarchinit_mini.graphml_io.yed_writer import write_extended_matrix_graphml
+
+    epochs: list[dict] = []
+    # Populate epochs from rows that have dating information
+    for r in graph.rows:
+        if r.datazione:
+            epochs.append({
+                "row_id": r.row_id,
+                "periodo": r.periodo,
+                "fase": r.fase,
+                "datazione": r.datazione,
+            })
+
+    with tempfile.NamedTemporaryFile(suffix=".graphml", delete=False) as tmp:
+        tmp_path = tmp.name
+    try:
+        write_extended_matrix_graphml(
+            state,
+            site_meta={"sito": graph.site},
+            epochs=epochs,
+            out=Path(tmp_path),
+        )
+        with open(tmp_path, "rb") as f:
+            return f.read()
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass

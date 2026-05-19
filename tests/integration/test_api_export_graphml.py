@@ -54,6 +54,29 @@ def test_export_graphml_includes_site_nodes(client):
 def test_export_graphml_includes_palette_template(client):
     r = client.get("/harris-creator/api/export/S/yed-graphml")
     body = r.data.decode("utf-8")
-    # Palette includes USM unit type as a template node (label "USM01" in the canonical palette)
-    # Check for either "USM" label or yEd shape namespace
-    assert "USM" in body or "yfiles" in body
+    # Now produces TableNode swimlane format; yfiles namespace must be present
+    assert "yfiles" in body
+
+
+def test_export_graphml_has_tablenode_with_rows(client):
+    r = client.get("/harris-creator/api/export/S/yed-graphml")
+    body = r.data.decode("utf-8")
+    assert "TableNode" in body, "Expected <y:TableNode> wrapper"
+    assert 'yfiles.foldertype="group"' in body, "Expected group node with foldertype=group"
+    # at least one row inside the table
+    assert "<y:Row " in body or "<y:Rows" in body
+
+
+def test_export_graphml_edge_labels_italianized(client):
+    body = client.get("/harris-creator/api/export/S/yed-graphml").data.decode("utf-8")
+    # When we have an edge, its label should be "Copre" (italian), not "overlies"
+    if "EdgeLabel" in body:
+        import re
+        labels = re.findall(r'<y:EdgeLabel[^>]*>([^<]+)</y:EdgeLabel>', body)
+        for lbl in labels:
+            assert lbl.strip() not in {
+                "overlies", "is_after", "cuts", "is_cut_by",
+                "fills", "is_filled_by", "abuts",
+                "is_abutted_by", "is_bonded_to",
+                "has_same_time", "is_before",
+            }, f"Edge label still in canonical form: {lbl!r}"
