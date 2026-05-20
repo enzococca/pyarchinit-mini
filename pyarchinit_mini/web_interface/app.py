@@ -3991,6 +3991,16 @@ def create_app():
             db_conn = DatabaseConnection.from_url(new_db_url)
             db_manager = DatabaseManager(db_conn)
 
+            # Auto-apply schema migrations on the new DB so missing columns
+            # (e.g. node_uuid added in 2.8.x) get created without a manual
+            # `pyarchinit-mini-migrate-vocab` step. Failures are logged but
+            # do not abort the switch — read-only users will still see data
+            # they have access to, and admins can re-run the CLI migration.
+            try:
+                db_manager.run_migrations()
+            except Exception as mig_err:
+                print(f"[DATABASE SWITCH] Migration warning on {connection_name}: {mig_err}")
+
             # Reinitialize ALL services with new database manager
             global site_service, us_service, inventario_service, thesaurus_service
             global user_service, analytics_service, relationship_sync_service, datazione_service
