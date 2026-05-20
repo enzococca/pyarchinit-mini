@@ -9,7 +9,7 @@
 
 ## Goal
 
-Extract the s3dgraphy sync logic currently living inline inside the QGIS plugin (`pyarchinit/modules/s3dgraphy/sync/`, ~22 modules + 75 test files) into a standalone Python package `pyarchinit-s3dgraphy-bridge`, distributed via public PyPI, and consume it from both the QGIS plugin and `pyarchinit-mini-desk` so that yEd ↔ DB ↔ GraphML round-trip is implemented **once** and used **twice**.
+Extract the s3dgraphy sync logic currently living inline inside the QGIS plugin (`pyarchinit/modules/s3dgraphy/sync/`, **23 implementation modules** + 1 master `__init__.py` + 75 test files) into a standalone Python package `pyarchinit-s3dgraphy-bridge`, distributed via public PyPI, and consume it from both the QGIS plugin and `pyarchinit-mini-desk` so that yEd ↔ DB ↔ GraphML round-trip is implemented **once** and used **twice**.
 
 The driving user statement: *"in pyarchinit-mini-desk deve funzionare come hai implementato in pyarchinit"*. Vendoring is the only port strategy that literally honors that: same code, same fixes, same AC-2 guarantee.
 
@@ -34,9 +34,17 @@ Six picks, in the order they were made:
 | Q3 | Mini-desk reconciliation | **Delete-and-replace** legacy `graphproj/*`, `graphml_io/*`, `s3d_integration/*` (14 files) | Aggressive cleanup. Flask audit mandatory before merge. |
 | Q4 | Distribution | **New repo + public PyPI**: `github.com/pyarchinit/pyarchinit-s3dgraphy-bridge` + GitHub Actions Trusted Publishing on tag | Standard Python pattern, version-explicit, no submodule friction, no monorepo restructure. |
 | Q5 | Adapter surface | **5 typing.Protocol**: `DbSession`, `Workspace`, `Settings`, `FileProvider`, `Logger` | Pythonic, mypy-verifiable, trivial mocks for tests. Avoids god-object. |
-| Q6 | Plugin migration | **Shim re-export**: 22 plugin files become 1-line `from pyarchinit_s3dgraphy_bridge.X import *  # noqa` | Minimum risk, 0 call sites touched in ~80 plugin files. Shims removed in plugin v6.0.0 cleanup. |
+| Q6 | Plugin migration | **Shim re-export**: at plugin v5.9.1, 16 of the 23 implementation files (those matching bridge v1.0 scope) become 1-line `from pyarchinit_s3dgraphy_bridge.X import *  # noqa`. The remaining 7 are shimmed progressively as bridge v1.1 → v1.4 ship the corresponding modules. | Minimum risk, 0 call sites touched in ~80 plugin files. All 23 shims removed in plugin v6.0.0 cleanup. |
 
 The asymmetry between Q3 (mini-desk = radical delete) and Q6 (plugin = conservative shim) is deliberate: mini-desk has few consumers of the modules being replaced, the plugin has ~80 files that import from `modules/s3dgraphy/sync/*`.
+
+**Inventory of the 23 plugin implementation files** (excluding master `__init__.py`):
+
+| In bridge v1.0 scope (16, shimmed at plugin v5.9.1) | Deferred (7, shimmed at later plugin tags) |
+|---|---|
+| `_db_handle`, `edge_registry`, `graph_ingestor`, `graph_projector`, `graphml_writer`, `group_projector`, `paradata_store`, `uuid7`, `vocab_provider`, `vocab_types`, `yed_classifier`, `yed_detector`, `yed_group_walker`, `yed_import_pipeline`, `yed_rapporti_policy`, `yed_table_parser` | `_legacy_paradata_svgs`, `_workspace`, `conflict_resolver`, `group_store`, `ingest_result`, `pyarchinit_pg_importer`, `vocab_provider_core` |
+
+The 7 deferred files map to: PG-Compat full (`_workspace`, `pyarchinit_pg_importer`), LocationNodeGroup (`group_store`), conflict handling (`conflict_resolver`), legacy SVGs (`_legacy_paradata_svgs`), result dataclass shared with v1.4 features (`ingest_result`), hardened vocab (`vocab_provider_core`). Each lands in the bridge release tracked in the Roadmap below.
 
 ## Architecture
 
@@ -165,7 +173,7 @@ One concept per minor release. Plugin and mini-desk pin to whatever version they
 
 - **Bridge v1.0** is the blocker for the mini-desk delete-and-replace merge (Q3=A).
 - Plugin migrates to shim re-export (Q6=C) **at** bridge v1.0, tag `5.9.1-bridge-migration-alpha`.
-- Plugin shim **cleanup** (deletion of the 22 shim files) **not before** bridge v1.2 — needs confidence that the bridge handles yE-F + LocationNodeGroup as well as the inline did.
+- Plugin shim **cleanup** (deletion of all 23 shim files at plugin v6.0.0) **not before** bridge v1.4 — at v1.4 all 23 implementation files exist in the bridge, so the shims can be safely deleted and call sites rewritten to import directly from `pyarchinit_s3dgraphy_bridge.*`.
 - Mini-desk jumps directly to bridge v1.0 (it never had yE-F natively, gains it for free at v1.1).
 - Branch policy: GitFlow-light. `main` is always releasable. Development on `feat/*`. Annotated tags `vX.Y.Z`. GitHub Actions Trusted Publishing on tag — no API tokens in repo.
 
@@ -192,11 +200,11 @@ Pre-requisite blocker: same as mini-desk.
 |---|---|---|---|
 | PR-A | **requirements + auto-install** | ~1 day | `pyarchinit-s3dgraphy-bridge==1.0.0` in `requirements.txt`. `scripts/modules_installer.py` extended to `pip install` the bridge into `ext_libs/`. Smoke test: after QGIS restart, `import pyarchinit_s3dgraphy_bridge` works. **Zero lines of plugin code touched** — bridge installed but inert. |
 | PR-B | **Adapter QGIS-side** | ~3 days | New `modules/s3dgraphy/bridge_adapter/` with `QgisDbSession` (wraps existing `_db_handle`), `QgisWorkspace`, `QSettingsProxy`, `QtFileProvider`, `QgsLogger`. Unit tests via pytest-qt mocks. |
-| PR-C | **Shim re-export atomico** | ~1 day | The 22 files in `modules/s3dgraphy/sync/` reduced to 1-line `from pyarchinit_s3dgraphy_bridge.<modulename> import *  # noqa: F401, F403`. `modules/s3dgraphy/sync/__init__.py` master re-export. ~80 plugin call sites unchanged. Gate: the 351 plugin sync tests must pass against the installed bridge. |
+| PR-C | **Shim re-export atomico** | ~1 day | The **16 v1.0 implementation files** in `modules/s3dgraphy/sync/` (listed in the inventory above) reduced to 1-line `from pyarchinit_s3dgraphy_bridge.<modulename> import *  # noqa: F401, F403`. The 7 deferred files stay inline until their bridge release ships. `modules/s3dgraphy/sync/__init__.py` master re-export updated. ~80 plugin call sites unchanged. Gate: the 351 plugin sync tests must pass against the installed bridge. |
 | PR-D | **CHANGELOG + tag** | ~1 hour | `5.9.1-bridge-migration-alpha`. Bilingual CHANGELOG entry. `metadata.txt` bumped. |
 
 Plugin v6.0.0 "Great Cleanup" (deferred, target Q4 2026):
-- Delete the 22 shim files when bridge ≥ v1.4 and zero bug reports for at least 6 weeks.
+- Delete all **23 shim files** (the full inventory of `modules/s3dgraphy/sync/`) when bridge ≥ v1.4 and zero bug reports for at least 6 weeks.
 - Rewrite all plugin call sites to import directly from `pyarchinit_s3dgraphy_bridge.*` (drop the `modules/s3dgraphy/sync.*` path).
 - Major bump 5.9 → 6.0 to signal internal API breaking change for third-party scripts.
 
@@ -249,7 +257,7 @@ External plugin users (people with scripts like `from pyarchinit.modules.s3dgrap
 
 ### Integration (plugin migration)
 
-14. **AC-INT-4** The 22 files in `modules/s3dgraphy/sync/` of the plugin are reduced to 1-line `from pyarchinit_s3dgraphy_bridge.X import *` each.
+14. **AC-INT-4** At plugin v5.9.1, the **16 v1.0-scope files** in `modules/s3dgraphy/sync/` (per the inventory above) are reduced to 1-line `from pyarchinit_s3dgraphy_bridge.X import *` each. The 7 deferred files remain at their original inline content until the matching bridge release ships, at which point a follow-up plugin tag shimms them. By plugin v6.0.0 all 23 are shimmed and ready to be deleted entirely.
 15. **AC-INT-5** The 351 plugin sync tests pass against the installed bridge (with `PYTHONPATH` excluding the inline `sync`).
 16. **AC-INT-6** Plugin tag `5.9.1-bridge-migration-alpha` with `metadata.txt` aligned and bilingual CHANGELOG.
 
