@@ -837,7 +837,12 @@ class DatabaseMigrations:
             f"{pkg}._2026_05_vocab_alignment",
             f"{pkg}._2026_05_period_table_schema",
         ]
-        url = str(self.connection.engine.url)
+        # SQLAlchemy 2.x str(URL) redacts the password as '***', which would
+        # cause the migration scripts to fail authentication when they call
+        # create_engine(url) — silently, because the loop below swallows
+        # exceptions. Use render_as_string(hide_password=False) to keep the
+        # real password.
+        url = self.connection.engine.url.render_as_string(hide_password=False)
         applied = 0
         for mod_path in scripts:
             try:
