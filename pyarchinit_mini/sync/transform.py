@@ -52,6 +52,8 @@ def build_insert(table: str, cols: list[str], value_exprs: list[str], fill: dict
     return f'INSERT INTO public."{table}" ({col_sql}) VALUES ({val_sql})'
 
 def build_update(table: str, set_cols: list[str], set_exprs: list[str], pk: list[str]) -> str:
+    # pk uses NAMED placeholders so the whole statement is named-param (set_exprs
+    # carry named %(col)s placeholders from cast_expr; mixing named+positional is illegal).
     assigns = ", ".join(f'"{c}" = {e}' for c, e in zip(set_cols, set_exprs))
-    where = " AND ".join(f'"{c}" = %s' for c in pk)
+    where = " AND ".join(f'"{c}" = %(__pk_{c})s' for c in pk)
     return f'UPDATE public."{table}" SET {assigns} WHERE {where}'

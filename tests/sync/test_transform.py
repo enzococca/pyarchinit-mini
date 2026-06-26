@@ -35,6 +35,6 @@ def test_build_insert_includes_fill_and_value_exprs():
     assert '"sito"' in sql and '"created_at"' in sql and "now()" in sql and "(%s)::text" in sql
 
 def test_build_update_sets_and_pk_where():
-    sql = build_update("site_table", ["descrizione"], ["(%s)::text"], ["id_sito"])
-    assert 'update public."site_table" set "descrizione" = (%s)::text' in sql.lower()
-    assert 'where "id_sito" = %s' in sql.lower()
+    sql = build_update("site_table", ["descrizione"], ["(%(descrizione)s)::text"], ["id_sito"])
+    assert 'update public."site_table" set "descrizione" = (%(descrizione)s)::text' in sql.lower()
+    assert 'where "id_sito" = %(__pk_id_sito)s' in sql.lower()
