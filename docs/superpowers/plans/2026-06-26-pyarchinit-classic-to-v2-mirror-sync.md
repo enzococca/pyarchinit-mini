@@ -329,9 +329,9 @@ def test_build_insert_includes_fill_and_value_exprs():
     assert '"sito"' in sql and '"created_at"' in sql and "now()" in sql and "(%s)::text" in sql
 
 def test_build_update_sets_and_pk_where():
-    sql = build_update("site_table", ["descrizione"], ["(%s)::text"], ["id_sito"])
-    assert 'update public."site_table" set "descrizione" = (%s)::text' in sql.lower()
-    assert 'where "id_sito" = %s' in sql.lower()
+    sql = build_update("site_table", ["descrizione"], ["(%(descrizione)s)::text"], ["id_sito"])
+    assert 'update public."site_table" set "descrizione" = (%(descrizione)s)::text' in sql.lower()
+    assert 'where "id_sito" = %(__pk_id_sito)s' in sql.lower()
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -397,8 +397,10 @@ def build_insert(table: str, cols: list[str], value_exprs: list[str], fill: dict
     return f'INSERT INTO public."{table}" ({col_sql}) VALUES ({val_sql})'
 
 def build_update(table: str, set_cols: list[str], set_exprs: list[str], pk: list[str]) -> str:
+    # pk uses NAMED placeholders so the whole statement is named-param (set_exprs
+    # carry named %(col)s placeholders from cast_expr; mixing named+positional is illegal).
     assigns = ", ".join(f'"{c}" = {e}' for c, e in zip(set_cols, set_exprs))
-    where = " AND ".join(f'"{c}" = %s' for c in pk)
+    where = " AND ".join(f'"{c}" = %(__pk_{c})s' for c in pk)
     return f'UPDATE public."{table}" SET {assigns} WHERE {where}'
 ```
 
@@ -786,11 +788,25 @@ def test_dry_run_writes_nothing(src_conn, tgt_conn, make_table):
     cur = tgt_conn.cursor()
     cur.execute('select count(*) from public."w_dry"')
     assert cur.fetchone()[0] == 0   # dry-run rolled back, nothing written
+
+def test_full_sync_casts_divergent_types(src_conn, tgt_conn, make_table):
+    # source `anno` is varchar, target `anno` is integer -> cast_expr emits the
+    # placeholder twice; named params must bind both occurrences to one value.
+    make_table(src_conn, "w_cast",
+        'CREATE TABLE public."w_cast" (id int primary key, anno varchar(10))',
+        rows=[(1, "2020"), (2, "n/a")])
+    make_table(tgt_conn, "w_cast",
+        'CREATE TABLE public."w_cast" (id int primary key, anno integer)')
+    res = sync_table(src_conn, tgt_conn, "w_cast", _cfg("x", "x"), dry_run=False)
+    assert res.inserted == 2
+    cur = tgt_conn.cursor()
+    cur.execute('select id, anno from public."w_cast" order by id')
+    assert cur.fetchall() == [(1, 2020), (2, None)]   # "2020"->2020, "n/a"->NULL (guarded)
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `python -m pytest tests/sync/test_engine.py -k "full_sync or dry_run" -v`
+Run: `python -m pytest tests/sync/test_engine.py -v`
 Expected: FAIL with `ImportError: cannot import name 'sync_table'`
 
 - [ ] **Step 3: Write minimal implementation**
@@ -839,10 +855,12 @@ def _fetch_source_rows(src_conn, table, common, pk, keys=None, all_rows=False):
     return rows
 
 def _value_exprs(common, src_types, tgt_types, geom):
+    # Named placeholder per column: cast_expr may emit the placeholder N times
+    # (varchar->int = 2, varchar->date = 6); a named %(col)s binds them all to one value.
     out = []
     for c in common:
         tgt_t = "geometry" if c in geom else tgt_types[c][0]
-        out.append(T.cast_expr(src_types[c][0], tgt_t, tgt_types[c][1]))
+        out.append(T.cast_expr(src_types[c][0], tgt_t, tgt_types[c][1], ph=f"%({c})s"))
     return out
 
 def _insert_rows(tgt_conn, table, common, rows, src_types, tgt_types, geom):
@@ -853,7 +871,8 @@ def _insert_rows(tgt_conn, table, common, rows, src_types, tgt_types, geom):
     sql = T.build_insert(table, common, exprs, fill)
     cur = tgt_conn.cursor(); total = 0
     for r in rows:
-        cur.execute(sql, list(r[:len(common)]))   # common-column values only
+        params = {c: r[i] for i, c in enumerate(common)}    # dict (named params)
+        cur.execute(sql, params)
         total += cur.rowcount
     return total
 
@@ -864,7 +883,10 @@ def _update_rows(tgt_conn, table, common, pk, rows, src_types, tgt_types, geom):
     sql = T.build_update(table, common, exprs, pk)
     cur = tgt_conn.cursor(); total = 0
     for r in rows:
-        cur.execute(sql, list(r[:len(common)]) + list(r[len(common):]))  # common values + pk values
+        params = {c: r[i] for i, c in enumerate(common)}
+        for j, p in enumerate(pk):
+            params[f"__pk_{p}"] = r[len(common) + j]
+        cur.execute(sql, params)
         total += cur.rowcount
     return total
 
