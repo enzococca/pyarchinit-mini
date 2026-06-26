@@ -802,6 +802,37 @@ def test_full_sync_casts_divergent_types(src_conn, tgt_conn, make_table):
     cur = tgt_conn.cursor()
     cur.execute('select id, anno from public."w_cast" order by id')
     assert cur.fetchall() == [(1, 2020), (2, None)]   # "2020"->2020, "n/a"->NULL (guarded)
+
+def test_keyset_mode_insert_and_delete_first_run(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."w_keyset" (id int primary key, sito varchar(20))'
+    make_table(src_conn, "w_keyset", ddl, rows=[(1, "A"), (2, "B")])
+    make_table(tgt_conn, "w_keyset", ddl, rows=[(2, "B"), (3, "old")])
+    cfg = _cfg("x", "x"); cfg.size_threshold_keyset = 1     # rc=2 > 1 -> keyset mode
+    tgt_conn.cursor().execute("DROP TABLE IF EXISTS public.sync_state"); tgt_conn.commit()  # prove first run works
+    res = sync_table(src_conn, tgt_conn, "w_keyset", cfg, dry_run=False)
+    assert res.mode == "keyset"
+    assert (res.inserted, res.deleted) == (1, 1)           # +id1, -id3; id2 untouched (no per-row update)
+    cur = tgt_conn.cursor(); cur.execute('select id from public."w_keyset" order by id')
+    assert [r[0] for r in cur.fetchall()] == [1, 2]
+
+def test_replace_mode_truncates_and_reloads_first_run(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."w_replace" (sito varchar(20), n int)'    # no PK -> replace mode
+    make_table(src_conn, "w_replace", ddl, rows=[("A", 1), ("B", 2)])
+    make_table(tgt_conn, "w_replace", ddl, rows=[("OLD", 9)])
+    tgt_conn.cursor().execute("DROP TABLE IF EXISTS public.sync_state"); tgt_conn.commit()
+    res = sync_table(src_conn, tgt_conn, "w_replace", _cfg("x", "x"), dry_run=False)
+    assert res.mode == "replace"
+    cur = tgt_conn.cursor(); cur.execute('select sito, n from public."w_replace" order by sito')
+    assert cur.fetchall() == [("A", 1), ("B", 2)]          # OLD truncated away
+
+def test_missing_source_table_is_isolated(src_conn, tgt_conn, make_table):
+    # table exists only on target -> source introspection fails; error must be caught,
+    # tgt_conn must remain usable (per-table isolation).
+    make_table(tgt_conn, "w_only_tgt", 'CREATE TABLE public."w_only_tgt" (id int primary key)')
+    res = sync_table(src_conn, tgt_conn, "w_only_tgt", _cfg("x", "x"), dry_run=False)
+    assert res.error is not None and res.inserted == 0
+    cur = tgt_conn.cursor(); cur.execute("select 1")
+    assert cur.fetchone()[0] == 1                          # connection still usable
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -901,20 +932,23 @@ def _delete_rows(tgt_conn, table, pk, keys, cfg):
     return total
 
 def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
-    pk = I.primary_key(src_conn, table)
-    override = cfg.overrides.get(table) or {}
-    rc = I.row_count(src_conn, table)
-    mode = select_mode(rc, bool(pk), cfg.size_threshold_keyset, override.get("mode"))
-    src_types = I.column_types(src_conn, table)
-    tgt_types = I.column_types(tgt_conn, table)
-    geom = I.geometry_columns(tgt_conn, table)
-    preserve = preserve_set_for_table(cfg.preserve_columns_global, set(src_types), set(tgt_types),
-                                      override.get("extra_preserve", []))
-    common = common_data_columns(set(src_types), set(tgt_types), preserve)
+    mode = "unknown"          # so the except handler can reference it on early failure
     ins = upd = dele = 0
     try:
+        S.ensure_state_table(tgt_conn)   # idempotent; MUST precede get_signature
+        pk = I.primary_key(src_conn, table)
+        override = cfg.overrides.get(table) or {}
+        rc = I.row_count(src_conn, table)
+        mode = select_mode(rc, bool(pk), cfg.size_threshold_keyset, override.get("mode"))
+        src_types = I.column_types(src_conn, table)
+        tgt_types = I.column_types(tgt_conn, table)
+        geom = I.geometry_columns(tgt_conn, table)
+        preserve = preserve_set_for_table(cfg.preserve_columns_global, set(src_types), set(tgt_types),
+                                          override.get("extra_preserve", []))
+        common = common_data_columns(set(src_types), set(tgt_types), preserve)
         if mode in ("keyset", "replace"):
             if I.signature(src_conn, table, pk) == S.get_signature(tgt_conn, table):
+                tgt_conn.rollback()      # close the open transaction; nothing to persist
                 return TableResult(table, mode, 0, 0, 0, True, None)
         if mode == "replace":
             tgt_conn.cursor().execute(f'TRUNCATE public."{table}"')
@@ -938,7 +972,6 @@ def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
         if dry_run:
             tgt_conn.rollback()
         else:
-            S.ensure_state_table(tgt_conn)
             S.record_result(tgt_conn, table, I.signature(src_conn, table, pk), mode, ins, upd, dele, None)
             tgt_conn.commit()
         return TableResult(table, mode, ins, upd, dele, False, None)
