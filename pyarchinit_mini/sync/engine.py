@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from psycopg2.extensions import connection
 from . import introspect as I, transform as T, state as S
+from .config import Config
 from .diff import diff_by_hash, diff_by_keyset
 from .policy import select_mode, preserve_set_for_table, common_data_columns
 
@@ -13,17 +15,17 @@ _FILL_DEFAULTS = {
     "entity_uuid": "gen_random_uuid()::text", "node_uuid": "gen_random_uuid()::text",
 }
 
-def _fetch_keyed_hash(conn, table, pk, hash_cols):
+def _fetch_keyed_hash(conn: connection, table: str, pk: list[str], hash_cols: list[str]):
     cur = conn.cursor()
     cur.execute(T.build_pk_hash_select(table, pk, hash_cols))
     return {tuple(r[:len(pk)]): r[len(pk)] for r in cur.fetchall()}
 
-def _pk_set(conn, table, pk):
+def _pk_set(conn: connection, table: str, pk: list[str]):
     cur = conn.cursor()
     cur.execute(f'select {", ".join(chr(34)+c+chr(34) for c in pk)} from public."{table}"')
     return {tuple(r) for r in cur.fetchall()}
 
-def _fetch_source_rows(src_conn, table, common, pk, keys=None, all_rows=False):
+def _fetch_source_rows(src_conn: connection, table: str, common: list[str], pk: list[str], keys=None, all_rows: bool = False):
     """Return rows as tuples ordered (common..., pk...)."""
     cur = src_conn.cursor()
     sel = ", ".join(f'"{c}"' for c in common + pk)
@@ -48,7 +50,7 @@ def _value_exprs(common, src_types, tgt_types, geom):
         out.append(T.cast_expr(src_types[c][0], tgt_t, tgt_types[c][1], ph=f"%({c})s"))
     return out
 
-def _insert_rows(tgt_conn, table, common, rows, src_types, tgt_types, geom):
+def _insert_rows(tgt_conn: connection, table: str, common: list[str], rows, src_types, tgt_types, geom):
     if not rows:
         return 0
     exprs = _value_exprs(common, src_types, tgt_types, geom)
@@ -61,7 +63,7 @@ def _insert_rows(tgt_conn, table, common, rows, src_types, tgt_types, geom):
         total += cur.rowcount
     return total
 
-def _update_rows(tgt_conn, table, common, pk, rows, src_types, tgt_types, geom):
+def _update_rows(tgt_conn: connection, table: str, common: list[str], pk: list[str], rows, src_types, tgt_types, geom):
     if not rows:
         return 0
     exprs = _value_exprs(common, src_types, tgt_types, geom)
@@ -75,7 +77,7 @@ def _update_rows(tgt_conn, table, common, pk, rows, src_types, tgt_types, geom):
         total += cur.rowcount
     return total
 
-def _delete_rows(tgt_conn, table, pk, keys, cfg):
+def _delete_rows(tgt_conn: connection, table: str, pk: list[str], keys, cfg):
     if not keys or not cfg.delete_enabled:
         return 0
     cur = tgt_conn.cursor(); total = 0
@@ -85,7 +87,7 @@ def _delete_rows(tgt_conn, table, pk, keys, cfg):
         total += cur.rowcount
     return total
 
-def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
+def sync_table(src_conn: connection, tgt_conn: connection, table: str, cfg: Config, dry_run: bool = True) -> TableResult:
     mode = "unknown"          # so the except handler can reference it on early failure
     ins = upd = dele = 0
     try:

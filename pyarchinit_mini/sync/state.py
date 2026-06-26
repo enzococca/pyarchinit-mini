@@ -1,7 +1,8 @@
 """sync_state tracking table — records last sync result per table."""
+from psycopg2.extensions import connection
 
 
-def ensure_state_table(conn) -> None:
+def ensure_state_table(conn: connection) -> None:
     conn.cursor().execute("""
         CREATE TABLE IF NOT EXISTS public.sync_state (
             table_name text PRIMARY KEY,
@@ -15,7 +16,7 @@ def ensure_state_table(conn) -> None:
         )""")
 
 
-def get_signature(conn, table: str) -> str | None:
+def get_signature(conn: connection, table: str) -> str | None:
     cur = conn.cursor()
     cur.execute("select last_signature from public.sync_state where table_name=%s", (table,))
     row = cur.fetchone()
@@ -23,7 +24,7 @@ def get_signature(conn, table: str) -> str | None:
 
 
 def record_result(
-    conn,
+    conn: connection,
     table: str,
     signature: str,
     mode: str,

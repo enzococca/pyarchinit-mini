@@ -1,12 +1,14 @@
 import logging, psycopg2
+from psycopg2.extensions import connection
 from . import introspect as I
-from .engine import sync_table
+from .config import Config
+from .engine import sync_table, TableResult
 
-def discover_tables(src_conn, tgt_conn, cfg) -> list:
+def discover_tables(src_conn: connection, tgt_conn: connection, cfg: Config) -> list[str]:
     mirrored = I.base_tables(src_conn) & I.base_tables(tgt_conn)
     return sorted(mirrored - set(cfg.exclude_tables))
 
-def run(cfg, tables=None, dry_run=True, logger=None, _conns=None) -> list:
+def run(cfg: Config, tables: list[str] | None = None, dry_run: bool = True, logger=None, _conns: tuple | None = None) -> list[TableResult]:
     logger = logger or logging.getLogger("sync")
     src, tgt = _conns or (psycopg2.connect(cfg.source_dsn), psycopg2.connect(cfg.target_dsn))
     src.autocommit = True              # source: read-only

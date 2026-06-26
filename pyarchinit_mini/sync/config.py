@@ -14,9 +14,9 @@ class Config:
     source_dsn: str
     target_dsn: str
     size_threshold_keyset: int = 200_000
-    exclude_tables: frozenset = DEFAULT_EXCLUDE
-    preserve_columns_global: frozenset = DEFAULT_PRESERVE
-    overrides: dict = field(default_factory=dict)
+    exclude_tables: frozenset[str] = DEFAULT_EXCLUDE
+    preserve_columns_global: frozenset[str] = DEFAULT_PRESERVE
+    overrides: dict[str, dict] = field(default_factory=dict)
     weekly_full_refresh: bool = True
     delete_enabled: bool = True
 

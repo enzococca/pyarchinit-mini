@@ -1,17 +1,20 @@
-def base_tables(conn) -> set:
+from psycopg2.extensions import connection
+
+
+def base_tables(conn: connection) -> set[str]:
     cur = conn.cursor()
     cur.execute("select table_name from information_schema.tables "
                 "where table_schema='public' and table_type='BASE TABLE'")
     return {r[0] for r in cur.fetchall()}
 
-def column_types(conn, table) -> dict:
+def column_types(conn: connection, table: str) -> dict[str, tuple[str, int | None]]:
     cur = conn.cursor()
     cur.execute("select column_name, data_type, character_maximum_length "
                 "from information_schema.columns where table_schema='public' and table_name=%s",
                 (table,))
     return {r[0]: (r[1], r[2]) for r in cur.fetchall()}
 
-def primary_key(conn, table) -> list:
+def primary_key(conn: connection, table: str) -> list[str]:
     cur = conn.cursor()
     cur.execute("""select a.attname from pg_index i
                    join pg_class c on c.oid=i.indrelid
@@ -21,19 +24,19 @@ def primary_key(conn, table) -> list:
                    order by a.attnum""", (table,))
     return [r[0] for r in cur.fetchall()]
 
-def geometry_columns(conn, table) -> set:
+def geometry_columns(conn: connection, table: str) -> set[str]:
     cur = conn.cursor()
     cur.execute("select column_name from information_schema.columns "
                 "where table_schema='public' and table_name=%s "
                 "and udt_name in ('geometry','geography')", (table,))
     return {r[0] for r in cur.fetchall()}
 
-def row_count(conn, table) -> int:
+def row_count(conn: connection, table: str) -> int:
     cur = conn.cursor()
     cur.execute(f'select count(*) from public."{table}"')
     return cur.fetchone()[0]
 
-def signature(conn, table, pk) -> str:
+def signature(conn: connection, table: str, pk: list[str]) -> str:
     cur = conn.cursor()
     cur.execute(f'select count(*) from public."{table}"')
     cnt = cur.fetchone()[0]
