@@ -106,9 +106,23 @@
     <div class="card-body">
         <h5><i class="fas fa-print"></i> {{ _('Bulk label print') }}</h5>
         <p class="text-muted small">{{ _('Print labels for ALL TMA records matching current filters.') }}</p>
-        <a href="{{ url_for('tma_labels_bulk', search=search, sito=sito_filter) }}" class="btn btn-success">
-            <i class="fas fa-file-pdf"></i> {{ _('Generate PDF labels (all filtered)') }}
-        </a>
+        <form method="GET" action="{{ url_for('tma_labels_bulk') }}" class="row g-2 align-items-end">
+            <input type="hidden" name="search" value="{{ search }}">
+            <input type="hidden" name="sito" value="{{ sito_filter }}">
+            <div class="col-auto">
+                <label for="bulk_format" class="form-label small mb-1">{{ _('Label format') }}</label>
+                <select name="format" id="bulk_format" class="form-select form-select-sm">
+                    {% for key, label in tma_label_formats %}
+                    <option value="{{ key }}" {% if key == tma_label_format_default %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-file-pdf"></i> {{ _('Generate PDF labels (all filtered)') }}
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 

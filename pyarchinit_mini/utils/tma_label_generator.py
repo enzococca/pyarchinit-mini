@@ -24,12 +24,24 @@ except ImportError:
 
 # Standard label sheet formats (mm)
 LABEL_FORMATS = {
-    'avery_l7160': {'width': 63.5, 'height': 38.1, 'per_row': 3, 'per_col': 7, 'margin': 2.5},
-    'avery_l7163': {'width': 99.1, 'height': 38.1, 'per_row': 2, 'per_col': 7, 'margin': 2.5},
-    'small_70x37': {'width': 70, 'height': 37, 'per_row': 3, 'per_col': 8, 'margin': 2},
-    'medium_105x57': {'width': 105, 'height': 57, 'per_row': 2, 'per_col': 5, 'margin': 3},
-    'single_a4': {'width': 210, 'height': 297, 'per_row': 1, 'per_col': 1, 'margin': 10},
+    'avery_l7160': {'width': 63.5, 'height': 38.1, 'per_row': 3, 'per_col': 7, 'margin': 2.5,
+                    'label': 'Avery L7160 — 3×7 (63×38 mm)'},
+    'avery_l7163': {'width': 99.1, 'height': 38.1, 'per_row': 2, 'per_col': 7, 'margin': 2.5,
+                    'label': 'Avery L7163 — 2×7 (99×38 mm)'},
+    'small_70x37': {'width': 70, 'height': 37, 'per_row': 3, 'per_col': 8, 'margin': 2,
+                    'label': 'Piccola — 3×8 (70×37 mm)'},
+    'medium_105x57': {'width': 105, 'height': 57, 'per_row': 2, 'per_col': 5, 'margin': 3,
+                      'label': 'Media — 2×5 (105×57 mm)'},
+    'single_a4': {'width': 210, 'height': 297, 'per_row': 1, 'per_col': 1, 'margin': 10,
+                  'label': 'A4 singola — 1 etichetta/pagina'},
 }
+
+DEFAULT_LABEL_FORMAT = 'avery_l7160'
+
+
+def get_label_format_choices():
+    """Return [(key, friendly_label), ...] for building a format selector UI."""
+    return [(key, cfg.get('label', key)) for key, cfg in LABEL_FORMATS.items()]
 
 
 class TMALabelGenerator:

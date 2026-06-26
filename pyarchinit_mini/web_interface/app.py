@@ -421,6 +421,18 @@ def create_app():
     def inject_locale():
         return dict(get_locale=get_locale, _=_, version=__version__)
 
+    @app.context_processor
+    def inject_tma_label_formats():
+        """Expose TMA label sheet formats so templates can render a selector."""
+        try:
+            from pyarchinit_mini.utils.tma_label_generator import (
+                get_label_format_choices, DEFAULT_LABEL_FORMAT,
+            )
+            return dict(tma_label_formats=get_label_format_choices(),
+                        tma_label_format_default=DEFAULT_LABEL_FORMAT)
+        except Exception:
+            return dict(tma_label_formats=[], tma_label_format_default='avery_l7160')
+
     # Create necessary folders
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(app.config['DATABASE_FOLDER'], exist_ok=True)
@@ -4398,11 +4410,16 @@ def create_app():
                         user_map[u.full_name.lower().strip()] = u.email
                     user_map[u.username.lower().strip()] = u.email
 
-                # Also check pyarchinit_users if PostgreSQL
+                # Also check pyarchinit_users (legacy PyArchInit installs may have it).
+                # Wrap in a SAVEPOINT so that, on PostgreSQL, a missing table does not
+                # abort the whole transaction — which would otherwise make every
+                # subsequent query in this session fail with "current transaction is
+                # aborted". (SQLite tolerates the failed statement; PostgreSQL does not.)
                 try:
-                    pa_users = session.execute(sa_text(
-                        "SELECT username, email, full_name FROM pyarchinit_users"
-                    )).fetchall()
+                    with session.begin_nested():
+                        pa_users = session.execute(sa_text(
+                            "SELECT username, email, full_name FROM pyarchinit_users"
+                        )).fetchall()
                     for pu in pa_users:
                         if pu[2]:  # full_name
                             user_map[pu[2].lower().strip()] = pu[1]
