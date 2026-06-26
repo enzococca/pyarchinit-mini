@@ -174,6 +174,7 @@ exclude = ["docs*", "examples*", "scripts*", "test_*"]
 "*" = ["logo/*.png"]
 pyarchinit_mini = [
     "*.yaml", "*.yml", "*.json",
+    "sync/*.json",
     "data/*.db", "data/*.sql",
     "graphml_converter/templates/*.graphml",
     "web_interface/templates/*.html",
