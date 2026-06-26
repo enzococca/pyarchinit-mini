@@ -55,3 +55,32 @@ def test_full_sync_casts_divergent_types(src_conn, tgt_conn, make_table):
     cur = tgt_conn.cursor()
     cur.execute('select id, anno from public."w_cast" order by id')
     assert cur.fetchall() == [(1, 2020), (2, None)]   # "2020"->2020, "n/a"->NULL (guarded)
+
+def test_keyset_mode_insert_and_delete_first_run(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."w_keyset" (id int primary key, sito varchar(20))'
+    make_table(src_conn, "w_keyset", ddl, rows=[(1, "A"), (2, "B")])
+    make_table(tgt_conn, "w_keyset", ddl, rows=[(2, "B"), (3, "old")])
+    cfg = _cfg("x", "x"); cfg.size_threshold_keyset = 1
+    tgt_conn.cursor().execute("DROP TABLE IF EXISTS public.sync_state"); tgt_conn.commit()
+    res = sync_table(src_conn, tgt_conn, "w_keyset", cfg, dry_run=False)
+    assert res.mode == "keyset"
+    assert (res.inserted, res.deleted) == (1, 1)
+    cur = tgt_conn.cursor(); cur.execute('select id from public."w_keyset" order by id')
+    assert [r[0] for r in cur.fetchall()] == [1, 2]
+
+def test_replace_mode_truncates_and_reloads_first_run(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."w_replace" (sito varchar(20), n int)'
+    make_table(src_conn, "w_replace", ddl, rows=[("A", 1), ("B", 2)])
+    make_table(tgt_conn, "w_replace", ddl, rows=[("OLD", 9)])
+    tgt_conn.cursor().execute("DROP TABLE IF EXISTS public.sync_state"); tgt_conn.commit()
+    res = sync_table(src_conn, tgt_conn, "w_replace", _cfg("x", "x"), dry_run=False)
+    assert res.mode == "replace"
+    cur = tgt_conn.cursor(); cur.execute('select sito, n from public."w_replace" order by sito')
+    assert cur.fetchall() == [("A", 1), ("B", 2)]
+
+def test_missing_source_table_is_isolated(src_conn, tgt_conn, make_table):
+    make_table(tgt_conn, "w_only_tgt", 'CREATE TABLE public."w_only_tgt" (id int primary key)')
+    res = sync_table(src_conn, tgt_conn, "w_only_tgt", _cfg("x", "x"), dry_run=False)
+    assert res.error is not None and res.inserted == 0
+    cur = tgt_conn.cursor(); cur.execute("select 1")
+    assert cur.fetchone()[0] == 1

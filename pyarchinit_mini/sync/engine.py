@@ -86,20 +86,23 @@ def _delete_rows(tgt_conn, table, pk, keys, cfg):
     return total
 
 def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
-    pk = I.primary_key(src_conn, table)
-    override = cfg.overrides.get(table) or {}
-    rc = I.row_count(src_conn, table)
-    mode = select_mode(rc, bool(pk), cfg.size_threshold_keyset, override.get("mode"))
-    src_types = I.column_types(src_conn, table)
-    tgt_types = I.column_types(tgt_conn, table)
-    geom = I.geometry_columns(tgt_conn, table)
-    preserve = preserve_set_for_table(cfg.preserve_columns_global, set(src_types), set(tgt_types),
-                                      override.get("extra_preserve", []))
-    common = common_data_columns(set(src_types), set(tgt_types), preserve)
+    mode = "unknown"          # so the except handler can reference it on early failure
     ins = upd = dele = 0
     try:
+        S.ensure_state_table(tgt_conn)   # idempotent; MUST precede get_signature
+        pk = I.primary_key(src_conn, table)
+        override = cfg.overrides.get(table) or {}
+        rc = I.row_count(src_conn, table)
+        mode = select_mode(rc, bool(pk), cfg.size_threshold_keyset, override.get("mode"))
+        src_types = I.column_types(src_conn, table)
+        tgt_types = I.column_types(tgt_conn, table)
+        geom = I.geometry_columns(tgt_conn, table)
+        preserve = preserve_set_for_table(cfg.preserve_columns_global, set(src_types), set(tgt_types),
+                                          override.get("extra_preserve", []))
+        common = common_data_columns(set(src_types), set(tgt_types), preserve)
         if mode in ("keyset", "replace"):
             if I.signature(src_conn, table, pk) == S.get_signature(tgt_conn, table):
+                tgt_conn.rollback()      # close the open transaction; nothing to persist
                 return TableResult(table, mode, 0, 0, 0, True, None)
         if mode == "replace":
             tgt_conn.cursor().execute(f'TRUNCATE public."{table}"')
@@ -123,7 +126,6 @@ def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
         if dry_run:
             tgt_conn.rollback()
         else:
-            S.ensure_state_table(tgt_conn)
             S.record_result(tgt_conn, table, I.signature(src_conn, table, pk), mode, ins, upd, dele, None)
             tgt_conn.commit()
         return TableResult(table, mode, ins, upd, dele, False, None)
