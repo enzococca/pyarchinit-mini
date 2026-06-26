@@ -84,3 +84,31 @@ def test_missing_source_table_is_isolated(src_conn, tgt_conn, make_table):
     assert res.error is not None and res.inserted == 0
     cur = tgt_conn.cursor(); cur.execute("select 1")
     assert cur.fetchone()[0] == 1
+
+def test_full_sync_idempotent_on_divergent_types(src_conn, tgt_conn, make_table):
+    make_table(src_conn, "w_idem",
+        'CREATE TABLE public."w_idem" (id int primary key, anno varchar(10))', rows=[(1, "2020"), (2, "n/a")])
+    make_table(tgt_conn, "w_idem",
+        'CREATE TABLE public."w_idem" (id int primary key, anno integer)')
+    r1 = sync_table(src_conn, tgt_conn, "w_idem", _cfg("x", "x"), dry_run=False)
+    assert r1.inserted == 2
+    r2 = sync_table(src_conn, tgt_conn, "w_idem", _cfg("x", "x"), dry_run=False)
+    assert (r2.inserted, r2.updated, r2.deleted) == (0, 0, 0)   # no perpetual update
+
+def test_error_is_recorded_in_sync_state(src_conn, tgt_conn, make_table):
+    make_table(tgt_conn, "w_err", 'CREATE TABLE public."w_err" (id int primary key)')  # absent on source
+    res = sync_table(src_conn, tgt_conn, "w_err", _cfg("x", "x"), dry_run=False)
+    assert res.error is not None
+    cur = tgt_conn.cursor()
+    cur.execute("select error from public.sync_state where table_name='w_err'")
+    row = cur.fetchone()
+    assert row is not None and row[0]      # error persisted
+
+def test_empty_source_does_not_wipe_target_by_default(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."w_empty" (id int primary key, sito varchar(10))'
+    make_table(src_conn, "w_empty", ddl, rows=[])
+    make_table(tgt_conn, "w_empty", ddl, rows=[(1, "A"), (2, "B")])
+    res = sync_table(src_conn, tgt_conn, "w_empty", _cfg("x", "x"), dry_run=False)
+    assert res.deleted == 0
+    cur = tgt_conn.cursor(); cur.execute('select count(*) from public."w_empty"')
+    assert cur.fetchone()[0] == 2

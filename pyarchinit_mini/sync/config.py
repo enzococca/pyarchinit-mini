@@ -19,6 +19,7 @@ class Config:
     overrides: dict[str, dict] = field(default_factory=dict)
     weekly_full_refresh: bool = True
     delete_enabled: bool = True
+    delete_on_empty_source: bool = False
 
 def load_config(path: str | None = None, env: Mapping[str, str] = os.environ) -> Config:
     raw = {}
@@ -38,4 +39,5 @@ def load_config(path: str | None = None, env: Mapping[str, str] = os.environ) ->
         overrides=raw.get("overrides", {}),
         weekly_full_refresh=bool(raw.get("weekly_full_refresh", True)),
         delete_enabled=bool(raw.get("delete_enabled", True)),
+        delete_on_empty_source=bool(raw.get("delete_on_empty_source", False)),
     )

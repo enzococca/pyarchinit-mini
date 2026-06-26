@@ -45,6 +45,22 @@ def build_pk_hash_select(table: str, pk: list[str], hash_cols: list[str]) -> str
     pk_sql = ", ".join(f'"{c}"' for c in pk)
     return f'SELECT {pk_sql}, {row_hash_sql(hash_cols)} FROM public."{table}"'
 
+def coerced_row_hash_sql(columns: list[str], src_types: dict, tgt_types: dict, geom: set) -> str:
+    if not columns:
+        return "md5('')"
+    parts = []
+    for c in columns:
+        tgt_t = "geometry" if c in geom else tgt_types[c][0]
+        expr = cast_expr(src_types[c][0], tgt_t, tgt_types[c][1], ph=f'"{c}"')
+        parts.append(f"coalesce(({expr})::text,'')")
+    return "md5(" + "||'|'||".join(parts) + ")"
+
+def build_pk_hash_select_coerced(table: str, pk: list[str], columns: list[str],
+                                 src_types: dict, tgt_types: dict, geom: set) -> str:
+    pk_sql = ", ".join(f'"{c}"' for c in pk)
+    return (f'SELECT {pk_sql}, '
+            f'{coerced_row_hash_sql(columns, src_types, tgt_types, geom)} FROM public."{table}"')
+
 def build_insert(table: str, cols: list[str], value_exprs: list[str], fill: dict[str, str]) -> str:
     all_cols = cols + list(fill.keys())
     col_sql = ", ".join(f'"{c}"' for c in all_cols)

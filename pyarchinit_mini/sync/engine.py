@@ -77,8 +77,13 @@ def _update_rows(tgt_conn: connection, table: str, common: list[str], pk: list[s
         total += cur.rowcount
     return total
 
-def _delete_rows(tgt_conn: connection, table: str, pk: list[str], keys, cfg):
-    if not keys or not cfg.delete_enabled:
+def _fetch_keyed_hash_coerced(conn, table, pk, common, src_types, tgt_types, geom):
+    cur = conn.cursor()
+    cur.execute(T.build_pk_hash_select_coerced(table, pk, common, src_types, tgt_types, geom))
+    return {tuple(r[:len(pk)]): r[len(pk)] for r in cur.fetchall()}
+
+def _delete_rows(tgt_conn, table, pk, keys):
+    if not keys:
         return 0
     cur = tgt_conn.cursor(); total = 0
     where = " AND ".join(f'"{c}"=%s' for c in pk)
@@ -114,17 +119,20 @@ def sync_table(src_conn: connection, tgt_conn: connection, table: str, cfg: Conf
             d = diff_by_keyset(_pk_set(src_conn, table, pk), _pk_set(tgt_conn, table, pk))
             rows = _fetch_source_rows(src_conn, table, common, pk, keys=d.inserts)
             ins = _insert_rows(tgt_conn, table, common, rows, src_types, tgt_types, geom)
-            dele = _delete_rows(tgt_conn, table, pk, d.deletes, cfg)
+            dele = (_delete_rows(tgt_conn, table, pk, d.deletes)
+                    if cfg.delete_enabled and (rc > 0 or cfg.delete_on_empty_source) else 0)
         else:  # full
-            d = diff_by_hash(_fetch_keyed_hash(src_conn, table, pk, common),
-                             _fetch_keyed_hash(tgt_conn, table, pk, common))
+            s = _fetch_keyed_hash_coerced(src_conn, table, pk, common, src_types, tgt_types, geom)
+            t = _fetch_keyed_hash(tgt_conn, table, pk, common)
+            d = diff_by_hash(s, t)
             ins = _insert_rows(tgt_conn, table, common,
                                _fetch_source_rows(src_conn, table, common, pk, keys=d.inserts),
                                src_types, tgt_types, geom)
             upd = _update_rows(tgt_conn, table, common, pk,
                                _fetch_source_rows(src_conn, table, common, pk, keys=d.updates),
                                src_types, tgt_types, geom)
-            dele = _delete_rows(tgt_conn, table, pk, d.deletes, cfg)
+            dele = (_delete_rows(tgt_conn, table, pk, d.deletes)
+                    if cfg.delete_enabled and (rc > 0 or cfg.delete_on_empty_source) else 0)
         if dry_run:
             tgt_conn.rollback()
         else:
@@ -133,4 +141,11 @@ def sync_table(src_conn: connection, tgt_conn: connection, table: str, cfg: Conf
         return TableResult(table, mode, ins, upd, dele, False, None)
     except Exception as e:
         tgt_conn.rollback()
-        return TableResult(table, mode, 0, 0, 0, False, str(e).splitlines()[0])
+        msg = str(e).splitlines()[0]
+        try:                                  # best-effort: persist the error
+            S.ensure_state_table(tgt_conn)
+            S.record_result(tgt_conn, table, "", mode, 0, 0, 0, msg)
+            tgt_conn.commit()
+        except Exception:
+            tgt_conn.rollback()
+        return TableResult(table, mode, 0, 0, 0, False, msg)
