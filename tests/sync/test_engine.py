@@ -3,6 +3,8 @@ pytestmark = pytest.mark.skipif(
     not (os.getenv("TEST_SYNC_SRC_DSN") and os.getenv("TEST_SYNC_TGT_DSN")),
     reason="needs test DBs")
 from pyarchinit_mini.sync import state as S
+from pyarchinit_mini.sync.engine import sync_table
+from pyarchinit_mini.sync.config import Config
 
 
 def test_state_roundtrip(tgt_conn):
@@ -13,3 +15,43 @@ def test_state_roundtrip(tgt_conn):
     # upsert overwrites
     S.record_result(tgt_conn, "w_state", "6:6", "full", 0, 0, 0, None)
     assert S.get_signature(tgt_conn, "w_state") == "6:6"
+
+
+def _cfg(src, tgt):
+    return Config(source_dsn=src, target_dsn=tgt, size_threshold_keyset=1000)
+
+def test_full_sync_insert_update_delete(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."w_full" (id int primary key, sito varchar(50), order_layer int)'
+    make_table(src_conn, "w_full", ddl, rows=[(1, "A", None), (2, "Bclassic", None)])
+    make_table(tgt_conn, "w_full", ddl, rows=[(2, "Bold", 99), (3, "ghost", 7)])
+    cfg = _cfg("x", "x"); cfg.preserve_columns_global = frozenset({"order_layer"})
+    res = sync_table(src_conn, tgt_conn, "w_full", cfg, dry_run=False)
+    assert (res.inserted, res.updated, res.deleted) == (1, 1, 1)
+    cur = tgt_conn.cursor()
+    cur.execute('select id, sito, order_layer from public."w_full" order by id')
+    rows = cur.fetchall()
+    assert rows == [(1, "A", None), (2, "Bclassic", 99)]   # id3 deleted, id2 updated, order_layer preserved
+
+def test_dry_run_writes_nothing(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."w_dry" (id int primary key, sito varchar(50))'
+    make_table(src_conn, "w_dry", ddl, rows=[(1, "A")])
+    make_table(tgt_conn, "w_dry", ddl, rows=[])
+    res = sync_table(src_conn, tgt_conn, "w_dry", _cfg("x", "x"), dry_run=True)
+    assert res.inserted == 1
+    cur = tgt_conn.cursor()
+    cur.execute('select count(*) from public."w_dry"')
+    assert cur.fetchone()[0] == 0   # dry-run rolled back, nothing written
+
+def test_full_sync_casts_divergent_types(src_conn, tgt_conn, make_table):
+    # source `anno` is varchar, target `anno` is integer -> cast_expr emits the
+    # placeholder twice; named params must bind both occurrences to one value.
+    make_table(src_conn, "w_cast",
+        'CREATE TABLE public."w_cast" (id int primary key, anno varchar(10))',
+        rows=[(1, "2020"), (2, "n/a")])
+    make_table(tgt_conn, "w_cast",
+        'CREATE TABLE public."w_cast" (id int primary key, anno integer)')
+    res = sync_table(src_conn, tgt_conn, "w_cast", _cfg("x", "x"), dry_run=False)
+    assert res.inserted == 2
+    cur = tgt_conn.cursor()
+    cur.execute('select id, anno from public."w_cast" order by id')
+    assert cur.fetchall() == [(1, 2020), (2, None)]   # "2020"->2020, "n/a"->NULL (guarded)
