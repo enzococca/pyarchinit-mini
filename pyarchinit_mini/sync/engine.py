@@ -21,10 +21,10 @@ def _source_hash(src_conn, table, pk, common, src_types, tgt_types, geom):
     cur.execute(T.build_pk_hash_select_coerced(table, [pk], hcols, src_types, tgt_types, geom))
     return {str(r[0]): r[1] for r in cur.fetchall()}
 
-def _target_hash(tgt_conn, table, pk, common):
+def _target_hash(tgt_conn, table, pk, common, tgt_types):
     hcols = [c for c in common if c != pk]
     cur = tgt_conn.cursor()
-    cur.execute(f'select "{pk}"::text, {T.row_hash_sql(hcols)} from public."{table}"')
+    cur.execute(f'select "{pk}"::text, {T.plain_row_hash_sql(hcols, tgt_types)} from public."{table}"')
     return {r[0]: r[1] for r in cur.fetchall()}
 
 def _fetch_source_row(src_conn, table, common, pk, v1_pk):
@@ -89,7 +89,7 @@ def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
         common = common_data_columns(set(src_types), set(tgt_types), preserve)
         if mode == "additive":
             src_hexpr = T.coerced_row_hash_sql(common, src_types, tgt_types, geom)
-            tgt_hexpr = T.row_hash_sql(common)
+            tgt_hexpr = T.plain_row_hash_sql(common, tgt_types)
             scur = src_conn.cursor()
             scur.execute(f'select {src_hexpr}, {", ".join(chr(34)+c+chr(34) for c in common)} '
                          f'from public."{table}"')
@@ -125,7 +125,7 @@ def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
             M.bootstrap_table(tgt_conn, src_conn, table, single_pk)
         mp = M.load_map(tgt_conn, table)                       # {v1_pk: v2_pk}
         src = _source_hash(src_conn, table, single_pk, common, src_types, tgt_types, geom)
-        tgt_h = _target_hash(tgt_conn, table, single_pk, common)   # {v2_pk: hash}
+        tgt_h = _target_hash(tgt_conn, table, single_pk, common, tgt_types)   # {v2_pk: hash}
         target = {v1: tgt_h.get(v2) for v1, v2 in mp.items()}      # {v1_pk: hash-of-its-v2-row}
         d = diff_by_hash(src, target)
         v2pks = M.v2_pk_set(tgt_conn, table, single_pk)

@@ -132,3 +132,13 @@ def test_additive_idempotent_on_divergent_types(src_conn, tgt_conn, make_table):
     assert r2.inserted == 0                                 # no perpetual re-insert
     cur = tgt_conn.cursor(); cur.execute('select count(*) from public."wAi"')
     assert cur.fetchone()[0] == 2
+
+def test_idempotent_on_v2_char_column(src_conn, tgt_conn, make_table):
+    # v2 column is char(3): stored blank-padded; sync must still converge (target hash rtrims char)
+    make_table(src_conn, "wC", 'CREATE TABLE public."wC" (id int primary key, code char(3))',
+               rows=[(1, "A"), (2, "BB")])
+    make_table(tgt_conn, "wC", 'CREATE TABLE public."wC" (id int primary key, code char(3))')
+    r1 = sync_table(src_conn, tgt_conn, "wC", _cfg(), dry_run=False)
+    assert r1.inserted == 2
+    r2 = sync_table(src_conn, tgt_conn, "wC", _cfg(), dry_run=False)
+    assert (r2.inserted, r2.updated, r2.deleted) == (0, 0, 0)   # char padding no longer perpetual-updates

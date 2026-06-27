@@ -45,6 +45,17 @@ def row_hash_sql(columns: list[str]) -> str:
     parts = "||'|'||".join(f"coalesce(\"{c}\"::text,'')" for c in columns)
     return f"md5({parts})" if columns else "md5('')"
 
+def plain_row_hash_sql(columns: list[str], col_types: dict) -> str:
+    if not columns:
+        return "md5('')"
+    parts = []
+    for c in columns:
+        ref = f'"{c}"'
+        if col_types.get(c, ("", None))[0] == "character":
+            ref = f"rtrim({ref})"
+        parts.append(f"coalesce(({ref})::text,'')")
+    return "md5(" + "||'|'||".join(parts) + ")"
+
 def build_pk_hash_select(table: str, pk: list[str], hash_cols: list[str]) -> str:
     pk_sql = ", ".join(f'"{c}"' for c in pk)
     return f'SELECT {pk_sql}, {row_hash_sql(hash_cols)} FROM public."{table}"'
