@@ -1,4 +1,8 @@
 def cast_expr(src_type: str, tgt_type: str, tgt_maxlen: int | None, ph: str = "%s") -> str:
+    # CHAR(n) (bpchar) source is blank-padded; trailing spaces are insignificant.
+    # Strip them so the coerced value matches the trimmed value stored in v2.
+    if src_type == "character":
+        ph = f"rtrim({ph})"
     t = tgt_type
     if t in ("geometry", "geography"):
         return f"({ph})::{t}"

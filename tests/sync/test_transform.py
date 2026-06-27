@@ -38,3 +38,14 @@ def test_build_update_sets_and_pk_where():
     sql = build_update("site_table", ["descrizione"], ["(%(descrizione)s)::text"], ["id_sito"])
     assert 'update public."site_table" set "descrizione" = (%(descrizione)s)::text' in sql.lower()
     assert 'where "id_sito" = %(__pk_id_sito)s' in sql.lower()
+
+def test_cast_bpchar_source_rtrims_padding():
+    # source CHAR(n) blank-padded -> target text/varchar must drop trailing spaces
+    e = cast_expr("character", "character varying", 255)
+    assert "rtrim(" in e
+    e2 = cast_expr("character", "text", None)
+    assert "rtrim(" in e2
+
+def test_cast_non_char_source_not_rtrimmed():
+    e = cast_expr("character varying", "text", None)
+    assert "rtrim(" not in e
