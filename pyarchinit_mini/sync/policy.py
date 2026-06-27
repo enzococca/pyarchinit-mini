@@ -1,11 +1,8 @@
-def select_mode(rowcount: int, has_pk: bool, threshold: int, override: str | None) -> str:
-    if override in ("full", "keyset", "replace"):
-        return override
-    if not has_pk:
-        return "replace"
-    if rowcount > threshold:
-        return "keyset"
-    return "full"
+def select_mode(has_single_pk: bool) -> str:
+    return "mapped" if has_single_pk else "additive"
+
+def is_gated(rowcount: int, threshold: int) -> bool:
+    return rowcount > threshold
 
 def preserve_set_for_table(global_preserve: frozenset[str], src_cols: set[str], tgt_cols: set[str], extra: list[str]) -> set[str]:
     target_only = set(tgt_cols) - set(src_cols)

@@ -1,16 +1,15 @@
 from pyarchinit_mini.sync.policy import select_mode, preserve_set_for_table, common_data_columns
 
-def test_select_mode_override_wins():
-    assert select_mode(10, True, 200_000, "replace") == "replace"
+def test_select_mode_mapped_when_single_pk():
+    assert select_mode(True) == "mapped"
 
-def test_select_mode_no_pk_is_replace():
-    assert select_mode(10, False, 200_000, None) == "replace"
+def test_select_mode_additive_when_no_single_pk():
+    assert select_mode(False) == "additive"
 
-def test_select_mode_large_is_keyset():
-    assert select_mode(500_000, True, 200_000, None) == "keyset"
-
-def test_select_mode_small_is_full():
-    assert select_mode(1915, True, 200_000, None) == "full"
+def test_is_gated_threshold():
+    from pyarchinit_mini.sync.policy import is_gated
+    assert is_gated(500_000, 200_000) is True
+    assert is_gated(1915, 200_000) is False
 
 def test_preserve_set_includes_target_only_and_en_cols():
     p = preserve_set_for_table(
