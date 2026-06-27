@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:61
 #: pyarchinit_mini/desktop_gui/main_window.py:1490
@@ -139,6 +139,8 @@ msgid ""
 "Drag media files here\n"
 "(Images, PDF, Video, Audio)"
 msgstr ""
+"Trascina qui i file multimediali\n"
+"(Immagini, PDF, Video, Audio)"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:483
 #: pyarchinit_mini/desktop_gui/dialogs.py:521
@@ -441,6 +443,12 @@ msgid ""
 "• Mouse wheel to zoom\n"
 "• Zoom buttons for precise control"
 msgstr ""
+"Seleziona un sito e genera il Matrix di Harris\n"
+"\n"
+"Controlli:\n"
+"• Trascina con il mouse per spostare\n"
+"• Rotellina del mouse per lo zoom\n"
+"• Pulsanti zoom per un controllo preciso"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:979
 #: pyarchinit_mini/desktop_gui/dialogs.py:1401
@@ -488,6 +496,14 @@ msgid ""
 "Isolated US: {}\n"
 "\n"
 msgstr ""
+"STATISTICHE MATRIX DI HARRIS - {}\n"
+"\n"
+"Totale US: {}\n"
+"Rapporti stratigrafici: {}\n"
+"Livelli stratigrafici: {}\n"
+"Matrix valido: {}\n"
+"US isolate: {}\n"
+"\n"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1017
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:157
@@ -522,6 +538,8 @@ msgid ""
 "No data to visualize\n"
 "Generate a Harris Matrix first"
 msgstr ""
+"Nessun dato da visualizzare\n"
+"Genera prima un Matrix di Harris"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1089
 #, python-brace-format
@@ -542,6 +560,10 @@ msgid ""
 "\n"
 "Use the Advanced Editor for more options"
 msgstr ""
+"Errore di visualizzazione:\n"
+"{}\n"
+"\n"
+"Usa l'Editor Avanzato per altre opzioni"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1238
 #: pyarchinit_mini/desktop_gui/main_window.py:879
@@ -567,6 +589,9 @@ msgid ""
 "\n"
 "{}"
 msgstr ""
+"Matrix esportato in:\n"
+"\n"
+"{}"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1268
 #, fuzzy, python-brace-format
@@ -678,6 +703,8 @@ msgid ""
 "US sheets saved to:\n"
 "{}"
 msgstr ""
+"Schede US salvate in:\n"
+"{}"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1454
 #, python-brace-format
@@ -690,6 +717,8 @@ msgid ""
 "Inventory sheets saved to:\n"
 "{}"
 msgstr ""
+"Schede inventario salvate in:\n"
+"{}"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1529
 msgid "Error generating PDF"
@@ -701,6 +730,8 @@ msgid ""
 "Complete report saved to:\n"
 "{}"
 msgstr ""
+"Report completo salvato in:\n"
+"{}"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1537
 #, fuzzy, python-brace-format
@@ -805,6 +836,21 @@ msgid ""
 "NOTE: Changing database will reload the interface\n"
 "and data migrations may be required."
 msgstr ""
+"CONFIGURAZIONE DATABASE\n"
+"\n"
+"SQLite:\n"
+"• Database locale salvato in un file\n"
+"• Ideale per utente singolo\n"
+"• Facile da trasportare e condividere\n"
+"\n"
+"PostgreSQL:\n"
+"• Server di database professionale\n"
+"• Supporta l'accesso multiutente\n"
+"• Prestazioni migliori per grandi quantità di dati\n"
+"• Richiede l'installazione del server PostgreSQL\n"
+"\n"
+"NOTA: cambiare database ricaricherà l'interfaccia\n"
+"e potrebbero essere necessarie migrazioni dei dati."
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1659
 msgid "Select SQLite database file"
@@ -820,6 +866,13 @@ msgid ""
 "• 50 Artifacts\n"
 "• 70+ Stratigraphic relationships"
 msgstr ""
+"Database di esempio caricato!\n"
+"\n"
+"Contenuto:\n"
+"• 1 Sito archeologico\n"
+"• 100 Unità stratigrafiche\n"
+"• 50 Reperti\n"
+"• 70+ Rapporti stratigrafici"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1680
 msgid "Missing Database"
@@ -830,6 +883,8 @@ msgid ""
 "The sample database does not exist.\n"
 "Do you want to create it now?"
 msgstr ""
+"Il database di esempio non esiste.\n"
+"Vuoi crearlo ora?"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1688
 msgid "Create new SQLite database"
@@ -858,6 +913,12 @@ msgid ""
 "• 100 US with relationships\n"
 "• 50 Artifacts"
 msgstr ""
+"Database di esempio creato con successo!\n"
+"\n"
+"Contenuto:\n"
+"• 1 Sito archeologico\n"
+"• 100 US con rapporti\n"
+"• 50 Reperti"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1733
 #, fuzzy, python-brace-format
@@ -1014,6 +1075,15 @@ msgid ""
 "\n"
 "DETAILS BY SITE:\n"
 msgstr ""
+"STATISTICHE PYARCHINIT-MINI\n"
+"Data: {}\n"
+"\n"
+"TOTALI COMPLESSIVI:\n"
+"• Siti archeologici: {}\n"
+"• Unità stratigrafiche: {}\n"
+"• Reperti catalogati: {}\n"
+"\n"
+"DETTAGLI PER SITO:\n"
 
 #: pyarchinit_mini/desktop_gui/dialogs.py:1974
 #, python-brace-format
@@ -1094,6 +1164,7 @@ msgstr "Dashboard"
 msgid "Sites"
 msgstr "Siti"
 
+# Unit Type translations for Extended Matrix
 #: pyarchinit_mini/desktop_gui/main_window.py:164
 #: pyarchinit_mini/desktop_gui/main_window.py:409
 #: pyarchinit_mini/pdf_export/pdf_generator.py:232
@@ -1423,6 +1494,8 @@ msgid ""
 "Language preference saved.\n"
 "Please restart the application for changes to take effect."
 msgstr ""
+"Preferenza lingua salvata.\n"
+"Riavvia l'applicazione per applicare le modifiche."
 
 #: pyarchinit_mini/desktop_gui/us_dialog_extended.py:48
 #, python-brace-format
@@ -1926,10 +1999,8 @@ msgid "RESPONSIBLE ENTITY"
 msgstr "ENTE RESPONSABILE"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:668
-msgid ""
-"IDENTIFICATION NUMBER/CODE OF STRATIGRAPHIC "
-"TRENCH/BUILDING/STRUCTURE/BURIAL REFERENCE"
-msgstr ""
+msgid "IDENTIFICATION NUMBER/CODE OF STRATIGRAPHIC TRENCH/BUILDING/STRUCTURE/BURIAL REFERENCE"
+msgstr "NUMERO/CODICE IDENTIFICATIVO DEL SAGGIO/EDIFICIO/STRUTTURA/SEPOLTURA STRATIGRAFICA DI RIFERIMENTO"
 
 #: pyarchinit_mini/pdf_export/pdf_generator.py:669
 msgid "COMPETENT SUPERINTENDENCE FOR PROTECTION"
@@ -2382,11 +2453,8 @@ msgid "GraphML Export"
 msgstr "Esportazione GraphML"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:12
-msgid ""
-"Export the Harris Matrix in GraphML format compatible with yEd Graph "
-"Editor. This format preserves the structure of archaeological periods and"
-" allows advanced diagram editing."
-msgstr ""
+msgid "Export the Harris Matrix in GraphML format compatible with yEd Graph Editor. This format preserves the structure of archaeological periods and allows advanced diagram editing."
+msgstr "Esporta il Matrix di Harris in formato GraphML compatibile con yEd Graph Editor. Questo formato preserva la struttura dei periodi archeologici e permette la modifica avanzata del diagramma."
 
 #: web_interface/templates/harris_matrix/graphml_export.html:18
 msgid "Export Parameters"
@@ -2421,10 +2489,8 @@ msgid "Reverse period order"
 msgstr "Reverse period order"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:51
-msgid ""
-"If selected, Period 1 will correspond to the last excavated epoch "
-"(reverse order)"
-msgstr ""
+msgid "If selected, Period 1 will correspond to the last excavated epoch (reverse order)"
+msgstr "Se selezionato, il Periodo 1 corrisponderà all'ultima epoca scavata (ordine inverso)"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:57
 msgid "Export to GraphML"
@@ -2439,11 +2505,8 @@ msgid "Advanced Export with s3Dgraphy"
 msgstr "Advanced Export with s3Dgraphy"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:73
-msgid ""
-"Export the stratigraphy in s3Dgraphy format compatible with Extended "
-"Matrix Framework. Includes complete metadata, 3D model support, and "
-"advanced analysis."
-msgstr ""
+msgid "Export the stratigraphy in s3Dgraphy format compatible with Extended Matrix Framework. Includes complete metadata, 3D model support, and advanced analysis."
+msgstr "Esporta la stratigrafia in formato s3Dgraphy compatibile con Extended Matrix Framework. Include metadati completi, supporto ai modelli 3D e analisi avanzate."
 
 #: web_interface/templates/harris_matrix/graphml_export.html:78
 msgid "Select Site for s3Dgraphy Export"
@@ -2506,10 +2569,8 @@ msgid "2. Open the GraphML File"
 msgstr "2. Open the GraphML File"
 
 #: web_interface/templates/harris_matrix/graphml_export.html:138
-msgid ""
-"Once the .graphml file is exported, open it with yEd Graph Editor. The "
-"diagram will appear with all nodes (SU) and stratigraphic relationships."
-msgstr ""
+msgid "Once the .graphml file is exported, open it with yEd Graph Editor. The diagram will appear with all nodes (SU) and stratigraphic relationships."
+msgstr "Una volta esportato il file .graphml, aprilo con yEd Graph Editor. Il diagramma apparirà con tutti i nodi (US) e i rapporti stratigrafici."
 
 #: web_interface/templates/harris_matrix/graphml_export.html:141
 msgid "3. Edit and Layout"
@@ -3403,10 +3464,8 @@ msgid "Tip:"
 msgstr "Tip:"
 
 #: web_interface/templates/us/form.html:354
-msgid ""
-"Specifying the initial and final period helps to chronologically "
-"contextualize the stratigraphic unit in the archaeological site."
-msgstr ""
+msgid "Specifying the initial and final period helps to chronologically contextualize the stratigraphic unit in the archaeological site."
+msgstr "Specificare il periodo iniziale e finale aiuta a contestualizzare cronologicamente l'unità stratigrafica nel sito archeologico."
 
 #: web_interface/templates/us/form.html:362
 msgid "Stratigraphic relationships format:"
@@ -3433,16 +3492,12 @@ msgid "Harris Matrix Relationships"
 msgstr "Harris Matrix"
 
 #: web_interface/templates/us/form.html:382
-msgid ""
-"After saving the SU, it will be possible to view the complete Harris "
-"Matrix of the site in the dedicated section."
-msgstr ""
+msgid "After saving the SU, it will be possible to view the complete Harris Matrix of the site in the dedicated section."
+msgstr "Dopo aver salvato l'US, sarà possibile visualizzare il Matrix di Harris completo del sito nella sezione dedicata."
 
 #: web_interface/templates/us/form.html:386
-msgid ""
-"The system will automatically validate stratigraphic relationships to "
-"identify any paradoxes or cycles."
-msgstr ""
+msgid "The system will automatically validate stratigraphic relationships to identify any paradoxes or cycles."
+msgstr "Il sistema validerà automaticamente i rapporti stratigrafici per identificare eventuali paradossi o cicli."
 
 #: web_interface/templates/us/form.html:395
 msgid "Inclusions"
@@ -3480,15 +3535,102 @@ msgstr "Salva US"
 msgid "No US found."
 msgstr "Nessuna US trovata."
 
-#: web_interface/templates/base.html:392
-#: web_interface/templates/base.html:511
+#: web_interface/templates/base.html:392 web_interface/templates/base.html:511
 msgid "Configuration"
 msgstr "Configurazione"
 
-#: web_interface/templates/base.html:397
-#: web_interface/templates/base.html:521
+#: web_interface/templates/base.html:397 web_interface/templates/base.html:521
 msgid "Thesaurus ICCD"
 msgstr "Thesaurus ICCD"
+
+msgid "USM"
+msgstr "USM"
+
+msgid "VSF"
+msgstr "VSF"
+
+msgid "SF"
+msgstr "SF"
+
+msgid "CON"
+msgstr "CON"
+
+msgid "USD"
+msgstr "USD"
+
+msgid "USVA"
+msgstr "USVA"
+
+msgid "USVB"
+msgstr "USVB"
+
+msgid "USVC"
+msgstr "USVC"
+
+msgid "DOC"
+msgstr "DOC"
+
+msgid "TU"
+msgstr "TU"
+
+msgid "property"
+msgstr "property"
+
+msgid "Combiner"
+msgstr "Combiner"
+
+msgid "Extractor"
+msgstr "Extractor"
+
+# Extended Matrix - Document Type field
+msgid "Document Type"
+msgstr "Tipo Documento"
+
+msgid "Image"
+msgstr "Immagine"
+
+msgid "PDF"
+msgstr "PDF"
+
+msgid "DOCX"
+msgstr "DOCX"
+
+msgid "CSV"
+msgstr "CSV"
+
+msgid "Excel"
+msgstr "Excel"
+
+msgid "TXT"
+msgstr "TXT"
+
+# Document file upload
+msgid "Upload Document File"
+msgstr "Carica File Documento"
+
+msgid "File will be saved in DoSC folder"
+msgstr "Il file verrà salvato nella cartella DoSC"
+
+msgid "Document File:"
+msgstr "File Documento:"
+
+msgid "Select Document File"
+msgstr "Seleziona File Documento"
+
+msgid "All Files"
+msgstr "Tutti i File"
+
+msgid "Word Documents"
+msgstr "Documenti Word"
+
+msgid "Excel Files"
+msgstr "File Excel"
+
+msgid "CSV Files"
+msgstr "File CSV"
+
+msgid "Text Files"
+msgstr "File di Testo"
 
 #~ msgid "OK"
 #~ msgstr "OK"
@@ -3919,9 +4061,7 @@ msgstr "Thesaurus ICCD"
 #~ msgstr "Visualizzatore Matplotlib (Semplice)"
 
 #~ msgid "For advanced visualization with groupings and desktop GUI style,"
-#~ msgstr ""
-#~ "Per una visualizzazione avanzata con "
-#~ "raggruppamenti e stile desktop GUI,"
+#~ msgstr "Per una visualizzazione avanzata con raggruppamenti e stile desktop GUI,"
 
 #~ msgid "switch to Graphviz"
 #~ msgstr "passa a Graphviz"
@@ -4697,102 +4837,3 @@ msgstr "Thesaurus ICCD"
 #~ msgid "View Inventory"
 #~ msgstr "Visualizza Inventario"
 
-
-# Unit Type translations for Extended Matrix
-msgid "US"
-msgstr "US"
-
-msgid "USM"
-msgstr "USM"
-
-msgid "VSF"
-msgstr "VSF"
-
-msgid "SF"
-msgstr "SF"
-
-msgid "CON"
-msgstr "CON"
-
-msgid "USD"
-msgstr "USD"
-
-msgid "USVA"
-msgstr "USVA"
-
-msgid "USVB"
-msgstr "USVB"
-
-msgid "USVC"
-msgstr "USVC"
-
-msgid "DOC"
-msgstr "DOC"
-
-msgid "TU"
-msgstr "TU"
-
-msgid "property"
-msgstr "property"
-
-msgid "Combiner"
-msgstr "Combiner"
-
-msgid "Extractor"
-msgstr "Extractor"
-
-# Extended Matrix - Document Type field
-msgid "Document Type"
-msgstr "Tipo Documento"
-
-msgid "Image"
-msgstr "Immagine"
-
-msgid "PDF"
-msgstr "PDF"
-
-msgid "DOCX"
-msgstr "DOCX"
-
-msgid "CSV"
-msgstr "CSV"
-
-msgid "Excel"
-msgstr "Excel"
-
-msgid "TXT"
-msgstr "TXT"
-
-# Document file upload
-msgid "Upload Document File"
-msgstr "Carica File Documento"
-
-msgid "File will be saved in DoSC folder"
-msgstr "Il file verrà salvato nella cartella DoSC"
-
-msgid "Document File:"
-msgstr "File Documento:"
-
-msgid "Browse..."
-msgstr "Sfoglia..."
-
-msgid "Select Document File"
-msgstr "Seleziona File Documento"
-
-msgid "All Files"
-msgstr "Tutti i File"
-
-msgid "Images"
-msgstr "Immagini"
-
-msgid "Word Documents"
-msgstr "Documenti Word"
-
-msgid "Excel Files"
-msgstr "File Excel"
-
-msgid "CSV Files"
-msgstr "File CSV"
-
-msgid "Text Files"
-msgstr "File di Testo"
