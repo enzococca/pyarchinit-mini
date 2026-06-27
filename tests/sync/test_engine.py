@@ -89,3 +89,23 @@ def test_dry_run_writes_nothing(src_conn, tgt_conn, make_table):
     assert r.inserted == 1
     cur = tgt_conn.cursor(); cur.execute('select count(*) from public."w5"')
     assert cur.fetchone()[0] == 0
+
+def test_additive_mode_no_pk_inserts_missing_keeps_native(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."wA" (sito varchar(20), n int)'   # no PK -> additive
+    make_table(src_conn, "wA", ddl, rows=[("A",1),("B",2)])
+    make_table(tgt_conn, "wA", ddl, rows=[("A",1),("NATIVE",9)])  # has one v1 row + one native
+    r = sync_table(src_conn, tgt_conn, "wA", _cfg(), dry_run=False)
+    assert r.mode == "additive"
+    assert r.deleted == 0
+    cur = tgt_conn.cursor(); cur.execute('select sito, n from public."wA" order by sito')
+    assert cur.fetchall() == [("A",1),("B",2),("NATIVE",9)]   # B added, native + A kept, nothing deleted
+
+def test_large_table_gate_skips_when_unchanged(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."wG" (id int primary key, sito varchar(20))'
+    make_table(src_conn, "wG", ddl, rows=[(1,"A"),(2,"B")])
+    make_table(tgt_conn, "wG", ddl, rows=[(1,"A"),(2,"B")])
+    cfg = _cfg(); cfg.size_threshold_keyset = 1      # rc=2 > 1 -> gated
+    r1 = sync_table(src_conn, tgt_conn, "wG", cfg, dry_run=False)
+    assert r1.skipped is False                       # first run: bootstraps + processes
+    r2 = sync_table(src_conn, tgt_conn, "wG", cfg, dry_run=False)
+    assert r2.skipped is True                         # unchanged v1 signature -> skipped

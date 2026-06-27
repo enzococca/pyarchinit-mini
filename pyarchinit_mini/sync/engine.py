@@ -87,8 +87,35 @@ def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
         preserve = preserve_set_for_table(cfg.preserve_columns_global,
                                           set(src_types), set(tgt_types), [])
         common = common_data_columns(set(src_types), set(tgt_types), preserve)
-        if mode != "mapped":
-            raise NotImplementedError("additive mode implemented in Task 6")
+        if mode == "additive":
+            hexpr = T.row_hash_sql(common)
+            scur = src_conn.cursor()
+            scur.execute(f'select {hexpr}, {", ".join(chr(34)+c+chr(34) for c in common)} '
+                         f'from public."{table}"')
+            srows = scur.fetchall()
+            tcur = tgt_conn.cursor()
+            tcur.execute(f'select {hexpr} from public."{table}"')
+            thashes = {r[0] for r in tcur.fetchall()}
+            seen = set(thashes)
+            for r in srows:
+                h = r[0]
+                if h in seen:
+                    continue
+                seen.add(h)
+                row = r[1:]
+                exprs = _value_exprs(common, src_types, tgt_types, geom)
+                col_sql = ", ".join(f'"{c}"' for c in common)
+                params = {c: row[i] for i, c in enumerate(common)}
+                tgt_conn.cursor().execute(
+                    f'INSERT INTO public."{table}" ({col_sql}) VALUES ({", ".join(exprs)})', params)
+                ins += 1
+            if dry_run:
+                tgt_conn.rollback()
+            else:
+                S.record_result(tgt_conn, table, I.signature(src_conn, table, pk_cols),
+                                mode, ins, 0, 0, None)
+                tgt_conn.commit()
+            return TableResult(table, mode, ins, 0, 0, False, None)
         if is_gated(rc, cfg.size_threshold_keyset):
             if I.signature(src_conn, table, pk_cols) == S.get_signature(tgt_conn, table):
                 tgt_conn.rollback()
