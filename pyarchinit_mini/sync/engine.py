@@ -95,19 +95,19 @@ def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
             srows = scur.fetchall()
             tcur = tgt_conn.cursor()
             tcur.execute(f'select {hexpr} from public."{table}"')
-            thashes = {r[0] for r in tcur.fetchall()}
-            seen = set(thashes)
+            seen = {r[0] for r in tcur.fetchall()}
+            exprs = _value_exprs(common, src_types, tgt_types, geom)
+            col_sql = ", ".join(f'"{c}"' for c in common)
+            sql = f'INSERT INTO public."{table}" ({col_sql}) VALUES ({", ".join(exprs)})'
+            icur = tgt_conn.cursor()
             for r in srows:
                 h = r[0]
                 if h in seen:
                     continue
                 seen.add(h)
                 row = r[1:]
-                exprs = _value_exprs(common, src_types, tgt_types, geom)
-                col_sql = ", ".join(f'"{c}"' for c in common)
                 params = {c: row[i] for i, c in enumerate(common)}
-                tgt_conn.cursor().execute(
-                    f'INSERT INTO public."{table}" ({col_sql}) VALUES ({", ".join(exprs)})', params)
+                icur.execute(sql, params)
                 ins += 1
             if dry_run:
                 tgt_conn.rollback()
