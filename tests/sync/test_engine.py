@@ -109,3 +109,26 @@ def test_large_table_gate_skips_when_unchanged(src_conn, tgt_conn, make_table):
     assert r1.skipped is False                       # first run: bootstraps + processes
     r2 = sync_table(src_conn, tgt_conn, "wG", cfg, dry_run=False)
     assert r2.skipped is True                         # unchanged v1 signature -> skipped
+
+def test_empty_source_does_not_wipe_v1_origin(src_conn, tgt_conn, make_table):
+    ddl = 'CREATE TABLE public."wEmpty" (id int primary key, sito varchar(20))'
+    make_table(src_conn, "wEmpty", ddl, rows=[(1,"A"),(2,"B")])
+    make_table(tgt_conn, "wEmpty", ddl, rows=[(1,"A"),(2,"B")])
+    sync_table(src_conn, tgt_conn, "wEmpty", _cfg(), dry_run=False)   # bootstrap maps 1,2
+    src_conn.cursor().execute('delete from public."wEmpty"'); src_conn.commit()  # source now empty
+    r = sync_table(src_conn, tgt_conn, "wEmpty", _cfg(), dry_run=False)
+    assert r.deleted == 0                                   # empty source must not wipe v1-origin
+    cur = tgt_conn.cursor(); cur.execute('select count(*) from public."wEmpty"')
+    assert cur.fetchone()[0] == 2
+
+def test_additive_idempotent_on_divergent_types(src_conn, tgt_conn, make_table):
+    # no-PK (additive); source `n` varchar vs target `n` integer -> coerced insert must be idempotent
+    make_table(src_conn, "wAi", 'CREATE TABLE public."wAi" (sito varchar(20), n varchar(10))',
+               rows=[("A","1"),("B","2")])
+    make_table(tgt_conn, "wAi", 'CREATE TABLE public."wAi" (sito varchar(20), n integer)')
+    r1 = sync_table(src_conn, tgt_conn, "wAi", _cfg(), dry_run=False)
+    assert r1.inserted == 2
+    r2 = sync_table(src_conn, tgt_conn, "wAi", _cfg(), dry_run=False)
+    assert r2.inserted == 0                                 # no perpetual re-insert
+    cur = tgt_conn.cursor(); cur.execute('select count(*) from public."wAi"')
+    assert cur.fetchone()[0] == 2

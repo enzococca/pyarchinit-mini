@@ -88,13 +88,14 @@ def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
                                           set(src_types), set(tgt_types), [])
         common = common_data_columns(set(src_types), set(tgt_types), preserve)
         if mode == "additive":
-            hexpr = T.row_hash_sql(common)
+            src_hexpr = T.coerced_row_hash_sql(common, src_types, tgt_types, geom)
+            tgt_hexpr = T.row_hash_sql(common)
             scur = src_conn.cursor()
-            scur.execute(f'select {hexpr}, {", ".join(chr(34)+c+chr(34) for c in common)} '
+            scur.execute(f'select {src_hexpr}, {", ".join(chr(34)+c+chr(34) for c in common)} '
                          f'from public."{table}"')
             srows = scur.fetchall()
             tcur = tgt_conn.cursor()
-            tcur.execute(f'select {hexpr} from public."{table}"')
+            tcur.execute(f'select {tgt_hexpr} from public."{table}"')
             seen = {r[0] for r in tcur.fetchall()}
             exprs = _value_exprs(common, src_types, tgt_types, geom)
             col_sql = ", ".join(f'"{c}"' for c in common)
@@ -130,8 +131,9 @@ def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
         v2pks = M.v2_pk_set(tgt_conn, table, single_pk)
         nums = [int(x) for x in v2pks if re.fullmatch(r"-?\d+", x)]
         state = {"next_high": max([cfg.collision_id_base] + [n + 1 for n in nums])}
-        for v1k in d.deletes:
-            _delete_one(tgt_conn, table, single_pk, mp[v1k]); M.delete_map(tgt_conn, table, v1k); dele += 1
+        if cfg.delete_enabled and (rc > 0 or cfg.delete_on_empty_source):
+            for v1k in d.deletes:
+                _delete_one(tgt_conn, table, single_pk, mp[v1k]); M.delete_map(tgt_conn, table, v1k); dele += 1
         for v1k in d.inserts:
             row = _fetch_source_row(src_conn, table, common, single_pk, v1k)
             if row is None:

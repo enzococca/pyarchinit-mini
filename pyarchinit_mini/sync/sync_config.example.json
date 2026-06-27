@@ -4,7 +4,7 @@
   "size_threshold_keyset": 200000,
   "exclude_tables": [],
   "preserve_columns_global": [],
-  "overrides": { "shape_finali_polygon": { "mode": "replace" } },
+  "overrides": {},
   "weekly_full_refresh": true,
   "delete_enabled": true
 }
