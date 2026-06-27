@@ -138,4 +138,541 @@ class AdvancedMediaManager:
         # Upload controls
         self.create_upload_controls(upload_frame)
 
-    def create_drop_area(self, parent):\n        \"\"\"Create drag & drop area\"\"\"\n        \n        drop_frame = ttk.LabelFrame(parent, text=\"Trascina i File Qui\", padding=20)\n        drop_frame.pack(fill=tk.X, pady=10)\n        \n        # Drop zone\n        self.drop_zone = tk.Label(drop_frame, \n                                 text=\"📁 Trascina file qui\\n\\nFormati supportati:\\n• Immagini: JPG, PNG, GIF, BMP\\n• Documenti: PDF, DOC, TXT\\n• Video: MP4, AVI, MOV\",\n                                 bg=\"lightgray\", \n                                 relief=\"ridge\", \n                                 borderwidth=2,\n                                 font=(\"\", 12),\n                                 height=8)\n        self.drop_zone.pack(fill=tk.X, pady=10)\n        \n        # Enable drag & drop\n        self.drop_zone.drop_target_register(DND_FILES)\n        self.drop_zone.dnd_bind('<<Drop>>', self.handle_drop)\n        \n        # Visual feedback for drag over\n        self.drop_zone.dnd_bind('<<DragEnter>>', self.on_drag_enter)\n        self.drop_zone.dnd_bind('<<DragLeave>>', self.on_drag_leave)\n        \n    def create_upload_controls(self, parent):\n        \"\"\"Create upload controls\"\"\"\n        \n        controls_frame = ttk.Frame(parent)\n        controls_frame.pack(fill=tk.X, pady=10)\n        \n        # File description\n        ttk.Label(controls_frame, text=\"Descrizione:\").pack(anchor=\"w\")\n        self.description_text = tk.Text(controls_frame, height=3, wrap=tk.WORD)\n        self.description_text.pack(fill=tk.X, pady=5)\n        \n        # Tags\n        ttk.Label(controls_frame, text=\"Tags (separati da virgola):\").pack(anchor=\"w\")\n        self.tags_entry = ttk.Entry(controls_frame)\n        self.tags_entry.pack(fill=tk.X, pady=5)\n        \n        # Author\n        ttk.Label(controls_frame, text=\"Autore/Fotografo:\").pack(anchor=\"w\")\n        self.author_entry = ttk.Entry(controls_frame)\n        self.author_entry.pack(fill=tk.X, pady=5)\n        \n        # Upload buttons\n        buttons_frame = ttk.Frame(controls_frame)\n        buttons_frame.pack(fill=tk.X, pady=10)\n        \n        ttk.Button(buttons_frame, text=\"Seleziona File\", \n                  command=self.select_files).pack(side=tk.LEFT, padx=5)\n        ttk.Button(buttons_frame, text=\"Carica File Selezionati\", \n                  command=self.upload_selected_files).pack(side=tk.LEFT, padx=5)\n        \n        # Selected files list\n        self.selected_files = []\n        self.files_listbox = tk.Listbox(controls_frame, height=4)\n        self.files_listbox.pack(fill=tk.X, pady=5)\n        \n        files_buttons_frame = ttk.Frame(controls_frame)\n        files_buttons_frame.pack(fill=tk.X)\n        \n        ttk.Button(files_buttons_frame, text=\"Rimuovi Selezionato\", \n                  command=self.remove_selected_file).pack(side=tk.LEFT, padx=5)\n        ttk.Button(files_buttons_frame, text=\"Pulisci Lista\", \n                  command=self.clear_file_list).pack(side=tk.LEFT, padx=5)\n        \n    def create_right_panel(self, parent):\n        \"\"\"Create right panel with media gallery\"\"\"\n        \n        # Media gallery\n        gallery_frame = ttk.LabelFrame(parent, text=\"Galleria Media\", padding=5)\n        gallery_frame.pack(fill=tk.BOTH, expand=True)\n        \n        # Gallery controls\n        gallery_controls = ttk.Frame(gallery_frame)\n        gallery_controls.pack(fill=tk.X, pady=5)\n        \n        # View options\n        ttk.Label(gallery_controls, text=\"Vista:\").pack(side=tk.LEFT)\n        self.view_mode = tk.StringVar(value=\"grid\")\n        ttk.Radiobutton(gallery_controls, text=\"Griglia\", variable=self.view_mode, \n                       value=\"grid\", command=self.change_view_mode).pack(side=tk.LEFT, padx=5)\n        ttk.Radiobutton(gallery_controls, text=\"Lista\", variable=self.view_mode, \n                       value=\"list\", command=self.change_view_mode).pack(side=tk.LEFT, padx=5)\n        \n        # Filter options\n        ttk.Label(gallery_controls, text=\"Filtro:\").pack(side=tk.LEFT, padx=(20, 5))\n        self.filter_type = tk.StringVar(value=\"all\")\n        filter_types = [(\"all\", \"Tutti\"), (\"image\", \"Immagini\"), (\"document\", \"Documenti\"), (\"video\", \"Video\")]\n        for value, text in filter_types:\n            ttk.Radiobutton(gallery_controls, text=text, variable=self.filter_type, \n                           value=value, command=self.apply_filter).pack(side=tk.LEFT, padx=2)\n        \n        # Search\n        ttk.Label(gallery_controls, text=\"Cerca:\").pack(side=tk.RIGHT, padx=5)\n        self.search_var = tk.StringVar()\n        search_entry = ttk.Entry(gallery_controls, textvariable=self.search_var, width=20)\n        search_entry.pack(side=tk.RIGHT)\n        search_entry.bind('<KeyRelease>', self.on_search_changed)\n        \n        # Media display area\n        self.create_media_display(gallery_frame)\n        \n    def create_media_display(self, parent):\n        \"\"\"Create media display area\"\"\"\n        \n        # Create scrollable frame\n        canvas = tk.Canvas(parent)\n        scrollbar = ttk.Scrollbar(parent, orient=\"vertical\", command=canvas.yview)\n        self.media_frame = ttk.Frame(canvas)\n        \n        self.media_frame.bind(\n            \"<Configure>\",\n            lambda e: canvas.configure(scrollregion=canvas.bbox(\"all\"))\n        )\n        \n        canvas.create_window((0, 0), window=self.media_frame, anchor=\"nw\")\n        canvas.configure(yscrollcommand=scrollbar.set)\n        \n        canvas.pack(side=\"left\", fill=\"both\", expand=True)\n        scrollbar.pack(side=\"right\", fill=\"y\")\n        \n        # Store references\n        self.media_canvas = canvas\n        self.media_scrollbar = scrollbar\n        \n    def load_sites(self):\n        \"\"\"Load available sites\"\"\"\n        try:\n            sites = self.site_service.get_all_sites(size=200)\n            site_names = [site.sito for site in sites]\n            self.site_combo['values'] = site_names\n        except Exception as e:\n            messagebox.showerror(\"Errore\", f\"Errore caricamento siti: {e}\")\n    \n    def on_site_changed(self, event=None):\n        \"\"\"Handle site selection change\"\"\"\n        self.current_site = self.site_var.get()\n        self.on_entity_type_changed()\n        \n    def on_entity_type_changed(self, event=None):\n        \"\"\"Handle entity type change\"\"\"\n        self.current_entity_type = self.entity_type_var.get()\n        self.load_entities()\n        \n    def load_entities(self):\n        \"\"\"Load entities based on type and site\"\"\"\n        if not self.current_site:\n            return\n            \n        try:\n            entities = []\n            \n            if self.current_entity_type == \"site\":\n                # Just the current site\n                entities = [(self.current_site, f\"Sito: {self.current_site}\")]\n            elif self.current_entity_type == \"us\":\n                # Get US for the site\n                us_list = self.us_service.get_us_by_site(self.current_site, size=1000)\n                entities = [(us.id_us, f\"US {us.us} - {us.d_stratigrafica[:50] if us.d_stratigrafica else ''}\") \n                           for us in us_list]\n            elif self.current_entity_type == \"inventario\":\n                # Get inventory for the site\n                inv_list = self.inventario_service.get_inventario_by_site(self.current_site, size=1000)\n                entities = [(inv.id_invmat, f\"Inv {inv.numero_inventario} - {inv.definizione or inv.tipo_reperto or ''}\") \n                           for inv in inv_list]\n            \n            # Update combobox\n            self.entity_combo['values'] = [display for _, display in entities]\n            self.entity_data = {display: entity_id for entity_id, display in entities}\n            \n        except Exception as e:\n            messagebox.showerror(\"Errore\", f\"Errore caricamento entità: {e}\")\n    \n    def on_entity_changed(self, event=None):\n        \"\"\"Handle entity selection change\"\"\"\n        entity_display = self.entity_var.get()\n        if entity_display in self.entity_data:\n            self.current_entity_id = self.entity_data[entity_display]\n            self.refresh_media()\n    \n    def on_drag_enter(self, event):\n        \"\"\"Handle drag enter\"\"\"\n        self.drop_zone.config(bg=\"lightblue\")\n        \n    def on_drag_leave(self, event):\n        \"\"\"Handle drag leave\"\"\"\n        self.drop_zone.config(bg=\"lightgray\")\n        \n    def handle_drop(self, event):\n        \"\"\"Handle file drop\"\"\"\n        self.drop_zone.config(bg=\"lightgray\")\n        \n        # Get dropped files\n        files = self.window.tk.splitlist(event.data)\n        \n        # Add to selected files list\n        for file_path in files:\n            if os.path.isfile(file_path) and file_path not in self.selected_files:\n                self.selected_files.append(file_path)\n                self.files_listbox.insert(tk.END, os.path.basename(file_path))\n        \n        messagebox.showinfo(\"File Aggiunti\", f\"Aggiunti {len(files)} file alla lista\")\n    \n    def select_files(self):\n        \"\"\"Select files using file dialog\"\"\"\n        files = filedialog.askopenfilenames(\n            title=\"Seleziona file da caricare\",\n            filetypes=[\n                (\"Immagini\", \"*.jpg *.jpeg *.png *.gif *.bmp\"),\n                (\"Documenti\", \"*.pdf *.doc *.docx *.txt\"),\n                (\"Video\", \"*.mp4 *.avi *.mov\"),\n                (\"Tutti i files\", \"*.*\")\n            ]\n        )\n        \n        for file_path in files:\n            if file_path not in self.selected_files:\n                self.selected_files.append(file_path)\n                self.files_listbox.insert(tk.END, os.path.basename(file_path))\n    \n    def remove_selected_file(self):\n        \"\"\"Remove selected file from list\"\"\"\n        selection = self.files_listbox.curselection()\n        if selection:\n            index = selection[0]\n            self.files_listbox.delete(index)\n            del self.selected_files[index]\n    \n    def clear_file_list(self):\n        \"\"\"Clear file list\"\"\"\n        self.files_listbox.delete(0, tk.END)\n        self.selected_files.clear()\n    \n    def upload_selected_files(self):\n        \"\"\"Upload all selected files\"\"\"\n        if not self.selected_files:\n            messagebox.showwarning(\"File\", \"Nessun file selezionato\")\n            return\n            \n        if not self.current_entity_type or not self.current_entity_id:\n            messagebox.showwarning(\"Entità\", \"Seleziona un'entità\")\n            return\n        \n        # Get metadata\n        description = self.description_text.get(\"1.0\", tk.END).strip()\n        tags = self.tags_entry.get().strip()\n        author = self.author_entry.get().strip()\n        \n        uploaded_count = 0\n        errors = []\n        \n        for file_path in self.selected_files:\n            try:\n                # Store file\n                metadata = self.media_handler.store_file(\n                    file_path, self.current_entity_type, self.current_entity_id,\n                    description, tags, author\n                )\n                \n                # TODO: Save metadata to database\n                uploaded_count += 1\n                \n            except Exception as e:\n                errors.append(f\"{os.path.basename(file_path)}: {str(e)}\")\n        \n        # Show results\n        if uploaded_count > 0:\n            messagebox.showinfo(\"Upload Completato\", \n                               f\"Caricati {uploaded_count} file con successo\")\n            \n            # Clear form\n            self.clear_file_list()\n            self.description_text.delete(\"1.0\", tk.END)\n            self.tags_entry.delete(0, tk.END)\n            \n            # Refresh media display\n            self.refresh_media()\n        \n        if errors:\n            error_message = \"Errori durante l'upload:\\n\" + \"\\n\".join(errors)\n            messagebox.showerror(\"Errori Upload\", error_message)\n    \n    def refresh_media(self):\n        \"\"\"Refresh media display\"\"\"\n        if not self.current_entity_type or not self.current_entity_id:\n            self.clear_media_display()\n            return\n            \n        try:\n            # Get media files for current entity\n            self.media_list = self.media_handler.organize_media_by_entity(\n                self.current_entity_type, self.current_entity_id)\n            \n            # Apply current filters\n            self.apply_filter()\n            \n        except Exception as e:\n            messagebox.showerror(\"Errore\", f\"Errore caricamento media: {e}\")\n    \n    def apply_filter(self):\n        \"\"\"Apply current filter to media list\"\"\"\n        if not hasattr(self, 'media_list'):\n            return\n            \n        filtered_media = self.media_list.copy()\n        \n        # Apply type filter\n        filter_type = self.filter_type.get()\n        if filter_type != \"all\":\n            filtered_media = [media for media in filtered_media \n                            if media.get('media_type') == filter_type]\n        \n        # Apply search filter\n        search_term = self.search_var.get().lower()\n        if search_term:\n            filtered_media = [media for media in filtered_media \n                            if search_term in media.get('filename', '').lower()]\n        \n        # Display filtered media\n        self.display_media(filtered_media)\n    \n    def display_media(self, media_list):\n        \"\"\"Display media in the gallery\"\"\"\n        # Clear current display\n        self.clear_media_display()\n        \n        if not media_list:\n            no_media_label = ttk.Label(self.media_frame, text=\"Nessun file multimediale trovato\")\n            no_media_label.pack(pady=50)\n            return\n        \n        view_mode = self.view_mode.get()\n        \n        if view_mode == \"grid\":\n            self.display_media_grid(media_list)\n        else:\n            self.display_media_list(media_list)\n    \n    def display_media_grid(self, media_list):\n        \"\"\"Display media in grid view\"\"\"\n        # Create grid\n        columns = 4\n        for i, media in enumerate(media_list):\n            row = i // columns\n            col = i % columns\n            \n            # Create media card\n            card = self.create_media_card(self.media_frame, media)\n            card.grid(row=row, column=col, padx=5, pady=5, sticky=\"nw\")\n    \n    def display_media_list(self, media_list):\n        \"\"\"Display media in list view\"\"\"\n        for media in media_list:\n            # Create media row\n            row = self.create_media_row(self.media_frame, media)\n            row.pack(fill=tk.X, padx=5, pady=2)\n    \n    def create_media_card(self, parent, media):\n        \"\"\"Create media card for grid view\"\"\"\n        card = ttk.Frame(parent, relief=\"raised\", borderwidth=1)\n        \n        # Thumbnail\n        try:\n            if media.get('media_type') == 'image':\n                # Load and resize image\n                image_path = media['path']\n                img = Image.open(image_path)\n                img.thumbnail((150, 150), Image.Resampling.LANCZOS)\n                photo = ImageTk.PhotoImage(img)\n                \n                # Store reference to prevent garbage collection\n                card.image = photo\n                \n                thumbnail_label = tk.Label(card, image=photo)\n                thumbnail_label.pack(pady=5)\n            else:\n                # Show file type icon\n                file_type = media.get('media_type', 'unknown')\n                icon_text = {'document': '📄', 'video': '🎥', 'audio': '🎵'}.get(file_type, '📁')\n                thumbnail_label = tk.Label(card, text=icon_text, font=(\"\", 48))\n                thumbnail_label.pack(pady=5)\n        except Exception:\n            # Fallback icon\n            thumbnail_label = tk.Label(card, text=\"❓\", font=(\"\", 48))\n            thumbnail_label.pack(pady=5)\n        \n        # File info\n        filename = os.path.basename(media['path'])\n        if len(filename) > 20:\n            filename = filename[:17] + \"...\"\n        \n        ttk.Label(card, text=filename, font=(\"\", 9)).pack()\n        \n        file_size = media.get('file_size', 0)\n        if file_size > 1024*1024:\n            size_text = f\"{file_size/(1024*1024):.1f} MB\"\n        elif file_size > 1024:\n            size_text = f\"{file_size/1024:.0f} KB\"\n        else:\n            size_text = f\"{file_size} B\"\n        \n        ttk.Label(card, text=size_text, font=(\"\", 8), foreground=\"gray\").pack()\n        \n        # Action buttons\n        button_frame = ttk.Frame(card)\n        button_frame.pack(pady=5)\n        \n        ttk.Button(button_frame, text=\"Apri\", width=8,\n                  command=lambda: self.open_media(media)).pack(side=tk.LEFT, padx=2)\n        ttk.Button(button_frame, text=\"Elimina\", width=8,\n                  command=lambda: self.delete_media(media)).pack(side=tk.LEFT, padx=2)\n        \n        return card\n    \n    def create_media_row(self, parent, media):\n        \"\"\"Create media row for list view\"\"\"\n        row = ttk.Frame(parent)\n        \n        # File icon\n        file_type = media.get('media_type', 'unknown')\n        icon_text = {'image': '🖼️', 'document': '📄', 'video': '🎥', 'audio': '🎵'}.get(file_type, '📁')\n        ttk.Label(row, text=icon_text, font=(\"\", 16)).pack(side=tk.LEFT, padx=5)\n        \n        # File info\n        info_frame = ttk.Frame(row)\n        info_frame.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)\n        \n        filename = os.path.basename(media['path'])\n        ttk.Label(info_frame, text=filename, font=(\"\", 10, \"bold\")).pack(anchor=\"w\")\n        \n        # File details\n        file_size = media.get('file_size', 0)\n        if file_size > 1024*1024:\n            size_text = f\"{file_size/(1024*1024):.1f} MB\"\n        else:\n            size_text = f\"{file_size/1024:.0f} KB\"\n        \n        details = f\"{media.get('media_type', '').title()} • {size_text}\"\n        ttk.Label(info_frame, text=details, font=(\"\", 9), foreground=\"gray\").pack(anchor=\"w\")\n        \n        # Action buttons\n        button_frame = ttk.Frame(row)\n        button_frame.pack(side=tk.RIGHT, padx=5)\n        \n        ttk.Button(button_frame, text=\"Apri\", width=8,\n                  command=lambda: self.open_media(media)).pack(side=tk.LEFT, padx=2)\n        ttk.Button(button_frame, text=\"Elimina\", width=8,\n                  command=lambda: self.delete_media(media)).pack(side=tk.LEFT, padx=2)\n        \n        return row\n    \n    def clear_media_display(self):\n        \"\"\"Clear media display\"\"\"\n        for widget in self.media_frame.winfo_children():\n            widget.destroy()\n    \n    def change_view_mode(self):\n        \"\"\"Change view mode\"\"\"\n        self.apply_filter()\n    \n    def on_search_changed(self, event=None):\n        \"\"\"Handle search change\"\"\"\n        # Debounce search\n        if hasattr(self, 'search_timer'):\n            self.window.after_cancel(self.search_timer)\n        self.search_timer = self.window.after(500, self.apply_filter)\n    \n    def open_media(self, media):\n        \"\"\"Open media file\"\"\"\n        try:\n            import subprocess\n            import platform\n            \n            file_path = media['path']\n            \n            if platform.system() == 'Darwin':  # macOS\n                subprocess.call(['open', file_path])\n            elif platform.system() == 'Windows':  # Windows\n                os.startfile(file_path)\n            else:  # Linux\n                subprocess.call(['xdg-open', file_path])\n                \n        except Exception as e:\n            messagebox.showerror(\"Errore\", f\"Impossibile aprire il file: {e}\")\n    \n    def delete_media(self, media):\n        \"\"\"Delete media file\"\"\"\n        filename = os.path.basename(media['path'])\n        if messagebox.askyesno(\"Conferma\", f\"Sei sicuro di voler eliminare '{filename}'?\"):\n            try:\n                # Delete file\n                os.remove(media['path'])\n                \n                # TODO: Remove from database\n                \n                # Refresh display\n                self.refresh_media()\n                \n                messagebox.showinfo(\"Successo\", \"File eliminato con successo\")\n                \n            except Exception as e:\n                messagebox.showerror(\"Errore\", f\"Errore eliminazione file: {e}\")\n    \n    def export_archive(self):\n        \"\"\"Export media archive\"\"\"\n        if not self.current_entity_type or not self.current_entity_id:\n            messagebox.showwarning(\"Selezione\", \"Seleziona un'entità\")\n            return\n            \n        # Select output file\n        filename = filedialog.asksaveasfilename(\n            title=\"Salva archivio media\",\n            defaultextension=\".zip\",\n            filetypes=[(\"ZIP files\", \"*.zip\")]\n        )\n        \n        if filename:\n            try:\n                success = self.media_handler.create_media_archive(\n                    self.current_entity_type, self.current_entity_id, filename)\n                \n                if success:\n                    messagebox.showinfo(\"Successo\", f\"Archivio creato: {filename}\")\n                else:\n                    messagebox.showerror(\"Errore\", \"Errore creazione archivio\")\n                    \n            except Exception as e:\n                messagebox.showerror(\"Errore\", f\"Errore esportazione: {e}\")\n    \n    def close_window(self):\n        \"\"\"Close the window\"\"\"\n        self.window.destroy()\n    \n    def run(self):\n        \"\"\"Run the media manager\"\"\"\n        self.window.mainloop()
+    def create_drop_area(self, parent):
+        """Create drag & drop area"""
+        
+        drop_frame = ttk.LabelFrame(parent, text="Trascina i File Qui", padding=20)
+        drop_frame.pack(fill=tk.X, pady=10)
+        
+        # Drop zone
+        self.drop_zone = tk.Label(drop_frame, 
+                                 text="📁 Trascina file qui\n\nFormati supportati:\n• Immagini: JPG, PNG, GIF, BMP\n• Documenti: PDF, DOC, TXT\n• Video: MP4, AVI, MOV",
+                                 bg="lightgray", 
+                                 relief="ridge", 
+                                 borderwidth=2,
+                                 font=("", 12),
+                                 height=8)
+        self.drop_zone.pack(fill=tk.X, pady=10)
+        
+        # Enable drag & drop
+        self.drop_zone.drop_target_register(DND_FILES)
+        self.drop_zone.dnd_bind('<<Drop>>', self.handle_drop)
+        
+        # Visual feedback for drag over
+        self.drop_zone.dnd_bind('<<DragEnter>>', self.on_drag_enter)
+        self.drop_zone.dnd_bind('<<DragLeave>>', self.on_drag_leave)
+        
+    def create_upload_controls(self, parent):
+        """Create upload controls"""
+        
+        controls_frame = ttk.Frame(parent)
+        controls_frame.pack(fill=tk.X, pady=10)
+        
+        # File description
+        ttk.Label(controls_frame, text="Descrizione:").pack(anchor="w")
+        self.description_text = tk.Text(controls_frame, height=3, wrap=tk.WORD)
+        self.description_text.pack(fill=tk.X, pady=5)
+        
+        # Tags
+        ttk.Label(controls_frame, text="Tags (separati da virgola):").pack(anchor="w")
+        self.tags_entry = ttk.Entry(controls_frame)
+        self.tags_entry.pack(fill=tk.X, pady=5)
+        
+        # Author
+        ttk.Label(controls_frame, text="Autore/Fotografo:").pack(anchor="w")
+        self.author_entry = ttk.Entry(controls_frame)
+        self.author_entry.pack(fill=tk.X, pady=5)
+        
+        # Upload buttons
+        buttons_frame = ttk.Frame(controls_frame)
+        buttons_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Button(buttons_frame, text="Seleziona File", 
+                  command=self.select_files).pack(side=tk.LEFT, padx=5)
+        ttk.Button(buttons_frame, text="Carica File Selezionati", 
+                  command=self.upload_selected_files).pack(side=tk.LEFT, padx=5)
+        
+        # Selected files list
+        self.selected_files = []
+        self.files_listbox = tk.Listbox(controls_frame, height=4)
+        self.files_listbox.pack(fill=tk.X, pady=5)
+        
+        files_buttons_frame = ttk.Frame(controls_frame)
+        files_buttons_frame.pack(fill=tk.X)
+        
+        ttk.Button(files_buttons_frame, text="Rimuovi Selezionato", 
+                  command=self.remove_selected_file).pack(side=tk.LEFT, padx=5)
+        ttk.Button(files_buttons_frame, text="Pulisci Lista", 
+                  command=self.clear_file_list).pack(side=tk.LEFT, padx=5)
+        
+    def create_right_panel(self, parent):
+        """Create right panel with media gallery"""
+        
+        # Media gallery
+        gallery_frame = ttk.LabelFrame(parent, text="Galleria Media", padding=5)
+        gallery_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Gallery controls
+        gallery_controls = ttk.Frame(gallery_frame)
+        gallery_controls.pack(fill=tk.X, pady=5)
+        
+        # View options
+        ttk.Label(gallery_controls, text="Vista:").pack(side=tk.LEFT)
+        self.view_mode = tk.StringVar(value="grid")
+        ttk.Radiobutton(gallery_controls, text="Griglia", variable=self.view_mode, 
+                       value="grid", command=self.change_view_mode).pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(gallery_controls, text="Lista", variable=self.view_mode, 
+                       value="list", command=self.change_view_mode).pack(side=tk.LEFT, padx=5)
+        
+        # Filter options
+        ttk.Label(gallery_controls, text="Filtro:").pack(side=tk.LEFT, padx=(20, 5))
+        self.filter_type = tk.StringVar(value="all")
+        filter_types = [("all", "Tutti"), ("image", "Immagini"), ("document", "Documenti"), ("video", "Video")]
+        for value, text in filter_types:
+            ttk.Radiobutton(gallery_controls, text=text, variable=self.filter_type, 
+                           value=value, command=self.apply_filter).pack(side=tk.LEFT, padx=2)
+        
+        # Search
+        ttk.Label(gallery_controls, text="Cerca:").pack(side=tk.RIGHT, padx=5)
+        self.search_var = tk.StringVar()
+        search_entry = ttk.Entry(gallery_controls, textvariable=self.search_var, width=20)
+        search_entry.pack(side=tk.RIGHT)
+        search_entry.bind('<KeyRelease>', self.on_search_changed)
+        
+        # Media display area
+        self.create_media_display(gallery_frame)
+        
+    def create_media_display(self, parent):
+        """Create media display area"""
+        
+        # Create scrollable frame
+        canvas = tk.Canvas(parent)
+        scrollbar = ttk.Scrollbar(parent, orient="vertical", command=canvas.yview)
+        self.media_frame = ttk.Frame(canvas)
+        
+        self.media_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=self.media_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Store references
+        self.media_canvas = canvas
+        self.media_scrollbar = scrollbar
+        
+    def load_sites(self):
+        """Load available sites"""
+        try:
+            sites = self.site_service.get_all_sites(size=200)
+            site_names = [site.sito for site in sites]
+            self.site_combo['values'] = site_names
+        except Exception as e:
+            messagebox.showerror("Errore", f"Errore caricamento siti: {e}")
+    
+    def on_site_changed(self, event=None):
+        """Handle site selection change"""
+        self.current_site = self.site_var.get()
+        self.on_entity_type_changed()
+        
+    def on_entity_type_changed(self, event=None):
+        """Handle entity type change"""
+        self.current_entity_type = self.entity_type_var.get()
+        self.load_entities()
+        
+    def load_entities(self):
+        """Load entities based on type and site"""
+        if not self.current_site:
+            return
+            
+        try:
+            entities = []
+            
+            if self.current_entity_type == "site":
+                # Just the current site
+                entities = [(self.current_site, f"Sito: {self.current_site}")]
+            elif self.current_entity_type == "us":
+                # Get US for the site
+                us_list = self.us_service.get_us_by_site(self.current_site, size=1000)
+                entities = [(us.id_us, f"US {us.us} - {us.d_stratigrafica[:50] if us.d_stratigrafica else ''}") 
+                           for us in us_list]
+            elif self.current_entity_type == "inventario":
+                # Get inventory for the site
+                inv_list = self.inventario_service.get_inventario_by_site(self.current_site, size=1000)
+                entities = [(inv.id_invmat, f"Inv {inv.numero_inventario} - {inv.definizione or inv.tipo_reperto or ''}") 
+                           for inv in inv_list]
+            
+            # Update combobox
+            self.entity_combo['values'] = [display for _, display in entities]
+            self.entity_data = {display: entity_id for entity_id, display in entities}
+            
+        except Exception as e:
+            messagebox.showerror("Errore", f"Errore caricamento entità: {e}")
+    
+    def on_entity_changed(self, event=None):
+        """Handle entity selection change"""
+        entity_display = self.entity_var.get()
+        if entity_display in self.entity_data:
+            self.current_entity_id = self.entity_data[entity_display]
+            self.refresh_media()
+    
+    def on_drag_enter(self, event):
+        """Handle drag enter"""
+        self.drop_zone.config(bg="lightblue")
+        
+    def on_drag_leave(self, event):
+        """Handle drag leave"""
+        self.drop_zone.config(bg="lightgray")
+        
+    def handle_drop(self, event):
+        """Handle file drop"""
+        self.drop_zone.config(bg="lightgray")
+        
+        # Get dropped files
+        files = self.window.tk.splitlist(event.data)
+        
+        # Add to selected files list
+        for file_path in files:
+            if os.path.isfile(file_path) and file_path not in self.selected_files:
+                self.selected_files.append(file_path)
+                self.files_listbox.insert(tk.END, os.path.basename(file_path))
+        
+        messagebox.showinfo("File Aggiunti", f"Aggiunti {len(files)} file alla lista")
+    
+    def select_files(self):
+        """Select files using file dialog"""
+        files = filedialog.askopenfilenames(
+            title="Seleziona file da caricare",
+            filetypes=[
+                ("Immagini", "*.jpg *.jpeg *.png *.gif *.bmp"),
+                ("Documenti", "*.pdf *.doc *.docx *.txt"),
+                ("Video", "*.mp4 *.avi *.mov"),
+                ("Tutti i files", "*.*")
+            ]
+        )
+        
+        for file_path in files:
+            if file_path not in self.selected_files:
+                self.selected_files.append(file_path)
+                self.files_listbox.insert(tk.END, os.path.basename(file_path))
+    
+    def remove_selected_file(self):
+        """Remove selected file from list"""
+        selection = self.files_listbox.curselection()
+        if selection:
+            index = selection[0]
+            self.files_listbox.delete(index)
+            del self.selected_files[index]
+    
+    def clear_file_list(self):
+        """Clear file list"""
+        self.files_listbox.delete(0, tk.END)
+        self.selected_files.clear()
+    
+    def upload_selected_files(self):
+        """Upload all selected files"""
+        if not self.selected_files:
+            messagebox.showwarning("File", "Nessun file selezionato")
+            return
+            
+        if not self.current_entity_type or not self.current_entity_id:
+            messagebox.showwarning("Entità", "Seleziona un'entità")
+            return
+        
+        # Get metadata
+        description = self.description_text.get("1.0", tk.END).strip()
+        tags = self.tags_entry.get().strip()
+        author = self.author_entry.get().strip()
+        
+        uploaded_count = 0
+        errors = []
+        
+        for file_path in self.selected_files:
+            try:
+                # Store file
+                metadata = self.media_handler.store_file(
+                    file_path, self.current_entity_type, self.current_entity_id,
+                    description, tags, author
+                )
+                
+                # TODO: Save metadata to database
+                uploaded_count += 1
+                
+            except Exception as e:
+                errors.append(f"{os.path.basename(file_path)}: {str(e)}")
+        
+        # Show results
+        if uploaded_count > 0:
+            messagebox.showinfo("Upload Completato", 
+                               f"Caricati {uploaded_count} file con successo")
+            
+            # Clear form
+            self.clear_file_list()
+            self.description_text.delete("1.0", tk.END)
+            self.tags_entry.delete(0, tk.END)
+            
+            # Refresh media display
+            self.refresh_media()
+        
+        if errors:
+            error_message = "Errori durante l'upload:\n" + "\n".join(errors)
+            messagebox.showerror("Errori Upload", error_message)
+    
+    def refresh_media(self):
+        """Refresh media display"""
+        if not self.current_entity_type or not self.current_entity_id:
+            self.clear_media_display()
+            return
+            
+        try:
+            # Get media files for current entity
+            self.media_list = self.media_handler.organize_media_by_entity(
+                self.current_entity_type, self.current_entity_id)
+            
+            # Apply current filters
+            self.apply_filter()
+            
+        except Exception as e:
+            messagebox.showerror("Errore", f"Errore caricamento media: {e}")
+    
+    def apply_filter(self):
+        """Apply current filter to media list"""
+        if not hasattr(self, 'media_list'):
+            return
+            
+        filtered_media = self.media_list.copy()
+        
+        # Apply type filter
+        filter_type = self.filter_type.get()
+        if filter_type != "all":
+            filtered_media = [media for media in filtered_media 
+                            if media.get('media_type') == filter_type]
+        
+        # Apply search filter
+        search_term = self.search_var.get().lower()
+        if search_term:
+            filtered_media = [media for media in filtered_media 
+                            if search_term in media.get('filename', '').lower()]
+        
+        # Display filtered media
+        self.display_media(filtered_media)
+    
+    def display_media(self, media_list):
+        """Display media in the gallery"""
+        # Clear current display
+        self.clear_media_display()
+        
+        if not media_list:
+            no_media_label = ttk.Label(self.media_frame, text="Nessun file multimediale trovato")
+            no_media_label.pack(pady=50)
+            return
+        
+        view_mode = self.view_mode.get()
+        
+        if view_mode == "grid":
+            self.display_media_grid(media_list)
+        else:
+            self.display_media_list(media_list)
+    
+    def display_media_grid(self, media_list):
+        """Display media in grid view"""
+        # Create grid
+        columns = 4
+        for i, media in enumerate(media_list):
+            row = i // columns
+            col = i % columns
+            
+            # Create media card
+            card = self.create_media_card(self.media_frame, media)
+            card.grid(row=row, column=col, padx=5, pady=5, sticky="nw")
+    
+    def display_media_list(self, media_list):
+        """Display media in list view"""
+        for media in media_list:
+            # Create media row
+            row = self.create_media_row(self.media_frame, media)
+            row.pack(fill=tk.X, padx=5, pady=2)
+    
+    def create_media_card(self, parent, media):
+        """Create media card for grid view"""
+        card = ttk.Frame(parent, relief="raised", borderwidth=1)
+        
+        # Thumbnail
+        try:
+            if media.get('media_type') == 'image':
+                # Load and resize image
+                image_path = media['path']
+                img = Image.open(image_path)
+                img.thumbnail((150, 150), Image.Resampling.LANCZOS)
+                photo = ImageTk.PhotoImage(img)
+                
+                # Store reference to prevent garbage collection
+                card.image = photo
+                
+                thumbnail_label = tk.Label(card, image=photo)
+                thumbnail_label.pack(pady=5)
+            else:
+                # Show file type icon
+                file_type = media.get('media_type', 'unknown')
+                icon_text = {'document': '📄', 'video': '🎥', 'audio': '🎵'}.get(file_type, '📁')
+                thumbnail_label = tk.Label(card, text=icon_text, font=("", 48))
+                thumbnail_label.pack(pady=5)
+        except Exception:
+            # Fallback icon
+            thumbnail_label = tk.Label(card, text="❓", font=("", 48))
+            thumbnail_label.pack(pady=5)
+        
+        # File info
+        filename = os.path.basename(media['path'])
+        if len(filename) > 20:
+            filename = filename[:17] + "..."
+        
+        ttk.Label(card, text=filename, font=("", 9)).pack()
+        
+        file_size = media.get('file_size', 0)
+        if file_size > 1024*1024:
+            size_text = f"{file_size/(1024*1024):.1f} MB"
+        elif file_size > 1024:
+            size_text = f"{file_size/1024:.0f} KB"
+        else:
+            size_text = f"{file_size} B"
+        
+        ttk.Label(card, text=size_text, font=("", 8), foreground="gray").pack()
+        
+        # Action buttons
+        button_frame = ttk.Frame(card)
+        button_frame.pack(pady=5)
+        
+        ttk.Button(button_frame, text="Apri", width=8,
+                  command=lambda: self.open_media(media)).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="Elimina", width=8,
+                  command=lambda: self.delete_media(media)).pack(side=tk.LEFT, padx=2)
+        
+        return card
+    
+    def create_media_row(self, parent, media):
+        """Create media row for list view"""
+        row = ttk.Frame(parent)
+        
+        # File icon
+        file_type = media.get('media_type', 'unknown')
+        icon_text = {'image': '🖼️', 'document': '📄', 'video': '🎥', 'audio': '🎵'}.get(file_type, '📁')
+        ttk.Label(row, text=icon_text, font=("", 16)).pack(side=tk.LEFT, padx=5)
+        
+        # File info
+        info_frame = ttk.Frame(row)
+        info_frame.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        
+        filename = os.path.basename(media['path'])
+        ttk.Label(info_frame, text=filename, font=("", 10, "bold")).pack(anchor="w")
+        
+        # File details
+        file_size = media.get('file_size', 0)
+        if file_size > 1024*1024:
+            size_text = f"{file_size/(1024*1024):.1f} MB"
+        else:
+            size_text = f"{file_size/1024:.0f} KB"
+        
+        details = f"{media.get('media_type', '').title()} • {size_text}"
+        ttk.Label(info_frame, text=details, font=("", 9), foreground="gray").pack(anchor="w")
+        
+        # Action buttons
+        button_frame = ttk.Frame(row)
+        button_frame.pack(side=tk.RIGHT, padx=5)
+        
+        ttk.Button(button_frame, text="Apri", width=8,
+                  command=lambda: self.open_media(media)).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="Elimina", width=8,
+                  command=lambda: self.delete_media(media)).pack(side=tk.LEFT, padx=2)
+        
+        return row
+    
+    def clear_media_display(self):
+        """Clear media display"""
+        for widget in self.media_frame.winfo_children():
+            widget.destroy()
+    
+    def change_view_mode(self):
+        """Change view mode"""
+        self.apply_filter()
+    
+    def on_search_changed(self, event=None):
+        """Handle search change"""
+        # Debounce search
+        if hasattr(self, 'search_timer'):
+            self.window.after_cancel(self.search_timer)
+        self.search_timer = self.window.after(500, self.apply_filter)
+    
+    def open_media(self, media):
+        """Open media file"""
+        try:
+            import subprocess
+            import platform
+            
+            file_path = media['path']
+            
+            if platform.system() == 'Darwin':  # macOS
+                subprocess.call(['open', file_path])
+            elif platform.system() == 'Windows':  # Windows
+                os.startfile(file_path)
+            else:  # Linux
+                subprocess.call(['xdg-open', file_path])
+                
+        except Exception as e:
+            messagebox.showerror("Errore", f"Impossibile aprire il file: {e}")
+    
+    def delete_media(self, media):
+        """Delete media file"""
+        filename = os.path.basename(media['path'])
+        if messagebox.askyesno("Conferma", f"Sei sicuro di voler eliminare '{filename}'?"):
+            try:
+                # Delete file
+                os.remove(media['path'])
+                
+                # TODO: Remove from database
+                
+                # Refresh display
+                self.refresh_media()
+                
+                messagebox.showinfo("Successo", "File eliminato con successo")
+                
+            except Exception as e:
+                messagebox.showerror("Errore", f"Errore eliminazione file: {e}")
+    
+    def export_archive(self):
+        """Export media archive"""
+        if not self.current_entity_type or not self.current_entity_id:
+            messagebox.showwarning("Selezione", "Seleziona un'entità")
+            return
+            
+        # Select output file
+        filename = filedialog.asksaveasfilename(
+            title="Salva archivio media",
+            defaultextension=".zip",
+            filetypes=[("ZIP files", "*.zip")]
+        )
+        
+        if filename:
+            try:
+                success = self.media_handler.create_media_archive(
+                    self.current_entity_type, self.current_entity_id, filename)
+                
+                if success:
+                    messagebox.showinfo("Successo", f"Archivio creato: {filename}")
+                else:
+                    messagebox.showerror("Errore", "Errore creazione archivio")
+                    
+            except Exception as e:
+                messagebox.showerror("Errore", f"Errore esportazione: {e}")
+    
+    def close_window(self):
+        """Close the window"""
+        self.window.destroy()
+    
+    def run(self):
+        """Run the media manager"""
+        self.window.mainloop()
