@@ -20,19 +20,21 @@ def map_count(conn: connection, table: str) -> int:
     return cur.fetchone()[0]
 
 
-def load_map(conn: connection, table: str) -> dict:
+def load_map(conn: connection, table: str) -> dict[str, str]:
     cur = conn.cursor()
     cur.execute("select v1_pk, v2_pk from public.sync_row_map where table_name=%s", (table,))
     return {r[0]: r[1] for r in cur.fetchall()}
 
 
-def v2_pk_set(conn: connection, table: str, pk: str) -> set:
+def v2_pk_set(conn: connection, table: str, pk: str) -> set[str]:
     cur = conn.cursor()
     cur.execute(f'select "{pk}"::text from public."{table}"')
     return {r[0] for r in cur.fetchall()}
 
 
 def bootstrap_table(tgt_conn: connection, src_conn: connection, table: str, pk: str) -> int:
+    if map_count(tgt_conn, table) > 0:      # only bootstrap an empty map
+        return 0
     scur = src_conn.cursor()
     scur.execute(f'select "{pk}"::text from public."{table}"')
     v1 = {r[0] for r in scur.fetchall()}

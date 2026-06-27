@@ -16,6 +16,7 @@ def test_map_crud_and_bootstrap(src_conn, tgt_conn, make_table):
     seeded = M.bootstrap_table(tgt_conn, src_conn, "w_map", "id"); tgt_conn.commit()
     assert seeded == 2                                   # ids 2,3 overlap; 99 native not mapped; 1 not in v2
     assert M.load_map(tgt_conn, "w_map") == {"2": "2", "3": "3"}
+    assert M.bootstrap_table(tgt_conn, src_conn, "w_map", "id") == 0   # non-empty map -> no re-seed
     assert M.v2_pk_set(tgt_conn, "w_map", "id") == {"2", "3", "99"}
     M.upsert_map(tgt_conn, "w_map", "1", "1"); tgt_conn.commit()
     assert M.load_map(tgt_conn, "w_map")["1"] == "1"
