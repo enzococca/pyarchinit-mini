@@ -27,3 +27,12 @@ python -m pytest tests/sync -v
 
 ## Rollback
 pg_restore --clean --no-owner -d "$DATABASE_URL" ~/pyarchinit_v2_pre_sync_<date>.dump
+
+## Native-preserving model (since 2026-06-27)
+- Identity is the map `public.sync_row_map (table_name, v1_pk, v2_pk)`; a row is synced from v1 iff it is mapped.
+- v2-native rows (inserted directly in v2, not mapped) are NEVER updated or deleted.
+- DELETE happens only for mapped rows whose v1_pk disappeared from v1.
+- Id collisions (a new v1 row whose id is taken by a native row) get a v2 id from `collision_id_base` (default 1e9); the map records v1_pk->v2_pk. Relationships are by name (sito/us), so the reassigned surrogate id is harmless.
+- No-PK tables (e.g. shape_finali_polygon) are additive-only (insert new v1 content; no update/delete).
+- First run bootstraps the map from the current overlap (v1 ids also present in v2); it will not re-delete natives.
+- To force a deep refresh of a large gated table, delete its row from public.sync_state.
