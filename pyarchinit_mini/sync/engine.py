@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from psycopg2.extensions import connection
 from . import introspect as I, transform as T, state as S, rowmap as M
@@ -15,13 +16,15 @@ _FILL_DEFAULTS = {
 }
 
 def _source_hash(src_conn, table, pk, common, src_types, tgt_types, geom):
+    hcols = [c for c in common if c != pk]      # pk excluded; identity is the map, not the hash
     cur = src_conn.cursor()
-    cur.execute(T.build_pk_hash_select_coerced(table, [pk], common, src_types, tgt_types, geom))
+    cur.execute(T.build_pk_hash_select_coerced(table, [pk], hcols, src_types, tgt_types, geom))
     return {str(r[0]): r[1] for r in cur.fetchall()}
 
 def _target_hash(tgt_conn, table, pk, common):
+    hcols = [c for c in common if c != pk]
     cur = tgt_conn.cursor()
-    cur.execute(f'select "{pk}"::text, {T.row_hash_sql(common)} from public."{table}"')
+    cur.execute(f'select "{pk}"::text, {T.row_hash_sql(hcols)} from public."{table}"')
     return {r[0]: r[1] for r in cur.fetchall()}
 
 def _fetch_source_row(src_conn, table, common, pk, v1_pk):
@@ -98,7 +101,6 @@ def sync_table(src_conn, tgt_conn, table, cfg, dry_run=True) -> TableResult:
         target = {v1: tgt_h.get(v2) for v1, v2 in mp.items()}      # {v1_pk: hash-of-its-v2-row}
         d = diff_by_hash(src, target)
         v2pks = M.v2_pk_set(tgt_conn, table, single_pk)
-        import re
         nums = [int(x) for x in v2pks if re.fullmatch(r"-?\d+", x)]
         state = {"next_high": max([cfg.collision_id_base] + [n + 1 for n in nums])}
         for v1k in d.deletes:

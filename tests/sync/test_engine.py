@@ -57,6 +57,8 @@ def test_collision_assigns_high_id(src_conn, tgt_conn, make_table):
     assert (99, "NATIVE") in rows                                # native id=99 untouched
     assert any(i >= 1000 and s == "FROM_V1" for i, s in rows)    # v1 row got a high id
     assert M.load_map(tgt_conn, "w3")["99"] != "99"             # mapped to a different v2 id
+    r2 = sync_table(src_conn, tgt_conn, "w3", cfg, dry_run=False)
+    assert (r2.inserted, r2.updated, r2.deleted) == (0, 0, 0)   # collision row idempotent
 
 def test_idempotent_second_run(src_conn, tgt_conn, make_table):
     ddl = 'CREATE TABLE public."w4" (id int primary key, anno varchar(10))'
@@ -66,6 +68,18 @@ def test_idempotent_second_run(src_conn, tgt_conn, make_table):
     assert r1.inserted == 2
     r2 = sync_table(src_conn, tgt_conn, "w4", _cfg(), dry_run=False)
     assert (r2.inserted, r2.updated, r2.deleted) == (0, 0, 0)   # idempotent (coerced compare)
+
+def test_error_recorded_and_isolated(src_conn, tgt_conn, make_table):
+    # table exists only on target -> source introspection fails; error caught + recorded
+    make_table(tgt_conn, "wE", 'CREATE TABLE public."wE" (id int primary key)')
+    r = sync_table(src_conn, tgt_conn, "wE", _cfg(), dry_run=False)
+    assert r.error is not None and r.inserted == 0
+    cur = tgt_conn.cursor()
+    cur.execute("select error from public.sync_state where table_name='wE'")
+    row = cur.fetchone()
+    assert row is not None and row[0]            # error persisted to sync_state
+    cur.execute("select 1")
+    assert cur.fetchone()[0] == 1                 # connection still usable
 
 def test_dry_run_writes_nothing(src_conn, tgt_conn, make_table):
     ddl = 'CREATE TABLE public."w5" (id int primary key, sito varchar(20))'
