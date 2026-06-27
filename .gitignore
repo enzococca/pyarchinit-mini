@@ -97,6 +97,8 @@ celerybeat.pid
 
 # Environments
 .env
+# Local deploy secrets (sourced by adarte_deploy.sh; see .adarte_secrets.sh.example)
+.adarte_secrets.sh
 .venv
 env/
 venv/

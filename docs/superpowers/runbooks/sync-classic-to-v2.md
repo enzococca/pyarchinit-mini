@@ -20,10 +20,43 @@ python -m pytest tests/sync -v
    ... python -m pyarchinit_mini.sync --apply
 4. Verify: re-run dry-run -> expect all tables +0 ~0 -0 (or SKIP).
 
-## Cron (Adarte)
-0 1 * * *  PYARCHINIT_CLASSIC_DSN=... DATABASE_URL=... /home/ganesh/pyarchinit_env/bin/python -m pyarchinit_mini.sync --apply --log /home/ganesh/sync_classic_to_v2.log
-# weekly full refresh of keyset tables is handled by the engine's signature gate;
-# force a deep pass if needed by clearing sync_state for those tables.
+## Cron (Adarte) — INSTALLED & LIVE since 2026-06-27
+
+Nightly at **03:00** via a wrapper script (keeps DSNs/secrets out of the crontab line).
+
+Crontab entry (`crontab -l` on ganesh@10.0.1.13):
+```
+0 3 * * * /home/ganesh/run_pyarchinit_sync.sh
+```
+
+Wrapper `/home/ganesh/run_pyarchinit_sync.sh` (lives on the server only, not in this repo):
+```bash
+#!/usr/bin/env bash
+export PYARCHINIT_CLASSIC_DSN="postgresql://admin_pyarchinit:<pw>@10.0.1.6:5432/pyarchinit"
+export DATABASE_URL="postgresql://admin_pyarchinit:<pw>@10.0.1.6:5432/pyarchinit_v2"
+LOGDIR=/home/ganesh/logs; mkdir -p "$LOGDIR"; LOG="$LOGDIR/pyarchinit_sync.log"
+echo "===== sync run $(date -Is) =====" >> "$LOG"
+/home/ganesh/pyarchinit_env/bin/python -m pyarchinit_mini.sync --apply --log "$LOG" >> "$LOG" 2>&1
+echo "----- exit $? @ $(date -Is) -----" >> "$LOG"
+```
+
+Monitor / verify:
+```
+ssh ganesh@10.0.1.13 'tail -30 /home/ganesh/logs/pyarchinit_sync.log'   # each run: TOTAL tables=127 +N ~M -K, exit 0
+ssh ganesh@10.0.1.13 'crontab -l | grep run_pyarchinit_sync'            # cron present
+ssh ganesh@10.0.1.13 'systemctl is-active cron'                         # daemon active
+```
+Healthy steady-state on a quiet night = `+0 ~0 -0 exit 0`. Non-zero `~`/`+`/`-` means real v1 deltas propagated.
+
+Reinstall the cron idempotently (no duplicate):
+```
+( crontab -l 2>/dev/null | grep -v run_pyarchinit_sync.sh ; echo '0 3 * * * /home/ganesh/run_pyarchinit_sync.sh' ) | crontab -
+```
+
+Notes:
+- weekly full refresh of keyset tables is handled by the engine's signature gate;
+  force a deep pass if needed by clearing `sync_state` for those tables.
+- First production apply (2026-06-27) was `+0 ~57 -0` (thesaurus_sigle only); `sync_row_map` bootstrapped to ~933k rows; backup at `/home/ganesh/pyarchinit_v2_pre_sync_20260627.dump` (399 MB).
 
 ## Rollback
 pg_restore --clean --no-owner -d "$DATABASE_URL" ~/pyarchinit_v2_pre_sync_<date>.dump
