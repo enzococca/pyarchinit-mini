@@ -20,6 +20,7 @@ class Config:
     weekly_full_refresh: bool = True
     delete_enabled: bool = True
     delete_on_empty_source: bool = False
+    collision_id_base: int = 1_000_000_000
 
 def load_config(path: str | None = None, env: Mapping[str, str] = os.environ) -> Config:
     raw = {}
@@ -40,4 +41,5 @@ def load_config(path: str | None = None, env: Mapping[str, str] = os.environ) ->
         weekly_full_refresh=bool(raw.get("weekly_full_refresh", True)),
         delete_enabled=bool(raw.get("delete_enabled", True)),
         delete_on_empty_source=bool(raw.get("delete_on_empty_source", False)),
+        collision_id_base=int(raw.get("collision_id_base", 1_000_000_000)),
     )

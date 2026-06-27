@@ -20,3 +20,14 @@ def test_load_config_resolves_dsn_from_env(tmp_path):
 def test_load_config_missing_env_raises():
     with pytest.raises(KeyError):
         load_config(None, env={})
+
+def test_collision_id_base_default_and_override(tmp_path):
+    import json
+    from pyarchinit_mini.sync.config import load_config
+    env = {"SRC": "postgresql://x@h/c", "TGT": "postgresql://x@h/v2"}
+    cfg = load_config(None, env={**env, "PYARCHINIT_CLASSIC_DSN": env["SRC"], "DATABASE_URL": env["TGT"]})
+    assert cfg.collision_id_base == 1_000_000_000
+    f = tmp_path / "c.json"
+    f.write_text(json.dumps({"source_dsn_env": "SRC", "target_dsn_env": "TGT", "collision_id_base": 5000}))
+    cfg2 = load_config(str(f), env=env)
+    assert cfg2.collision_id_base == 5000
