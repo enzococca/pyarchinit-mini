@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from pyarchinit_mini.vocab.provider import VocabProvider
 from pyarchinit_mini.graphproj.ingestor import GraphIngestor
 from pyarchinit_mini.graphproj.ingest_plan import IngestPlan
+from pyarchinit_mini.graphproj.strat_graph import new_strat_node
 from tests.unit.strat_graph_factory import make_graph
 
 FIX = Path(__file__).parent.parent / "fixtures" / "s3dgraphy_jsons" / "0.1.42"
@@ -51,7 +52,7 @@ def _build_input_graph(nodes_data):
     g = s3dgraphy.Graph(graph_id="ing", name="ing", description="")
     for us_num, unita_tipo, emid in nodes_data:
         node_id = f"Volterra_{us_num}"
-        n = s3dgraphy.Node(node_id, f"{unita_tipo}{us_num}", "")
+        n = new_strat_node(node_id=node_id, name=f"{unita_tipo}{us_num}", unit_type=unita_tipo)
         if not hasattr(n, "attributes") or n.attributes is None:
             n.attributes = {}
         n.attributes["unit_type"] = unita_tipo
@@ -108,7 +109,7 @@ def test_preview_snapshot_changes_when_db_changes(session):
 
 def test_us_number_uses_trailing_digits_when_no_attrs(session):
     g = Graph(graph_id="x")
-    n = Node("A1_12", "A1.US12", ""); n.attributes = {"unit_type": "US", "EMid": ""}
+    n = new_strat_node(node_id="A1_12", name="A1.US12", unit_type="US"); n.attributes = {"unit_type": "US", "EMid": ""}
     g.add_node(n)
     plan = GraphIngestor(session, "Volterra").preview(g)
     assert [e.after["us"] for e in plan.inserts] == [12]
@@ -134,3 +135,20 @@ def test_non_numeric_attrs_us_falls_back_to_name_digits(session):
     node = next(n for n in g.nodes if n.node_id == "v"); node.name = "US15"
     plan = GraphIngestor(session, "Volterra").preview(g)
     assert [e.after["us"] for e in plan.inserts] == [15]
+
+
+def test_non_stratigraphic_nodes_are_ignored(session):
+    g = _build_input_graph([(1002, "US", "u-2")])
+    for nid, name in [("ep", "Periodo 2"), ("doc", "A1")]:
+        n = Node(nid, name, ""); n.attributes = {"unit_type": "US", "EMid": ""}
+        g.add_node(n)
+    plan = GraphIngestor(session, "Volterra").preview(g)
+    assert [e.after["us"] for e in plan.inserts] == [1002] and not plan.updates
+
+
+def test_node_id_matching_existing_uuid_is_identity_without_emid(session):
+    g = Graph(graph_id="x")
+    n = new_strat_node(node_id="u-1", name="1001", unit_type="US"); n.attributes = {"unit_type": "US"}
+    g.add_node(n)
+    plan = GraphIngestor(session, "Volterra").preview(g)
+    assert not plan.inserts and [e.node_uuid for e in plan.updates] == ["u-1"]

@@ -12,7 +12,10 @@ Phase 2 (apply): execute the plan in a single transaction. Refuses to
 proceed if current snapshot_revision != plan.snapshot_revision (DB
 changed between preview and apply).
 
-Identity key: node.attributes['EMid'] ↔ us_table.node_uuid (per Spec 1 §4.3).
+Identity key: node.attributes['EMid'] ↔ us_table.node_uuid (per Spec 1 §4.3);
+when EMid is absent (it does not survive s3dgraphy's GraphML export → import),
+a node_id equal to an existing node_uuid is the identity. Only stratigraphic
+nodes are classified (epochs, authors, documents... are ignored).
 """
 import hashlib
 import re
@@ -24,7 +27,7 @@ from sqlalchemy.orm import Session
 
 from .ingest_plan import IngestPlan, IngestResult, NodePlanEntry
 from .exceptions import IngestError, IngestStaleError
-from .strat_graph import pyarchinit_attrs
+from .strat_graph import is_stratigraphic, pyarchinit_attrs
 
 
 def _us_number(node) -> Optional[int]:
@@ -65,7 +68,9 @@ class GraphIngestor:
     def _classify_node(self, node: "s3dgraphy.Node", existing: dict[str, dict]) -> tuple[str, NodePlanEntry] | None:
         """Classify one graph node. Returns (bucket_name, entry) or None to skip."""
         attrs = getattr(node, "attributes", {}) or {}
-        emid = attrs.get("EMid", "")
+        # EMid is lost on the GraphML round trip; the exported node_id (= node_uuid) survives.
+        # Foreign ids (yEd "n1") match no existing uuid and stay inserts.
+        emid = attrs.get("EMid") or (node.node_id if node.node_id in existing else "")
         unita_tipo = attrs.get("unit_type", "US")
         # US number from pyarchinit attrs, else trailing digits of the name.
         # Some nodes (e.g. GeoPositionNode) have neither — skip silently.
@@ -116,6 +121,8 @@ class GraphIngestor:
         }
 
         for node in graph.nodes:
+            if not is_stratigraphic(node):
+                continue
             result = self._classify_node(node, existing)
             if result is None:
                 continue

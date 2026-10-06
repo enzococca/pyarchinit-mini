@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from pyarchinit_mini.vocab.provider import VocabProvider
 from pyarchinit_mini.graphproj.ingestor import GraphIngestor
 from pyarchinit_mini.graphproj.exceptions import IngestStaleError
+from pyarchinit_mini.graphproj.strat_graph import new_strat_node
 
 FIX = Path(__file__).parent.parent / "fixtures" / "s3dgraphy_jsons" / "0.1.42"
 
@@ -42,7 +43,7 @@ def session(tmp_path):
 def _input_graph(nodes):
     g = s3dgraphy.Graph(graph_id="ing", name="ing", description="")
     for us_num, unita_tipo, emid in nodes:
-        n = s3dgraphy.Node(f"Volterra_{us_num}", f"{unita_tipo}{us_num}", "")
+        n = new_strat_node(node_id=f"Volterra_{us_num}", name=f"{unita_tipo}{us_num}", unit_type=unita_tipo)
         if not hasattr(n, "attributes") or n.attributes is None:
             n.attributes = {}
         n.attributes["unit_type"] = unita_tipo
