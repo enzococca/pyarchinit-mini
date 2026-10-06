@@ -48,7 +48,7 @@ def test_transitive_reduction_drops_implied_edge():
 def test_target_resolves_by_area_then_us():
     g = _g(); idx = NodeIndex.from_graph(g)
     assert build_stratigraphic_edges([("n1", "[['Copre', '2', 'B', 'S']]")], site="S", index=idx) == [StratEdge("n1", "n2b", "overlies")]
-    assert build_stratigraphic_edges([("n1", "[['Copre', '2']]")], site="S", index=idx)[0].target_id in {"n2", "n2b"}
+    assert build_stratigraphic_edges([("n1", "[['Copre', '2']]")], site="S", index=idx)[0].target_id == "n2"
 
 
 def test_unknown_target_and_second_rapporto_keep_original_source():
@@ -69,3 +69,13 @@ def test_add_edges_is_idempotent_and_uses_contract_ids():
 def test_edge_types_constant_is_the_forward_only_contract():
     from pyarchinit_mini.graphproj.strat_edges import STRATIGRAPHIC_EDGE_TYPES
     assert STRATIGRAPHIC_EDGE_TYPES == {"overlies", "cuts", "fills", "abuts", "has_same_time", "is_bonded_to", "is_before"}
+
+
+def test_area_qualified_rapporto_to_unknown_area_yields_no_edge():
+    g = _g(); idx = NodeIndex.from_graph(g)
+    assert build_stratigraphic_edges([("n1", "[['Copre', '2', 'C', 'S']]")], site="S", index=idx) == []
+
+
+def test_self_referencing_rapporto_is_dropped():
+    g = _g(); idx = NodeIndex.from_graph(g)
+    assert build_stratigraphic_edges([("n1", "[['Copre', '1', 'A', 'S']]")], site="S", index=idx) == []

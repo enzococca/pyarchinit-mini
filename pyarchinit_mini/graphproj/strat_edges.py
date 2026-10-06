@@ -46,9 +46,7 @@ class NodeIndex:
 
     def resolve(self, us: str, area: Optional[str]) -> Optional[str]:
         if area:
-            hit = self.by_area_us.get((area, str(us)))
-            if hit:
-                return hit
+            return self.by_area_us.get((area, str(us)))
         return self.by_us.get(str(us))
 
 
@@ -61,7 +59,7 @@ def build_stratigraphic_edges(rapporti_rows: Iterable[Tuple[str, Optional[str]]]
             continue
         for rap in parse_rapporti(raw, current_site=site):
             target_id = index.resolve(rap.target_us, rap.target_area)
-            if target_id is None:
+            if target_id is None or target_id == source_id:
                 continue
             canonical, src, tgt = rap.canonical, source_id, target_id
             if canonical in REVERSE_TO_FORWARD:

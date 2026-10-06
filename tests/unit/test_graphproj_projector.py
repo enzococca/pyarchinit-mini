@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker
 
 from pyarchinit_mini.vocab.provider import VocabProvider
 from pyarchinit_mini.graphproj.projector import GraphProjector
-from pyarchinit_mini.graphproj.strat_graph import pyarchinit_attrs, stratigraphic_nodes
+from pyarchinit_mini.graphproj.strat_graph import pyarchinit_attrs, stratigraphic_edges, stratigraphic_nodes
 
 FIX = Path(__file__).parent.parent / "fixtures" / "s3dgraphy_jsons" / "0.1.42"
 
@@ -78,9 +78,8 @@ def test_populate_graph_idempotent(session):
 
 def test_populate_graph_creates_stratigraphic_edges(session):
     g = GraphProjector.populate_graph(session, "Volterra")
-    edges = list(g.edges)
     # 'copre 1002' produces an edge between 1001 and 1002
-    assert len(edges) >= 1
+    assert len(stratigraphic_edges(g)) >= 1
 
 
 def test_populate_graph_empty_site_returns_empty_graph(session):
