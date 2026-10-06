@@ -240,8 +240,11 @@ export PYARCHINIT_WEB_HOST="0.0.0.0"
 export PYARCHINIT_WEB_PORT="5001"  # Cambiato da 5000 per macOS
 export PYARCHINIT_WEB_DEBUG="true"
 
-# Flask Secret Key
-export FLASK_SECRET_KEY="your-secret-key"
+# Flask Secret Key (firma sessioni e token CSRF) — opzionale.
+# Se non impostata, l'app genera una chiave casuale al primo avvio in
+# ~/.pyarchinit_mini/flask_secret.key (permessi 0600) e la riusa ai riavvii.
+# Sui deploy con filesystem effimero (es. Railway) impostarla esplicitamente.
+export FLASK_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
 ```
 
 ### Avvio Server

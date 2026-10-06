@@ -20,8 +20,20 @@ if PASSLIB_AVAILABLE:
 
 
 # JWT configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
+
+
+def _jwt_secret() -> str:
+    """Signing secret for API tokens: ``JWT_SECRET_KEY`` if set, otherwise the
+    installation's own session secret (env var or generated key file).
+    Resolved per call so there is never a hardcoded default."""
+    explicit = (os.getenv("JWT_SECRET_KEY") or "").strip()
+    if explicit:
+        return explicit
+    from .secret_key import resolve_secret_key
+    return resolve_secret_key()
+
+
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
@@ -101,7 +113,7 @@ class AuthUtils:
             expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        encoded_jwt = jwt.encode(to_encode, _jwt_secret(), algorithm=ALGORITHM)
 
         return encoded_jwt
 
@@ -123,7 +135,7 @@ class AuthUtils:
             )
 
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            payload = jwt.decode(token, _jwt_secret(), algorithms=[ALGORITHM])
             return payload
         except JWTError:
             return None

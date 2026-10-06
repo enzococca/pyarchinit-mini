@@ -25,6 +25,7 @@ from sqlalchemy import text
 # PyArchInit-Mini imports
 from pyarchinit_mini import __version__
 from pyarchinit_mini.database.connection import DatabaseConnection
+from pyarchinit_mini.utils.secret_key import resolve_secret_key
 from pyarchinit_mini.database.manager import DatabaseManager
 from pyarchinit_mini.services.site_service import SiteService
 from pyarchinit_mini.services.us_service import USService
@@ -534,7 +535,9 @@ def create_app():
     global matrix_generator, export_import_service, csv_excel_service, media_service
 
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'your-secret-key-here'
+    # Session/CSRF signing key: env var, else a per-install key file
+    # (generated once, 0600). Never a value that lives in the repository.
+    app.config['SECRET_KEY'] = resolve_secret_key()
     app.config.setdefault("MAX_CONTENT_LENGTH", 16 * 1024 * 1024)  # 16MB cap on uploads
     # Use centralized ~/.pyarchinit_mini directory
     pyarchinit_home = Path.home() / '.pyarchinit_mini'
