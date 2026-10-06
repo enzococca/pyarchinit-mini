@@ -15,7 +15,8 @@ changed between preview and apply).
 Identity key: node.attributes['EMid'] ↔ us_table.node_uuid (per Spec 1 §4.3).
 """
 import hashlib
-from typing import Any
+import re
+from typing import Any, Optional
 
 import s3dgraphy
 from sqlalchemy import text
@@ -23,6 +24,15 @@ from sqlalchemy.orm import Session
 
 from .ingest_plan import IngestPlan, IngestResult, NodePlanEntry
 from .exceptions import IngestError, IngestStaleError
+from .strat_graph import pyarchinit_attrs
+
+
+def _us_number(node) -> Optional[int]:
+    a = pyarchinit_attrs(node)
+    if a.get("us") is not None and str(a["us"]).strip().isdigit():
+        return int(str(a["us"]).strip())
+    m = re.search(r"(\d+)\s*$", node.name or "")
+    return int(m.group(1)) if m else None
 
 
 class GraphIngestor:
@@ -57,12 +67,11 @@ class GraphIngestor:
         attrs = getattr(node, "attributes", {}) or {}
         emid = attrs.get("EMid", "")
         unita_tipo = attrs.get("unit_type", "US")
-        # Derive us number from node.name (format "<TYPE><NUM>"). Some nodes
-        # (e.g. GeoPositionNode) won't have a numeric tail — skip silently.
-        us_str = "".join(c for c in (node.name or "") if c.isdigit())
-        if not us_str:
+        # US number from pyarchinit attrs, else trailing digits of the name.
+        # Some nodes (e.g. GeoPositionNode) have neither — skip silently.
+        us_num = _us_number(node)
+        if us_num is None:
             return None
-        us_num = int(us_str)
         semantic_id = f"pyarchinit:site={self.site}/us={us_num}"
 
         after_row = {

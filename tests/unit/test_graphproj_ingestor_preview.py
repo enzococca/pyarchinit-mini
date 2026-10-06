@@ -3,12 +3,15 @@ import sqlite3
 import pytest
 
 import s3dgraphy
+from s3dgraphy.graph import Graph
+from s3dgraphy.nodes.base_node import Node
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from pyarchinit_mini.vocab.provider import VocabProvider
 from pyarchinit_mini.graphproj.ingestor import GraphIngestor
 from pyarchinit_mini.graphproj.ingest_plan import IngestPlan
+from tests.unit.strat_graph_factory import make_graph
 
 FIX = Path(__file__).parent.parent / "fixtures" / "s3dgraphy_jsons" / "0.1.42"
 
@@ -101,3 +104,17 @@ def test_preview_snapshot_changes_when_db_changes(session):
     session.commit()
     plan_b = GraphIngestor(session, "Volterra").preview(g)
     assert plan_a.snapshot_revision != plan_b.snapshot_revision
+
+
+def test_us_number_uses_trailing_digits_when_no_attrs(session):
+    g = Graph(graph_id="x")
+    n = Node("A1_12", "A1.US12", ""); n.attributes = {"unit_type": "US", "EMid": ""}
+    g.add_node(n)
+    plan = GraphIngestor(session, "Volterra").preview(g)
+    assert [e.after["us"] for e in plan.inserts] == [12]
+
+
+def test_us_number_prefers_pyarchinit_attrs(session):
+    g = make_graph(site="Volterra", nodes=[{"id": "u", "us": "77", "unit_type": "US", "node_uuid": ""}])
+    plan = GraphIngestor(session, "Volterra").preview(g)
+    assert [e.after["us"] for e in plan.inserts] == [77]
