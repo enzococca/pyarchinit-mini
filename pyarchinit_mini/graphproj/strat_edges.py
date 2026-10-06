@@ -111,9 +111,12 @@ def _transitive_reduction(edges: List[StratEdge]) -> List[StratEdge]:
 
 def add_stratigraphic_edges(graph, edges: Iterable[StratEdge]) -> int:
     added = 0
+    existing = {e.edge_id for e in graph.edges}
     for e in edges:
         edge_id = f"{e.source_id}__{e.canonical}__{e.target_id}"
-        if graph.find_edge_by_id(edge_id) is None:
-            graph.add_edge(edge_id, e.source_id, e.target_id, e.canonical)
-            added += 1
+        if edge_id in existing:
+            continue
+        graph.add_edge(edge_id, e.source_id, e.target_id, e.canonical)
+        existing.add(edge_id)
+        added += 1
     return added
