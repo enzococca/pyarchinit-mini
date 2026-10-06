@@ -27,7 +27,12 @@ def test_trigger_graph_regen_produces_stratigraphy_file(tmp_path, monkeypatch):
     conn.execute("""CREATE TABLE us_table (
         id_us INTEGER PRIMARY KEY, sito TEXT, area TEXT, us INTEGER,
         unita_tipo TEXT, d_stratigrafica TEXT, d_interpretativa TEXT,
-        rapporti TEXT, node_uuid TEXT
+        rapporti TEXT, node_uuid TEXT,
+        settore TEXT, periodo_iniziale TEXT, fase_iniziale TEXT, descrizione TEXT
+    )""")
+    conn.execute("""CREATE TABLE period_table (
+        id_perfas INTEGER PRIMARY KEY,
+        sito TEXT, periodo TEXT, fase TEXT, datazione TEXT
     )""")
     conn.commit()
     conn.close()
