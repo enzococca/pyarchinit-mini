@@ -103,3 +103,21 @@ def test_attach_first_row_wins_on_same_name_collision(db, caplog):
     usm = next(n for n in stratigraphic_nodes(g) if n.name == "A.Nord.USM2")
     assert list(mapping.values()).count(usm.node_id) == 1
     assert "already attributed" in caplog.text
+
+
+def test_sub_group_settore_none_and_missing_column(db, tmp_path):
+    conn, _ = db
+    with conn.get_session() as s:
+        by_us = lambda gb: {x.us: x.sub_group for x in load_us_rows(s, "S", group_by=gb)}
+        assert by_us("settore") == {"1": "Nord", "2": "Nord"}
+        assert by_us("area") == {"1": "A", "2": "A"}
+        assert by_us("none") == {"1": None, "2": None}
+    # legacy us_table without any sub-grouping column: no crash, sub_group None
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    engine = create_engine(f"sqlite:///{tmp_path}/legacy.db")
+    with engine.begin() as c:
+        c.execute(text("CREATE TABLE us_table (id_us INTEGER PRIMARY KEY, sito TEXT, area TEXT, us TEXT, unita_tipo TEXT)"))
+        c.execute(text("INSERT INTO us_table (sito,area,us,unita_tipo) VALUES ('S','A','1','USM')"))
+    with sessionmaker(bind=engine)() as s:
+        assert [r.sub_group for r in load_us_rows(s, "S", group_by="settore")] == [None]

@@ -1,4 +1,4 @@
-"""Swimlane period rows from mini's period_table (moved from s3d_projector)."""
+"""Swimlane period rows from mini's period_table."""
 from __future__ import annotations
 
 import logging

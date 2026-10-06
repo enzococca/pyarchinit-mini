@@ -2,7 +2,7 @@
 
 s3dgraphy's PyArchInitImporter does not map ``rapporti`` (mapping ``relations``
 is empty until s3Dgraphy#26 lands), so mini keeps its codec and adds the edges.
-Normalisation is unchanged from the former S3DProjector: inverse → forward with
+Normalisation is as before the s3dgraphy move: inverse → forward with
 endpoint swap, symmetric dedup, inverse dedup, per-canonical transitive reduction.
 """
 from __future__ import annotations
