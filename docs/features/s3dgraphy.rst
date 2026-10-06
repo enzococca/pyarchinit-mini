@@ -6,6 +6,16 @@ s3Dgraphy Integration
 
 PyArchInit-Mini integrates with **s3Dgraphy**, a Python library for 3D stratigraphic graphs and Extended Matrix Framework.
 
+Since 3.6.0 the database-to-graph projection is done by the library itself:
+``GraphProjector.populate_graph()`` feeds ``us_table`` through s3Dgraphy's
+``PyArchInitImporter``, which provides typed stratigraphic nodes keyed by
+``node_uuid`` plus qualia, location, author and document nodes. Mini keeps
+only what the library does not cover: the stratigraphic edges parsed from
+``rapporti`` (the library has no ``relations`` import yet), the swimlane rows
+built from ``period_table``, the yEd TableNode writer (swimlane GraphML for yEd
+Desktop), the DB write-back of editor changes, and the StratiGraph bundle/sync
+layer (bundle I/O is not yet available in the library).
+
 Key Features
 ------------
 

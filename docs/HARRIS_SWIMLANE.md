@@ -15,6 +15,15 @@ auto-loads:
 - **Edges** from `rapporti` strings (parsed via canonical edge names
   like `overlies`, `is_after`, `cuts`).
 
+## Pipeline
+
+The editor data is built in two steps: `GraphProjector.populate_graph()`
+projects the site into an `s3dgraphy.Graph` (US nodes through the library's
+`PyArchInitImporter`, then mini adds the `rapporti` edges and the swimlane
+rows from `period_table`), and `to_cytoscape` turns that graph into the
+nodes/edges the editor renders. Node ids in the editor are the US
+`node_uuid`.
+
 ## Drag-drop a US to a different row
 
 Drag the US node from one row to another. The change is tracked

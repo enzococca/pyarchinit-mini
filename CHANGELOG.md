@@ -1,3 +1,21 @@
+## 3.6.0 — 2026-10-06
+
+### Changed — DB⇄graph projection through s3dgraphy (issue #2)
+- `GraphProjector.populate_graph()` now projects `us_table` through the shared library's
+  `PyArchInitImporter` (s3dgraphy ≥ 1.6.0.dev39): node ids are the row `node_uuid`, nodes
+  are typed `StratigraphicNode` subclasses, and the graph carries qualia (`has_property`),
+  locations (`is_in_location`), authors and documents; on plugin-schema databases also
+  epochs. The local `ProjectedGraph` model (`graphproj/s3d_projector.py`) is gone.
+- Mini keeps, as thin layers on that graph: stratigraphic edges from `rapporti`
+  (`rapporti_codec`, same normalisation as before), swimlane rows from `period_table`,
+  the cytoscape view, the yEd TableNode export (which now also writes `node_uuid`), the
+  yEd/Heriverse readers and the DB write-back.
+- Dependency: `s3dgraphy>=1.6.0.dev39,<1.7`; `requires-python>=3.9` (stale Python 3.8 classifier removed).
+- Not changed: the StratiGraph bundle/sync layer (`stratigraph/`), pending WP4 bundle I/O in s3dgraphy.
+- Correctness: rapporti targets are now resolved by (area, us) — on sites where the same US number exists in several areas (e.g. 138 of 828 numbers on the Rimini Museo Fellini site) the old projection bound edges to the wrong area; edge totals change slightly (+1.7 % there) because of this.
+- Known: projecting very large sites is slower than before (Rimini, 990 US: ~10 s vs ~1.3 s), the time being spent in the library's node/edge lookups; auto-regen after a US save runs synchronously, so saves on such sites take longer until this is addressed.
+- Fixed: the `/api/export/graphml` 404 check for empty sites (it never fired because a graph always contains a GeoPositionNode); yEd/Heriverse imports no longer fail on duplicate edges; the yEd export now carries each US `node_uuid`.
+
 ## 3.5.3 — 2026-10-06
 
 ### Fixed

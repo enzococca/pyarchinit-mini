@@ -10,6 +10,13 @@ data/paradata/<site_slug>/stratigraphy.graphml
 This file is the projector's output (DB rows → s3dgraphy.Graph). Paradata
 are NOT embedded in it (they live in `paradata.json` — see PARADATA_GUIDE).
 
+Since 3.6.0 the projection is the s3dgraphy library's `PyArchInitImporter`
+(typed stratigraphic nodes keyed by `node_uuid`) plus two thin mini layers:
+the stratigraphic edges parsed from `rapporti` and the swimlane rows from
+`period_table`. The regenerated GraphML therefore also carries the
+library's qualia (`has_property`), location (`is_in_location`) and author
+nodes, not only US nodes and stratigraphic edges.
+
 ## When it fires
 
 - After `session.commit()` in the US save paths:
@@ -53,9 +60,14 @@ US/USM saves work normally; `stratigraphy.graphml` simply isn't written.
 
 ## Performance
 
-100-US site: ~50ms. 1500-US site (Volterra-scale): ~500ms. Synchronous in
-the request handler today; large deployments may want a background queue
-(out of scope for Spec 2).
+100-US site: ~50ms. 1500-US site (Volterra-scale): ~500ms (timings
+measured before 3.6.0). Synchronous in the request handler today; large
+deployments may want a background queue (out of scope for Spec 2).
+
+Since 3.6.0, very large sites are slower: Rimini (990 US) takes ~10 s
+versus ~1.3 s before, the time being spent in the library's node/edge
+lookups. Because regen runs synchronously, a US save on such a site takes
+correspondingly longer until this is addressed.
 
 ## Logs
 
