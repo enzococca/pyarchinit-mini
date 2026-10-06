@@ -41,3 +41,10 @@ def test_as_dict_matches_swimlane_row_shape():
         "row_id": "row_0", "label": "Periodo 1", "periodo": None, "fase": None,
         "datazione": None, "is_fallback": True,
     }
+
+
+def test_missing_period_table_yields_no_rows(tmp_path, caplog):
+    with _session(tmp_path) as s:
+        s.execute(text("DROP TABLE period_table")); s.commit()
+        assert load_period_rows(s, "S") == []
+    assert "period_table unavailable" in caplog.text

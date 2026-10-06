@@ -1,10 +1,13 @@
 """Swimlane period rows from mini's period_table (moved from s3d_projector)."""
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import text
+
+logger = logging.getLogger(__name__)
 
 FALLBACK_LABEL = "Periodo 1"
 
@@ -24,11 +27,19 @@ class PeriodRow:
 
 
 def load_period_rows(session, site: str) -> List[PeriodRow]:
-    rows = session.execute(
-        text("SELECT periodo, fase, datazione FROM period_table "
-             "WHERE sito = :s OR sito IS NULL OR sito = ''"),
-        {"s": site},
-    ).fetchall()
+    try:
+        rows = session.execute(
+            text("SELECT periodo, fase, datazione FROM period_table "
+                 "WHERE sito = :s OR sito IS NULL OR sito = ''"),
+            {"s": site},
+        ).fetchall()
+    except Exception as exc:
+        try:
+            session.rollback()
+        except Exception:
+            pass
+        logger.warning("period_table unavailable for site %r; no swimlane rows: %s", site, exc)
+        return []
     items = [(p, (f or None), d) for p, f, d in rows if p]
     items.sort(key=lambda t: (str(t[0] or ""), str(t[1] or "")))
     return [

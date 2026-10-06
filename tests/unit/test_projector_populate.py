@@ -77,3 +77,12 @@ def test_populate_graph_wraps_importer_failure(db):
         s.execute(text("DROP TABLE us_table")); s.commit()
         with pytest.raises(ProjectionError):
             GraphProjector.populate_graph(s, "S")
+
+
+def test_populate_without_period_table_uses_fallback_row(db):
+    conn, _ = db
+    with conn.get_session() as s:
+        s.execute(text("DROP TABLE period_table")); s.commit()
+        g = GraphProjector.populate_graph(s, "S")
+    assert get_swimlane(g)["rows"][0]["is_fallback"] is True
+    assert len(stratigraphic_nodes(g)) == 3
