@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 
 from sqlalchemy import text
 
+from .exceptions import ProjectionError
 from .periods import PeriodRow, resolve_row_id
 from .strat_graph import is_stratigraphic, set_pyarchinit_attrs, stratigraphic_nodes
 
@@ -36,7 +37,11 @@ class UsRow:
 
 
 def _available_columns(session) -> set:
-    """Column names of us_table on this connection (SQLite and PostgreSQL)."""
+    """Column names of us_table on this connection (SQLite and PostgreSQL).
+
+    Raises ProjectionError if the table cannot be read, so a failed probe is
+    never mistaken for an empty site.
+    """
     try:
         return set(session.execute(text("SELECT * FROM us_table LIMIT 0")).keys())
     except Exception as exc:
@@ -45,15 +50,13 @@ def _available_columns(session) -> set:
             session.rollback()
         except Exception:
             pass
-        return set()
+        raise ProjectionError(f"Cannot inspect us_table: {exc}") from exc
 
 
 def load_us_rows(session, site: str, *, group_by: str = "none", area: Optional[str] = None) -> List[UsRow]:
     if group_by not in VALID_GROUP_BY:
         raise ValueError(f"group_by must be one of {sorted(VALID_GROUP_BY)}, got {group_by!r}")
     cols = _available_columns(session)
-    if not cols:
-        return []
 
     def pick(*candidates: str) -> str:
         for c in candidates:
@@ -93,6 +96,7 @@ def attach_pyarchinit_attributes(graph, importer, rows: List[UsRow], *, period_r
     provider = VocabProvider.instance()
     by_id = {n.node_id: n for n in stratigraphic_nodes(graph)}
     mapping: Dict[int, str] = {}
+    claimed: set = set()
     for r in rows:
         node = by_id.get(r.node_uuid) if r.node_uuid else None
         if node is None:
@@ -102,6 +106,10 @@ def attach_pyarchinit_attributes(graph, importer, rows: List[UsRow], *, period_r
             if node is None or not is_stratigraphic(node):
                 logger.warning("us_table row id_us=%s (%s) has no node in the projected graph; skipped", r.id_us, name)
                 continue
+        if node.node_id in claimed:
+            logger.warning("us_table row id_us=%s (%s) resolves to node %s already attributed by another row; skipped",
+                           r.id_us, node.name, node.node_id)
+            continue
         ut = provider.get_unit_type(r.unit_type)
         family = ut.family if (ut and getattr(ut, "family", None)) else "unknown"
         set_pyarchinit_attrs(
@@ -111,4 +119,5 @@ def attach_pyarchinit_attributes(graph, importer, rows: List[UsRow], *, period_r
             node_uuid=r.node_uuid or node.node_id, id_us=r.id_us, family=family,
         )
         mapping[r.id_us] = node.node_id
+        claimed.add(node.node_id)
     return mapping

@@ -3,6 +3,7 @@ from s3dgraphy.importer.pyarchinit_importer import PyArchInitImporter
 from sqlalchemy import text
 
 from pyarchinit_mini.database.connection import DatabaseConnection
+from pyarchinit_mini.graphproj.exceptions import ProjectionError
 from pyarchinit_mini.graphproj.enrich import VALID_GROUP_BY, attach_pyarchinit_attributes, load_us_rows
 from pyarchinit_mini.graphproj.periods import PeriodRow
 from pyarchinit_mini.graphproj.strat_graph import pyarchinit_attrs, stratigraphic_nodes
@@ -80,3 +81,25 @@ def test_attach_skips_rows_without_node_and_reports_them(db, caplog):
             g.remove_node(n.node_id)
     mapping = attach_pyarchinit_attributes(g, imp, rows, period_rows=[])
     assert len(mapping) == 1 and "A.Nord.USM2" in caplog.text
+
+
+def test_load_rows_raises_when_us_table_is_unreadable(db):
+    conn, _ = db
+    with conn.get_session() as s:
+        s.execute(text("DROP TABLE us_table")); s.commit()
+        with pytest.raises(ProjectionError):
+            load_us_rows(s, "S")
+
+
+def test_attach_first_row_wins_on_same_name_collision(db, caplog):
+    conn, path = db
+    with conn.get_session() as s:
+        s.execute(text("INSERT INTO us_table (sito, area, settore, us, unita_tipo, node_uuid, created_at, updated_at, version_number) VALUES ('S','A','Nord','2','USM',NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,1)"))
+        s.commit()
+    imp, g = _graph(path)
+    with conn.get_session() as s:
+        rows = load_us_rows(s, "S")
+    mapping = attach_pyarchinit_attributes(g, imp, rows, period_rows=[])
+    usm = next(n for n in stratigraphic_nodes(g) if n.name == "A.Nord.USM2")
+    assert list(mapping.values()).count(usm.node_id) == 1
+    assert "already attributed" in caplog.text
