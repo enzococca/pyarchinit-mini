@@ -40,7 +40,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Framework :: FastAPI",
 ]
-requires-python = ">=3.8,<3.15"
+requires-python = ">=3.9,<3.15"
 # Core dependencies - includes CLI, Web GUI, and API
 dependencies = [
     # API dependencies
@@ -58,7 +58,7 @@ dependencies = [
     "reportlab>=4.0.0",
     "pillow>=10.0.0",
     "qrcode[pil]>=7.4.0",
-    "s3dgraphy>=0.1.42",
+    "s3dgraphy>=1.6.0.dev39,<1.7",  # shared DB⇄graph library (issue #2); pre-release pin on purpose
     "uuid7>=0.1.0",
     # CLI interface dependencies
     "click>=8.1.0",
