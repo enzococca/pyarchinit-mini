@@ -13,7 +13,8 @@ from typing import Dict, Iterable, List, Optional, Tuple
 from .rapporti_codec import INVERSE_PAIRS, REVERSE_TO_FORWARD, SYMMETRIC, parse_rapporti
 from .strat_graph import pyarchinit_attrs, stratigraphic_nodes
 
-STRATIGRAPHIC_EDGE_TYPES = frozenset(INVERSE_PAIRS) | SYMMETRIC
+# Forward-form canonicals this layer emits (spec §4); inverse forms are swapped away.
+STRATIGRAPHIC_EDGE_TYPES = frozenset({"overlies", "cuts", "fills", "abuts", "has_same_time", "is_bonded_to", "is_before"})
 
 
 @dataclass(frozen=True)

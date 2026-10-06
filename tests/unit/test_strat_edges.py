@@ -64,3 +64,8 @@ def test_add_edges_is_idempotent_and_uses_contract_ids():
     assert add_stratigraphic_edges(g, e) == 0
     assert [x.edge_id for x in stratigraphic_edges(g)] == ["n1__overlies__n2"]
     assert stratigraphic_edges(g)[0].edge_type == "overlies"
+
+
+def test_edge_types_constant_is_the_forward_only_contract():
+    from pyarchinit_mini.graphproj.strat_edges import STRATIGRAPHIC_EDGE_TYPES
+    assert STRATIGRAPHIC_EDGE_TYPES == {"overlies", "cuts", "fills", "abuts", "has_same_time", "is_bonded_to", "is_before"}
