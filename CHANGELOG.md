@@ -1,3 +1,8 @@
+## 3.5.3 — 2026-10-06
+
+### Fixed
+- **Boot crash on fresh installs with PostgreSQL** (`ModuleNotFoundError: No module named 'psycopg'`): SQLAlchemy 2.1 (released after 3.5.1) resolves plain `postgresql://` URLs to the psycopg 3 driver, which this project does not ship. SQLAlchemy is now pinned `>=2.0,<2.1` in `requirements.txt` and `pyproject.toml`. 3.5.2 carries the same security fix but its unbounded pin breaks new installs that use Postgres — use 3.5.3.
+
 ## 3.5.2 — 2026-10-06
 
 ### Security

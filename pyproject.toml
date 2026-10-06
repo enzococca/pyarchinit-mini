@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyarchinit-mini"
-version = "3.5.2"
+version = "3.5.3"
 description = "Lightweight archaeological data management system with REST API, Web UI, Desktop GUI, CLI, multi-user authentication, real-time collaboration, analytics dashboard, PyArchInit import/export, Heriverse/ATON export integration, and 3D CRUD viewer"
 readme = "README.md"
 license = {text = "GPL-2.0"}
@@ -46,7 +46,7 @@ dependencies = [
     # API dependencies
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
-    "sqlalchemy>=2.0.0",
+    "sqlalchemy>=2.0.0,<2.1",  # 2.1 defaults postgresql:// to psycopg 3 (not shipped)
     "psycopg2-binary>=2.9.0",
     "gunicorn>=21.0.0",
     "pydantic>=2.0.0",
