@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-from pyarchinit_mini.graphproj.s3d_projector import ProjectedGraph, Row, Node, Edge
+from tests.unit.strat_graph_factory import make_graph
 from pyarchinit_mini.graphproj.graph_to_db import write_graph
 
 
@@ -22,15 +22,10 @@ def session(tmp_path):
 
 
 def _graph_2_us_1_edge():
-    g = ProjectedGraph(site="S", group_by="none")
-    g.nodes = [
-        Node(node_id="us_1", us="1", area="A", sito="S", unit_type="USM",
-             description="x", row_id="row_0"),
-        Node(node_id="us_2", us="2", area="A", sito="S", unit_type="USV",
-             description="y", row_id="row_0"),
-    ]
-    g.edges = [Edge(source_id="us_1", target_id="us_2", canonical="overlies")]
-    return g
+    return make_graph(
+        nodes=[{"id": "us_1", "us": "1", "area": "A", "unit_type": "USM", "description": "x"}, {"id": "us_2", "us": "2", "area": "A", "unit_type": "USV", "description": "y"}],
+        edges=[("us_1", "us_2", "overlies")],
+    )
 
 
 def test_write_graph_inserts_us_rows(session):
@@ -62,14 +57,10 @@ def test_write_graph_upsert_does_not_duplicate(session):
 
 
 def test_write_graph_symmetric_edge_no_inverse(session):
-    g = ProjectedGraph(site="S", group_by="none")
-    g.nodes = [
-        Node(node_id="us_1", us="1", area="A", sito="S", unit_type="USM",
-             description="x", row_id="row_0"),
-        Node(node_id="us_2", us="2", area="A", sito="S", unit_type="USM",
-             description="y", row_id="row_0"),
-    ]
-    g.edges = [Edge(source_id="us_1", target_id="us_2", canonical="has_same_time")]
+    g = make_graph(
+        nodes=[{"id": "us_1", "us": "1", "area": "A", "unit_type": "USM", "description": "x"}, {"id": "us_2", "us": "2", "area": "A", "unit_type": "USM", "description": "y"}],
+        edges=[("us_1", "us_2", "has_same_time")],
+    )
     res = write_graph(g, target_site="S", session=session, source_label="test")
     assert res.imported_edges == 1
     assert res.inverses_written == 0  # symmetric → no inverse
@@ -84,12 +75,7 @@ def test_write_graph_symmetric_edge_no_inverse(session):
 
 
 def test_write_graph_stub_counted(session):
-    g = ProjectedGraph(site="S", group_by="none")
-    g.nodes = [
-        Node(node_id="us_99", us="99", area="A", sito="S", unit_type="US",
-             description="Imported placeholder", row_id="row_0"),
-    ]
-    g.edges = []
+    g = make_graph(nodes=[{"id": "us_99", "us": "99", "area": "A", "unit_type": "US", "description": "Imported placeholder"}])
     res = write_graph(g, target_site="S", session=session, source_label="test")
     assert res.imported_us == 1
     assert res.stubs_created == 1
@@ -97,14 +83,10 @@ def test_write_graph_stub_counted(session):
 
 def test_write_graph_unknown_inverse_skipped(session):
     """An edge with an unmapped inverse logs to inverses_skipped, writes forward only."""
-    g = ProjectedGraph(site="S", group_by="none")
-    g.nodes = [
-        Node(node_id="us_1", us="1", area="A", sito="S", unit_type="USM",
-             description="x", row_id="row_0"),
-        Node(node_id="us_2", us="2", area="A", sito="S", unit_type="USM",
-             description="y", row_id="row_0"),
-    ]
-    g.edges = [Edge(source_id="us_1", target_id="us_2", canonical="partially_covers")]
+    g = make_graph(
+        nodes=[{"id": "us_1", "us": "1", "area": "A", "unit_type": "USM", "description": "x"}, {"id": "us_2", "us": "2", "area": "A", "unit_type": "USM", "description": "y"}],
+        edges=[("us_1", "us_2", "partially_covers")],
+    )
     res = write_graph(g, target_site="S", session=session, source_label="test")
     assert res.imported_edges == 1
     assert res.inverses_written == 0
