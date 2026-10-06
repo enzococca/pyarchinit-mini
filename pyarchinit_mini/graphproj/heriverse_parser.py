@@ -70,6 +70,7 @@ def parse_heriverse(raw_json: str) -> Graph:
             graph.add_node(node)
 
     known = {n.node_id for n in stratigraphic_nodes(graph)}
+    seen_edges = set()
     for edge_type, items in (g0.get("edges") or {}).items():
         if not isinstance(items, list):
             continue
@@ -80,8 +81,9 @@ def parse_heriverse(raw_json: str) -> Graph:
             src, tgt = item.get("from"), item.get("to")
             if src in known and tgt in known:
                 edge_id = f"{src}__{canonical}__{tgt}"
-                if graph.find_edge_by_id(edge_id) is not None:
+                if edge_id in seen_edges:
                     continue
+                seen_edges.add(edge_id)
                 graph.add_edge(edge_id, src, tgt, canonical)
 
     return graph

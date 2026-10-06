@@ -88,3 +88,14 @@ def test_populate_without_period_table_uses_fallback_row(db):
         g = GraphProjector.populate_graph(s, "S")
     assert get_swimlane(g)["rows"][0]["is_fallback"] is True
     assert len(stratigraphic_nodes(g)) == 3
+
+
+def test_populate_graph_wraps_importer_construction_failure(db, monkeypatch):
+    import pyarchinit_mini.graphproj.projector as projector_mod
+
+    def boom(**kwargs):
+        raise ValueError("mapping 'pyarchinit_us_mapping' not found")
+    monkeypatch.setattr(projector_mod, "PyArchInitImporter", boom)
+    conn, _ = db
+    with conn.get_session() as s, pytest.raises(ProjectionError):
+        GraphProjector.populate_graph(s, "S")

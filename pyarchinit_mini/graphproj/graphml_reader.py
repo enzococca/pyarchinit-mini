@@ -58,6 +58,7 @@ def parse_graphml(raw: bytes, *, target_site: str) -> Graph:
         graph.add_node(node)
 
     known = {n.node_id for n in stratigraphic_nodes(graph)}
+    seen_edges = set()
     for edge_el in root.iter(f"{{{NS_G}}}edge"):
         src = edge_el.attrib.get("source")
         tgt = edge_el.attrib.get("target")
@@ -69,8 +70,9 @@ def parse_graphml(raw: bytes, *, target_site: str) -> Graph:
         label = (label_el.text or "").strip() if label_el is not None and label_el.text else "overlies"
         canonical = _resolve_canonical(label) or "overlies"
         edge_id = f"{src}__{canonical}__{tgt}"
-        if graph.find_edge_by_id(edge_id) is not None:
+        if edge_id in seen_edges:
             continue
+        seen_edges.add(edge_id)
         graph.add_edge(edge_id, src, tgt, canonical)
 
     return graph

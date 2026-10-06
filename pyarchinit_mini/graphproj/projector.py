@@ -35,14 +35,14 @@ class GraphProjector:
         filters = {"sito": site}
         if area:
             filters["area"] = area
-        importer = PyArchInitImporter(
-            connection_url=connection_url_from_session(session),
-            mapping_name=GraphProjector.MAPPING_NAME,
-            filters=filters,
-        )
-        try:
+        try:  # construction too: a bad mapping/URL raises ValueError there
+            importer = PyArchInitImporter(
+                connection_url=connection_url_from_session(session),
+                mapping_name=GraphProjector.MAPPING_NAME,
+                filters=filters,
+            )
             graph = importer.parse()
-        except Exception as exc:  # the importer wraps everything in ImportError
+        except Exception as exc:  # parse() wraps everything in ImportError
             raise ProjectionError(f"s3dgraphy import failed for site {site!r}: {exc}", site=site) from exc
         graph.graph_id = f"strat:{site}"
         graph.name = f"{site} stratigraphic graph"
