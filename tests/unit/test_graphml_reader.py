@@ -23,3 +23,11 @@ def test_parse_graphml_builds_contract_graph():
     edges = stratigraphic_edges(g)
     assert len(edges) == 1
     assert (edges[0].edge_source, edges[0].edge_target) == ("n1", "n2")
+    assert edges[0].edge_type == "cuts"
+
+
+def test_parse_graphml_duplicate_edges_collapse_to_one():
+    dup = YED.replace(b'<edge id="e2" source="n1" target="ghost"/>',
+                      b'<edge id="e2" source="n1" target="n2"><data><y:PolyLineEdge><y:EdgeLabel>cuts</y:EdgeLabel></y:PolyLineEdge></data></edge>')
+    g = parse_graphml(dup, target_site="S")
+    assert len(stratigraphic_edges(g)) == 1

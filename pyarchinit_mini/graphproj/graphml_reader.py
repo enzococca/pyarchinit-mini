@@ -68,6 +68,9 @@ def parse_graphml(raw: bytes, *, target_site: str) -> Graph:
         label_el = edge_el.find(f".//{{{NS_Y}}}EdgeLabel")
         label = (label_el.text or "").strip() if label_el is not None and label_el.text else "overlies"
         canonical = _resolve_canonical(label) or "overlies"
-        graph.add_edge(f"{src}__{canonical}__{tgt}", src, tgt, canonical)
+        edge_id = f"{src}__{canonical}__{tgt}"
+        if graph.find_edge_by_id(edge_id) is not None:
+            continue
+        graph.add_edge(edge_id, src, tgt, canonical)
 
     return graph

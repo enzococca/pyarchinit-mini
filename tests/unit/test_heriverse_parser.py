@@ -97,3 +97,14 @@ def test_parse_heriverse_edge_type_cuts_mapping():
     g = parse_heriverse(json.dumps(sample))
     cans = {e.edge_type for e in stratigraphic_edges(g)}
     assert "cuts" in cans
+
+
+def test_parse_heriverse_duplicate_canonical_edges_collapse_to_one():
+    sample = json.loads(json.dumps(SAMPLE))
+    sample["multigraph"]["graphs"][0]["edges"]["covers"] = [
+        {"id": "ec", "from": "us_1", "to": "us_2", "type": "covers"},
+    ]
+    g = parse_heriverse(json.dumps(sample))
+    edges = stratigraphic_edges(g)
+    assert len(edges) == 1
+    assert edges[0].edge_type == "overlies"

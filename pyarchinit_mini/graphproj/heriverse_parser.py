@@ -79,6 +79,9 @@ def parse_heriverse(raw_json: str) -> Graph:
                 continue
             src, tgt = item.get("from"), item.get("to")
             if src in known and tgt in known:
-                graph.add_edge(f"{src}__{canonical}__{tgt}", src, tgt, canonical)
+                edge_id = f"{src}__{canonical}__{tgt}"
+                if graph.find_edge_by_id(edge_id) is not None:
+                    continue
+                graph.add_edge(edge_id, src, tgt, canonical)
 
     return graph
