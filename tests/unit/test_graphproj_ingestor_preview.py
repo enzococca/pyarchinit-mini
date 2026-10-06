@@ -116,5 +116,21 @@ def test_us_number_uses_trailing_digits_when_no_attrs(session):
 
 def test_us_number_prefers_pyarchinit_attrs(session):
     g = make_graph(site="Volterra", nodes=[{"id": "u", "us": "77", "unit_type": "US", "node_uuid": ""}])
+    node = next(n for n in g.nodes if n.node_id == "u"); node.name = "A1.US12"
     plan = GraphIngestor(session, "Volterra").preview(g)
     assert [e.after["us"] for e in plan.inserts] == [77]
+
+
+def test_node_without_digits_or_attrs_is_skipped(session):
+    g = Graph(graph_id="x")
+    n = Node("nodigits", "US", ""); n.attributes = {"unit_type": "US", "EMid": ""}
+    g.add_node(n)
+    plan = GraphIngestor(session, "Volterra").preview(g)
+    assert not plan.inserts and not plan.updates
+
+
+def test_non_numeric_attrs_us_falls_back_to_name_digits(session):
+    g = make_graph(site="Volterra", nodes=[{"id": "v", "us": "12a", "unit_type": "US", "node_uuid": ""}])
+    node = next(n for n in g.nodes if n.node_id == "v"); node.name = "US15"
+    plan = GraphIngestor(session, "Volterra").preview(g)
+    assert [e.after["us"] for e in plan.inserts] == [15]
