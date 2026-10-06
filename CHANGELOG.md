@@ -1,3 +1,10 @@
+## 3.5.2 — 2026-10-06
+
+### Security
+- **Flask session/CSRF secret was hardcoded** (`app.config['SECRET_KEY'] = 'your-secret-key-here'` in `web_interface/app.py`), so every installation signed its session cookies and CSRF tokens with a string published on GitHub — anyone could forge a session for any reachable instance without a password. The key is now taken from the `FLASK_SECRET_KEY` (or `SECRET_KEY`) environment variable when set; otherwise a random key is generated once and stored in `~/.pyarchinit_mini/flask_secret.key` (`$PYARCHINIT_HOME` honoured, mode 0600) and reused across restarts. If that file can neither be read nor created, the app refuses to start and names the path. Placeholder values (e.g. `your-secret-key-here`) are ignored.
+- **API JWT tokens** (`utils/auth.py`) had the same flaw via the default `your-secret-key-change-in-production`; they now use `JWT_SECRET_KEY` if set, else the installation's session secret — tokens signed with the old default are rejected.
+- **After upgrading, every open session is invalidated once** (the old signature no longer verifies): users simply log in again.
+
 ## 3.5.1 — 2026-07-04
 
 ### Fixed
