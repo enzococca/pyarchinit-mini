@@ -63,12 +63,14 @@ def test_populate_rejects_bad_group_by(db):
         GraphProjector.populate_graph(s, "S", group_by="banana")
 
 
-def test_free_text_rapporti_yield_no_edges(db):
+def test_free_text_rapporti_yield_edges(db):
     conn, _ = db
     with conn.get_session() as s:
         s.execute(text("UPDATE us_table SET rapporti = 'copre 2' WHERE us = '1'")); s.commit()
         g = GraphProjector.populate_graph(s, "S")
-    assert all(e.edge_type != "overlies" for e in stratigraphic_edges(g))
+    nodes = {pyarchinit_attrs(n)["us"]: n.node_id for n in stratigraphic_nodes(g)}
+    overlies = [(e.edge_source, e.edge_target) for e in stratigraphic_edges(g) if e.edge_type == "overlies"]
+    assert overlies == [(nodes["1"], nodes["2"])]
 
 
 def test_populate_graph_wraps_importer_failure(db):

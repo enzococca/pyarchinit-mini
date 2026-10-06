@@ -60,6 +60,15 @@ def test_parse_malformed_string_returns_empty():
     assert items == []
 
 
+def test_free_text_is_not_logged_as_malformed_but_broken_list_is(caplog):
+    import logging
+    with caplog.at_level(logging.DEBUG, logger="pyarchinit_mini.graphproj.rapporti_codec"):
+        assert parse_rapporti("Copre 1002, Taglia 1005", current_site="S") == []
+        assert parse_rapporti("[['Copre', '2'", current_site="S") == []
+    warnings = [r.getMessage() for r in caplog.records if r.levelno >= logging.WARNING]
+    assert len(warnings) == 1 and "[['Copre'" in warnings[0]
+
+
 def test_serialize_writes_4_tuple_list():
     items = [
         Rapporto(canonical="overlies", target_us="120", target_area="A1", target_sito="S"),

@@ -57,6 +57,17 @@ def test_unknown_target_and_second_rapporto_keep_original_source():
     assert edges == [StratEdge("n1", "n3", "overlies")]
 
 
+def test_free_text_rapporti_are_tokenised():
+    g = _g(); idx = NodeIndex.from_graph(g)
+    edges = build_stratigraphic_edges([("n1", "Copre 2, Taglia 3")], site="S", index=idx)
+    assert set(edges) == {StratEdge("n1", "n2", "overlies"), StratEdge("n1", "n3", "cuts")}
+
+
+def test_free_text_inverse_is_swapped():
+    g = _g(); idx = NodeIndex.from_graph(g)
+    assert build_stratigraphic_edges([("n1", "coperto da 2")], site="S", index=idx) == [StratEdge("n2", "n1", "overlies")]
+
+
 def test_add_edges_is_idempotent_and_uses_contract_ids():
     g = _g()
     e = [StratEdge("n1", "n2", "overlies")]

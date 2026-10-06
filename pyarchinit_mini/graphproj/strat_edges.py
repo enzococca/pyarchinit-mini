@@ -54,14 +54,15 @@ def build_stratigraphic_edges(rapporti_rows: Iterable[Tuple[str, Optional[str]]]
                               index: NodeIndex) -> List[StratEdge]:
     seen = set()
     edges: List[StratEdge] = []
+    registry = []  # lazily-built EdgeRegistry (loads the vocab), only for free-text rows
     for source_id, raw in rapporti_rows:
         if not raw or not str(raw).strip():
             continue
-        for rap in parse_rapporti(raw, current_site=site):
-            target_id = index.resolve(rap.target_us, rap.target_area)
+        for canonical, target_us, target_area in _rapporti_triples(str(raw), site, registry):
+            target_id = index.resolve(target_us, target_area)
             if target_id is None or target_id == source_id:
                 continue
-            canonical, src, tgt = rap.canonical, source_id, target_id
+            src, tgt = source_id, target_id
             if canonical in REVERSE_TO_FORWARD:
                 canonical = REVERSE_TO_FORWARD[canonical]
                 src, tgt = tgt, src
@@ -71,6 +72,26 @@ def build_stratigraphic_edges(rapporti_rows: Iterable[Tuple[str, Optional[str]]]
             seen.add(key)
             edges.append(StratEdge(src, tgt, canonical))
     return _transitive_reduction(_drop_redundant_inverses(edges))
+
+
+def _rapporti_triples(raw: str, site: str, registry: list) -> List[Tuple[str, str, Optional[str]]]:
+    """``(canonical, target_us, target_area)`` from the codec list-of-lists, or from
+    free text such as ``"Copre 1002, Taglia 1005"`` (mini's US form). Free text
+    carries no area, so its targets resolve by US number only."""
+    triples = [(r.canonical, r.target_us, r.target_area) for r in parse_rapporti(raw, current_site=site)]
+    if triples or raw.strip().startswith("["):
+        return triples
+    if not registry:
+        from .edge_registry import EdgeRegistry
+        registry.append(EdgeRegistry())
+    for token in raw.replace(";", ",").split(","):
+        token = token.strip()
+        if not token:
+            continue
+        edge_name, target_us = registry[0].parse_rapporti_token(token)
+        if edge_name and target_us:
+            triples.append((edge_name, str(target_us), None))
+    return triples
 
 
 def _drop_redundant_inverses(edges: List[StratEdge]) -> List[StratEdge]:

@@ -168,7 +168,10 @@ def parse_rapporti(raw: Optional[str], *, current_site: str) -> List[Rapporto]:
     try:
         parsed = ast.literal_eval(raw)
     except (SyntaxError, ValueError):
-        logger.warning("rapporti malformed (literal_eval failed): %r", raw[:80])
+        if raw.strip().startswith("["):
+            logger.warning("rapporti malformed (literal_eval failed): %r", raw[:80])
+        else:  # free text ("Copre 1002, ...") is a supported input, tokenised elsewhere
+            logger.debug("rapporti is not a list literal: %r", raw[:80])
         return []
     if not isinstance(parsed, (list, tuple)):
         return []
