@@ -42,7 +42,7 @@ def test_s3dgraphy_pipeline_returns_nodes(session, monkeypatch):
     monkeypatch.setenv("SWIMLANE_PIPELINE", "s3dgraphy")
     state = SwimlaneState.load(session, "S", group_by="none")
     # We should have 2 US nodes
-    us_nodes = [n for n in state.nodes if "us_" in str(getattr(n, "data", {}).get("id", ""))]
+    us_nodes = [n for n in state.nodes if getattr(n, "data", {}).get("us")]
     assert len(us_nodes) >= 2
 
 
@@ -54,14 +54,13 @@ def test_legacy_pipeline_does_not_error(session, monkeypatch):
 
 
 def test_s3dgraphy_falls_back_to_legacy_on_exception(session, monkeypatch):
-    """If S3DProjector raises, the loader should fall back without crashing."""
+    """If GraphProjector raises, the loader should fall back without crashing."""
     monkeypatch.setenv("SWIMLANE_PIPELINE", "s3dgraphy")
-    # Patch S3DProjector to raise
-    import pyarchinit_mini.graphproj.s3d_projector as sp
-    original = sp.S3DProjector.from_site
+    # Patch GraphProjector to raise
+    from pyarchinit_mini.graphproj.projector import GraphProjector
     def boom(*a, **kw):
         raise RuntimeError("forced failure")
-    monkeypatch.setattr(sp.S3DProjector, "from_site", staticmethod(boom))
+    monkeypatch.setattr(GraphProjector, "populate_graph", staticmethod(boom))
     # Should not raise — falls back to legacy
     state = SwimlaneState.load(session, "S", group_by="period_phase")
     assert state is not None

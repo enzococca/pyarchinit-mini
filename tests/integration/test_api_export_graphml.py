@@ -80,3 +80,11 @@ def test_export_graphml_edge_labels_italianized(client):
                 "is_abutted_by", "is_bonded_to",
                 "has_same_time", "is_before",
             }, f"Edge label still in canonical form: {lbl!r}"
+
+
+def test_export_graphml_unknown_site_returns_404(client):
+    # The s3dgraphy graph always carries non-stratigraphic nodes (geo/property),
+    # so emptiness is judged on stratigraphic nodes only.
+    r = client.get("/harris-creator/api/export/graphml?site=NoSuchSite")
+    assert r.status_code == 404, r.data[:300]
+    assert r.get_json()["success"] is False

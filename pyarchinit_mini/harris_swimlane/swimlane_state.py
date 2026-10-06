@@ -4,7 +4,7 @@ Load: row_provider + us_table -> EditorState (Cytoscape-shaped).
 Save: full impl in Task 11 (currently NotImplementedError).
 
 Pipeline selection via SWIMLANE_PIPELINE env var:
-  - "s3dgraphy" (default): S3DProjector + to_cytoscape pipeline
+  - "s3dgraphy" (default): GraphProjector + to_cytoscape pipeline
   - "legacy": historical pipeline
 
 On any exception in the new pipeline, falls back to legacy automatically.
@@ -117,7 +117,7 @@ class SwimlaneState:
     def load(session: Session, site: str, *, group_by: str = "period_phase") -> EditorState:
         """Load swimlane state. Dispatcher honouring SWIMLANE_PIPELINE env var.
 
-        - SWIMLANE_PIPELINE=s3dgraphy (default): use S3DProjector + to_cytoscape.
+        - SWIMLANE_PIPELINE=s3dgraphy (default): use GraphProjector + to_cytoscape.
           Falls back to legacy on any exception.
         - SWIMLANE_PIPELINE=legacy: use the historical pipeline.
 
@@ -137,14 +137,15 @@ class SwimlaneState:
 
     @staticmethod
     def _load_via_s3dgraphy(session: Session, site: str, group_by: str) -> EditorState:
-        """New pipeline: S3DProjector → ProjectedGraph → to_cytoscape → EditorState."""
-        from pyarchinit_mini.graphproj.s3d_projector import S3DProjector, VALID_GROUP_BY as S3D_VALID
+        """New pipeline: GraphProjector → s3dgraphy Graph → to_cytoscape → EditorState."""
+        from pyarchinit_mini.graphproj.enrich import VALID_GROUP_BY
+        from pyarchinit_mini.graphproj.projector import GraphProjector
         from pyarchinit_mini.graphproj.s3d_to_cytoscape import to_cytoscape
 
         # Map legacy group_by values to the new vocabulary; unknown → "none"
-        new_group_by = group_by if group_by in S3D_VALID else "none"
-        projected = S3DProjector.from_site(session, site, group_by=new_group_by)
-        cyto = to_cytoscape(projected)
+        s3d_group_by = group_by if group_by in VALID_GROUP_BY else "none"
+        graph = GraphProjector.populate_graph(session, site, group_by=s3d_group_by)
+        cyto = to_cytoscape(graph)
         return SwimlaneState._make_state_from_cytoscape(site, group_by, cyto)
 
     @staticmethod

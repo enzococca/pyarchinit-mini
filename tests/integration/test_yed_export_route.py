@@ -75,8 +75,9 @@ def test_get_export_graphml_contains_site_nodes(client):
     r = cli.get("/harris-creator/api/export/Volterra/yed-graphml")
     assert r.status_code == 200, r.data[:400]
     body = r.data.decode("utf-8", errors="ignore")
-    # Volterra fixture has US nodes — their IDs appear as us_<id>
-    assert "us_" in body
+    # Volterra fixture has 30 US; the s3dgraphy writer emits yEd nodes with
+    # sequential "uuid-NNN" ids (no longer "us_<id>").
+    assert body.count('<node id="uuid-') >= 30
 
 
 def test_get_export_graphml_contains_palette_usm(client):

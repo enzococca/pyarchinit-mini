@@ -92,5 +92,6 @@ def test_api_load_unknown_site_returns_empty(client):
     r = client.get("/harris-creator/api/load/NoSuchSite")
     assert r.status_code == 200
     body = r.get_json()
-    assert body["nodes"] == []
+    # No US: only the fallback period-row compound is emitted.
+    assert [n for n in body["nodes"] if not n["data"].get("is_period_row")] == []
     assert body["edges"] == []

@@ -28,6 +28,7 @@ from pyarchinit_mini.config.em_node_config_manager import get_config_manager
 from pyarchinit_mini.vocab.provider import VocabProvider
 from pyarchinit_mini.graphml_io.writer import write_graphml
 from pyarchinit_mini.graphproj.projector import GraphProjector
+from pyarchinit_mini.graphproj.strat_graph import stratigraphic_nodes
 
 # Create Blueprint
 harris_creator_bp = Blueprint('harris_creator', __name__, url_prefix='/harris-creator')
@@ -428,7 +429,7 @@ def export_matrix(format):
                 # graphml_io.writer (bypasses the GraphMLBuilder.to_string bug).
                 graph = GraphProjector.populate_graph(db, site_name)
 
-                if not graph.nodes:
+                if not stratigraphic_nodes(graph):
                     return jsonify({'success': False, 'message': 'No nodes found for this site'}), 404
 
                 write_graphml(graph, _Path(output_path))
@@ -731,7 +732,7 @@ def api_load_state(site: str):
     """Load full editor state (rows + nodes + edges) as Cytoscape JSON.
 
     Pipeline selection honours SWIMLANE_PIPELINE env var:
-      - "s3dgraphy" (default): S3DProjector → flat palette fields (Fix B/C/D)
+      - "s3dgraphy" (default): GraphProjector → flat palette fields (Fix B/C/D)
       - "legacy": SwimlaneState.load → nested style dict (backward compat)
     """
     pipeline = os.environ.get("SWIMLANE_PIPELINE", "s3dgraphy").lower()
@@ -739,16 +740,14 @@ def api_load_state(site: str):
         session = _get_session()
 
         if pipeline == "s3dgraphy":
-            # ── New pipeline: S3DProjector + flat-palette to_cytoscape ──────
-            from pyarchinit_mini.graphproj.s3d_projector import (
-                S3DProjector, VALID_GROUP_BY as S3D_VALID,
-            )
+            # ── New pipeline: GraphProjector + flat-palette to_cytoscape ──────
+            from pyarchinit_mini.graphproj.enrich import VALID_GROUP_BY
             from pyarchinit_mini.graphproj.s3d_to_cytoscape import to_cytoscape
 
             group_by = request.args.get("group_by", "none")
-            s3d_group_by = group_by if group_by in S3D_VALID else "none"
-            projected = S3DProjector.from_site(session, site, group_by=s3d_group_by)
-            cyto = to_cytoscape(projected)
+            s3d_group_by = group_by if group_by in VALID_GROUP_BY else "none"
+            graph = GraphProjector.populate_graph(session, site, group_by=s3d_group_by)
+            cyto = to_cytoscape(graph)
             # Wrap nodes/edges in the envelope renderSwimlaneState expects:
             # each element is {data: {...}} (no nested style key — flat fields
             # are already in data).  Pending changes not relevant for this path.
@@ -862,7 +861,7 @@ def api_export_yed(site: str):
     """Export site stratigraphy as yEd-flavored GraphML.
 
     Pipeline selection honours SWIMLANE_PIPELINE env var:
-      - "s3dgraphy" (default): S3DProjector → EM palette graphml_writer
+      - "s3dgraphy" (default): GraphProjector → EM palette graphml_writer
       - "legacy": SwimlaneState.load → write_extended_matrix_graphml
     """
     import os as _os
@@ -887,13 +886,12 @@ def api_export_yed(site: str):
                 )
                 data = out.read_bytes()
         else:
-            from pyarchinit_mini.graphproj.s3d_projector import S3DProjector
-            from pyarchinit_mini.graphproj.graphml_writer import write_graphml
-            # Map legacy group_by values that S3DProjector doesn't accept
-            from pyarchinit_mini.graphproj.s3d_projector import VALID_GROUP_BY as S3D_VALID
-            s3d_group_by = group_by if group_by in S3D_VALID else "none"
-            projected = S3DProjector.from_site(session, site, group_by=s3d_group_by)
-            data = write_graphml(projected)
+            from pyarchinit_mini.graphproj.enrich import VALID_GROUP_BY
+            from pyarchinit_mini.graphproj.graphml_writer import write_graphml as write_yed_graphml
+            # Map legacy group_by values the projector doesn't accept
+            s3d_group_by = group_by if group_by in VALID_GROUP_BY else "none"
+            graph = GraphProjector.populate_graph(session, site, group_by=s3d_group_by)
+            data = write_yed_graphml(graph)
         return Response(
             data,
             mimetype="application/graphml+xml",
@@ -913,7 +911,7 @@ def api_export_heriverse(site: str):
     from pyarchinit_mini.s3d_integration.s3d_converter import S3DConverter
     try:
         session = _get_session()
-        # Fetch US rows as dicts using a column-variant fallback (mirrors S3DProjector)
+        # Fetch US rows as dicts using a column-variant fallback (mirrors the projector)
         _VARIANTS = [
             "id_us, sito, area, us, unita_tipo, d_stratigrafica, d_interpretativa, "
             "interpretazione, anno_scavo, scavato, periodo_iniziale, fase_iniziale, rapporti",
