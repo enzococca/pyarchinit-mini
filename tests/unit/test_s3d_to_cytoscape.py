@@ -1,20 +1,22 @@
-import pytest
-
-from pyarchinit_mini.graphproj.s3d_projector import ProjectedGraph, Row, Node, Edge
 from pyarchinit_mini.graphproj.s3d_to_cytoscape import to_cytoscape
+from pyarchinit_mini.graphproj.strat_graph import new_strat_node
+from tests.unit.strat_graph_factory import make_graph
+
+_ROWS = [{"row_id": "row_0", "label": "I/a", "periodo": "I", "fase": "a",
+          "datazione": None, "is_fallback": False}]
 
 
-def _graph_with_two_us(group_by="none"):
-    g = ProjectedGraph(site="S", group_by=group_by)
-    g.rows = [Row(row_id="row_0", label="I/a", periodo="I", fase="a")]
-    g.nodes = [
-        Node(node_id="us_1", us="1", area="A", sito="S", unit_type="USM",
-             description="x", row_id="row_0", sub_group=None),
-        Node(node_id="us_2", us="2", area="A", sito="S", unit_type="USV",
-             description="y", row_id="row_0", sub_group=None),
-    ]
-    g.edges = [Edge(source_id="us_1", target_id="us_2", canonical="overlies")]
-    return g
+def _graph_with_two_us(group_by="none", sub_groups=(None, None), edge="overlies"):
+    return make_graph(
+        site="S", group_by=group_by, rows=list(_ROWS),
+        nodes=[
+            {"id": "us_1", "us": "1", "unit_type": "USM", "area": "A",
+             "row_id": "row_0", "sub_group": sub_groups[0], "description": "x"},
+            {"id": "us_2", "us": "2", "unit_type": "USV", "area": "A",
+             "row_id": "row_0", "sub_group": sub_groups[1], "description": "y"},
+        ],
+        edges=[("us_1", "us_2", edge)],
+    )
 
 
 def test_to_cytoscape_top_level_keys():
@@ -79,9 +81,7 @@ def test_to_cytoscape_us_nodes_have_parent_row():
 # ── Fix D: sub-group clusters nested inside period rows ─────────────────────
 
 def test_to_cytoscape_with_sub_group_creates_compound_parents():
-    g = _graph_with_two_us(group_by="area")
-    for n in g.nodes:
-        n.sub_group = "A"
+    g = _graph_with_two_us(group_by="area", sub_groups=("A", "A"))
     out = to_cytoscape(g)
     # Sub-cluster compounds (compound=True, is_period_row falsy)
     sub_clusters = [n for n in out["nodes"] if n["data"].get("compound") and not n["data"].get("is_period_row")]
@@ -96,9 +96,7 @@ def test_to_cytoscape_with_sub_group_creates_compound_parents():
 
 
 def test_to_cytoscape_distinct_sub_groups_create_distinct_parents():
-    g = _graph_with_two_us(group_by="area")
-    g.nodes[0].sub_group = "A1"
-    g.nodes[1].sub_group = "A2"
+    g = _graph_with_two_us(group_by="area", sub_groups=("A1", "A2"))
     out = to_cytoscape(g)
     sub_clusters = [n for n in out["nodes"] if n["data"].get("compound") and not n["data"].get("is_period_row")]
     parent_ids = sorted([p["data"]["id"] for p in sub_clusters])
@@ -118,8 +116,7 @@ def test_to_cytoscape_arrowtarget_for_directional():
 
 def test_to_cytoscape_arrowtarget_none_for_symmetric():
     """has_same_time edges get arrowtarget='none' (Fix B)."""
-    g = _graph_with_two_us()
-    g.edges = [Edge(source_id="us_1", target_id="us_2", canonical="has_same_time")]
+    g = _graph_with_two_us(edge="has_same_time")
     out = to_cytoscape(g)
     e = out["edges"][0]
     assert e["data"]["arrowtarget"] == "none"
@@ -136,3 +133,14 @@ def test_to_cytoscape_rows_preserved():
     assert r["periodo"] == "I"
     assert r["fase"] == "a"
     assert r["is_fallback"] is False
+
+
+def test_to_cytoscape_node_without_pyarchinit_attrs_uses_defaults():
+    g = make_graph(site="S", rows=list(_ROWS))
+    node = new_strat_node(node_id="bare_1", name="77", unit_type="US", description="")
+    g.add_node(node)
+    out = to_cytoscape(g)
+    d = next(n["data"] for n in out["nodes"] if n["data"]["id"] == "bare_1")
+    assert d["label"] == node.name
+    assert d["unit_type"] == "US"
+    assert d["parent"] == out["rows"][0]["row_id"]

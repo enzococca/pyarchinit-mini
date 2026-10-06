@@ -1,134 +1,75 @@
-"""Translate a ProjectedGraph into cytoscape.js JSON with palette-derived styles.
-
-Changes from 2.9.0:
-- Palette fields are FLAT top-level data keys (shape, bgcolor, bordercolor …)
-  instead of a nested ``style`` object.  Cytoscape's ``data()`` accessor does
-  not reliably traverse nested objects, so ``data(style.shape)`` silently
-  returns nothing.
-- Period rows are ALWAYS emitted as compound parents (regardless of group_by)
-  so the UI always shows horizontal swimlanes.
-- When group_by != "none", sub-cluster compounds are nested INSIDE their period
-  row compound (cytoscape supports nested compounds).
-"""
+"""Translate the projected s3dgraphy.Graph into cytoscape.js JSON with
+palette-derived styles. Output shape unchanged (flat palette keys, period rows
+always emitted as compound parents, sub-clusters nested inside rows)."""
 from __future__ import annotations
 
 from typing import Any, Dict, List, Tuple
 
 from pyarchinit_mini.em_palette import get_palette
-from pyarchinit_mini.graphproj.rapporti_codec import display_label, SYMMETRIC
-from pyarchinit_mini.graphproj.s3d_projector import ProjectedGraph
+from .rapporti_codec import SYMMETRIC, display_label
+from .strat_graph import get_swimlane, pyarchinit_attrs, stratigraphic_edges, stratigraphic_nodes
 
 
-def to_cytoscape(graph: ProjectedGraph) -> Dict[str, Any]:
+def _node_view(node, default_row_id: str) -> Dict[str, Any]:
+    a = pyarchinit_attrs(node)
+    if a:
+        return {"id": node.node_id, "us": a["us"], "area": a.get("area"), "unit_type": a.get("unit_type") or "US",
+                "description": a.get("description"), "row_id": a.get("row_id") or default_row_id,
+                "sub_group": a.get("sub_group")}
+    return {"id": node.node_id, "us": node.name, "area": None, "unit_type": "US",
+            "description": node.description or None, "row_id": default_row_id, "sub_group": None}
+
+
+def to_cytoscape(graph) -> Dict[str, Any]:
     palette = get_palette()
+    sw = get_swimlane(graph)
+    rows: List[Dict[str, Any]] = list(sw["rows"]) or [{"row_id": "row_0", "label": "Periodo 1", "periodo": None,
+                                                        "fase": None, "datazione": None, "is_fallback": True}]
+    group_by = sw["group_by"]
     out_nodes: List[Dict[str, Any]] = []
     out_edges: List[Dict[str, Any]] = []
 
-    # ── Fix C: ALWAYS emit period row compound parents first ─────────────────
-    for r in graph.rows:
-        label = r.label
-        if r.datazione:
-            label = f"{r.label} — {r.datazione}"
-        out_nodes.append({
-            "data": {
-                "id": r.row_id,
-                "label": label,
-                "compound": True,
-                "is_period_row": True,
-                "is_fallback": r.is_fallback,
-            },
-        })
+    for r in rows:
+        label = f"{r['label']} — {r['datazione']}" if r.get("datazione") else r["label"]
+        out_nodes.append({"data": {"id": r["row_id"], "label": label, "compound": True,
+                                   "is_period_row": True, "is_fallback": r["is_fallback"]}})
 
-    # ── Fix D: sub-cluster compounds nested inside period rows ───────────────
-    # Indexed by (row_id, sub_group) → cluster node id
+    views = [_node_view(n, rows[0]["row_id"]) for n in stratigraphic_nodes(graph)]
     parent_ids: Dict[Tuple[str, str], str] = {}
-    if graph.group_by != "none":
-        for n in graph.nodes:
-            if n.sub_group is None:
+    if group_by != "none":
+        for v in views:
+            if v["sub_group"] is None:
                 continue
-            key = (n.row_id, n.sub_group)
+            key = (v["row_id"], v["sub_group"])
             if key not in parent_ids:
-                cluster_id = f"cluster_{n.row_id}_{n.sub_group}"
+                cluster_id = f"cluster_{v['row_id']}_{v['sub_group']}"
                 parent_ids[key] = cluster_id
-                out_nodes.append({
-                    "data": {
-                        "id": cluster_id,
-                        "label": n.sub_group,
-                        "row": n.row_id,
-                        "compound": True,
-                        "is_period_row": False,
-                        # Nested inside the period row
-                        "parent": n.row_id,
-                    },
-                })
+                out_nodes.append({"data": {"id": cluster_id, "label": v["sub_group"], "row": v["row_id"],
+                                           "compound": True, "is_period_row": False, "parent": v["row_id"]}})
 
-    # ── Fix B: flat palette fields on US nodes ────────────────────────────────
-    for n in graph.nodes:
-        ns = palette.get_node_style(n.unit_type)
+    for v in views:
+        ns = palette.get_node_style(v["unit_type"])
+        parent = parent_ids.get((v["row_id"], v["sub_group"]), v["row_id"]) if (group_by != "none" and v["sub_group"] is not None) else v["row_id"]
+        out_nodes.append({"data": {
+            "id": v["id"], "label": v["us"], "us": v["us"], "area": v["area"], "unit_type": v["unit_type"],
+            "description": v["description"], "row": v["row_id"], "parent": parent,
+            "shape": ns.shape, "bgcolor": ns.fill_color, "bordercolor": ns.border_color,
+            "borderwidth": ns.border_width, "borderstyle": ns.border_style,
+            "fontcolor": ns.font_color, "fontsize": ns.font_size,
+        }})
 
-        # Determine the immediate parent for this node
-        if graph.group_by != "none" and n.sub_group is not None:
-            immediate_parent = parent_ids.get((n.row_id, n.sub_group), n.row_id)
-        else:
-            immediate_parent = n.row_id
+    for e in stratigraphic_edges(graph):
+        canonical = e.edge_type
+        es = palette.get_edge_style(canonical)
+        out_edges.append({"data": {
+            "id": f"{e.edge_source}__{canonical}__{e.edge_target}", "source": e.edge_source, "target": e.edge_target,
+            "label": display_label(canonical, locale="it"), "canonical": canonical,
+            "linecolor": es.line_color, "linewidth": es.line_width, "linestyle": es.line_style,
+            "arrowtarget": "none" if canonical in SYMMETRIC else es.arrow_target, "arrowsource": es.arrow_source,
+            "is_dashed": "true" if canonical == "cuts" else "false",
+        }})
 
-        node_obj: Dict[str, Any] = {
-            "data": {
-                "id": n.node_id,
-                "label": n.us,
-                "us": n.us,
-                "area": n.area,
-                "unit_type": n.unit_type,
-                "description": n.description,
-                "row": n.row_id,
-                "parent": immediate_parent,
-                # ── Flat palette fields (Fix B) ──
-                "shape": ns.shape,
-                "bgcolor": ns.fill_color,
-                "bordercolor": ns.border_color,
-                "borderwidth": ns.border_width,
-                "borderstyle": ns.border_style,
-                "fontcolor": ns.font_color,
-                "fontsize": ns.font_size,
-            },
-        }
-        out_nodes.append(node_obj)
-
-    # ── Fix B: flat palette fields on edges ──────────────────────────────────
-    for e in graph.edges:
-        es = palette.get_edge_style(e.canonical)
-        is_symmetric = e.canonical in SYMMETRIC
-        out_edges.append({
-            "data": {
-                "id": f"{e.source_id}__{e.canonical}__{e.target_id}",
-                "source": e.source_id,
-                "target": e.target_id,
-                "label": display_label(e.canonical, locale="it"),
-                "canonical": e.canonical,
-                # ── Flat palette fields (Fix B) ──
-                "linecolor": es.line_color,
-                "linewidth": es.line_width,
-                "linestyle": es.line_style,
-                "arrowtarget": "none" if is_symmetric else es.arrow_target,
-                "arrowsource": es.arrow_source,
-                "is_dashed": "true" if e.canonical == "cuts" else "false",
-            },
-        })
-
-    return {
-        "site": graph.site,
-        "group_by": graph.group_by,
-        "rows": [
-            {
-                "row_id": r.row_id,
-                "label": r.label,
-                "periodo": r.periodo,
-                "fase": r.fase,
-                "datazione": r.datazione,
-                "is_fallback": r.is_fallback,
-            }
-            for r in graph.rows
-        ],
-        "nodes": out_nodes,
-        "edges": out_edges,
-    }
+    return {"site": sw["site"], "group_by": group_by,
+            "rows": [{"row_id": r["row_id"], "label": r["label"], "periodo": r.get("periodo"), "fase": r.get("fase"),
+                      "datazione": r.get("datazione"), "is_fallback": r["is_fallback"]} for r in rows],
+            "nodes": out_nodes, "edges": out_edges}
