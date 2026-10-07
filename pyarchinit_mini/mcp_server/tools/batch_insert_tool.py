@@ -4,7 +4,8 @@ Batch Insert Tool - High-Performance Bulk Data Insertion for MCP
 This tool enables AI assistants to insert multiple archaeological records in a single operation.
 Features:
 - Batch insertion of up to 1000 records per call
-- Support for all PyArchInit tables
+- Support for all PyArchInit tables except the media tables
+  (media_table, media_thumb_table, media_to_entity_table): use manage_media
 - Automatic validation for all records
 - Transaction safety (all-or-nothing insertion)
 - Detailed error reporting with record-level feedback
@@ -19,6 +20,7 @@ from sqlalchemy.exc import IntegrityError, DataError
 from typing import Dict, Any, List
 from pyarchinit_mini.database.connection import DatabaseConnection
 from pyarchinit_mini.database.manager import DatabaseManager
+from pyarchinit_mini.mcp_server.tools.media_table_guard import media_table_guard
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +132,11 @@ def batch_insert(
                 "error": "too_many_records",
                 "message": f"Maximum 1000 records per batch. Got {len(records)}. Split into smaller batches."
             }
+
+        # Media tables are never written by this tool (see media_table_guard).
+        blocked = media_table_guard(table)
+        if blocked:
+            return blocked
 
         # Get database connection
         from pyarchinit_mini.mcp_server.config import _get_default_database_url

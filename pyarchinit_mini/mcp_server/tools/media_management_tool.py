@@ -32,7 +32,8 @@ class MediaManagementTool(BaseTool):
             name="manage_media",
             description=(
                 "⚠️ REQUIRED FOR ALL MEDIA OPERATIONS - This is the ONLY correct way to upload media files. "
-                "DO NOT use 'insert_data' tool for media_table - it will fail. "
+                "DO NOT use 'insert_data' or 'batch_insert' for media_table, media_thumb_table "
+                "or media_to_entity_table - they refuse those tables. "
                 "\n\n"
                 "Comprehensive media file management tool: "
                 "Upload, retrieve, list, update, and delete media files (images, documents, videos, 3D models). "

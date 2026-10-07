@@ -20,6 +20,7 @@ from sqlalchemy.exc import IntegrityError, DataError
 from typing import Dict, Any, Optional
 from pyarchinit_mini.database.connection import DatabaseConnection
 from pyarchinit_mini.database.manager import DatabaseManager
+from pyarchinit_mini.mcp_server.tools.media_table_guard import media_table_guard
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +94,11 @@ def insert_data(
         - For PostgreSQL: SERIAL fields are auto-increment
     """
     try:
+        # Media tables are never written by this tool (see media_table_guard).
+        blocked = media_table_guard(table)
+        if blocked:
+            return blocked
+
         # Get database connection - use config default if DATABASE_URL not set
         from pyarchinit_mini.mcp_server.config import _get_default_database_url
         database_url = os.getenv("DATABASE_URL") or _get_default_database_url()
@@ -113,38 +119,6 @@ def insert_data(
                 "error": "table_not_found",
                 "message": f"Table '{table}' does not exist in database",
                 "available_tables": all_tables
-            }
-
-        # ⚠️ BLOCK DIRECT MEDIA TABLE INSERTS - Use manage_media tool instead
-        MEDIA_TABLES = ["media_table", "media_thumb_table"]
-        if table in MEDIA_TABLES:
-            return {
-                "success": False,
-                "error": "use_manage_media_tool",
-                "message": (
-                    f"❌ Direct insert into '{table}' is not allowed. "
-                    f"Media files must be uploaded using the 'manage_media' tool "
-                    f"to ensure proper file storage and path management. "
-                    f"\n\n📋 How to use manage_media:\n"
-                    f"1. Upload file with operation='upload'\n"
-                    f"2. Provide entity_type (one of: us, inventario, pottery, struttura, tomba, tma, ut, site)\n"
-                    f"3. Provide entity_id (the entity's integer primary key, e.g. id_sito, id_us, id_invmat)\n"
-                    f"4. Either provide file_path on server OR file_content_base64\n"
-                    f"5. The tool will copy files to ~/.pyarchinit_mini/media/ and create DB record\n\n"
-                    f"Example:\n"
-                    f"{{\n"
-                    f"  'operation': 'upload',\n"
-                    f"  'entity_type': 'site',\n"
-                    f"  'entity_id': 12,\n"
-                    f"  'file_content_base64': '<base64-encoded-content>',\n"
-                    f"  'filename': 'site_photo.jpg',\n"
-                    f"  'description': 'Site overview'\n"
-                    f"}}\n\n"
-                    f"This ensures files are stored permanently in the correct location, "
-                    f"not in temporary directories like /tmp/ where they will be lost."
-                ),
-                "correct_tool": "manage_media",
-                "tool_operations": ["upload", "get", "list", "update", "delete"]
             }
 
         # Reflect table structure
