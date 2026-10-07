@@ -1,3 +1,9 @@
+## 3.5.5 — 2026-10-07
+
+### Fixed
+- **Dropbox storage could not stay connected on a server**: Dropbox has issued only 4-hour access tokens since 2021, and `/settings/storage` exposed no `refresh_token` field even though `DropboxBackend` already supports the refresh-token flow. The Dropbox fieldset now has `refresh_token` (secret), and the backend prefers `refresh_token + app_key + app_secret` over a saved access token, which is the one likely to be stale.
+- **S3 / Cloudflare R2 backend unusable on requirements.txt-based deploys (Railway)**: the storage SDKs were pyproject extras only, so the backend offered in `/settings/storage` could never connect there. `boto3` now ships in `requirements.txt`; Google Drive and Dropbox SDKs remain extras (`pip install pyarchinit-mini[storage-gdrive]`, `[storage-dropbox]`) or one line in the deploy's `requirements.txt`.
+
 ## 3.5.4 — 2026-10-07
 
 ### Fixed
