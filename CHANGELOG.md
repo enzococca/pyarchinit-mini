@@ -1,3 +1,8 @@
+## 3.5.4 — 2026-10-07
+
+### Fixed
+- **MCP `batch_insert` could write media tables directly** (`insert_data` has refused `media_table`/`media_thumb_table` since 1.9.25, `batch_insert` never did, and neither refused `media_to_entity_table`). A media row created this way has no file behind it: when the tool answered `required_field_missing`, an AI client retried with `''`/`0` and the husk rows landed in the database (pyarchinit-mini#4: 129 such rows, shown as "Unknown / File not available"). Both tools now refuse all three media tables up front, before any schema is reflected, through the shared `mcp_server/tools/media_table_guard.py`, and point to `manage_media`.
+
 ## 3.5.3 — 2026-10-06
 
 ### Fixed
