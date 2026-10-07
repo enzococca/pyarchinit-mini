@@ -70,16 +70,18 @@ class DropboxBackend(StorageBackend):
             app_key = self.credentials.get('app_key')
             app_secret = self.credentials.get('app_secret')
 
-            if access_token:
-                # Use access token directly
-                self._dbx = dropbox.Dropbox(access_token)
-            elif refresh_token and app_key and app_secret:
-                # Use refresh token
+            if refresh_token and app_key and app_secret:
+                # Prefer the refresh-token flow: access tokens expire after
+                # 4 h, so when both are saved the access token is the one
+                # likely to be stale.
                 self._dbx = dropbox.Dropbox(
                     oauth2_refresh_token=refresh_token,
                     app_key=app_key,
                     app_secret=app_secret
                 )
+            elif access_token:
+                # Use access token directly
+                self._dbx = dropbox.Dropbox(access_token)
             else:
                 return False
 

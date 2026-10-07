@@ -430,9 +430,11 @@ STORAGE_BACKEND_DEFS = {
     'dropbox': {
         'label': 'Dropbox',
         'scheme_hint': 'dropbox://folder',
-        'fields': ['access_token', 'app_key', 'app_secret'],
+        # Dropbox access tokens expire after 4 h; a server needs the
+        # refresh-token flow (refresh_token + app_key + app_secret).
+        'fields': ['access_token', 'refresh_token', 'app_key', 'app_secret'],
         'checkboxes': set(),
-        'secret_fields': {'access_token', 'app_secret'},
+        'secret_fields': {'access_token', 'refresh_token', 'app_secret'},
     },
     's3': {
         'label': 'Amazon S3 / Cloudflare R2',
