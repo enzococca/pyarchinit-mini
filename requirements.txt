@@ -65,3 +65,7 @@ cryptography>=41.0.0
 
 # Optional storage backends are packaged as extras — see pyproject.toml [project.optional-dependencies].
 # e.g. pip install pyarchinit-mini[storage-all]
+
+# Media storage backends offered in /settings/storage: S3 / Cloudflare R2 (boto3) ships by
+# default so requirements.txt-based deploys (Railway) can use it without editing this file.
+boto3>=1.26.0

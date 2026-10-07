@@ -26,3 +26,15 @@ def _requirement(text: str) -> str:
 def test_sqlalchemy_is_bounded_below_2_1(path):
     spec = _requirement((ROOT / path).read_text(encoding="utf-8"))
     assert "<2.1" in spec, f"{path}: sqlalchemy spec {spec!r} lacks the <2.1 upper bound"
+
+
+def test_boto3_ships_in_requirements_txt():
+    """Railway (and any requirements.txt-based deploy) installs ONLY what is in
+    requirements.txt; the storage SDKs used to be pyproject extras only, so the
+    S3 / Cloudflare R2 backend offered in /settings/storage could never connect
+    there (pyarchinit-mini#4). boto3 must ship with the default install."""
+    lines = [
+        line.split("#", 1)[0].strip()
+        for line in (ROOT / "requirements.txt").read_text(encoding="utf-8").splitlines()
+    ]
+    assert any(line.lower().startswith("boto3") for line in lines), "boto3 missing from requirements.txt"
