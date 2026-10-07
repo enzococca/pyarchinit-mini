@@ -37,9 +37,9 @@ def _requirement_for(name: str, text: str) -> str:
 
 
 @pytest.mark.parametrize("path", ["requirements.txt", "pyproject.toml"])
-def test_s3dgraphy_is_pinned_to_1_6_prerelease_line(path):
+def test_s3dgraphy_is_pinned_exactly(path):
     spec = _requirement_for("s3dgraphy", (ROOT / path).read_text(encoding="utf-8"))
-    assert spec == ">=1.6.0.dev39,<1.7", f"{path}: s3dgraphy spec {spec!r}"
+    assert spec == "==1.6.0.dev39", f"{path}: s3dgraphy spec {spec!r}"
 
 
 def test_requires_python_floor_is_3_9():

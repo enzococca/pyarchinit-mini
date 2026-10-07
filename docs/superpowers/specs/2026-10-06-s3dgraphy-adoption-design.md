@@ -143,8 +143,7 @@ falling back to `us` alone (legacy 2-tuples).
 - **Rows without `node_uuid`** get a random uuid per projection, so their node ids are
   not stable across projections; the backfill migration already runs at startup, this
   only affects DBs never opened by mini.
-- **rapporti in legacy free-text form** (`"copre 1002"`) are not parsed by
-  `rapporti_codec` (list-of-lists only); they yield no edges, no error.
+- **rapporti in free-text form** (`"Copre 1002, Taglia 1005"`, written by mini's own US form) are tokenised with `EdgeRegistry.parse_rapporti_token` when the list-of-lists codec yields nothing; free text carries no area, so targets resolve by US number only. (Corrected after the final review: this format is current input, not legacy.)
 
 ## 8. Out of scope (follow-ups to note in issue #2)
 

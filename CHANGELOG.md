@@ -10,11 +10,12 @@
   (`rapporti_codec`, same normalisation as before), swimlane rows from `period_table`,
   the cytoscape view, the yEd TableNode export (which now also writes `node_uuid`), the
   yEd/Heriverse readers and the DB write-back.
-- Dependency: `s3dgraphy>=1.6.0.dev39,<1.7`; `requires-python>=3.9` (stale Python 3.8 classifier removed).
+- Dependency: `s3dgraphy==1.6.0.dev39` (exact pin: the importer's node naming/enriching behaviour is unspecified; widen only after the spike test passes on a newer build); `requires-python>=3.9` (stale Python 3.8 classifier removed).
 - Not changed: the StratiGraph bundle/sync layer (`stratigraph/`), pending WP4 bundle I/O in s3dgraphy.
 - Correctness: rapporti targets are now resolved by (area, us) — on sites where the same US number exists in several areas (e.g. 138 of 828 numbers on the Rimini Museo Fellini site) the old projection bound edges to the wrong area; edge totals change slightly (+1.7 % there) because of this.
-- Known: projecting very large sites is slower than before (Rimini, 990 US: ~10 s vs ~1.3 s), the time being spent in the library's node/edge lookups; auto-regen after a US save runs synchronously, so saves on such sites take longer until this is addressed.
+- Known: on very large sites the s3dgraphy-based projection and especially its GraphML export are far slower than before (Rimini, 990 US: ~10 s projection, GraphML export >30 min on the Adarte database), because of linear node/edge lookups in the library and the exporter's scaling on graphs with qualia/epochs; the release is held until the library is optimised (upstream issue filed). Auto-regen runs synchronously after each US save.
 - Fixed: the `/api/export/graphml` 404 check for empty sites (it never fired because a graph always contains a GeoPositionNode); yEd/Heriverse imports no longer fail on duplicate edges; the yEd export now carries each US `node_uuid`.
+- Fixed: rapporti typed as free text in the US form (e.g. `Copre 1002, Taglia 1005`) are tokenised again when building the stratigraphic edges, as before 3.6.0 (the list-of-lists format from the editor/plugin is still preferred); re-importing the auto-regen GraphML no longer proposes duplicate US rows.
 
 ## 3.5.3 — 2026-10-06
 

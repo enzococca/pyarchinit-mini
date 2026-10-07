@@ -28,7 +28,7 @@
 3. **Postgres URLs** with `postgresql+psycopg2://` and a password containing `@`/`:`-free but URL-encoded characters must reach the importer unchanged (`render_as_string(hide_password=False)`) — pinned by `test_postgres_url_keeps_password_and_driver` (Task 2).
 4. **Node names containing digits in area/settore** (`A1.US12`): the ingestor must not read `112` — pinned by `test_us_number_uses_trailing_digits_when_no_attrs` (Task 12).
 5. **Importer failure** (missing table, locked file): `populate_graph` raises `ProjectionError`, and auto-regen still never raises — pinned by `test_populate_graph_wraps_importer_failure` (Task 6) plus the existing `tests/unit/test_auto_regen.py` "never raises" cases.
-6. **Legacy free-text rapporti** (`"copre 1002"`): no edges, no exception — pinned by `test_free_text_rapporti_yield_no_edges` (Task 6).
+6. **Legacy free-text rapporti** (`"copre 1002"`): tokenised fallback produces the edges — pinned by `test_free_text_rapporti_yield_edges` (Task 6).
 
 ---
 

@@ -57,7 +57,7 @@ dependencies = [
     "reportlab>=4.0.0",
     "pillow>=10.0.0",
     "qrcode[pil]>=7.4.0",
-    "s3dgraphy>=1.6.0.dev39,<1.7",  # shared DB⇄graph library (issue #2); pre-release pin on purpose
+    "s3dgraphy==1.6.0.dev39",  # shared DB⇄graph library (issue #2); exact pin: the importer's node naming/enriching behaviour is unspecified; widen only after the spike test passes on a newer build
     "uuid7>=0.1.0",
     # CLI interface dependencies
     "click>=8.1.0",
