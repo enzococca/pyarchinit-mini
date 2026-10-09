@@ -13,12 +13,13 @@ import sys
 sys.path.append('..')
 from pyarchinit_mini.s3d_integration import S3DConverter, Model3DManager
 
-# Create blueprint
-s3d_bp = Blueprint('s3d', __name__, url_prefix='/3d')
-
 
 def init_s3d_routes(app, db_manager, media_handler):
     """Initialize 3D routes with app context"""
+
+    # One blueprint per app: routes cannot be added to a blueprint that is
+    # already registered, so a module-level one only served the first app.
+    s3d_bp = Blueprint('s3d', __name__, url_prefix='/3d')
 
     # Initialize Model3DManager with absolute path
     upload_folder = app.config.get('UPLOAD_FOLDER', 'uploads')
