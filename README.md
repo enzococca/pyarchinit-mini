@@ -1743,7 +1743,7 @@ pyarchinit-graphml --help
 | `gui` | (Tkinter is in stdlib) | `pip install 'pyarchinit-mini[gui]'` |
 | `harris` | Matplotlib, Graphviz | `pip install 'pyarchinit-mini[harris]'` |
 | `pdf` | WeasyPrint | `pip install 'pyarchinit-mini[pdf]'` |
-| `media` | python-magic, moviepy | `pip install 'pyarchinit-mini[media]'` |
+| `media` | (none; kept for backward compatibility) | `pip install 'pyarchinit-mini[media]'` |
 | `export` | pandas, openpyxl | `pip install 'pyarchinit-mini[export]'` |
 | `auth` | passlib, bcrypt, python-jose, flask-login | `pip install 'pyarchinit-mini[auth]'` |
 | `all` | All of the above | `pip install 'pyarchinit-mini[all]'` |
