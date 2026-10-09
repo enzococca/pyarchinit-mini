@@ -4,6 +4,7 @@ sqlalchemy>=2.0.0,<2.1  # 2.1 defaults postgresql:// to psycopg 3 (not shipped) 
 psycopg2-binary>=2.9.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
+email-validator>=2.0.0
 python-multipart>=0.0.6
 pytest>=7.0.0
 pytest-asyncio>=0.21.0
