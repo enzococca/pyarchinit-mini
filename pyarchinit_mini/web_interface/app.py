@@ -7203,7 +7203,7 @@ def create_app():
 
     # ===== 3D Model Viewer Routes (s3Dgraphy Integration) =====
     try:
-        from s3d_routes import init_s3d_routes
+        from pyarchinit_mini.web_interface.s3d_routes import init_s3d_routes
         init_s3d_routes(app, db_manager, media_handler)
         print("[FLASK] s3Dgraphy routes initialized")
     except ImportError as e:
