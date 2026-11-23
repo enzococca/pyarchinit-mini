@@ -16,7 +16,8 @@ def test_parse_2_tuple_expands_to_4_tuple():
     items = parse_rapporti("[['Coperto da', '120']]", current_site="SiteX")
     assert len(items) == 1
     r = items[0]
-    assert r.canonical == "is_after"
+    # «Coperto da» is physical (reverse of overlies), not the temporal is_after
+    assert r.canonical == "is_overlain_by"
     assert r.target_us == "120"
     assert r.target_area is None  # unknown at parse time
     assert r.target_sito == "SiteX"
@@ -63,11 +64,11 @@ def test_parse_malformed_string_returns_empty():
 def test_serialize_writes_4_tuple_list():
     items = [
         Rapporto(canonical="overlies", target_us="120", target_area="A1", target_sito="S"),
-        Rapporto(canonical="is_after", target_us="121", target_area="A1", target_sito="S"),
+        Rapporto(canonical="is_overlain_by", target_us="121", target_area="A1", target_sito="S"),
     ]
     out = serialize_rapporti(
         items,
-        italian_labels={"overlies": "Copre", "is_after": "Coperto da"},
+        italian_labels={"overlies": "Copre", "is_overlain_by": "Coperto da"},
     )
     parsed = eval(out)
     assert parsed == [
@@ -84,7 +85,7 @@ def test_serialize_emits_none_area_as_empty_string():
 
 
 def test_inverse_pairs_covers_directional():
-    for can in ("overlies", "is_after", "cuts", "is_cut_by", "fills", "abuts", "is_before"):
+    for can in ("overlies", "is_overlain_by", "is_after", "cuts", "is_cut_by", "fills", "abuts", "is_before"):
         assert can in INVERSE_PAIRS or can in SYMMETRIC, (
             f"{can} missing from INVERSE_PAIRS/SYMMETRIC"
         )

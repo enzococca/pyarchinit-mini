@@ -30,11 +30,15 @@ def test_edge_type_label_translation():
 
 def test_edge_aliases_returns_italian_variants_for_parsing():
     i18n = VocabI18n(translations_dir=Path("pyarchinit_mini/vocab/translations"))
-    # is_after only covers "coperto da" / "coperta da" — "tagliato da" was
-    # wrongly grouped here; it belongs to is_cut_by (fixed in vocab_it.json).
+    # «coperto da» / «coperta da» are the reverse of overlies (is_overlain_by),
+    # not the temporal is_after — "tagliato da" was likewise wrongly grouped
+    # under is_after once; it belongs to is_cut_by (fixed in vocab_it.json).
     aliases_after = i18n.edge_aliases("is_after", lang="it")
-    assert "coperto da" in aliases_after
+    assert "coperto da" not in aliases_after
     assert "tagliato da" not in aliases_after
+    assert "coperto da" in i18n.edge_aliases("is_overlain_by", lang="it")
+    assert "uguale a" in i18n.edge_aliases("equals", lang="it")
+    assert "uguale a" not in i18n.edge_aliases("has_same_time", lang="it")
     # Verify tagliato da now lives under is_cut_by
     aliases_cut = i18n.edge_aliases("is_cut_by", lang="it")
     assert "tagliato da" in aliases_cut
