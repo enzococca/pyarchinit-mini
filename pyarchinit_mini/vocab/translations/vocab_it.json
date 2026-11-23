@@ -14,12 +14,13 @@
     "cuts": {"label": "taglia"},
     "fills": {"label": "riempie"},
     "is_after": {"label": "è dopo"},
-    "has_same_time": {"label": "uguale a"},
+    "has_same_time": {"label": "contemporaneo a"},
+    "equals": {"label": "uguale a"},
     "abuts": {"label": "si appoggia a"}
   },
   "edge_type_aliases": {
     "overlies": ["copre"],
-    "is_after": ["coperto da", "coperta da"],
+    "is_overlain_by": ["coperto da", "coperta da"],
     "is_cut_by": ["tagliato da", "tagliata da"],
     "is_filled_by": ["riempito da", "riempita da"],
     "is_abutted_by": ["gli si appoggia"],
@@ -27,6 +28,6 @@
     "fills": ["riempie"],
     "abuts": ["si appoggia a", "si appoggia"],
     "is_bonded_to": ["si lega a", "si lega_a", "connesso a", "connesso_a"],
-    "has_same_time": ["uguale a"]
+    "equals": ["uguale a"]
   }
 }

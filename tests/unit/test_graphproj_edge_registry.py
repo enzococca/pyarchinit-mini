@@ -24,9 +24,18 @@ def test_resolve_alias_returns_canonical_edge_name():
 
 
 def test_resolve_compound_alias_coperto_da():
+    """«coperto da» is no longer an alias of the temporal is_after. Like
+    «tagliato da» it is the reverse reading of a datamodel edge
+    (is_overlain_by), which the registry does not list; the codec resolves it."""
     reg = EdgeRegistry()
-    name = reg.resolve_italian_alias("coperto da")
-    assert name == "is_after"
+    assert reg.resolve_italian_alias("coperto da") is None
+    from pyarchinit_mini.graphproj.rapporti_codec import _resolve_canonical
+    assert _resolve_canonical("Coperto da") == "is_overlain_by"
+
+
+def test_uguale_a_is_equals_not_has_same_time():
+    reg = EdgeRegistry()
+    assert reg.resolve_italian_alias("uguale a") == "equals"
 
 
 def test_resolve_alias_unknown_returns_none():

@@ -32,23 +32,35 @@ def test_italian_rapporti_parsed_via_vocab():
     assert len(edges) >= 1
 
 
-def test_coperto_da_parsed_as_is_after():
-    """Compound alias 'coperto da' must map to is_after (and not to 'covers')."""
+def test_coperto_da_is_not_read_as_is_after():
+    """'coperto da' is the reverse of overlies (physical), no longer an alias of
+    the temporal is_after. Like 'tagliato da' it has no alias row in this
+    legacy converter, so the token yields no edge; the forward 'copre' on the
+    other unit carries the relation. What MUST hold: never a temporal edge."""
     conv = S3DConverter()
     us_list = [
         {"sito": "S", "us": 10, "rapporti": "coperto da 20"},
-        {"sito": "S", "us": 20, "rapporti": ""},
+        {"sito": "S", "us": 20, "rapporti": "copre 10"},
     ]
     g = conv.create_graph_from_us(us_list, site_name="S")
     edges = list(g.edges)
     assert len(edges) == 1
-    e = edges[0]
-    # The legacy code used uppercase 'COVERED_BY' attribute; new code maps via vocab.
-    # Either UPPERCASE legacy code OR s3dgraphy canonical name is acceptable;
-    # what MUST hold: the edge attribute reflects "is_after" semantics, not "covers".
-    rel = (e.attributes.get("stratigraphic_relation") or "").lower()
-    assert "is_after" in rel or "covered" in rel
-    assert "covers" != rel  # NOT the inverse
+    rel = (edges[0].attributes.get("stratigraphic_relation") or "").lower()
+    assert rel == "covers"
+    assert "is_after" not in rel
+
+
+def test_uguale_a_keeps_equal_to_code():
+    """'uguale a' is now `equals` in vocab_it.json; the legacy code stays EQUAL_TO."""
+    conv = S3DConverter()
+    us_list = [
+        {"sito": "S", "us": 1, "rapporti": "uguale a 2"},
+        {"sito": "S", "us": 2, "rapporti": ""},
+    ]
+    g = conv.create_graph_from_us(us_list, site_name="S")
+    edges = list(g.edges)
+    assert len(edges) == 1
+    assert edges[0].attributes.get("stratigraphic_relation") == "EQUAL_TO"
 
 
 def test_usvs_node_categorized_via_vocab_family():

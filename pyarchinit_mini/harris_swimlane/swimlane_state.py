@@ -427,11 +427,11 @@ class SwimlaneState:
             return []
 
         # Edges where direction is meaningless (twins).
-        SYMMETRIC = {"has_same_time"}
-        # Edges that are inverses of each other (A overlies B ≡ B is_after A
-        # in stratigraphic Harris semantics). When pyarchinit stores both
-        # sides on different US rows, the editor must show one arrow, not two.
-        INVERSE_PAIRS = {"overlies": "is_after", "is_after": "overlies"}
+        SYMMETRIC = {"has_same_time", "equals"}
+        # Edges that are inverses of each other (A overlies B ≡ B is_overlain_by A;
+        # `is_after` is time, never the reverse of `overlies`). When pyarchinit
+        # stores both sides on different US rows, the editor must show one arrow.
+        INVERSE_PAIRS = {"overlies": "is_overlain_by", "is_overlain_by": "overlies"}
 
         edges: list[CytoscapeElement] = []
         edge_counter = 0
@@ -502,8 +502,8 @@ class SwimlaneState:
         except Exception:
             return []
 
-        SYMMETRIC = {"has_same_time"}
-        INVERSE_PAIRS = {"overlies": "is_after", "is_after": "overlies"}
+        SYMMETRIC = {"has_same_time", "equals"}
+        INVERSE_PAIRS = {"overlies": "is_overlain_by", "is_overlain_by": "overlies"}
 
         # Seed seen-set with edges already produced from rapporti so we don't
         # duplicate the same relation across the two sources.

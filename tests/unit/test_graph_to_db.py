@@ -77,9 +77,10 @@ def test_write_graph_symmetric_edge_no_inverse(session):
     r2 = session.execute(text("SELECT rapporti FROM us_table WHERE us='2'")).scalar()
     items1 = eval(r1) if r1 else []
     items2 = eval(r2) if r2 else []
-    # forward written on 1; nothing on 2
+    # forward written on 1; nothing on 2. has_same_time is temporal: it is
+    # written «Contemporaneo a», never «Uguale a» (which is physical, equals).
     assert len(items1) == 1
-    assert items1[0][0] == "Uguale a"
+    assert items1[0][0] == "Contemporaneo a"
     assert items2 == []
 
 

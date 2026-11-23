@@ -13,13 +13,21 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+# A temporal relation stays temporal, a physical one stays physical: a
+# physical relation is never derived from a temporal one, nor the reverse.
+# «Coperto da» is the reverse reading of `overlies` (`is_overlain_by` in the
+# s3dgraphy datamodel), not `is_after`; `is_after` / `is_before` are time only
+# and are written `>` / `<`, as s3dgraphy >= 1.6.0.dev139 and pyArchInit do.
+
 # Inverse canonicals that must be converted to their forward counterpart by
 # swapping source and target.  Only directional (non-symmetric) inverses.
+# `is_before` turns into `is_after` (time into time), never into `overlies`.
 REVERSE_TO_FORWARD: Dict[str, str] = {
-    "is_after": "overlies",
+    "is_overlain_by": "overlies",
     "is_cut_by": "cuts",
     "is_filled_by": "fills",
     "is_abutted_by": "abuts",
+    "is_before": "is_after",
 }
 
 
@@ -27,18 +35,20 @@ logger = logging.getLogger(__name__)
 
 
 # Symmetric edges: A↔B is the same as B↔A; one entry per pair.
-SYMMETRIC = frozenset({"has_same_time", "is_bonded_to"})
+# `equals` («Uguale a») is physical; `has_same_time` («Contemporaneo a») temporal.
+SYMMETRIC = frozenset({"has_same_time", "is_bonded_to", "equals"})
 
 # Directional pairs: relation → its inverse.
 INVERSE_PAIRS: Dict[str, str] = {
-    "overlies": "is_after",
-    "is_after": "overlies",
+    "overlies": "is_overlain_by",
+    "is_overlain_by": "overlies",
     "cuts": "is_cut_by",
     "is_cut_by": "cuts",
     "fills": "is_filled_by",
     "is_filled_by": "fills",
     "abuts": "is_abutted_by",
     "is_abutted_by": "abuts",
+    "is_after": "is_before",
     "is_before": "is_after",
 }
 
@@ -48,45 +58,64 @@ _IT_EXTRAS: Dict[str, str] = {
     # Inverse directional aliases (will be swapped to forward by REVERSE_TO_FORWARD)
     "riempito da": "is_filled_by",   # was wrongly "is_after" — fixed
     "tagliato da": "is_cut_by",      # was missing
-    "coperto da": "is_after",        # explicit fallback in case EdgeRegistry misses it
+    "coperto da": "is_overlain_by",  # physical: the reverse of "copre", never "is_after"
+    "coperta da": "is_overlain_by",
     # Symmetric / other
+    "uguale a": "equals",            # physical identity, not "has_same_time"
     "si lega a": "is_bonded_to",
     "si lega_a": "is_bonded_to",
     "connesso a": "is_bonded_to",
     "connesso_a": "is_bonded_to",
+    # Temporal: they stay temporal
     "anteriore a": "is_before",
     "posteriore a": "is_after",
+    "contemporaneo a": "has_same_time",
+    "continuità successiva a": "is_after",   # pyArchInit «Genera continuità»
+    "continuità precedente a": "is_before",
     "gli si appoggia": "is_abutted_by",  # was "is_before" — fixed to proper inverse
 }
 
-# Canonical → italian display label (for swimlane web + GraphML edge labels).
+# pyArchInit / Extended Matrix sequence tokens: `>` later than, `<` earlier
+# than. `>>` / `<<` are the paradata chain and are not rapporti here: they are
+# not recognised (skipped), never read as a stratigraphic relation.
+_SYMBOLS: Dict[str, str] = {
+    ">": "is_after",
+    "<": "is_before",
+}
+
+# Canonical → italian rapporti label (written to us_table.rapporti by
+# graph_to_db, and shown on swimlane web + GraphML edge labels).
 CANONICAL_TO_ITALIAN: Dict[str, str] = {
     "overlies": "Copre",
-    "is_after": "Coperto da",
+    "is_overlain_by": "Coperto da",
     "cuts": "Taglia",
     "is_cut_by": "Tagliato da",
     "fills": "Riempie",
     "is_filled_by": "Riempito da",
     "abuts": "Si appoggia a",
     "is_abutted_by": "Gli si appoggia",
-    "has_same_time": "Uguale a",
+    "equals": "Uguale a",
     "is_bonded_to": "Si lega a",
-    "is_before": "Anteriore a",
+    "is_after": ">",
+    "is_before": "<",
+    "has_same_time": "Contemporaneo a",
 }
 
 # Canonical → english display label.
 CANONICAL_TO_ENGLISH: Dict[str, str] = {
     "overlies": "Covers",
-    "is_after": "Covered by",
+    "is_overlain_by": "Covered by",
     "cuts": "Cuts",
     "is_cut_by": "Cut by",
     "fills": "Fills",
     "is_filled_by": "Filled by",
     "abuts": "Leans on",
     "is_abutted_by": "Leant on by",
-    "has_same_time": "Same as",
+    "equals": "Same as",
     "is_bonded_to": "Bonded to",
-    "is_before": "Before",
+    "is_after": ">",
+    "is_before": "<",
+    "has_same_time": "Contemporary with",
 }
 
 
@@ -104,16 +133,19 @@ _EN_TO_CANONICAL: Dict[str, str] = {
     "fills": "fills",
     "leans on": "abuts",
     "leans_on": "abuts",
-    "equal to": "has_same_time",
-    "equal_to": "has_same_time",
-    "same as": "has_same_time",
+    "equal to": "equals",
+    "equal_to": "equals",
+    "same as": "equals",
     "continuity": "has_same_time",
+    "contemporary with": "has_same_time",
+    "later than": "is_after",
+    "earlier than": "is_before",
     "bonds to": "is_bonded_to",
     "bonds_to": "is_bonded_to",
     "connected to": "is_bonded_to",
     "connected_to": "is_bonded_to",
-    "covered by": "is_after",
-    "covered_by": "is_after",
+    "covered by": "is_overlain_by",
+    "covered_by": "is_overlain_by",
     "cut by": "is_cut_by",
     "cut_by": "is_cut_by",
 }
@@ -150,6 +182,8 @@ def _resolve_canonical(label: str) -> Optional[str]:
     low = label.strip().lower()
     if not low:
         return None
+    if low in _SYMBOLS:
+        return _SYMBOLS[low]
     reg = _registry_singleton()
     if reg is not None:
         try:

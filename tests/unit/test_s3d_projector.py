@@ -80,7 +80,10 @@ def test_edges_built_from_rapporti(session_factory):
 
 
 def test_edges_dedup_symmetric():
-    """has_same_time edges deduplicated on sorted (src, tgt)."""
+    """Symmetric edges deduplicated on sorted (src, tgt).
+
+    «Uguale a» is read as equals (physical identity), no longer as
+    has_same_time (a temporal relation)."""
     # Use plain sqlite, two US with reciprocal "Uguale a"
     from sqlalchemy import create_engine, text
     from sqlalchemy.orm import sessionmaker
@@ -99,7 +102,7 @@ def test_edges_dedup_symmetric():
     g = S3DProjector.from_site(s, "S")
     # Only one symmetric edge, not two
     assert len(g.edges) == 1
-    assert g.edges[0].canonical == "has_same_time"
+    assert g.edges[0].canonical == "equals"
 
 
 # ---------------------------------------------------------------------------

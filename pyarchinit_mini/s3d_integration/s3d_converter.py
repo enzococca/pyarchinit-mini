@@ -138,11 +138,14 @@ class S3DConverter:
         # semantically incorrect for the cut-by relation.
         _LEGACY_CODE_MAP = {
             "overlies": "COVERS",  # s3dgraphy canonical 'overlies' = rapporti 'copre'
-            "is_after": "COVERED_BY",  # historical: rapporti 'coperto da' implied COVERED_BY semantically
             "cuts": "CUTS",
             "fills": "FILLS",
             "abuts": "LEANS_AGAINST",  # s3dgraphy canonical 'abuts' = rapporti 'si appoggia a'
             "has_same_time": "EQUAL_TO",
+            # 'uguale a' is `equals` (physical identity) in vocab_it.json; same legacy code as before.
+            # 'coperto da' is the reverse reading of `overlies`, no longer an alias of `is_after`
+            # (a temporal relation); like 'tagliato da' it has no alias row here.
+            "equals": "EQUAL_TO",
         }
 
         alias_to_pair = {}  # {italian_lowercase: (edge_name, legacy_code)}
